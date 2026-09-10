@@ -84,3 +84,25 @@ npm run check:config -- --clerk-production
 - Verification: 341 tests passed, typecheck and production build passed; actual application TLS options connected both restricted users successfully.
 - Live `/help-centre` completed enrollment and displayed the first-administrator confirmation; database read-back showed one member. Published article list is empty, as expected for a new database.
 - Remaining: second Admin setup, real content review/publish and file-access acceptance, negative-role account checks.
+
+### Scoped acceptance follow-up
+
+- User deferred second-Admin review/publish and real Support/Ops role-overreach tests; keep pending, not passed.
+- Temporary non-business Storage object: service read 200 with matching bytes; anonymous public/authenticated endpoints 400 without test content. Object deleted, post-delete authenticated read 400.
+- Anonymous deployed attachment API: 403, private/no-store.
+- Found PDF module-load 500 caused by missing Playwright browsers.json in deployment. Added Playwright runtime files to tracing; build manifest verified; deployed commit 03d9746. Live PDF request with revision=1 now returns 403 FORBIDDEN.
+- Actual PDF generation and authenticated attachment lifecycle remain unverified.
+- Vercel logs show touch requests at 17:09:12 and 17:09:22 returned 200, token request 17:10:40 returned 200. This does not establish the cause of the earlier client network error or long-term session stability. Logout acceptance still pending.
+
+### Logout and PDF rendering follow-up
+
+- Real Admin logout returned to `/admin/sign-in`; revisiting `/admin` redirected to that login page. Passed.
+- Existing real PDF renderer suite: 9/9 passed locally (Chinese, private cover, table pagination, rich blocks, formulas and diagrams). This does not establish Vercel Chromium availability or live export success.
+- Online current content observed: one draft, zero published articles. Published-document export acceptance remains dependent on a legitimately published document; deferred review workflow was not bypassed.
+- After navigating the reader URL, browser auto-review blocked further inspection because the active destination involved `juyuco.slack.com`. Reader-after-logout and re-login outcome not verified; no workaround attempted.
+
+### Re-login confirmation
+
+- User completed Slack login manually. Live `/help-centre` loaded authenticated reader navigation, administrator entry and logout control; no published article available.
+- Re-login positive check passed. Continued-session reliability remains observational, not a long-term guarantee.
+- Production PDF success remains pending both a legitimately published article and verification of an executable Chromium runtime. Including Playwright library resources fixes module loading only; it does not install the browser binary.

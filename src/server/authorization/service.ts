@@ -77,6 +77,7 @@ export class AuthorizationService {
   async saveFeatureConfig(input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>writeFeatureConfig(c,input));}
   async navigationSettings(){const v=await this.viewer(true);return this.database.run(v,c=>readNavigationSettings(c),true);}
   async saveNavigationSettings(input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>writeNavigationSettings(c,input));}
+  async readerChrome(){const v=await this.viewer();return this.database.run(v,async c=>({items:await readReaderMenu(c),features:await readFeatureFlags(c)}),true);}
   async readerMenu(){const v=await this.viewer();return this.database.run(v,c=>readReaderMenu(c),true);}
   async requireFormMember(){await this.viewer();}
   async forms(admin=false){const v=await this.viewer(admin);return this.database.run(v,c=>readForms(c,admin),true);}

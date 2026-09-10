@@ -5,9 +5,7 @@ import { databaseConfiguration } from '../../config/database.ts';
 export async function applicationAuthorization():Promise<AuthorizationService>{
  if(clerkConfiguration(process.env)!=='configured'||databaseConfiguration(process.env).state!=='configured')throw new Error('AUTH_NOT_CONFIGURED');
  const {applicationDatabase}=await import('../database/application.ts');
- const {currentVerifiedMember}=await import('../members/clerk.ts');
- const {database,members}=applicationDatabase();
- return new AuthorizationService(database,()=>members.locked(async client=>{
-  const member=await currentVerifiedMember();return member?members.bind(member,client):null;
- },true));
+ const {bindCurrentMember}=await import('../members/entry.ts');
+ const {database}=applicationDatabase();
+ return new AuthorizationService(database,bindCurrentMember);
 }

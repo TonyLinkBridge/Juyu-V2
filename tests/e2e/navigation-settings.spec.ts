@@ -62,7 +62,7 @@ test('uncertain acknowledgement locks exact payload and retries identical newly 
  const writes:NavigationWrite[]=[];await page.route('**/api/admin/navigation',r=>{const write=r.request().postDataJSON();writes.push(write);return r.fulfill({json:{config:{...ack(write).config,version:writes.length===1?99:2}}});});
  await mount(page);await page.getByRole('button',{name:'添加入口',exact:true}).click();await page.getByLabel('入口名称',{exact:true}).fill('稳定的新入口');
  await page.getByRole('button',{name:'保存导航',exact:true}).click();await expect(page.getByRole('alert')).toContainText('无法确认');
- await expect(page.getByLabel('入口名称',{exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'添加入口',exact:true})).toBeDisabled();await expect(page.getByRole('link',{name:'返回管理后台'})).not.toHaveAttribute('href');
+ await expect(page.getByLabel('入口名称',{exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'添加入口',exact:true})).toBeDisabled();await expect(page.getByRole('link',{name:'设置变更记录'})).not.toHaveAttribute('href');
  await page.getByRole('button',{name:'重试原提交',exact:true}).click();await expect(page.getByRole('status')).toContainText('已保存');expect(writes).toHaveLength(2);expect(writes[0]).toEqual(writes[1]);
 });
 
@@ -99,7 +99,7 @@ test('unknown then conflict stays uncertain and failed reload preserves pending 
 
 test('dirty edits guard navigation and stay intact while switching between entries',async({page})=>{
  await mount(page);await page.getByLabel('入口名称',{exact:true}).fill('未保存入口');await entryButton(page,'运营知识').click();await entryButton(page,'未保存入口').click();await expect(page.getByLabel('入口名称',{exact:true})).toHaveValue('未保存入口');
- page.once('dialog',dialog=>dialog.dismiss());await page.getByRole('link',{name:'返回管理后台'}).click();await expect(page).toHaveURL(/__navigation_settings_fixture$/);
+ page.once('dialog',dialog=>dialog.dismiss());await page.getByRole('link',{name:'设置变更记录'}).click();await expect(page).toHaveURL(/__navigation_settings_fixture$/);
  expect(await page.evaluate(()=>{const event=new Event('beforeunload',{cancelable:true});window.dispatchEvent(event);return event.defaultPrevented;})).toBe(true);
 });
 

@@ -100,7 +100,7 @@ export function NavigationSettings({initial,categories:initialCategories=[],stat
  }
 
  return <section className="navigation-settings" aria-label="导航设置" aria-busy={busy}>
-  <header className="navigation-settings-heading"><div><h1>导航设置</h1><p>配置员工快捷入口的名称、顺序和角色可见性。</p></div><a className="secondary-link" role="link" href={locked?undefined:'/admin'} aria-disabled={locked||undefined} tabIndex={locked?-1:undefined}>返回管理后台</a></header>
+  <header className="navigation-settings-heading"><div><h1>导航设置</h1><p>配置员工快捷入口的名称、顺序和角色可见性。</p></div><a className="secondary-link" role="link" href={locked?undefined:'/admin/settings/history'} aria-disabled={locked||undefined} tabIndex={locked?-1:undefined}>设置变更记录</a></header>
   <p className="navigation-settings-note">隐藏菜单不会收回内容访问权限。员工能否访问目标页面，仍由现有角色、分类和正式内容权限决定。修改快捷入口不会改动文章目录。</p>
   <p className="navigation-settings-note">品牌首页、退出和管理员后台入口是固定系统入口，不在这里移除。移除快捷入口不会删除分类、文章或其他内容。</p>
   {availability!=='ready'&&<div className="navigation-settings-unavailable" role="status"><h2>{availability==='denied'?'没有管理权限':'导航设置暂时不可用'}</h2><p>{availability==='denied'?'只有管理员可以查看和修改原始导航设置。':'未能完整载入导航和分类设置，当前无法确认配置。'}</p>{availability==='unavailable'&&<button type="button" disabled={busy} onClick={()=>void reload()}>重新载入</button>}</div>}

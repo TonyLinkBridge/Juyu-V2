@@ -101,9 +101,9 @@
 
 ## 12 · 上线与交接
 
-- [~] T059 测试环境配置与验收进行中：用户确认专用项目已准备，会在本地填写；已准备空白安全配置、离线检查命令及当前接入指南 `docs/setup/T059-test-environment.md`。334项规则测试、类型与lint通过，记录 `docs/verification/2026-09-10-test-environment-preflight.md`。真实项目连通、初始化、账号/回调和私有存储验收尚未执行；格式通过不等于真实验收。 用户随后选择 Clerk Production，仓库地址已提供但远端内容未核实；当前方向见 `docs/setup/T059-clerk-production.md`。已增加显式正式预检并修正邮箱误报，正式域名、Vercel、数据库初始化及大文件/PDF部署适配待办。
+- [~] T059 真实服务接入及部分验收已完成：Clerk Production、Slack、Vercel 与 Supabase 已接通；生产数据库初始化、首位管理员、登录/退出/重新登录和部分私有访问检查已有证据。保留第二位 Admin 二审发布、Support/Ops 真实账号越权、完整附件链路与在线 PDF 正向验收；尚无已发布文章，不绕过审核。见 `docs/setup/T059-clerk-production.md`。
 - [x] T060 备份、恢复与上线回退演练完成：真实 Supabase 36 张持久数据表、26 份迁移、38 条权限策略恢复比对一致；云端私有样例备份/删除/恢复/校验通过。2026-09-10 经用户明确批准执行 Vercel 42309f0 → 03d9746 → 42309f0，健康与匿名登录保护检查通过，自动分配生产域名已恢复开启。记录 `docs/verification/2026-09-10-t060-recovery.md`。此完成范围是恢复/回退演练；长期加密备份排程未配置，T059 真实业务验收独立保留。
-- [~] T061 正式发布进行中：目标 Juyu/helpcentre 与生产数据库已核对；343 项规则、本地恢复、lint/build 通过，线上 26 条迁移校验及受限账号检查通过。发布存储兼容修复并验收 Vercel；真实核心流程仍待 T059 保留项。记录 `docs/verification/2026-09-10-t061-deployment.md`。
+- [~] T061 发布部分完成：59b22ea 已推送并在 Vercel 6AGXZAMkKL7R2vx1icrrEiQbNHqC Ready，正式域名已绑定。343 项规则、本地恢复、lint/build 通过；线上 26 条迁移及受限账号检查通过；现有 Admin 会话后台/员工首页可读，匿名页面与附件保护通过。核心业务验收仍待 T059 保留项。记录 `docs/verification/2026-09-10-t061-deployment.md`。
 - [ ] T062 管理员使用说明及最终核对。验收：登录/角色、编辑审核、发布下线、配置和恢复有白话说明；逐项记录完成与已知限制。
 
 ## 依赖与下一步

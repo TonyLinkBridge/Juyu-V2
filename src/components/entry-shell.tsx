@@ -1,3 +1,5 @@
+import {Suspense} from 'react';
+import {NewAnnouncements} from './announcements/NewAnnouncements';
 import {Footer} from './gitbook/Footer/Footer';
 import {ReaderChrome} from './reader-chrome';
 import {AnnouncementBanner} from './gitbook/Announcement/AnnouncementBanner';
@@ -11,7 +13,7 @@ export function EntryShell({ children, search, announcement, navigation, account
       <Brand/>
       {search??<span className="internal-label">内部资料库</span>}
       {(search||account)&&<AccountMenu enabled={clerkConfiguration(process.env)==='configured'}/>}
-    </header>{announcement && <AnnouncementBanner announcement={announcement}/>}</ReaderChrome>}>{children}</ShellSlot>;
+    </header></ReaderChrome>}>{announcement && announcement.id!=='internal-materials' && <AnnouncementBanner announcement={announcement}/>} {navigation&&<Suspense fallback={null}><NewAnnouncements/></Suspense>}{children}</ShellSlot>;
 }
 
 export function BookIcon() {

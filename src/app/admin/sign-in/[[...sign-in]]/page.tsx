@@ -1,10 +1,8 @@
 import { enrollmentRedirect } from '../../../../server/enrollment/navigation';
 import { applicationEnrollment } from '../../../../server/enrollment/application';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { AccessUnavailable } from '../../../../components/access-unavailable';
-import { EntryShell, ShieldIcon } from '../../../../components/entry-shell';
+import {LoginScreen} from '../../../../components/login-screen';
 import { EmployeeLogin } from '../../../../components/employee-login';
 import { EmployeeSignOut } from '../../../../components/employee-sign-out';
 import { employeeSession } from '../../../../server/authentication/clerk';
@@ -14,7 +12,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '管理员登录' };
 export default async function AdminSignIn() {
   const session = await employeeSession();
-  if (session.status === 'unconfigured') return <AccessUnavailable audience="admin" />;
+  if (session.status === 'unconfigured') return <LoginScreen audience="admin"><div className="login-unavailable" role="status"><p>登录服务尚未连接</p><p>资料库暂未开放，请等待管理员完成开通。</p></div></LoginScreen>;
   if (session.status === 'unavailable') redirect('/admin/sign-in/error');
   let pending = false;
   if (session.status === 'signed_in') {
@@ -24,11 +22,5 @@ export default async function AdminSignIn() {
     if (access.status === 'unconfigured') pending = true;
     else if (access.status !== 'signed_out') redirect(adminDestination(access));
   }
-  return <EntryShell><main id="main-content" className="access-main"><section className="access-card" aria-labelledby="access-title">
-    <div className="entry-icon"><ShieldIcon /></div><p className="card-kicker">CONTENT WORKSPACE</p>
-    <h1 id="access-title">管理员登录</h1><p className="access-description">使用公司账号进入内容管理工作台。</p>
-    {pending ? <><p role="status" className="connection-notice">公司账号验证尚未配置，请等待完成开通。</p><EmployeeSignOut audience="admin" /></> : <EmployeeLogin audience="admin" />}
-    <p className="access-policy">登录后仍需通过公司账号和管理员权限检查。</p>
-    <div className="access-switch"><Link href="/sign-in">切换到员工登录 →</Link></div>
-  </section></main></EntryShell>;
+  return <LoginScreen audience="admin">{pending ? <><p role="status" className="connection-notice">公司账号验证尚未配置，请等待完成开通。</p><EmployeeSignOut audience="admin" /></> : <EmployeeLogin audience="admin" />}</LoginScreen>;
 }

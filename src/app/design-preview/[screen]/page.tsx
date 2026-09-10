@@ -1,3 +1,8 @@
+import '../../forms-settings.css';
+import {OpsCollection} from '../../../components/ops/OpsCollection';
+import {FormSettings} from '../../../components/forms/FormSettings';
+import {LoginScreen} from '../../../components/login-screen';
+import {LoginPreview} from '../../../components/login-preview';
 import {encodeEditorBody} from '../../../editor/document';
 import {notFound} from 'next/navigation';
 import Link from 'next/link';
@@ -15,6 +20,7 @@ import type {NavigationNode} from '../../../reader/tree';
 export default async function DesignPreview({params}:{params:Promise<{screen:string}>}){
  if(process.env.NODE_ENV!=='development'||process.env.JUYU_DESIGN_PREVIEW!=='true')notFound();
  const {screen}=await params;
+ if(screen==='login-light'||screen==='login-dark')return <LoginScreen audience={screen==='login-dark'?'admin':'employee'}><LoginPreview/></LoginScreen>;
  const titles=['域名转入操作指南','客户身份核验','费用与续费规则','异常升级处理'];
  const pages:NavigationNode[]=[{type:'group',id:'start',title:'新人上手',descendants:[{type:'document',id:'intro',title:'开始使用资料库',href:'/design-preview/article?article=intro'}]},{type:'group',id:'domains',title:'域名业务',descendants:titles.map((title,i)=>({type:'document',id:`preview-${i}`,title,href:`/design-preview/article?article=preview-${i}`}))}];
  const menu=[{id:'home',label:'首页',href:'/design-preview/home'},{id:'knowledge',label:'知识资料',href:'/design-preview/article'},{id:'reference',label:'Reference 速查',href:'/help-centre/reference'},{id:'qa',label:'Q&A 问答',href:'/help-centre/qa'},{id:'ops',label:'OPS Internal',href:'/help-centre/ops'},{id:'favorites',label:'收藏',href:'/help-centre/favorites'},{id:'recent',label:'最近浏览',href:'/help-centre/recent'}];
@@ -29,7 +35,9 @@ export default async function DesignPreview({params}:{params:Promise<{screen:str
  ]);
  const data:WorkspaceData={query:workspaceQuery({view:'list',scope:'all'}),items:titles.map((title,i)=>({id:`preview-${i}`,title,kind:'article',status:i<2?'in_review':i===2?'published':'draft',revision:8,publishedRevision:i===2?8:null,updatedAt:'2026-09-10T02:24:00Z',author:'Tony',editor:'Tony',submitter:'Tony',reviewer:i===3?null:'Ivy',canReview:i<2})),counts:{draft:1,in_review:2,changes_requested:0,approved:0,queued:0,published:1},total:4,page:1,pages:1};
  const notice=<nav className="preview-banner" aria-label="设计预览页面"><span>本地预览 · 示例内容，不代表正式资料</span>{[['home','首页'],['article','文章'],['admin','工作台'],['review','审核']].map(([id,label])=><Link key={id} href={`/design-preview/${id}`}>{label}</Link>)}</nav>;
- if(screen==='home')return <>{notice}<EntryShell search={<SearchInput/>} navigation={<ReaderQuickLinks items={menu} currentHref="/design-preview/home"/>}><KnowledgeHome pages={pages} menu={menu.filter(i=>['knowledge','reference','qa'].includes(i.id))} latest={titles.map((title,i)=>({id:`preview-${i}`,title,updated:'2026-09-10T02:24:00Z'}))} recent={titles.map((title,i)=>({id:`preview-${i}`,title,kind:'article',revision:8,tags:[],viewedRevision:8,viewedAt:'2026-09-10T02:24:00Z'}))} admin/></EntryShell></>;
+ if(screen==='home')return <>{notice}<EntryShell account navigation={<ReaderQuickLinks items={menu} currentHref="/design-preview/home"/>}><KnowledgeHome pages={pages} menu={menu.filter(i=>['knowledge','reference','qa'].includes(i.id))} latest={titles.map((title,i)=>({id:`preview-${i}`,title,updated:'2026-09-10T02:24:00Z'}))} recent={titles.map((title,i)=>({id:`preview-${i}`,title,kind:'article',revision:8,tags:[],viewedRevision:8,viewedAt:'2026-09-10T02:24:00Z'}))} admin/></EntryShell></>;
+ if(screen==='ops')return <>{notice}<EntryShell search={<SearchInput/>} navigation={<ReaderQuickLinks items={menu} currentHref="/help-centre/ops"/>}><main id="main-content" className="search-main"><OpsCollection state="ready" data={{items:[],total:0,page:1,pages:1}}/></main></EntryShell></>;
+ if(screen==='forms')return <>{notice}<AdminFrame><main id="main-content"><FormSettings initial={[]} definitions={[]} state="ready"/></main></AdminFrame></>;
  if(screen==='article')return <>{notice}<EntryShell search={<SearchInput/>}><ReaderNavigation pages={pages} requested="preview-0" article={{id:'preview-0',title:titles[0],revision:8,body}}/></EntryShell></>;
  if(screen==='admin')return <>{notice}<AdminFrame><TasksWorkspace data={data}/></AdminFrame></>;
  if(screen==='review')return <>{notice}<AdminFrame><main id="main-content" className="editor-main"><p className="back-link">内容管理 / 待我审核</p><h1>二审处理</h1><ReviewDecision initial={{article:{documentId:'preview-0',title:titles[0],body,sequence:4,status:'in_review',lifecycle:'active',blocks:[],cover:null,tags:[],assets:[],kind:'article',audience:'staff',publishedRevision:1},review:{revision:8,submittedBy:'preview-tony',reviewerId:'preview-ivy',reviewerName:'Ivy',status:'in_review',reason:null,submittedAt:'2026-09-10T09:30:00Z',decidedAt:null},canDecide:true}}/></main></AdminFrame></>;

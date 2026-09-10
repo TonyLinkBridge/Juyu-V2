@@ -120,17 +120,17 @@ export function FormSettings({initial=[],definitions=[],state='ready'}:{initial?
  }
 
  return <section className="form-settings" aria-label="自定义表单设置" aria-busy={busy}>
-  <header className="form-settings-heading"><div><h1>自定义表单</h1><p>选择已有字段，设置填写顺序、必填规则和布局。</p></div><a className="secondary-link" role="link" href={navigationLocked?undefined:'/admin'} aria-disabled={navigationLocked||undefined} tabIndex={navigationLocked?-1:undefined}>返回管理后台</a></header>
-  <p className="form-settings-note">表单独立于文章审核。管理员保存并启用后，指定范围内的员工即可填写；之后的配置修改立即生效，已有提交保留当时的内容。</p>
-  <p className="form-settings-note">每张表单保留所选字段的版本。字段改名或停用不会自动改变已有表单；需要时可主动更新为最新字段。</p>
+  <header className="form-settings-heading"><div><h1>自定义表单</h1><p>选择已有字段，设置填写顺序、必填规则和布局。</p></div><a className="secondary-link" role="link" href={navigationLocked?undefined:'/admin/settings/history'} aria-disabled={navigationLocked||undefined} tabIndex={navigationLocked?-1:undefined}>设置变更记录</a></header>
+  <details className="form-settings-help"><summary>使用说明</summary><p className="form-settings-note">表单独立于文章审核。管理员保存并启用后，指定范围内的员工即可填写；之后的配置修改立即生效，已有提交保留当时的内容。</p>
+  <p className="form-settings-note">每张表单保留所选字段的版本。字段改名或停用不会自动改变已有表单；需要时可主动更新为最新字段。</p></details>
   {availability!=='ready'&&<div className="form-settings-unavailable" role="status"><h2>{availability==='denied'?'没有管理权限':'表单设置暂时不可用'}</h2><p>{availability==='denied'?'只有管理员可以创建和修改表单。':'未能完整载入表单和字段设置，当前无法确认已有配置。'}</p>{availability==='unavailable'&&<button type="button" disabled={busy} onClick={()=>void reload()}>{busy?'正在载入…':'重新载入'}</button>}</div>}
-  {availability==='ready'&&<div className="form-settings-layout">
+  {availability==='ready'&&<div className={`form-settings-layout ${!draft&&!forms.length?'is-empty':''}`}>
    <section className="form-settings-list" aria-labelledby="form-list-title"><div className="form-settings-toolbar"><h2 id="form-list-title">全部表单 <span>{forms.length} / 50</span></h2><button type="button" disabled={frozen||forms.length>=50} onClick={()=>select()}>新建表单</button></div>
     {forms.length===0?<p className="form-settings-empty">还没有表单。点击“新建表单”添加第一张。</p>:<ul>{forms.map(form=><li key={form.id}><button type="button" className="form-settings-item" disabled={frozen} aria-pressed={draft?.id===form.id} onClick={()=>select(form)}><strong>{form.title}</strong><span>{form.fields.length} 个字段 · {audiences[form.audience]} · {form.enabled?'已启用':'已停用'}</span></button></li>)}</ul>}
     {forms.length>=50&&<p className="form-settings-note">已达到 50 张上限，包含已停用表单。</p>}
     <button type="button" className="form-settings-refresh" disabled={busy} onClick={()=>void reload()}>载入最新表单和字段</button>
    </section>
-   <section className="form-settings-editor" aria-labelledby="form-editor-title"><h2 id="form-editor-title">{draft?draft.expectedVersion===null?'新建表单':'编辑表单':'表单配置'}</h2>
+   {(draft||forms.length>0)&&<section className="form-settings-editor" aria-labelledby="form-editor-title"><h2 id="form-editor-title">{draft?draft.expectedVersion===null?'新建表单':'编辑表单':'表单配置'}</h2>
     {!draft?<p className="form-settings-empty">选择已有表单，或新建一张。</p>:<form onSubmit={submit}>
      <fieldset disabled={frozen}><legend className="form-settings-sr">表单配置内容</legend>
       <label htmlFor="form-title">表单标题<input id="form-title" aria-label="表单标题" value={draft.title} required onChange={event=>patch({title:event.target.value})}/></label>
@@ -157,7 +157,7 @@ export function FormSettings({initial=[],definitions=[],state='ready'}:{initial?
      </section>
      <div className="form-settings-actions">{pending?<button type="button" className="form-settings-primary" disabled={busy} onClick={()=>void submit()}>{busy?'正在确认保存…':'重试原提交'}</button>:<button type="submit" className="form-settings-primary" disabled={busy||conflict}>{busy?'正在保存…':'保存表单'}</button>}<button type="button" disabled={frozen} onClick={closeEditor}>关闭编辑</button>{(conflict||pending)&&<button type="button" disabled={busy} onClick={()=>void reload()}>载入最新设置（替换当前输入）</button>}</div>
     </form>}
-   </section>
+   </section>}
   </div>}
   {availability!=='ready'&&draft&&<p className="form-settings-note">尚未保存的表单“{draft.title||'未命名'}”仍保留在当前页面。</p>}
   {notice&&<p className={`form-settings-message form-settings-message-${notice.kind}`} role={notice.kind==='error'?'alert':'status'}>{notice.text}</p>}

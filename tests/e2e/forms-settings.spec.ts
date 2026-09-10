@@ -92,7 +92,7 @@ test('forged field metadata makes save uncertain, freezes configuration and retr
  await expect(page.getByRole('alert')).toContainText('无法确认');
  await expect(page.getByLabel('表单标题',{exact:true})).toBeDisabled();
  await expect(page.getByRole('button',{name:'新建表单',exact:true})).toBeDisabled();
- await expect(page.getByRole('link',{name:'返回管理后台'})).not.toHaveAttribute('href');
+ await expect(page.getByRole('link',{name:'设置变更记录'})).not.toHaveAttribute('href');
  await page.getByRole('button',{name:'重试原提交',exact:true}).click();
  await expect(page.getByRole('status')).toContainText('已保存');
  expect(writes).toHaveLength(2);expect(writes[0]).toEqual(writes[1]);
@@ -140,7 +140,7 @@ test('field conflict preserves edits and a partial reload failure updates neithe
 test('dirty field selections guard close, new, other form, navigation and unload',async({page})=>{
  await mount(page);await page.getByRole('button',{name:/入职申请/}).click();
  await page.getByLabel('所属团队设为必填',{exact:true}).uncheck();
- for(const element of [page.getByRole('button',{name:'关闭编辑'}),page.getByRole('button',{name:'新建表单',exact:true}),page.getByRole('button',{name:/其他申请/}),page.getByRole('link',{name:'返回管理后台'})]){
+ for(const element of [page.getByRole('button',{name:'关闭编辑'}),page.getByRole('button',{name:'新建表单',exact:true}),page.getByRole('button',{name:/其他申请/}),page.getByRole('link',{name:'设置变更记录'})]){
   page.once('dialog',dialog=>dialog.dismiss());await element.click();await expect(page.getByLabel('表单标题',{exact:true})).toHaveValue('入职申请');await expect(page.getByLabel('所属团队设为必填',{exact:true})).not.toBeChecked();
  }
  expect(await page.evaluate(()=>{const event=new Event('beforeunload',{cancelable:true});window.dispatchEvent(event);return event.defaultPrevented;})).toBe(true);

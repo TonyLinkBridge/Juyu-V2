@@ -42,8 +42,10 @@ if(document.getElementById('presentation')){
  else hydrate();
 }
 `);
+ await writeFile(resolve(directory,'next-link.js'),`import React from 'react';export default function Link({prefetch,scroll,replace,...props}){return React.createElement('a',props);}`);
+ await writeFile(resolve(directory,'next-navigation.js'),`export function usePathname(){return '/help-centre';}`);
  const {webpack}=require('next/dist/compiled/webpack/webpack');
- await new Promise<void>((done,reject)=>{const compiler=webpack({mode:'development',devtool:false,entry:resolve(directory,'entry.js'),output:{path:directory,filename:'bundle.js'},resolve:{modules:[resolve('node_modules')]},module:{rules:[{test:/\.js$/,resolve:{fullySpecified:false}}]}});compiler.run((error:Error|null,stats:{hasErrors():boolean;toString():string})=>compiler.close(()=>error||stats.hasErrors()?reject(error??new Error(stats.toString())):done()));});
+ await new Promise<void>((done,reject)=>{const compiler=webpack({mode:'development',devtool:false,entry:resolve(directory,'entry.js'),output:{path:directory,filename:'bundle.js'},resolve:{modules:[resolve('node_modules')],alias:{'next/link':resolve(directory,'next-link.js'),'next/navigation':resolve(directory,'next-navigation.js')}},module:{rules:[{test:/\.js$/,resolve:{fullySpecified:false}}]}});compiler.run((error:Error|null,stats:{hasErrors():boolean;toString():string})=>compiler.close(()=>error||stats.hasErrors()?reject(error??new Error(stats.toString())):done()));});
  const cssFiles=(await readdir('.next/static/chunks')).filter(file=>file.endsWith('.css')).sort();
  if(!cssFiles.length)throw new Error('Run the production build before navigation browser verification');
  return {script:await readFile(resolve(directory,'bundle.js'),'utf8'),css:(await Promise.all(cssFiles.map(file=>readFile(resolve('.next/static/chunks',file),'utf8')))).join('\n')};

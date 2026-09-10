@@ -1,0 +1,4 @@
+"use client";
+import {useState} from 'react';
+import Image from 'next/image';
+export function LoginPreview(){const [email,setEmail]=useState(false);const [notice,setNotice]=useState(false);return <div className="login-auth"><button type="button" className="cl-socialButtonsBlockButton login-preview-slack" onClick={()=>setNotice(true)}><Image src="/brand/slack-color.svg" alt="" width={24} height={24} unoptimized/> 使用 Slack 登录</button>{notice&&<p role="status" className="login-preview-note">外观预览不会启动登录。正式入口由 Clerk 验证公司账号。</p>}{email&&<label className="login-preview-email">公司邮箱<input type="email" placeholder="name@company.com"/><small>此处仅预览，实际登录由 Clerk 处理。</small></label>}<button className="login-email-toggle" type="button" aria-expanded={email} onClick={()=>setEmail(!email)}>{email?'收起邮箱登录':'使用邮箱登录 →'}</button></div>;}

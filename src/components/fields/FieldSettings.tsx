@@ -106,7 +106,7 @@ export function FieldSettings({initial = [], state = 'ready'}: {initial?:FieldDe
   return <section className="field-settings" aria-label="文章自定义字段" aria-busy={busy}>
     <header className="field-settings-heading">
       <div><h1>自定义字段</h1><p>为各类文章添加补充信息。字段值随草稿保存，经过文章审核后发布。</p></div>
-      <a className="secondary-link" role="link" href={navigationLocked?undefined:"/admin"} aria-disabled={navigationLocked || undefined} tabIndex={navigationLocked?-1:undefined} onClick={event=>{if(lock.current || pending)event.preventDefault();}}>返回管理后台</a>
+      <a className="secondary-link" role="link" href={navigationLocked?undefined:"/admin/settings/history"} aria-disabled={navigationLocked || undefined} tabIndex={navigationLocked?-1:undefined} onClick={event=>{if(lock.current || pending)event.preventDefault();}}>设置变更记录</a>
     </header>
     <p className="field-settings-note">修改设置不会改写已发布文章或历史版本。停用后不再要求填写，已有内容会保留。</p>
     {availability!=='ready' && <div className="field-settings-unavailable" role="status">

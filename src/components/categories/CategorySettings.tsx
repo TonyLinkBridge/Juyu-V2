@@ -147,7 +147,7 @@ export function CategorySettings({initial=[],state='ready'}:{initial?:CategoryDe
 
   return <section className="category-settings" aria-label="分类设置" aria-busy={busy}>
     <header className="category-settings-heading"><div><h1>分类设置</h1><p>整理文章分类与子分类，为每个分类设置访问范围。</p></div>
-      <a className="secondary-link" role="link" href={navigationLocked?undefined:'/admin'} aria-disabled={navigationLocked||undefined} tabIndex={navigationLocked?-1:undefined}>返回管理后台</a>
+      <a className="secondary-link" role="link" href={navigationLocked?undefined:'/admin/settings/history'} aria-disabled={navigationLocked||undefined} tabIndex={navigationLocked?-1:undefined}>设置变更记录</a>
     </header>
     <p className="category-settings-note">移动分类、修改范围或停用分类，会立即影响已有正式内容的搜索、阅读、附件和 PDF 访问。分类不删除，历史记录会保留。</p>
     <p className="category-settings-note">子分类同时继承所有父分类的限制，实际访问按最严格范围执行；任一父分类停用，子分类关联内容也不向员工开放。文章属于多个分类时，需满足全部分类限制。</p>

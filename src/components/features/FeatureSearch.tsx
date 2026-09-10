@@ -1,3 +1,3 @@
-import {applicationAuthorization} from '../../server/authorization/application';
+import {readReaderPresentation} from '../../server/reader-presentation';
 import {SearchInput} from '../gitbook/Search/SearchInput';
-export async function FeatureSearch({query=''}:{query?:string}){let enabled=false;try{enabled=(await(await applicationAuthorization()).features()).search;}catch{}return enabled?<SearchInput query={query}/>:null;}
+export async function FeatureSearch({query=''}:{query?:string}){let enabled=false;try{enabled=(await readReaderPresentation()).features.search;}catch{}return enabled?<SearchInput query={query}/>:null;}

@@ -1,4 +1,4 @@
-type Stage='company.verify'|'clerk.user'|'clerk.tokens'|'slack.userinfo'|'database.scope';
+type Stage='company.verify'|'clerk.user'|'clerk.tokens'|'slack.userinfo'|'database.scope'|'member.bind'|'reader.frame';
 /** Fixed labels and durations only: never log IDs, SQL, tokens or vendor errors. */
 export async function measured<T>(stage:Stage,work:()=>Promise<T>):Promise<T>{
  const start=performance.now();let ok=false;

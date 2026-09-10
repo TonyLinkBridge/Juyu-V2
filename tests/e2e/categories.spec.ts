@@ -66,7 +66,7 @@ test('uncertain result freezes original UUID and payload; retry confirms exact v
  await expect(page.getByRole('alert')).toContainText('无法确认');
  await expect(page.getByLabel('分类名称',{exact:true})).toBeDisabled();
  await expect(page.getByRole('button',{name:'新建分类',exact:true})).toBeDisabled();
- await expect(page.getByRole('link',{name:'返回管理后台'})).not.toHaveAttribute('href');
+ await expect(page.getByRole('link',{name:'设置变更记录'})).not.toHaveAttribute('href');
  await page.getByRole('button',{name:'重试原提交'}).click();
  await expect(page.getByRole('status')).toContainText('已保存');
  expect(writes).toHaveLength(2);expect(writes[0]).toEqual(writes[1]);
@@ -110,7 +110,7 @@ test('definite conflict preserves edits, reload failure preserves recovery, and 
 test('unsaved changes guard close, new, selection, navigation and page unload',async({page})=>{
  await mount(page);await page.getByRole('button',{name:/运营流程/}).click();
  await page.getByLabel('分类名称',{exact:true}).fill('尚未保存');
- for(const button of [page.getByRole('button',{name:'关闭编辑'}),page.getByRole('button',{name:'新建分类',exact:true}),page.getByRole('button',{name:/通用说明/}),page.getByRole('link',{name:'返回管理后台'})]){
+ for(const button of [page.getByRole('button',{name:'关闭编辑'}),page.getByRole('button',{name:'新建分类',exact:true}),page.getByRole('button',{name:/通用说明/}),page.getByRole('link',{name:'设置变更记录'})]){
   page.once('dialog',d=>d.dismiss());await button.click();await expect(page.getByLabel('分类名称',{exact:true})).toHaveValue('尚未保存');
  }
  expect(await page.evaluate(()=>{const event=new Event('beforeunload',{cancelable:true});window.dispatchEvent(event);return event.defaultPrevented;})).toBe(true);

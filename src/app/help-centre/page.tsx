@@ -27,8 +27,6 @@ import { EntryShell, ShieldIcon } from '../../components/entry-shell';
 import { EmployeeSignOut } from '../../components/employee-sign-out';
 import {KnowledgeHome} from '../../components/home/KnowledgeHome';
 import {ReaderQuickLinks} from '../../components/navigation-settings/ReaderQuickLinks';
-import {NewAnnouncements} from '../../components/announcements/NewAnnouncements';
-import {Suspense} from 'react';
 export const dynamic = 'force-dynamic';
 export default async function HelpCentre({searchParams}:{searchParams:Promise<{article?:string|string[];q?:string|string[];page?:string|string[]}>}) {
   const access = await employeeCompanyAccess();
@@ -49,7 +47,7 @@ export default async function HelpCentre({searchParams}:{searchParams:Promise<{a
       let home:Awaited<ReturnType<Awaited<ReturnType<typeof applicationAuthorization>>['home']>>|undefined;
       try{home=await(await applicationAuthorization()).home();}catch{}
       if(!home)return <EntryShell><main id="main-content" className="message-main"><h1>资料库暂时无法读取</h1><p>请稍后重试。读取失败不会被当作没有内容。</p><Link href="/help-centre">重新读取</Link></main></EntryShell>;
-      return <EntryShell account announcement={readerAnnouncement} navigation={<ReaderQuickLinks items={home.menu} currentHref="/help-centre"/>} search={home.features.search?<SearchInput query=""/>:undefined}><KnowledgeHome {...home} search={home.features.search} showRecent={home.features.recent} admin={admin.status==='admin'}/><Suspense fallback={null}><NewAnnouncements/></Suspense></EntryShell>;
+      return <EntryShell account announcement={readerAnnouncement} navigation={<ReaderQuickLinks items={home.menu} currentHref="/help-centre"/>} search={home.features.search?<SearchInput query=""/>:undefined}><KnowledgeHome {...home} search={home.features.search} showRecent={home.features.recent} admin={admin.status==='admin'}/></EntryShell>;
     }
     let features=closedFeatureFlags,featuresUnavailable=false;try{features=await(await applicationAuthorization()).features();}catch{featuresUnavailable=true;}
     let pages:NavigationNode[]=[];let article:Publication|null=null;let failed=false;
