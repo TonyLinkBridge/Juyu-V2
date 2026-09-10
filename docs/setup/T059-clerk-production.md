@@ -75,3 +75,12 @@ npm run check:config -- --clerk-production
 - Created Storage bucket `juyu-private`, verified `public=false`; applied restrictive `juyu_private_server_only` policy for `anon,authenticated`.
 - TLS client verification passed with the official CA linked by Supabase Database Settings: https://supabase-downloads.s3-ap-southeast-1.amazonaws.com/prod/ssl/prod-ca-2021.crt . Temporary local certificate: `/tmp/juyu-supabase-ca.crt`. CA trust must be configured durably for application/deployment; verification must remain enabled.
 - Pending: production runtime/issuer and Storage configuration, durable CA integration, deployment, first Admin enrollment and real end-to-end account/attachment acceptance. Database initialization is not website readiness.
+
+### Production connection acceptance
+
+- User explicitly approved transfer to Vercel `Juyu / helpcentre` Production.
+- Saved runtime/issuer URLs and Storage service key as Production Secrets; saved Supabase URL and CA PEM as Production Config. Database administrator password remains local.
+- Deployed commit `1f77dd3c125a1b881c44fad4c30b46951c740708`, Vercel deployment `52wUEbCTfvQ3Qzh3RuqWJ1hNYcAx`: Ready.
+- Verification: 341 tests passed, typecheck and production build passed; actual application TLS options connected both restricted users successfully.
+- Live `/help-centre` completed enrollment and displayed the first-administrator confirmation; database read-back showed one member. Published article list is empty, as expected for a new database.
+- Remaining: second Admin setup, real content review/publish and file-access acceptance, negative-role account checks.
