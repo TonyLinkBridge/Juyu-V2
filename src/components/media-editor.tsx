@@ -1,0 +1,50 @@
+'use client';
+import {useEffect,useState} from 'react';
+import type {MediaEditorData} from '../media/editor';
+import {normalizeBlocks,type MediaBlock,type ManagedAsset,uploadExtensions} from '../media/model';
+import {ScienceFields} from './science-fields';
+import {RichBlockFields} from './rich-block-fields';
+import {MediaBlocks} from './gitbook/Media/MediaBlocks';
+function message(code:string){return code==='CONFLICT'?'资料已在另一页面修改。当前输入已保留，请重新载入后再处理。':code==='INVALID_STATE'?'当前内容正在审核，不能修改。请先撤回审核。':code==='UPLOAD_TOO_LARGE'?'文件超过大小限制，请压缩或选择较小文件。':code==='INVALID_UPLOAD'?'文件格式或实际内容不符合要求，请检查后重试。':'操作未确认完成，当前内容已保留，请稍后重试。';}
+export function MediaEditor({initial}:{initial:MediaEditorData}){
+ const [data,setData]=useState(initial);const [blocks,setBlocks]=useState(initial.blocks);const [cover,setCover]=useState(initial.cover);const [dirty,setDirty]=useState(false);const [busy,setBusy]=useState(false);const [notice,setNotice]=useState('');const [error,setError]=useState('');const [selected,setSelected]=useState('');
+ let previewBlocks:MediaBlock[]|null=null;try{previewBlocks=normalizeBlocks(blocks);}catch{}
+ const frozen=data.status==='in_review'||data.lifecycle!=='active';const assets=data.assets.filter(a=>a.status==='ready');
+ useEffect(()=>{if(!dirty)return;const warn=(e:BeforeUnloadEvent)=>{e.preventDefault();};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[dirty]);
+ function edit(next:MediaBlock[]){setBlocks(next);setDirty(true);setNotice('');setError('');}
+ function update(id:string,block:MediaBlock){edit(blocks.map(b=>b.id===id?block:b));}
+ function add(fileOnly=false){const asset=assets.find(a=>a.id===selected);if(!asset)return;edit([...blocks,{id:crypto.randomUUID(),type:fileOnly?'file':asset.mime.startsWith('image/')?'image':asset.mime.startsWith('video/')?'video':'file',assetId:asset.id,caption:asset.filename,alt:''}]);}
+ async function save(){
+  setBusy(true);setNotice('');setError('');
+  try{const normalized=normalizeBlocks(blocks);const response=await fetch(`/api/admin/media/${encodeURIComponent(data.documentId)}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({expectedSequence:data.sequence,blocks:normalized,cover}),signal:AbortSignal.timeout(20000)});const result=await response.json();if(!response.ok){setError(message(result.error));return;}setData(result);setBlocks(result.blocks);setCover(result.cover);setDirty(false);setNotice('草稿已保存。正式版本保持原样，审核发布后才会替换。');}
+  catch{setError('保存未确认完成，请检查内容或稍后重试。当前输入已保留。');}finally{setBusy(false);}
+ }
+ async function upload(file:File){
+  const rule=uploadExtensions[file.name.split('.').pop()?.toLowerCase()??''];if(!rule||file.size>rule.max*1024*1024){setError('格式或大小不符合要求，请按下方说明选择文件。');return;}
+  setBusy(true);setError('');setNotice('');try{const response=await fetch(`/api/admin/media/${encodeURIComponent(data.documentId)}/upload`,{method:'POST',headers:{'Content-Type':'application/octet-stream','X-File-Name':encodeURIComponent(file.name)},body:file,signal:AbortSignal.timeout(100000)});const result=await response.json();if(!response.ok){setError(message(result.error));return;}setData(previous=>({...previous,assets:[result as ManagedAsset,...previous.assets]}));setSelected(result.id);setNotice('文件上传并核对成功。请选择加入内容块或设为封面，再保存草稿。');}catch{setError('上传结果未确认。可重新载入查看文件列表；未就绪文件不能加入正文。');}finally{setBusy(false);}
+ }
+ return <section className="media-editor" aria-label="媒体与表格编辑">
+  <p>当前工作版本：{data.status==='in_review'?'等待审核':data.status==='published'?'已经发布':'草稿／流程中'} · {dirty?'有未保存修改':'内容已载入'}</p>
+  {frozen&&<p role="alert">当前版本不能编辑；待审内容需先撤回，归档或回收站资料需先恢复。</p>}
+  <fieldset disabled={busy||frozen}><legend>本篇文件与封面</legend><p>图片最多 5 MB（PNG/JPEG/GIF/WebP）；影片最多 50 MB（MP4/WebM）；PDF 最多 20 MB；TXT/CSV 最多 5 MB。</p>
+   <label>上传文件<input type="file" accept=".png,.jpg,.jpeg,.gif,.webp,.mp4,.webm,.pdf,.txt,.csv" onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void upload(file);}}/></label>
+   <label>本篇已就绪文件<select value={selected} onChange={e=>setSelected(e.target.value)}><option value="">请选择文件</option>{assets.map(a=><option value={a.id} key={a.id}>{a.filename}（{Math.ceil(Number(a.size)/1024)} KB）</option>)}</select></label>
+   <div className="media-toolbar"><button type="button" disabled={!selected||blocks.length>=40} onClick={()=>add()}>加入图片／影片／文件</button><button type="button" disabled={!selected||blocks.length>=40} onClick={()=>add(true)}>作为下载文件加入</button><button type="button" disabled={blocks.length>=40} onClick={()=>edit([...blocks,{id:crypto.randomUUID(),type:'table',headers:['项目','说明'],rows:[['','']]}])}>新增表格</button></div>
+   <label>文章封面<select value={cover?.assetId??''} onChange={e=>{setCover(e.target.value?{assetId:e.target.value,alt:'',position:50}:null);setDirty(true);}}><option value="">不使用封面</option>{assets.filter(a=>a.mime.startsWith('image/')).map(a=><option key={a.id} value={a.id}>{a.filename}</option>)}</select></label>
+   {cover&&<><label>封面文字说明<input maxLength={200} value={cover.alt} onChange={e=>{setCover({...cover,alt:e.target.value});setDirty(true);}}/></label><label>封面垂直位置<input type="range" min={0} max={100} value={cover.position} onChange={e=>{setCover({...cover,position:Number(e.target.value)});setDirty(true);}}/></label></>}
+   {data.assets.some(a=>a.status!=='ready')&&<p>部分文件未就绪或已隔离，不能加入内容。上传失败后请重新选择文件上传。</p>}
+  </fieldset>
+  <fieldset disabled={busy||frozen}><legend>正文后的内容块（按下面顺序显示）</legend>
+   <div className="media-toolbar"><button type="button" disabled={blocks.length>=40} onClick={()=>edit([...blocks,{id:crypto.randomUUID(),type:'math',source:'x^2',caption:''}])}>新增数学公式</button><button type="button" disabled={blocks.length>=40} onClick={()=>edit([...blocks,{id:crypto.randomUUID(),type:'diagram',source:'flowchart TD\n A[提交] --> B[审核]',caption:''}])}>新增流程图</button><button type="button" disabled={blocks.length>=40} onClick={()=>edit([...blocks,{id:crypto.randomUUID(),type:'hint',style:'info',title:'',body:''}])}>新增提示框</button><button type="button" disabled={blocks.length>=40} onClick={()=>edit([...blocks,{id:crypto.randomUUID(),type:'code',language:'',code:''}])}>新增代码框</button><button type="button" disabled={blocks.length>=40} onClick={()=>edit([...blocks,{id:crypto.randomUUID(),type:'tabs',tabs:[{id:crypto.randomUUID(),title:'标签 1',body:''},{id:crypto.randomUUID(),title:'标签 2',body:''}]}])}>新增分页标签</button></div>
+   {blocks.length===0&&<p>还没有内容块。可添加媒体、表格、提示框、代码框或分页标签。</p>}
+   {blocks.map((b,index)=><section key={b.id} className="media-editor-block" aria-label={`内容块 ${index+1}`}><h3>{index+1}. {b.type==='image'?'图片':b.type==='video'?'影片':b.type==='file'?'文件':b.type==='hint'?'提示框':b.type==='code'?'代码框':b.type==='tabs'?'分页标签':b.type==='math'?'数学公式':b.type==='diagram'?'流程图':'表格'}</h3>
+    {b.type==='math'||b.type==='diagram'?<ScienceFields block={b} onChange={next=>update(b.id,next)}/>:b.type==='hint'||b.type==='code'||b.type==='tabs'?<RichBlockFields block={b} onChange={next=>update(b.id,next)}/>:b.type==='table'?<><div className="reader-scroll-region"><table><thead><tr>{b.headers.map((v,col)=><th key={col}><input aria-label={`表头 ${col+1}`} value={v} maxLength={200} onChange={e=>update(b.id,{...b,headers:b.headers.map((old,j)=>j===col?e.target.value:old)})}/><button type="button" disabled={b.headers.length===1} onClick={()=>update(b.id,{...b,headers:b.headers.filter((_,j)=>j!==col),rows:b.rows.map(r=>r.filter((_,j)=>j!==col))})}>删除列 {col+1}</button></th>)}</tr></thead><tbody>{b.rows.map((row,r)=><tr key={r}>{row.map((value,c)=><td key={c}><textarea rows={2} aria-label={`第 ${r+1} 行第 ${c+1} 列`} value={value} maxLength={2000} onChange={e=>update(b.id,{...b,rows:b.rows.map((old,i)=>i===r?old.map((text,j)=>j===c?e.target.value:text):old)})}/></td>)}<td><button type="button" onClick={()=>update(b.id,{...b,rows:b.rows.filter((_,i)=>i!==r)})}>删除行 {r+1}</button></td></tr>)}</tbody></table></div><div className="media-toolbar"><button type="button" disabled={b.rows.length>=200} onClick={()=>update(b.id,{...b,rows:[...b.rows,b.headers.map(()=>'')]})}>增加行</button><button type="button" disabled={b.headers.length>=8} onClick={()=>update(b.id,{...b,headers:[...b.headers,'新列'],rows:b.rows.map(r=>[...r,''])})}>增加列</button></div></>:<><p>{assets.find(a=>a.id===b.assetId)?.filename??'文件当前不可用，请移除此块或重新上传。'}</p><label>说明<input maxLength={500} value={b.caption} onChange={e=>update(b.id,{...b,caption:e.target.value})}/></label>{b.type!=='file'&&<label>{b.type==='image'?'图片替代文字':'影片文字说明'}<textarea value={b.alt} maxLength={500} onChange={e=>update(b.id,{...b,alt:e.target.value})}/></label>}</>}
+    <div className="media-toolbar"><button type="button" disabled={index===0} onClick={()=>{const next=[...blocks];[next[index-1],next[index]]=[next[index],next[index-1]];edit(next);}}>上移</button><button type="button" disabled={index===blocks.length-1} onClick={()=>{const next=[...blocks];[next[index+1],next[index]]=[next[index],next[index+1]];edit(next);}}>下移</button><button type="button" onClick={()=>{edit(blocks.filter(v=>v.id!==b.id));setNotice('内容块已从待保存草稿中移除；历史版本及文件仍保留。');}}>删除内容块 {index+1}</button></div>
+   </section>)}
+  </fieldset>
+  <div className="media-toolbar"><button className="secondary-link" disabled={busy||frozen||!dirty||!previewBlocks} type="button" onClick={()=>void save()}>{busy?'正在处理…':'保存草稿'}</button><button className="secondary-link" disabled={busy} type="button" onClick={()=>{if(!dirty||window.confirm('重新载入会替换未保存的修改，是否继续？')){setDirty(false);window.location.reload();}}}>重新载入</button></div>
+  <p role="status">{notice}</p>{error&&<p role="alert">{error}</p>}
+  {!previewBlocks&&<p role="alert">内容块超出总量限制或格式不完整。输入已保留，请检查代码语言、格式或减少内容后保存。</p>}
+  <details><summary>预览内容块（未发布）</summary>{previewBlocks&&<MediaBlocks key={JSON.stringify(previewBlocks)} blocks={previewBlocks} documentId={data.documentId} admin/>}</details>
+ </section>;
+}

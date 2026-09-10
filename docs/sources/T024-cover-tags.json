@@ -1,0 +1,49 @@
+{
+  "task": "T024",
+  "scope": "Private hero cover and versioned text tags; repository save/publish and reader display; upload UI T027, editor UI T031",
+  "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageBody/PageCover.tsx",
+      "target": "src/components/gitbook/Reading/PageCover.tsx",
+      "sourceSha256": "1f13774736ca75b67e16f2e5b526c0f0937f60ab3f2490d5ca921caeecc29d0e",
+      "targetSha256": "97e812fcd73862d093007abb66ff0d3cb5e03e1306d18a26b5c953a73084e6c1",
+      "adaptation": "保留hero封面容器和data标记；只接受版本内的私有图片ID，移除vendor引用解析、远程缩图、默认图/暗色替代图及背景蒙版分支。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageBody/PageCoverImage.tsx",
+      "target": "src/components/gitbook/Reading/PageCoverImage.tsx",
+      "sourceSha256": "b143f22669180c3d9a987f814d53136c781cdf93977b176846e367f7a7a42cf9",
+      "targetSha256": "f16a1c9c548779ae33797d6acbb6e71b44e7e650f441f7830eaaf1434ab2a8b6",
+      "adaptation": "保留原生img、1990/480比例、object-cover与纵向定位；只请求同源私有/api/assets，使用管理员保存的替代文字，补充加载失败及hydration前失败恢复。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageBody/PageTags.tsx",
+      "target": "src/components/gitbook/Reading/PageTags.tsx",
+      "sourceSha256": "7af4b94ad7119923949fc6c22a2b86831a35155e60fd496f81c23c8e739f9d6d",
+      "targetSha256": "d5ae75a96ccf465f6bdcbb6afae0da77d5a0ad801d2a60c82b11282894c1c76c",
+      "adaptation": "保留无标签不显示、逐项渲染和flex-wrap；改为当前正式版本的文本标签，用ul/li标识集合，不造标签检索链接。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/Tag.tsx",
+      "target": "src/components/gitbook/Reading/PageTags.tsx",
+      "sourceSha256": "69d5c59a62497ee067cb5eb44ad09cb58205b30c6ebc17d31ccb19b47c793804",
+      "targetSha256": "d5ae75a96ccf465f6bdcbb6afae0da77d5a0ad801d2a60c82b11282894c1c76c",
+      "adaptation": "保留data-tag、title、胶囊形span；替换vendor颜色与图标解析为共用主题色，长中文自然换行。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageBody/PageHeader.tsx",
+      "target": "src/components/gitbook/Reading/PageHeader.tsx",
+      "sourceSha256": "8d04d4c0365d18f343029024cc523a49c093faf2d34f93af122aa0902f0ca45a",
+      "targetSha256": "90f4d7fa2ef25613e567261c7db0a7737d417a369dbad15b33e407044673094d",
+      "adaptation": "在T022的标题与面包屑中接回PageTags分支，只显示正式快照的标签。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "target": "src/components/gitbook/Reading/PageBody.tsx",
+      "sourceSha256": "f466467bbb0bb7d0fe1ad69aac6e3513099d881d09301ceb3c0d45ca55b770b7",
+      "targetSha256": "5ec7e9744ea04319a74f8758a3be202e955955b094864ba4388af2d6048bd221",
+      "adaptation": "在T019/T022正文适配中接回正文上方的PageCover，未配置封面时不显示默认图。"
+    }
+  ]
+}

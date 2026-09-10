@@ -1,0 +1,140 @@
+{
+  "task": "T039",
+  "scope": "Complete paginated history and immutable source-version restore into new draft; local acceptance only",
+  "files": [
+    {
+      "target": "src/app/admin/history/page.tsx",
+      "targetSha256": "978da9bad704938023cfcce247295bbbcaa89c9f19658e1430abd81a2c1c116b",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/api/admin/history/[id]/route.ts",
+      "targetSha256": "e2dc783a809a7b756c6c67b10e6d144f2eb930e63fdc34ff47a0fbf0924c2c91",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/api/admin/history/[id]/versions/[revision]/assets/[assetId]/route.ts",
+      "targetSha256": "aa256676f32adf1e799eaa31542954849a13d939c8305769e8ec0555371b205b",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/api/admin/history/[id]/versions/[revision]/diagram/route.ts",
+      "targetSha256": "f85340eff88a83cca3eb9ca055b6c1428867cd5ffbde98e7460529164a587d0f",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/api/admin/history/[id]/versions/[revision]/route.ts",
+      "targetSha256": "027046669e0e48a6874e73453fd44e7ab90150a01600ffc755bad2d85c72419f",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/availability/AvailabilityPanel.tsx",
+      "targetSha256": "4e2e2f73230c7992589b730a962a23b01ee2a0af065df33687e680426ccdff22",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/editor/ArticleEditor.tsx",
+      "targetSha256": "a0e21751b24f480faadfedbbb7b49de1ba2693ad58c6e997fa542073af435c2a",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/gitbook/Media/MediaBlocks.tsx",
+      "targetSha256": "9771604dc9a6d5f1dede97e20ff891e4635d07be6d693ae27df545a01b30354d",
+      "origin": "Existing upstream-derived component adaptation; licence and source in SOURCES.json"
+    },
+    {
+      "target": "src/components/gitbook/RichBlocks/Diagram.tsx",
+      "targetSha256": "c89c28473538e8e5bca389300400cca98973fd34f379d37004fa7272b56558e4",
+      "origin": "Existing upstream-derived component adaptation; licence and source in SOURCES.json"
+    },
+    {
+      "target": "src/components/history/DeletedHistoryList.tsx",
+      "targetSha256": "149c7aa449fe181327a55e619e8f865599e9205785be800c9082e083a0fe439a",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/history/HistoryTimeline.tsx",
+      "targetSha256": "914852936387b55b38a81be5eb254c94dbab111b0d002a12aa8e819fd1d641d2",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/history/HistoryVersionPanel.tsx",
+      "targetSha256": "b3bd13d703f2bc442bbfb7bc4e32a618af833d5d825adb51a868ddf992fb294f",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/lifecycle/TrashManager.tsx",
+      "targetSha256": "dd76bc86338f3a00630b723828a79da8a3cd9dbb8ca4bdaba5a16ff9ba3ecd34",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/review/PublicationPanel.tsx",
+      "targetSha256": "b0f82ffd26528bfa487f08b92a0e420ff5e20187799b784bde8ec0d64b581dbe",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/review/ReviewDecision.tsx",
+      "targetSha256": "02477ace3bec23bf5f8cf9d65d3667052188a65079200f94d0516895a7565beb",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/tasks/TasksWorkspace.tsx",
+      "targetSha256": "5eaa78e6c950bd1876991f7bc4be53e1e294358c7ce52c0cfa03566a9f5d916f",
+      "origin": "Existing upstream-derived component adaptation; licence and source in SOURCES.json"
+    },
+    {
+      "target": "src/domain/model.ts",
+      "targetSha256": "73cf07a53476a56ead5aa5dd5539ef1b21e0704238ea5699d4ae6157ca8d36f0",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/history/client.ts",
+      "targetSha256": "7ea2b9977c35802e98a6c2f5269f29c613438ccceaeb503f7425eab30c7beece",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/history/model.ts",
+      "targetSha256": "3e3e86f7ea5723139065e7e3938c3b9d9cf7f3baa0cb9bad089cf08c98765208",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/history/paths.ts",
+      "targetSha256": "f3e86119e20e4add8a24c1f3bf2382f1c1226bac9c0c76684b5c23182927e99b",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "fad1f28581bd15691f52d8cbf0f543429914f5b8e4416e57a12cd9100ea5c090",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "04d467c1030f7ba8e05a34d56577025328b6e096de904befe13ad0213a9f46d0",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/database/migrations/0012_version_history.sql",
+      "targetSha256": "a42d9d61ebbd60891f062924b72460536852184658a26b3ed6d2b417acc089ac",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/history/http.ts",
+      "targetSha256": "de9fccd510d409110646ecfbb44ad1eb9a5c0031819af3c0fa31ddc6c0a55012",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/history/repository.ts",
+      "targetSha256": "d8f5a3a5da31884c5b2199b85dddb5dfe39086ea1ef354d80ebf5fc4b8c4bef0",
+      "origin": "JUYU application code; no new upstream source copied"
+    }
+  ],
+  "integration": "Adds 0012 migration and source-version audit evidence. Restores source associations without changing current publication; new admin-only historical resource routes. No dependencies added.",
+  "verification": "docs/verification/2026-09-09-history.md",
+  "limitations": [
+    "No live Clerk/Supabase/company/device/deployment acceptance",
+    "Historical PDF attachment files supported; generating a historical draft PDF is outside this stage",
+    "Purged receipts preserve metadata only; actual storage cleanup may remain pending",
+    "Source file readiness verified via local database metadata; remote blob acceptance remains pending",
+    "No simultaneous editing service added"
+  ]
+}

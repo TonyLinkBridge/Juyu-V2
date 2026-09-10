@@ -1,0 +1,11 @@
+✔ T058 indexed Chinese search, authorized directory and concurrent durable draft saves (33858.140875ms)
+✔ T058 actual large PDF export, explicit size boundary, busy rejection and recovery (1407.212208ms)
+✔ T058 maximum-size upload integrity, rejection, cancellation and process concurrency (709.371041ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 36318.909958

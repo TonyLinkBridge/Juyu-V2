@@ -1,0 +1,78 @@
+{
+  "task": "T035",
+  "scope": "Assigned reviewer approve or return, read-only review detail, saved new-draft resubmission; local acceptance only",
+  "files": [
+    {
+      "target": "src/review/decision.ts",
+      "targetSha256": "e35a0e394d1def75a75679720640f89a7d3f37f8451ca6b7cb36612691fecaca",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/review/decision-client.ts",
+      "targetSha256": "9423960f2af3ad60e9d4b7b9572505deaf7eb4e50ff77f85f15c778667f77059",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/review/client.ts",
+      "targetSha256": "a15c5b4be7655bb4326459f1832b5e96e51a7d39dd0d665f532023966d51eae7",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/review/decision.ts",
+      "targetSha256": "7b13a3684a4a88b94b05aa5ccbba7c5074a0875909f9773819c942cf794af7c3",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/review/repository.ts",
+      "targetSha256": "443cbf1ab871451a043e44b734b6bf226f4fa661b032b5e8b2025c0a3f2191de",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/review/http.ts",
+      "targetSha256": "b1d38bbed2f936b91a67ebe45e81a2f013d7cd3881136224c894cea005d6e38a",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "fc2213b9635e3ff5b762cd2ad3d730510405298a08b1ab5f39a7adba1089bb96",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/database/repository.ts",
+      "targetSha256": "d2715edb09fd4b61ee1933f135038b18b75042357c66d24154548711c3b4d756",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/api/admin/review/[id]/decision/route.ts",
+      "targetSha256": "55ef4b4bb3af7b0546c11b4cc61b57c4845d32c9d0f1757dafac68a133fe401c",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/admin/review/page.tsx",
+      "targetSha256": "a74042583b2415216c2367f93220f57751d1251a40f4d72d09307bc2fb952f34",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/review/ReviewDecision.tsx",
+      "targetSha256": "3f8215128a944c4acb0c0786664c33e4ef48d9399232f9e0fb98ce7765d694c1",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/editor/ArticleEditor.tsx",
+      "targetSha256": "85f1490d4df96acc295df524ffb44510961593ffe81a50b86dd4ddb432127ebf",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/globals.css",
+      "targetSha256": "90b35f353cc00211665709d77b4e91791b72bd96e7ca378bbec71b97557fad10",
+      "origin": "JUYU application code; no new upstream source copied"
+    }
+  ],
+  "integration": "Uses existing GitBook-derived DocumentView/MediaBlocks, BlockNote representation and atomic review/audit persistence. No new dependency or database migration.",
+  "verification": "docs/verification/2026-09-09-review-decision.md",
+  "limitations": [
+    "Local current role observations are not live Clerk acceptance",
+    "No external account, storage, device or deployment acceptance",
+    "Withdrawal, reassignment and publication UI are subsequent tasks"
+  ]
+}

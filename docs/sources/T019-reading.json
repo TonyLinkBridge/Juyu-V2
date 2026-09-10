@@ -1,0 +1,56 @@
+{
+  "task": "T019",
+  "scope": "Basic published text reading and heading outline; no complete Markdown/BlockNote or rich media claim",
+  "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "target": "src/components/gitbook/Reading/PageBody.tsx",
+      "sourceSha256": "f466467bbb0bb7d0fe1ad69aac6e3513099d881d09301ceb3c0d45ca55b770b7",
+      "targetSha256": "212591c7960202f66767197e500bdcb5ea4b55bd2e54ff2a8c04cb8157af8d00",
+      "adaptation": "保留 main/header/content/empty-body 结构；服务器正式版本替换供应商上下文。封面/分页/反馈留给后续任务。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageAside/PageAside.tsx",
+      "target": "src/components/gitbook/Reading/PageAside.tsx",
+      "sourceSha256": "391a033fbab7c93dafad5df6435bcb31ae2dd4f980e35501329b29842a4b1571",
+      "targetSha256": "5b0daed885ad50bb9bd9c5a568cc001aff06ca3e9b468c6b691741d42ede5918",
+      "adaptation": "保留 aside/outline/sections 结构；响应式原生 details 替换 SideSheet，移除广告、AI、主题和外部服务。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageAside/ScrollSectionsList.tsx",
+      "target": "src/components/gitbook/Reading/ScrollSectionsList.tsx",
+      "sourceSha256": "55014884bd444fe05fbd43e6f2e4dfc92db72788861f21b610f34bb451a3362e",
+      "targetSha256": "d989bec49cdaf9f8a1f096aa249af6e2ffc122e17871c5ae7a6fd38f6c099dc3",
+      "adaptation": "保留 section 映射、深度、活动引用和滚动；JUYU 样式替换供应商主题，移除 API 标签过滤。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/hooks/useScrollActiveId.ts",
+      "target": "src/components/gitbook/Reading/useScrollActiveId.ts",
+      "sourceSha256": "0c5172ae58afa95d1d58778ec9264049c3d6c73ab42f7513787b5d382d29e683",
+      "targetSha256": "d0b56fb8e97f6bf4ba683501337395a07d96c9e86df0f373174c17968fc0b7fb",
+      "adaptation": "保留 observer 驱动的标题状态；新增 rAF 滚动位置与页尾判断、反向滚动、hash 深链接及重复同 hash 点击定位，清理所有监听。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/Heading.tsx",
+      "target": "src/components/gitbook/Reading/Heading.tsx",
+      "sourceSha256": "e6726507782c3296549843281e665b84d275f45c3c7329da1ef7518d1d2bd63d",
+      "targetSha256": "42316e4052977ec00638d3e0e634b76f1cda6d00bde1f2a2822ab176a34e1279",
+      "adaptation": "保留 h2/h3/h4 层级、标题 ID、文本 span 和直接定位链接；文本快照节点替换 vendor Inlines。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/Paragraph.tsx",
+      "target": "src/components/gitbook/Reading/Paragraph.tsx",
+      "sourceSha256": "fabd346550302b608a1f43e9367afdfaeeb4e17a564d84dd1de8168a23ff2ccb",
+      "targetSha256": "409d0fc8d7605c5e6490e6797a0c2b5bd4975aee57185150c015e5f6e4b210c7",
+      "adaptation": "保留 paragraph 元素及样式标记；使用 React 文本节点替换 vendor Inlines，不包含 AI 请求。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/DocumentView.tsx",
+      "target": "src/components/gitbook/Reading/DocumentView.tsx",
+      "sourceSha256": "eb19546c3654a92d189cdabfad3fd528f21c1562bc3ecdd61d40de18d37267fe",
+      "targetSha256": "404452910d9da1365f94c4abf88dde653b95fbf38c0203f7e32a07d95b766b98",
+      "adaptation": "保留块列表与换行语义；以 JUYU 基础文本块分派替换 GitBook Blocks 数据接口，不包含完整块类型。"
+    }
+  ]
+}

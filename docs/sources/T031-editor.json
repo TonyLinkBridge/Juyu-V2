@@ -1,0 +1,85 @@
+{
+  "task": "T031",
+  "scope": "BlockNote 新建、编辑、自动保存、失败恢复和有顺序的私有阅读/PDF；仅本地验收",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/DocumentView.tsx",
+      "target": "src/components/gitbook/Reading/DocumentView.tsx",
+      "sourceSha256": "eb19546c3654a92d189cdabfad3fd528f21c1562bc3ecdd61d40de18d37267fe",
+      "targetSha256": "4c6d23260b6ce2ed4b0f51fd9e52e5fe7b05795478f58f7f5b2f6d9ec93bbbaa",
+      "adaptation": "接入有顺序的 BlockNote 文档，传递私有媒体草稿或正式阅读授权参数。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "target": "src/components/gitbook/Reading/PageBody.tsx",
+      "sourceSha256": "f466467bbb0bb7d0fe1ad69aac6e3513099d881d09301ceb3c0d45ca55b770b7",
+      "targetSha256": "17ac1d18fe65d362503c6784ede08f853062158680aa1383afe8254c36483978",
+      "adaptation": "结构化正文直接混排媒体，不重复追加媒体投影；旧文稿继续兼容。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PDF/pdf.css",
+      "target": "src/pdf/render.ts",
+      "sourceSha256": "399480f0f30221ab0a8dbdd8852d9e2a6fce1d07a94c1b61ca4f8fa26d1619bf",
+      "targetSha256": "e7acdb967d42974a917846a0a6f349ee2be0bd72061381a4f8efe8ed24611fa3",
+      "adaptation": "结构化正文按原顺序输出文本、嵌套列表、表格和私有媒体，延续打印排版和权限复核。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt"
+    },
+    {
+      "source": "/Users/tony/Downloads/square-ui-master/templates/tasks/components/tasks/board/task-card.tsx",
+      "target": "src/components/tasks/TaskCard.tsx",
+      "sourceSha256": "613a59c5b8bfa0ccd4f74eeb52b7fdc170016001cf716fa95ed7d64c70887086",
+      "targetSha256": "0b7c5f6b3d5cbc5781aab56d7925f4281cb94b13552bd296cf40e6aaa6103072",
+      "adaptation": "卡片文章标题接入完整文章编辑入口。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt"
+    },
+    {
+      "source": "/Users/tony/Downloads/square-ui-master/templates/tasks/components/tasks/tasks-main.tsx",
+      "target": "src/components/tasks/TasksWorkspace.tsx",
+      "sourceSha256": "f7cf4a0ca2c3a8f355df85af7408b82c45d21e8b5d6d6765f81c9bf93211b148",
+      "targetSha256": "bd7431f35514868cee5e44b5b86cf5377b7425ef996dd879559960a7ec9edd66",
+      "adaptation": "工作台增加新建文章入口与编辑说明。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt"
+    }
+  ],
+  "dependencies": [
+    {
+      "package": "@blocknote/core",
+      "version": "0.54.0",
+      "declaredLicense": "MPL-2.0",
+      "licenseSnapshot": "docs/sources/licenses/blocknote-core-0.54.0.txt",
+      "usage": "通过锁定的 npm 依赖使用，未复制或修改供应商包源码。"
+    },
+    {
+      "package": "@blocknote/react",
+      "version": "0.54.0",
+      "declaredLicense": "MPL-2.0",
+      "licenseSnapshot": "docs/sources/licenses/blocknote-react-0.54.0.txt",
+      "usage": "通过锁定的 npm 依赖使用，未复制或修改供应商包源码。"
+    },
+    {
+      "package": "@blocknote/mantine",
+      "version": "0.54.0",
+      "declaredLicense": "MPL-2.0",
+      "licenseSnapshot": "docs/sources/licenses/blocknote-mantine-0.54.0.txt",
+      "usage": "通过锁定的 npm 依赖使用，未复制或修改供应商包源码。"
+    }
+  ],
+  "juyuAdditions": [
+    "Strict versioned editor document codec and legacy import",
+    "Admin transactional editor GET/PUT and exact retry handling",
+    "Single-flight draft saver and recoverable field validation",
+    "Custom private media blocks and controlled toolbar",
+    "Structured reader and PDF traversal with stable headings"
+  ],
+  "excluded": [
+    "Liveblocks collaboration",
+    "Arbitrary HTML and external media URLs",
+    "Clickable hyperlink editing and full rich clipboard import",
+    "Nested rich content inside custom media and tabs",
+    "Review/publish operation panels",
+    "Admin draft PDF export endpoint",
+    "Real Clerk/Supabase/device/production acceptance"
+  ]
+}

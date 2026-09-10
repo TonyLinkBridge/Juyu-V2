@@ -1,0 +1,28 @@
+{
+  "task": "T018",
+  "scope": "Group branch and recursive categories; T017 target hashes describe their historical milestone, this is the updated target snapshot",
+  "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/TableOfContents/PageGroupItem.tsx",
+      "target": "src/components/gitbook/TableOfContents/PageGroupItem.tsx",
+      "sourceSha256": "331cf72b03a92adcfa5fd3ac435965e4372a573d6ca08b687190879bc35dd6da",
+      "targetSha256": "f6daec6428ee540732920b3043e838ba3ab9c75d5b5dfd832de869b172af09c8",
+      "adaptation": "适配原分组 state、button 和递归 descendants；以 JUYU 样式及图标替换供应商依赖，移除分组 sticky sentinel 避免多层标题重叠；增加 aria-controls 和 hidden，折叠内容不可聚焦。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/TableOfContents/PagesList.tsx",
+      "target": "src/components/gitbook/TableOfContents/PagesList.tsx",
+      "sourceSha256": "f04c3ee849bc38ef230bd875bb4bcef34e949d54098b387c7c22f135c3040099",
+      "targetSha256": "eb77a4a1d15dc63f778bd55dff7504b9cad2925081f8414f32a65c8b1a0ee62b",
+      "adaptation": "加入上游 group 分支；用类型和稳定 ID 作为节点 key，当前路径变化时重置展开；递归分类树仅接收服务器已裁剪节点。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/TableOfContents/TableOfContents.tsx",
+      "target": "src/components/gitbook/TableOfContents/TableOfContents.tsx",
+      "sourceSha256": "0667ddf2de7b3c8d0a3c1e0310c6c34edb41580957d9ff2c4ed5cd9a76020a97",
+      "targetSha256": "c97da5273eb7516e401771b500393154add087f05905a420ffb957b6b370da05",
+      "adaptation": "T017 侧栏接收 NavigationNode 树，根列表传入 isRoot，原有当前项定位保持。"
+    }
+  ]
+}

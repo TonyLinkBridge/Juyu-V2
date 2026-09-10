@@ -1,0 +1,1332 @@
+{
+  "task": "T055",
+  "scope": "Actual unconfigured local application; forged identity only; not authenticated Clerk acceptance",
+  "runs": [
+    {
+      "project": "desktop",
+      "matrix": "business-route-matrix",
+      "results": [
+        {
+          "path": "/api/admin/access",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/access",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/analytics",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/analytics",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/announcements/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/announcements",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/announcements",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/archives",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/archives",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/assets/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/assets/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/availability/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/availability/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/availability/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/categories/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/categories",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/categories",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/editor/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/editor/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/editor/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/features",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/features",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/features",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/feedback",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/feedback",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/fields/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/fields",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/fields",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/form-records/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/form-records/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/form-records/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/form-records",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/form-records",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/forms/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/forms",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/forms",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/versions/1/assets/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/versions/1/assets/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/versions/1/diagram",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/versions/1",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/versions/1",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/versions/1",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/lifecycle/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/cleanup",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/lifecycle/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/media/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/diagram",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/media/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/media/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PATCH",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/media/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/media/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/upload",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/members/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PATCH",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/members/operations/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/members",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/members",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/navigation",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/navigation",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/navigation",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/control",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/control",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/control",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/decision",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/decision",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/decision",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/publication",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/publication",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/publication",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/settings/history/detail",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/settings/history/detail",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/settings/history/restore",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/settings/history",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/settings/history",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/trash",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/trash",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/workspace",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/workspace",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/analytics",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/announcements/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/announcements",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/announcements",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/diagram",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/diagram",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/feedback",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/feedback",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/feedback",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/pdf",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/pdf",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/assets/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/assets/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/auth/enrollment",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/auth/enrollment",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/auth/enrollment",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/favorites/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/favorites/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/favorites/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/favorites",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/favorites",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/features",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/features",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/forms/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/forms/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/forms/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/submissions",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/forms",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/forms",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/navigation",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/navigation",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/ops",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/ops",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/qa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/qa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/reader-menu",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/reader-menu",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/recent/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/recent",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/recent",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/reference",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/reference",
+          "method": "HEAD",
+          "status": 503
+        }
+      ]
+    },
+    {
+      "project": "mobile",
+      "matrix": "business-route-matrix",
+      "results": [
+        {
+          "path": "/api/admin/access",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/access",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/analytics",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/analytics",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/announcements/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/announcements",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/announcements",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/archives",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/archives",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/assets/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/assets/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/availability/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/availability/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/availability/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/categories/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/categories",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/categories",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/editor/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/editor/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/editor/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/features",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/features",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/features",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/feedback",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/feedback",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/fields/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/fields",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/fields",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/form-records/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/form-records/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/form-records/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/form-records",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/form-records",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/forms/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/forms",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/forms",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/versions/1/assets/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/versions/1/assets/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/versions/1/diagram",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/versions/1",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/versions/1",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/history/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/versions/1",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/lifecycle/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/cleanup",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/lifecycle/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/media/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/diagram",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/media/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/media/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PATCH",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/media/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/media/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/upload",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/members/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PATCH",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/members/operations/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/members",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/members",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/navigation",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/navigation",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/navigation",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/control",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/control",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/control",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/decision",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/decision",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/decision",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/publication",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/publication",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/publication",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/review/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/settings/history/detail",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/settings/history/detail",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/settings/history/restore",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/settings/history",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/settings/history",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/trash",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/trash",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/workspace",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/admin/workspace",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/analytics",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/announcements/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/announcements",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/announcements",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/diagram",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/diagram",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/feedback",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/feedback",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/feedback",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/pdf",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/pdf",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/articles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/assets/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/assets/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/auth/enrollment",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/auth/enrollment",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/auth/enrollment",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/favorites/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/favorites/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "PUT",
+          "status": 503
+        },
+        {
+          "path": "/api/favorites/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/favorites",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/favorites",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/features",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/features",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/forms/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/forms/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/forms/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/submissions",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/forms",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/forms",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/navigation",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/navigation",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/ops",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/ops",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/qa",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/qa",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/reader-menu",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/reader-menu",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/recent/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "method": "POST",
+          "status": 503
+        },
+        {
+          "path": "/api/recent",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/recent",
+          "method": "HEAD",
+          "status": 503
+        },
+        {
+          "path": "/api/reference",
+          "method": "GET",
+          "status": 503
+        },
+        {
+          "path": "/api/reference",
+          "method": "HEAD",
+          "status": 503
+        }
+      ]
+    },
+    {
+      "project": "desktop",
+      "matrix": "protected-page-matrix",
+      "results": [
+        "/admin/analytics",
+        "/admin/announcements",
+        "/admin/availability",
+        "/admin/editor",
+        "/admin/feedback",
+        "/admin/forms/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "/admin/forms",
+        "/admin/history",
+        "/admin/media",
+        "/admin/members",
+        "/admin",
+        "/admin/review/manage",
+        "/admin/review",
+        "/admin/review/publish",
+        "/admin/settings/categories",
+        "/admin/settings/features",
+        "/admin/settings/fields",
+        "/admin/settings/forms",
+        "/admin/settings/history",
+        "/admin/settings/navigation",
+        "/admin/trash",
+        "/help-centre/categories/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "/help-centre/favorites",
+        "/help-centre/forms/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "/help-centre/forms",
+        "/help-centre/ops",
+        "/help-centre",
+        "/help-centre/pdf",
+        "/help-centre/qa",
+        "/help-centre/recent",
+        "/help-centre/reference"
+      ]
+    },
+    {
+      "project": "mobile",
+      "matrix": "protected-page-matrix",
+      "results": [
+        "/admin/analytics",
+        "/admin/announcements",
+        "/admin/availability",
+        "/admin/editor",
+        "/admin/feedback",
+        "/admin/forms/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "/admin/forms",
+        "/admin/history",
+        "/admin/media",
+        "/admin/members",
+        "/admin",
+        "/admin/review/manage",
+        "/admin/review",
+        "/admin/review/publish",
+        "/admin/settings/categories",
+        "/admin/settings/features",
+        "/admin/settings/fields",
+        "/admin/settings/forms",
+        "/admin/settings/history",
+        "/admin/settings/navigation",
+        "/admin/trash",
+        "/help-centre/categories/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "/help-centre/favorites",
+        "/help-centre/forms/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "/help-centre/forms",
+        "/help-centre/ops",
+        "/help-centre",
+        "/help-centre/pdf",
+        "/help-centre/qa",
+        "/help-centre/recent",
+        "/help-centre/reference"
+      ]
+    }
+  ]
+}

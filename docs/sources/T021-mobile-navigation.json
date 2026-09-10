@@ -1,0 +1,28 @@
+{
+  "task": "T021",
+  "scope": "Responsive authorized TOC; native dialog with focus/scroll restore and fallback. Table CSS only, real table renderer/devices still pending.",
+  "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/Header/HeaderMobileMenu.tsx",
+      "target": "src/components/gitbook/Header/HeaderMobileMenu.tsx",
+      "sourceSha256": "942aa0809f488622faf13bca6a36b3d0a17f894dd85a7bee97d1b97dbc076eb9",
+      "targetSha256": "3b6f7c8dc5e2c4ec4c6af810c0b5179368557ac1801b3fa2973c313e241e1d7a",
+      "adaptation": "保留手机目录按钮与导航后关闭意图，以当前文章路径属性代替供应商 pathname/global class；JUYU 增加原生 dialog、桌面侧栏与 details 回退、滚动锁恢复、断点处理。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/primitives/SideSheet.tsx",
+      "target": "src/components/gitbook/Header/HeaderMobileMenu.tsx",
+      "sourceSha256": "3877aefcf0ed6849771f296386efb50f226e5ab748f48c7281c6d6fccecd2cbe",
+      "targetSha256": "3b6f7c8dc5e2c4ec4c6af810c0b5179368557ac1801b3fa2973c313e241e1d7a",
+      "adaptation": "仅改编首尾 Tab 循环分支并过滤隐藏节点；原生 dialog 处理背景 inert/取消事件，未照搬 MutationObserver、portal、global class、动画或供应商主题。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/TableOfContents/TableOfContents.tsx",
+      "target": "src/components/gitbook/TableOfContents/TableOfContents.tsx",
+      "sourceSha256": "0667ddf2de7b3c8d0a3c1e0310c6c34edb41580957d9ff2c4ed5cd9a76020a97",
+      "targetSha256": "cfd3c5743f87a568de4cd49275b5b819689f3c18bdf647e29ebc2809f1ec0f73",
+      "adaptation": "沿用 T017 已授权目录与滚动结构，增加统一响应式菜单包裹；标题允许程序化焦点作为桌面切换后无选中文章时的恢复点。"
+    }
+  ]
+}

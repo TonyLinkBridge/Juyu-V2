@@ -1,0 +1,146 @@
+{
+  "task": "T050",
+  "scope": "Controlled custom forms built from existing field snapshots, role-filtered submissions, immutable submission records and Admin processing with audited optimistic concurrency",
+  "files": [
+    {
+      "target": "src/app/admin/forms/[id]/page.tsx",
+      "targetSha256": "838556a2b464246c052c53ace72ff696b808edec744a16c688212acd53b7f075",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/forms/page.tsx",
+      "targetSha256": "ce184afb8a06a2280945b60bcfc73723483795af75fcb1c3735836c836635376",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/settings/forms/page.tsx",
+      "targetSha256": "bb8a13f921b342b10749b203ec988eb2ccf0fa4339a9605a8948628ddbfc9145",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/form-records/[id]/route.ts",
+      "targetSha256": "9a844d5a2812aa900b7588593f2f4c6be0b696524b38a7d87f8777450a782191",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/form-records/route.ts",
+      "targetSha256": "7689bac6d937226e70809e4e11934fc07f9e949f5a0f81fcdaf616b917be1636",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/forms/[id]/route.ts",
+      "targetSha256": "5e96b8201c34269f33dd910fcddded247805dbc05e4387c616d55aee162a1f02",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/forms/route.ts",
+      "targetSha256": "90fa92fce7399e244a1b6adbfb8e67cdd0d92f5a379068400e710e5a1fb32a47",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/forms/[id]/route.ts",
+      "targetSha256": "35a5598d834ccfb627715f24cf7bca9712ebb1219ca69e2c3e913cde1a3bf2d3",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/forms/[id]/submissions/route.ts",
+      "targetSha256": "1a4bcf97c214599ab45bbf910d6c814c551f8dfd22ee1603f0edbf54345602dc",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/forms/route.ts",
+      "targetSha256": "52e9705121ed5ecb7937bc7f265c29db093080391822ff96e45df417dcc7bd38",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/forms-settings.css",
+      "targetSha256": "851190338b8b02b8e097fd7c1cb1aee1fc9ffdbfda123c7936906c37158e710e",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/forms.css",
+      "targetSha256": "465c962be69312cdca1272be328fcc9e6f092239d9afe1484e0e5f565a4ce745",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/forms/[id]/page.tsx",
+      "targetSha256": "7e27ea6b568df93878dd11f9522efc1344f5af6a3ecf802bf1e622ed9474e511",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/forms/page.tsx",
+      "targetSha256": "7257df694745d67f4499e994937a2c364336c3e2c871874e1e639bbb91f3efa1",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/page.tsx",
+      "targetSha256": "4fa2871566a97586708b2bf9b9621e52b8ceb99a418e96257bb5719012d0d2c1",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/forms/FormSettings.tsx",
+      "targetSha256": "c48cd6fd90f9bc7f5133366a9db9af4792c642b820b1a18ba1d15bb9a96d7813",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/forms/FormViews.tsx",
+      "targetSha256": "eb05f3a94281a6744a6994edd7a62a215944bf5846ac3711d1fdd06c822046b2",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/tasks/TasksWorkspace.tsx",
+      "targetSha256": "e493fff904ae57684c71c7c2e6fc134b0bc40e6b265a0dbafb2393d97d1d2567",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/forms/client.ts",
+      "targetSha256": "aaf5b8b1f537b807790fb55cdfea46b7cf6e41da85e74aae65dcd35b3c466599",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/forms/model.ts",
+      "targetSha256": "ae6f71d855d613f62998503f315f4661a3dfff280fbc2efeba38db3ebf0ac9a8",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/forms/settings-client.ts",
+      "targetSha256": "4d0d2e4585b7dfc6bd0befdee1b59640151ce972e61c23fa591ca1d1cb0e9968",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "49f29312cf9135600cf28d1927c18faa03d0729e4751bf2a11b8599a1ae76c97",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "92eb13abe31d791cfd1a11ad52dce85eee511e668bf224011363b14a98b361ff",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrations/0022_forms.sql",
+      "targetSha256": "1ea82ca1135da2af164e375f96eafe36c9edd2d0b474e772321905315ccbd848",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/forms/entry.ts",
+      "targetSha256": "15ac5e54a01977b32ad70277d93ae4da69be6ced6f05b787090c3138877d6b8b",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/forms/http.ts",
+      "targetSha256": "c8ddcc20b276f80fee1846071f7e33ef2cf4ff217b40ada81a00f0f311da3ad5",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/forms/repository.ts",
+      "targetSha256": "79a3abca129ad0abd4b0395e9fd7976fe0ebb0ff099aa9510fb7955573518ee4",
+      "origin": "JUYU custom-form implementation composing existing documented reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "docs/verification/2026-09-09-forms.md",
+      "targetSha256": "7fe4ea6d8b98d877ad4a30df763ae5f27e7eda94caf4fcac76c8af5206266f08",
+      "origin": "JUYU local custom-form acceptance evidence"
+    }
+  ]
+}

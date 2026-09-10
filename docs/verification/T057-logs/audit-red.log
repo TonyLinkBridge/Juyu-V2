@@ -1,0 +1,306 @@
+[WebServer] (node:73952) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:73953) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › tests/e2e/accessibility.spec.ts:27:137 › decision has no automated accessibility violations in both themes (615ms)
+(node:73974) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [desktop] › tests/e2e/accessibility.spec.ts:42:1 › workspace keeps frequent actions visible and tools keyboard operable at 320 pixels (5.3s)
+(node:73986) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  3 [desktop] › tests/e2e/accessibility.spec.ts:55:1 › actual login skip link and named editor can be reached with the keyboard (127ms)
+(node:73992) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  4 [mobile] › tests/e2e/accessibility.spec.ts:27:137 › decision has no automated accessibility violations in both themes (518ms)
+(node:74004) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  5 [mobile] › tests/e2e/accessibility.spec.ts:42:1 › workspace keeps frequent actions visible and tools keyboard operable at 320 pixels (5.3s)
+(node:74013) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  6 [mobile] › tests/e2e/accessibility.spec.ts:55:1 › actual login skip link and named editor can be reached with the keyboard (113ms)
+
+
+  1) [desktop] › tests/e2e/accessibility.spec.ts:27:137 › decision has no automated accessibility violations in both themes 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 50
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "color-contrast",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a[href$=\"admin\"]",
+    +         ],
+    +       },
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "nav > a:nth-child(2)",
+    +         ],
+    +       },
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a:nth-child(3)",
+    +         ],
+    +       },
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a:nth-child(4)",
+    +         ],
+    +       },
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a:nth-child(5)",
+    +         ],
+    +       },
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a:nth-child(6)",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      35 |  await writeFile(`output/verification/T057/${surface}-${theme}-${info.project.name}.json`,JSON.stringify({surface,theme,project:info.project.name,at:new Date().toISOString(),url:page.url(),...result},null,2));
+      36 |  await page.screenshot({path:`output/verification/T057/${surface}-${theme}-${info.project.name}.png`,fullPage:true});
+    > 37 |  expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                        ^
+      38 |  expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+      39 |  }
+      40 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility.spec.ts:37:136
+
+    Error Context: test-results/accessibility-decision-has-069fd-y-violations-in-both-themes-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-decision-has-069fd-y-violations-in-both-themes-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-decision-has-069fd-y-violations-in-both-themes-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [desktop] › tests/e2e/accessibility.spec.ts:42:1 › workspace keeps frequent actions visible and tools keyboard operable at 320 pixels 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('.tasks-tools-disclosure summary')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('.tasks-tools-disclosure summary')
+
+
+      44 |  await expect(page.getByRole('link',{name:'新建文章',exact:true})).toBeVisible();
+      45 |  await expect(page.getByRole('link',{name:'员工资料库 ↗',exact:true})).toBeVisible();
+    > 46 |  const toggle=page.locator('.tasks-tools-disclosure summary');await expect(toggle).toBeVisible();
+         |                                                                                    ^
+      47 |  await expect(page.getByRole('link',{name:'成员与权限',exact:true})).toHaveCount(0);
+      48 |  expect((await page.getByLabel('搜索标题').boundingBox())!.y).toBeLessThan(600);
+      49 |  await toggle.focus();await page.keyboard.press('Enter');await expect(page.getByRole('link',{name:'成员与权限',exact:true})).toBeVisible();
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility.spec.ts:46:84
+
+    Error Context: test-results/accessibility-workspace-ke-e9c8d-oard-operable-at-320-pixels-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-workspace-ke-e9c8d-oard-operable-at-320-pixels-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-workspace-ke-e9c8d-oard-operable-at-320-pixels-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [desktop] › tests/e2e/accessibility.spec.ts:55:1 › actual login skip link and named editor can be reached with the keyboard 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "main-content"
+    Received: ""
+
+      55 | test('actual login skip link and named editor can be reached with the keyboard',async({page})=>{
+      56 |  await page.goto('/sign-in');await page.keyboard.press('Tab');await expect(page.getByRole('link',{name:'跳到主要内容'})).toBeFocused();await page.keyboard.press('Enter');
+    > 57 |  expect(await page.evaluate(()=>document.activeElement?.id)).toBe('main-content');
+         |                                                              ^
+      58 |  await mount(page,'editor');const body=page.getByRole('textbox',{name:'文章正文',exact:true});await expect(body).toBeVisible();
+      59 |  await body.focus();await expect(body).toBeFocused();await page.keyboard.press('Tab');expect(await body.evaluate(e=>e===document.activeElement)).toBe(false);
+      60 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility.spec.ts:57:62
+
+    Error Context: test-results/accessibility-actual-login-0afd2-e-reached-with-the-keyboard-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-actual-login-0afd2-e-reached-with-the-keyboard-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-actual-login-0afd2-e-reached-with-the-keyboard-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [mobile] › tests/e2e/accessibility.spec.ts:27:137 › decision has no automated accessibility violations in both themes 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 50
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "color-contrast",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a[href$=\"admin\"]",
+    +         ],
+    +       },
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "nav > a:nth-child(2)",
+    +         ],
+    +       },
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a:nth-child(3)",
+    +         ],
+    +       },
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a:nth-child(4)",
+    +         ],
+    +       },
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a:nth-child(5)",
+    +         ],
+    +       },
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a:nth-child(6)",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      35 |  await writeFile(`output/verification/T057/${surface}-${theme}-${info.project.name}.json`,JSON.stringify({surface,theme,project:info.project.name,at:new Date().toISOString(),url:page.url(),...result},null,2));
+      36 |  await page.screenshot({path:`output/verification/T057/${surface}-${theme}-${info.project.name}.png`,fullPage:true});
+    > 37 |  expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                        ^
+      38 |  expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+      39 |  }
+      40 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility.spec.ts:37:136
+
+    Error Context: test-results/accessibility-decision-has-069fd-y-violations-in-both-themes-mobile/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-decision-has-069fd-y-violations-in-both-themes-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-decision-has-069fd-y-violations-in-both-themes-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [mobile] › tests/e2e/accessibility.spec.ts:42:1 › workspace keeps frequent actions visible and tools keyboard operable at 320 pixels 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('.tasks-tools-disclosure summary')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('.tasks-tools-disclosure summary')
+
+
+      44 |  await expect(page.getByRole('link',{name:'新建文章',exact:true})).toBeVisible();
+      45 |  await expect(page.getByRole('link',{name:'员工资料库 ↗',exact:true})).toBeVisible();
+    > 46 |  const toggle=page.locator('.tasks-tools-disclosure summary');await expect(toggle).toBeVisible();
+         |                                                                                    ^
+      47 |  await expect(page.getByRole('link',{name:'成员与权限',exact:true})).toHaveCount(0);
+      48 |  expect((await page.getByLabel('搜索标题').boundingBox())!.y).toBeLessThan(600);
+      49 |  await toggle.focus();await page.keyboard.press('Enter');await expect(page.getByRole('link',{name:'成员与权限',exact:true})).toBeVisible();
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility.spec.ts:46:84
+
+    Error Context: test-results/accessibility-workspace-ke-e9c8d-oard-operable-at-320-pixels-mobile/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-workspace-ke-e9c8d-oard-operable-at-320-pixels-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-workspace-ke-e9c8d-oard-operable-at-320-pixels-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [mobile] › tests/e2e/accessibility.spec.ts:55:1 › actual login skip link and named editor can be reached with the keyboard 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "main-content"
+    Received: ""
+
+      55 | test('actual login skip link and named editor can be reached with the keyboard',async({page})=>{
+      56 |  await page.goto('/sign-in');await page.keyboard.press('Tab');await expect(page.getByRole('link',{name:'跳到主要内容'})).toBeFocused();await page.keyboard.press('Enter');
+    > 57 |  expect(await page.evaluate(()=>document.activeElement?.id)).toBe('main-content');
+         |                                                              ^
+      58 |  await mount(page,'editor');const body=page.getByRole('textbox',{name:'文章正文',exact:true});await expect(body).toBeVisible();
+      59 |  await body.focus();await expect(body).toBeFocused();await page.keyboard.press('Tab');expect(await body.evaluate(e=>e===document.activeElement)).toBe(false);
+      60 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility.spec.ts:57:62
+
+    Error Context: test-results/accessibility-actual-login-0afd2-e-reached-with-the-keyboard-mobile/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-actual-login-0afd2-e-reached-with-the-keyboard-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-actual-login-0afd2-e-reached-with-the-keyboard-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6 failed
+    [desktop] › tests/e2e/accessibility.spec.ts:27:137 › decision has no automated accessibility violations in both themes 
+    [desktop] › tests/e2e/accessibility.spec.ts:42:1 › workspace keeps frequent actions visible and tools keyboard operable at 320 pixels 
+    [desktop] › tests/e2e/accessibility.spec.ts:55:1 › actual login skip link and named editor can be reached with the keyboard 
+    [mobile] › tests/e2e/accessibility.spec.ts:27:137 › decision has no automated accessibility violations in both themes 
+    [mobile] › tests/e2e/accessibility.spec.ts:42:1 › workspace keeps frequent actions visible and tools keyboard operable at 320 pixels 
+    [mobile] › tests/e2e/accessibility.spec.ts:55:1 › actual login skip link and named editor can be reached with the keyboard 

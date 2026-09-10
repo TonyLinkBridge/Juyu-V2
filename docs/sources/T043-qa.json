@@ -1,0 +1,154 @@
+{
+  "task": "T043",
+  "scope": "Authorized formal Q&A collection; immutable revision classification/order; shared editor, review, history and recovery integration",
+  "files": [
+    {
+      "target": "src/app/admin/editor/page.tsx",
+      "targetSha256": "b067abf91402cef1b9e23c7e08e41f89c26a16b95e70a96948eaf164fbaa5ed2",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/app/api/qa/route.ts",
+      "targetSha256": "c6e843d3db8aee0b761183c6f4cf9f7085c76a7fc187ebf9d3977f12dc7bc11e",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/app/globals.css",
+      "targetSha256": "5a9b52aa5d73563143c4e22f096fd9f510f10baa96418790a3957092348c0382",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/page.tsx",
+      "targetSha256": "8cc0e81eaaecc8279d3229812d6a40434f8b745ccaebdf5bd20825d4b026b192",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/qa/page.tsx",
+      "targetSha256": "5a804a5660ff3ee9ab60369bc2b3e58e313448ccf590ca0e4ad5875f6ac3eae4",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/components/editor/ArticleEditor.tsx",
+      "targetSha256": "dd6844dc5dfae6233cd051bc4f77410e04729f897aad17fa319610281548f549",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/components/editor/EditorLoader.tsx",
+      "targetSha256": "4665a4810401c77be917d9cad5a8fc592661192b97c839cb73701a4f9790213e",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/components/editor/EditorRecovery.tsx",
+      "targetSha256": "ac59ad405986d93ca73e128c570f2f8772d113adfc50ea81f2ea5a2c6e025c65",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/components/history/HistoryVersionPanel.tsx",
+      "targetSha256": "e5676f68e88f26b3df45bef5af99f45de9de41d52a2cc96fafd53627de3d8a67",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/components/qa/QaView.tsx",
+      "targetSha256": "82561bdc4c764c0779fa4511394e8a0f63fd284e929e02a390cfff518a0710fc",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/components/review/PublicationPanel.tsx",
+      "targetSha256": "495bab5ac81e4a5fbf7cf85eec6fb7c90605255cc7da287274806066bf9a5cc0",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/components/review/ReviewDecision.tsx",
+      "targetSha256": "3c0beaa4943e6d1822f283858e1d5e9954c9c9ef85edcedb2c7636e1a1d61212",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/domain/model.ts",
+      "targetSha256": "c4f716a2ca97c6fa62fffc53670a37bb7875dee01f86c3db4bfbfa63b424a35f",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/domain/workflow.ts",
+      "targetSha256": "9dc84e66512bd2a2a8aafcfdafaa76cbc64233bac0fd8fbdb13887141c09ddaf",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/editor/contract.ts",
+      "targetSha256": "913ab3ff4213102d2965eb1c475dd755281d5ffa9e40bdf779e734821719cb02",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/editor/recovery.ts",
+      "targetSha256": "6ef37ef839f5028de618c30c0fb2a4edd9cb66f73bb4af4b307d983529a1359e",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/history/client.ts",
+      "targetSha256": "97dc30b9c172fbe91e8fe35ce8c46992ddec9eb96bb357a27a52e4f6c0a6d471",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/history/model.ts",
+      "targetSha256": "199a0b0cab1b0644be055e30a0bfd573e1d997b5ff5c750a060d76bce58a4b05",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/qa/metadata.ts",
+      "targetSha256": "7ce33b57ff7a6c6ae66782346ca921d7aeee91b23abfea8cad2fdd10ac94becf",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/qa/model.ts",
+      "targetSha256": "101865ecd0bfec400f9f959708a7be6d61ec00fc54942dbb27d9dcfb5f89d322",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "536bbc0e48e4a6b024aed4b05cbe25a4851537053c1db5bcb8f9da9243e65813",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "e533c39cced16068f3ec535fc501e2e43990469fe7c74c763d147a3572e39881",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrations/0016_qa.sql",
+      "targetSha256": "59a122fc6210700da1d5722b0f17ec4aaa454935ed4fbac8aa17e488d5fa5004",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/server/database/repository.ts",
+      "targetSha256": "34cb7bf299d5e9480850ac1374ebff4f53b3be87c76d1561056dc784b724c55e",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/server/editor/input.ts",
+      "targetSha256": "fbd965140de499d48dae336c4bbf723c36bbbe0762f023d25c8136bca87adb6e",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/server/history/repository.ts",
+      "targetSha256": "39b37c6848a1623a5492aa689c2335e12510985b51842d994378b65f2d798201",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/server/qa/http.ts",
+      "targetSha256": "9cc874cb20dcac0ce8e50b9ba611d79307efb25c1c6fdbeca274640db095cd39",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    },
+    {
+      "target": "src/server/qa/repository.ts",
+      "targetSha256": "aa017f56a1b35b6f76370d2a7c64da8c2cb18903692eef3f25ef27fb314dc18b",
+      "origin": "JUYU application implementation composing existing GitBook-derived reading/results and BlockNote editor; no new vendor source"
+    }
+  ],
+  "integration": "0016 narrow publication projection and immutable revision metadata/history restore; unchanged existing access category and publication rules",
+  "verification": "docs/verification/2026-09-09-qa.md",
+  "limitations": [
+    "No real Clerk/Supabase/company/device/deployment/scale acceptance",
+    "QA display classification does not change access categories",
+    "Non-QA meaningful metadata rejected by application writes; SQL checks validate value shape only",
+    "No AI or fabricated business answers; no new dependency or upstream source copies"
+  ]
+}

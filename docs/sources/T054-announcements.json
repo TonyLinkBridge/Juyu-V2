@@ -1,0 +1,106 @@
+{
+  "task": "T054",
+  "scope": "Role- and feature-filtered announcements with admin versioning and per-member per-version read/dismiss state; local acceptance only; current assistant self-review without subagents",
+  "files": [
+    {
+      "target": "src/announcements/client.ts",
+      "targetSha256": "36f178eabc6220d17a353be33d06c211bd2c6415065d3cc9763886e433b26f6a",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/announcements/model.ts",
+      "targetSha256": "e975f01af6f81e98bf01921dca49c38e5ae4710820010c24e5b941db0f8feca5",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/announcements/page.tsx",
+      "targetSha256": "cc821065f3a82ce405fbca23baf20e5103de5e576bf12bb42eee7ad307554404",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/page.tsx",
+      "targetSha256": "8fe7664cf79588add6bcef9e339fdbb9735e735e0b778c4eff0c85c30bb5da29",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/announcements.css",
+      "targetSha256": "7f38a0a36290add23e4351b4f808db59f4c5acd3211d983e4d53607c62c0cbb6",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/announcements/[id]/route.ts",
+      "targetSha256": "f1b9ceb91502300757f01ab2b4e61ee69e4a3290a41d34e5c4db1212cbe5d0bc",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/announcements/route.ts",
+      "targetSha256": "0bcd24510a32ed3324a1f8cc774a1d4e131951d8125ff72cefbc1f76e2c1579e",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/announcements/[id]/route.ts",
+      "targetSha256": "1844e39c4b27d9345542665b711f89a7a7af116f2f958a9bcc03e1e043bfdcdf",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/announcements/route.ts",
+      "targetSha256": "0bb70ab226e2ca15612cb7c8815911291d5895c7f737c1b48c9024eda5721414",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/announcements/AnnouncementFeed.tsx",
+      "targetSha256": "3049569e96408373d04e60b055ff4eb560b478e87a7aede6ea1293afddabae20",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/announcements/AnnouncementManager.tsx",
+      "targetSha256": "f8d57d3f1c4abc664d7bcd4e41e2109fa421f28475f14b066ab434835c2a034b",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/announcements/NewAnnouncements.tsx",
+      "targetSha256": "3a4f8b904e9ec588fdff4815f9ca3de8ef12207b1ad06bec247dedf54cf757af",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/navigation-settings/ReaderMenu.tsx",
+      "targetSha256": "1d450b88801a6e6f0e8c8cead499c7d91907493ee9def6422fff387c8e803da6",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/tasks/TasksWorkspace.tsx",
+      "targetSha256": "2c2ae0615232b4b558cedbe003787e749ae92015424b8566ed22c7fbd56419f3",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/announcements/http.ts",
+      "targetSha256": "55e1492ba15ead1ea56a3ac299dd1fe3346ac60258a7b00e94e5762b53ff0edb",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/announcements/repository.ts",
+      "targetSha256": "39cd23a6a09a0d3d76619d5abadd891a7c3db0912c829cba905dbb2df31fe77f",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "83160b24755d3e347dc0143c374befc8a2f761961483487f61fda4d498e6f789",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "2bc3deb1cf91e857294b71fda76d1132a4ab9b48a24dc1ca17d069381ed17c2c",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrations/0026_announcements.sql",
+      "targetSha256": "fc1ac3ef494267a86e2a5935bc4495996e5c5d79001d038d9462ae183e2aedb7",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "docs/verification/2026-09-10-announcements.md",
+      "targetSha256": "9ce34e77ec8d9754dd018fd25b4d55d03a3398b6ca72b227cbe9e820de93efff",
+      "origin": "JUYU announcement implementation composing existing reader and Tasks adaptations; no new vendor source"
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+[WebServer] (node:78016) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 84 tests using 1 worker
+
+(node:78017) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search secondary UI audit (1.1s)
+  ✓   2 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search-empty secondary UI audit (584ms)
+  ✓   3 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search-error secondary UI audit (575ms)
+  ✓   4 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › pdf secondary UI audit (583ms)
+  ✓   5 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › rich-blocks secondary UI audit (667ms)
+  ✓   6 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › fields secondary UI audit (595ms)
+  ✓   7 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › fields-empty secondary UI audit (392ms)
+  ✓   8 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › fields-error secondary UI audit (382ms)
+  ✓   9 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › categories secondary UI audit (586ms)
+  ✓  10 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › categories-error secondary UI audit (392ms)
+  ✓  11 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-settings secondary UI audit (636ms)
+  ✓  12 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-settings-error secondary UI audit (410ms)
+  ✓  13 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-fill secondary UI audit (479ms)
+  ✓  14 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-record secondary UI audit (431ms)
+  ✓  15 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › forms-empty secondary UI audit (360ms)
+  ✓  16 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › forms-error secondary UI audit (382ms)
+  ✓  17 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › navigation-settings secondary UI audit (553ms)
+  ✓  18 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › setting-history secondary UI audit (630ms)
+  ✓  19 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › setting-history-error secondary UI audit (410ms)
+  ✓  20 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › members secondary UI audit (415ms)
+  ✓  21 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › history secondary UI audit (632ms)
+  ✓  22 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › history-version secondary UI audit (565ms)
+  ✓  23 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › publication secondary UI audit (646ms)
+  ✓  24 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › availability secondary UI audit (463ms)
+  ✓  25 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › trash secondary UI audit (446ms)
+  ✓  26 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › reference secondary UI audit (533ms)
+  ✓  27 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › qa secondary UI audit (461ms)
+  ✓  28 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › favorites secondary UI audit (464ms)
+  ✓  29 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › recent secondary UI audit (481ms)
+  ✓  30 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › announcements secondary UI audit (567ms)
+  ✓  31 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics secondary UI audit (565ms)
+  ✓  32 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics-error secondary UI audit (409ms)
+  ✓  33 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › feedback-overview secondary UI audit (531ms)
+  ✓  34 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › feedback-details secondary UI audit (550ms)
+  ✓  35 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-records secondary UI audit (410ms)
+  ✓  36 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › review-control secondary UI audit (468ms)
+  ✓  37 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › archives secondary UI audit (394ms)
+  ✓  38 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › deleted-history secondary UI audit (463ms)
+  ✓  39 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › category-landing secondary UI audit (532ms)
+  ✓  40 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › media secondary UI audit (768ms)
+  ✓  41 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › science secondary UI audit (649ms)
+  ✘  42 [desktop] › tests/e2e/accessibility-secondary.spec.ts:24:1 › secondary keyboard flows remain usable at 320 pixels (5.3s)
+(node:78093) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  43 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search secondary UI audit (1.0s)
+  ✓  44 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search-empty secondary UI audit (578ms)
+  ✓  45 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search-error secondary UI audit (545ms)
+  ✓  46 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › pdf secondary UI audit (598ms)
+  ✓  47 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › rich-blocks secondary UI audit (650ms)
+  ✓  48 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › fields secondary UI audit (577ms)
+  ✓  49 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › fields-empty secondary UI audit (363ms)
+  ✓  50 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › fields-error secondary UI audit (347ms)
+  ✓  51 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › categories secondary UI audit (603ms)
+  ✓  52 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › categories-error secondary UI audit (380ms)
+  ✓  53 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-settings secondary UI audit (597ms)
+  ✓  54 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-settings-error secondary UI audit (345ms)
+  ✓  55 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-fill secondary UI audit (480ms)
+  ✓  56 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-record secondary UI audit (448ms)
+  ✓  57 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › forms-empty secondary UI audit (376ms)
+  ✓  58 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › forms-error secondary UI audit (349ms)
+  ✓  59 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › navigation-settings secondary UI audit (550ms)
+  ✓  60 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › setting-history secondary UI audit (614ms)
+  ✓  61 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › setting-history-error secondary UI audit (397ms)
+  ✓  62 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › members secondary UI audit (465ms)
+  ✓  63 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › history secondary UI audit (647ms)
+  ✓  64 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › history-version secondary UI audit (530ms)
+  ✓  65 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › publication secondary UI audit (647ms)
+  ✓  66 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › availability secondary UI audit (464ms)
+  ✓  67 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › trash secondary UI audit (481ms)
+  ✓  68 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › reference secondary UI audit (513ms)
+  ✓  69 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › qa secondary UI audit (463ms)
+  ✓  70 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › favorites secondary UI audit (463ms)
+  ✓  71 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › recent secondary UI audit (448ms)
+  ✓  72 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › announcements secondary UI audit (565ms)
+  ✓  73 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics secondary UI audit (564ms)
+  ✓  74 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics-error secondary UI audit (379ms)
+  ✓  75 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › feedback-overview secondary UI audit (497ms)
+  ✓  76 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › feedback-details secondary UI audit (532ms)
+  ✓  77 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-records secondary UI audit (378ms)
+  ✓  78 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › review-control secondary UI audit (517ms)
+  ✓  79 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › archives secondary UI audit (344ms)
+  ✓  80 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › deleted-history secondary UI audit (432ms)
+  ✓  81 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › category-landing secondary UI audit (545ms)
+  ✓  82 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › media secondary UI audit (688ms)
+  ✓  83 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › science secondary UI audit (661ms)
+  ✘  84 [mobile] › tests/e2e/accessibility-secondary.spec.ts:24:1 › secondary keyboard flows remain usable at 320 pixels (5.3s)
+
+
+  1) [desktop] › tests/e2e/accessibility-secondary.spec.ts:24:1 › secondary keyboard flows remain usable at 320 pixels 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: '本地分类目标' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for getByRole('heading', { name: '本地分类目标' })
+
+
+      26 |  await mountSecondary(page,secondarySurfaces.find(s=>s.name==='qa')!);
+      27 |  const category=page.getByRole('link',{name:'查看分类：账户操作'});await category.focus();await expect(category).toBeFocused();expect((await category.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    > 28 |  await page.route('**/help-centre/qa?*',r=>r.fulfill({contentType:'text/html',body:'<h1>本地分类目标</h1>'}));await page.keyboard.press('Enter');await expect(page).toHaveURL(/category=/);await expect(page.getByRole('heading',{name:'本地分类目标'})).toBeVisible();
+         |                                                                                                                                                                                                                                              ^
+      29 |  await page.unrouteAll();await mountSecondary(page,secondarySurfaces.find(s=>s.name==='rich-blocks')!);
+      30 |  const code=page.getByRole('region',{name:'代码内容，可横向滚动'});await code.focus();await expect(code).toBeFocused();await page.keyboard.press('Tab');expect(await code.evaluate(e=>e===document.activeElement)).toBe(false);
+      31 |  const tab=page.getByRole('tab',{name:'注册',exact:true});await tab.focus();await page.keyboard.press('ArrowRight');await expect(page.getByRole('tab',{name:'转入',exact:true})).toBeFocused();await expect(page.getByRole('tabpanel',{name:'转入',exact:true})).toBeVisible();
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:28:238
+
+    Error Context: test-results/accessibility-secondary-se-ea872-remain-usable-at-320-pixels-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-secondary-se-ea872-remain-usable-at-320-pixels-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-secondary-se-ea872-remain-usable-at-320-pixels-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile] › tests/e2e/accessibility-secondary.spec.ts:24:1 › secondary keyboard flows remain usable at 320 pixels 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: '本地分类目标' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for getByRole('heading', { name: '本地分类目标' })
+
+
+      26 |  await mountSecondary(page,secondarySurfaces.find(s=>s.name==='qa')!);
+      27 |  const category=page.getByRole('link',{name:'查看分类：账户操作'});await category.focus();await expect(category).toBeFocused();expect((await category.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    > 28 |  await page.route('**/help-centre/qa?*',r=>r.fulfill({contentType:'text/html',body:'<h1>本地分类目标</h1>'}));await page.keyboard.press('Enter');await expect(page).toHaveURL(/category=/);await expect(page.getByRole('heading',{name:'本地分类目标'})).toBeVisible();
+         |                                                                                                                                                                                                                                              ^
+      29 |  await page.unrouteAll();await mountSecondary(page,secondarySurfaces.find(s=>s.name==='rich-blocks')!);
+      30 |  const code=page.getByRole('region',{name:'代码内容，可横向滚动'});await code.focus();await expect(code).toBeFocused();await page.keyboard.press('Tab');expect(await code.evaluate(e=>e===document.activeElement)).toBe(false);
+      31 |  const tab=page.getByRole('tab',{name:'注册',exact:true});await tab.focus();await page.keyboard.press('ArrowRight');await expect(page.getByRole('tab',{name:'转入',exact:true})).toBeFocused();await expect(page.getByRole('tabpanel',{name:'转入',exact:true})).toBeVisible();
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:28:238
+
+    Error Context: test-results/accessibility-secondary-se-ea872-remain-usable-at-320-pixels-mobile/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-secondary-se-ea872-remain-usable-at-320-pixels-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-secondary-se-ea872-remain-usable-at-320-pixels-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [desktop] › tests/e2e/accessibility-secondary.spec.ts:24:1 › secondary keyboard flows remain usable at 320 pixels 
+    [mobile] › tests/e2e/accessibility-secondary.spec.ts:24:1 › secondary keyboard flows remain usable at 320 pixels 
+  82 passed (54.9s)

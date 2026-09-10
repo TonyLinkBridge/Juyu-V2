@@ -1,0 +1,166 @@
+{
+  "task": "T051",
+  "scope": "Admin fixed-target shortcut configuration with ordered role visibility, immutable versions and protected publication category landing; local acceptance only",
+  "files": [
+    {
+      "target": "src/app/admin/settings/navigation/page.tsx",
+      "targetSha256": "ffe37cee73749960c6453f2932434b684b87ca96c715935d7d5bcb2f650db17e",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/navigation/route.ts",
+      "targetSha256": "9f846abec01942412b70b96fcd98256954266f5f66405e03b29cf49d92a1c937",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/reader-menu/route.ts",
+      "targetSha256": "fd4a5b375b894540497d1220d0ea73b9747cd5ce92c8873767b1dd764e9e54a2",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/globals.css",
+      "targetSha256": "5b6c261154c25b2cbbe0137f928b90ce99b3353c547e73a734b0539d6b35d3d4",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/categories/[id]/page.tsx",
+      "targetSha256": "c24c4de55f1499bf851d8a7f583ca44c8ca6948f97049116b0d5dd44d6613705",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/favorites/page.tsx",
+      "targetSha256": "a26995fac10be72592e6ac7785f3b4296043fec44dc27e9884e2089b5a01a03d",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/forms/[id]/page.tsx",
+      "targetSha256": "1ae37b2c114add1bba40ce081e3c8e6ed0bdddd221cc097810ccfc5a7780c16f",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/forms/page.tsx",
+      "targetSha256": "95234ea5bb6c2245ac9e8fa1f9115ff6a4f872879e9d4b13915c5c8efb27799b",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/ops/page.tsx",
+      "targetSha256": "2d31c2ec466a038d87d5bc8b2a2c412d2d70fab4aad55680977e48c53e1fb366",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/page.tsx",
+      "targetSha256": "4b666ac751eec60a5eff3db51e9c189dc14ef1562dcacf18921fa5d484f93d5c",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/pdf/page.tsx",
+      "targetSha256": "388521ff6b86f4175be0176d5fe732f641c40caa45b6029183bcc0b67c9e91d2",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/qa/page.tsx",
+      "targetSha256": "11519c73bc658e6f9617b666ce2e35186a660ef2e624fbb49ce09288cf59d8c9",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/recent/page.tsx",
+      "targetSha256": "037bf864a48b7f60121cda7659624978214c522e8b77bb2c9d47093f360c636b",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/reference/page.tsx",
+      "targetSha256": "59022126e56b7d04cf0cd568a8bd24836972fbe399a599e277a847710eac40f3",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/navigation-settings.css",
+      "targetSha256": "9b8d27ee311aa459394f3956b18db23f5d1f70cc04fcccc49a00d01c4fcae8c5",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/entry-shell.tsx",
+      "targetSha256": "08852a5c81a2e172ce9d58a01fc210c5f54047c33c4dd3b686869dba9df532a6",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/navigation-settings/CategoryLanding.tsx",
+      "targetSha256": "05e9d13f675fc29d72dc7f61f099848f3a25350f7a309073d005a3c11fd1fe72",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/navigation-settings/NavigationSettings.tsx",
+      "targetSha256": "b4e6c56232b4c119735a85854aa2c37339cc9c61644968f949eca603a42fb070",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/navigation-settings/ReaderMenu.tsx",
+      "targetSha256": "0bfb29b002e807d117a083b37c51abef97172862bfe42405d06d8186ac145be9",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/navigation-settings/ReaderQuickLinks.tsx",
+      "targetSha256": "743b0afa85854d4b1c93b81e44c7303ce33cd531a19d2fc30b03bcf3f380d7b6",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/tasks/TasksWorkspace.tsx",
+      "targetSha256": "65836bf28bd944a47e924094a8d3c90d6738b180d20f89a25eff42ed6b073126",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/navigation-settings/client.ts",
+      "targetSha256": "6d0c50d72e53733288e5b07d4846d20b41986978783522973476d5d122776410",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/navigation-settings/model.ts",
+      "targetSha256": "233cba6bc7760f9d72d3d16b5c5107aa2a64a455ee9449ab036d2cb2e21e774f",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/reader/category-page.ts",
+      "targetSha256": "00a111b39750859745e0fde7067cf8d615b21b2f88e56379c613c0ac2ba6b1ce",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/reader/tree.ts",
+      "targetSha256": "19a0111f419e18b49b57fa1c9d29f39d2e08d7496f4f75fe70e2fe3200982e8a",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "8f3195da3a5c5aceac91add2618826fb65ebca71e957660a5c4eb87b4072ff7e",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "439ab8c216c3aa59802ae7d4c83f3fce5b657c89507e4a064c9114af08910a2d",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrations/0023_navigation_settings.sql",
+      "targetSha256": "6d83172287d4ed2006bebe0af3ef4791d9488de4d6d204d7f2a8314324d28d23",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/navigation-settings/http.ts",
+      "targetSha256": "9f9daf242f664b957128bc124d341868188417f380185d9d165792a1c20c59e9",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/navigation-settings/repository.ts",
+      "targetSha256": "f3de98e930d07d0c82534cf8fc1a32a18ffca6066685414bf5a92d70d5b34ada",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "docs/verification/2026-09-10-navigation-settings.md",
+      "targetSha256": "fa6d79e63f56f45cf282a8cbb7fe00770c083ed3b24904327afbfddfdbd2cf12",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "docs/verification/2026-09-10-navigation-settings-review.md",
+      "targetSha256": "045c3251d2994614a3186b0dec59a28d901fb8cdeccc071caff62a95355bdbd7",
+      "origin": "JUYU navigation implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    }
+  ]
+}

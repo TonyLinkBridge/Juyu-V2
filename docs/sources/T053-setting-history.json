@@ -1,0 +1,106 @@
+{
+  "task": "T053",
+  "scope": "Unified admin setting history and validated restoration into new versions with atomic provenance and exact request receipts; local acceptance only; current assistant self-review without subagents",
+  "files": [
+    {
+      "target": "src/app/admin/settings/categories/page.tsx",
+      "targetSha256": "6686a5ec76d5bd3785dcf2f2cecb84f2af5bd7b4eb7d05df4e6305d018bb1f3b",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/settings/features/page.tsx",
+      "targetSha256": "962b315b52b5af21610618cea6eb3615920483802302a0e452212b222b0711e6",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/settings/fields/page.tsx",
+      "targetSha256": "86d42c65fa9ed49c5742a9de8bf269d791e3b31e410ea71d576cb8f933493b50",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/settings/forms/page.tsx",
+      "targetSha256": "c3118e7d81ccadd050398cffc5a52c710bd3afed4aa92b0184090462df37d214",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/settings/history/page.tsx",
+      "targetSha256": "5b34efb5fa61e2c86594a4e04e0c1dafd57a8e09d168f2205645086eed2ea3da",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/settings/navigation/page.tsx",
+      "targetSha256": "6bedbc296492c213f17f8ef73a7ab3c5bd6f9e730d511f241c5b302694a0fb20",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/settings/history/detail/route.ts",
+      "targetSha256": "76be77568dd13128e2bf5593608808315ff5a888c541863e208509d312ace67f",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/settings/history/restore/route.ts",
+      "targetSha256": "385c0fb6330c78cef6b257ce94cbfa00620659964eca5ef55d20836a30fdaf79",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/settings/history/route.ts",
+      "targetSha256": "e5ef8a0f68caf706f1647e423347a26a898c34799f32ed1571675915c6c44ee0",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/app/setting-history.css",
+      "targetSha256": "9d223cc49e2620d97d850c01b6ab1d684e579786c31d7303d1f39c2a3e297b94",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/components/setting-history/SettingHistory.tsx",
+      "targetSha256": "6d6724359f8d3d5a92604c279027fe69fb00c1970ffc2f00ffd30ec5cc8342b1",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/components/tasks/TasksWorkspace.tsx",
+      "targetSha256": "d883ceb55b57e0a23985e9e6ebf11c4be6ac0f8749126c4730b1d65c5794e55d",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "e68c20bdcbe00a5b312db25ff9a9e4223460a7f32760c92d18a159696b73f348",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "7d5e18a007dd8564434ca43f98593907c95ab588360e4416a1d24dbe6985085b",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrations/0025_setting_history.sql",
+      "targetSha256": "6a4ef9708201c5041d614351d448bdb9817c5a951c5c622823ae67620531ad16",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/server/setting-history/http.ts",
+      "targetSha256": "c627e294b724fef5f8f01ee6771141806ce9b16257964e35b4b9d9c9e5a2449f",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/server/setting-history/repository.ts",
+      "targetSha256": "151e1072fbf2ee37a3227a10a9b90ca156992be8c8f76f9e156c96f54fe42f74",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/setting-history/client.ts",
+      "targetSha256": "e7068f02453ca20c96c752444dd0e917597dec5b5c6a40958e54067ccf4ef282",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "src/setting-history/model.ts",
+      "targetSha256": "dc6e3ffde30ff9049adbaf6601c862b752d552844dc72413c286f908d5c2fad3",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    },
+    {
+      "target": "docs/verification/2026-09-10-setting-history.md",
+      "targetSha256": "9808d98f36e5eeaccb90131088cbaa8c52f2ad643207c940818af476e7dbb492",
+      "origin": "JUYU setting-history implementation; existing Tasks workspace adaptation adds entry; no new vendor source"
+    }
+  ]
+}

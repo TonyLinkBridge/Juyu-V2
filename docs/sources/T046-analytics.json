@@ -1,0 +1,71 @@
+{
+  "task": "T046",
+  "scope": "Permission-checked view/search impression/search-click/feedback analytics; deduplication, authoritative result snapshots and query fingerprint privacy",
+  "files": [
+    {
+      "target": "src/analytics/client.ts",
+      "targetSha256": "45d7896cb41f201a817148a42ff37036adbfd00e573997283ebf1e299d097e98",
+      "origin": "JUYU analytics implementation composing existing unmodified GitBook-derived reading/search components; no new vendor source"
+    },
+    {
+      "target": "src/analytics/model.ts",
+      "targetSha256": "57497bcb26b4dfbb2c75e47aee06c16b2baa6bc23e9b38dcece71580acb643a7",
+      "origin": "JUYU analytics implementation composing existing unmodified GitBook-derived reading/search components; no new vendor source"
+    },
+    {
+      "target": "src/analytics/search.ts",
+      "targetSha256": "9aed0add83e4ea61acae15fcb112463326239a837003a076f8de3c59c236ba45",
+      "origin": "JUYU analytics implementation composing existing unmodified GitBook-derived reading/search components; no new vendor source"
+    },
+    {
+      "target": "src/app/api/analytics/route.ts",
+      "targetSha256": "51de43fbc3f0bc3f5f6bda3c8b6e35816534c83178e22ce0e14de703f471f032",
+      "origin": "JUYU analytics implementation composing existing unmodified GitBook-derived reading/search components; no new vendor source"
+    },
+    {
+      "target": "src/app/globals.css",
+      "targetSha256": "672bfcc9e2be0517532ad10b10cc1f1e255e3e79e7403c412a051826cf207fd0",
+      "origin": "JUYU analytics implementation composing existing unmodified GitBook-derived reading/search components; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/page.tsx",
+      "targetSha256": "8e9799a592db77904e5d42c4ccd750c52306a2896f1a0aa5592146ffb5cffc4e",
+      "origin": "JUYU analytics implementation composing existing unmodified GitBook-derived reading/search components; no new vendor source"
+    },
+    {
+      "target": "src/components/analytics/ArticleAnalytics.tsx",
+      "targetSha256": "1c5d42032f755ebd880d1645776ecbc20c75a4f1e44fba4ade7fa93a41b21c50",
+      "origin": "JUYU analytics implementation composing existing unmodified GitBook-derived reading/search components; no new vendor source"
+    },
+    {
+      "target": "src/components/analytics/SearchAnalytics.tsx",
+      "targetSha256": "8253b1111b92c065ad66aa8df987ea2eb2c9a6c51b6157387f40cb01ce5e0f21",
+      "origin": "JUYU analytics implementation composing existing unmodified GitBook-derived reading/search components; no new vendor source"
+    },
+    {
+      "target": "src/server/analytics/http.ts",
+      "targetSha256": "06283501492a552cc6a8ce2190b01dbe800865dd50697925f4aa67a9e0652047",
+      "origin": "JUYU analytics implementation composing existing unmodified GitBook-derived reading/search components; no new vendor source"
+    },
+    {
+      "target": "src/server/analytics/repository.ts",
+      "targetSha256": "2c9cf9b810310320e19b0f36959b9cf20ba6e632bcd143b4773dcce3aa1c1527",
+      "origin": "JUYU analytics implementation composing existing unmodified GitBook-derived reading/search components; no new vendor source"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "c60db47cf7da90b3a75de9538b8a2036fe2fb117e60eba6c1833954d1783a422",
+      "origin": "JUYU analytics implementation composing existing unmodified GitBook-derived reading/search components; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "45a86d64c5a1079e2d01ecd27a5a33b7786184bd9c6aaf7b0e923d45595948db",
+      "origin": "JUYU analytics implementation composing existing unmodified GitBook-derived reading/search components; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrations/0019_analytics.sql",
+      "targetSha256": "952d4aa1574edf4777149cf539acc1d67d7c8056bcc8d340de3c9affede1e0d7",
+      "origin": "JUYU analytics implementation composing existing unmodified GitBook-derived reading/search components; no new vendor source"
+    }
+  ]
+}

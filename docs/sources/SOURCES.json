@@ -1,0 +1,2341 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-09-10",
+  "scope": "T003 baseline, T017-T029 GitBook adaptations and T030 Tasks workspace; local acceptance only, full editor and real service integration pending",
+  "sources": [
+    {
+      "id": "gitbook",
+      "root": "/Users/tony/Downloads/gitbook-main",
+      "gitHead": null,
+      "versionScope": "local package metadata only; not a release verification",
+      "packageName": "gitbook",
+      "packageVersion": "0.27.2",
+      "identity": "File SHA-256 is authoritative for this local snapshot; gitHead does not establish a clean working tree."
+    },
+    {
+      "id": "site",
+      "root": "/Users/tony/Desktop/docs/site",
+      "gitHead": "bb84d965229f4997f2d55b294a9fe4ef81c45f74",
+      "versionScope": "local package metadata only; not a release verification",
+      "packageName": "juyu-help-centre",
+      "packageVersion": "0.1.0",
+      "identity": "File SHA-256 is authoritative for this local snapshot; gitHead does not establish a clean working tree."
+    },
+    {
+      "id": "tasks",
+      "root": "/Users/tony/Downloads/square-ui-master",
+      "gitHead": null,
+      "versionScope": "local package metadata only; not a release verification",
+      "packageName": "tasks",
+      "packageVersion": "0.1.0",
+      "identity": "File SHA-256 is authoritative for this local snapshot; gitHead does not establish a clean working tree."
+    }
+  ],
+  "files": [
+    {
+      "id": "gitbook:packages/gitbook/src/components/TableOfContents/TableOfContents.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/TableOfContents/TableOfContents.tsx",
+      "sha256": "0667ddf2de7b3c8d0a3c1e0310c6c34edb41580957d9ff2c4ed5cd9a76020a97",
+      "bytes": 8180,
+      "decision": "adapt_ui",
+      "note": "沿用 T017 已授权目录与滚动结构，增加统一响应式菜单包裹；标题允许程序化焦点作为桌面切换后无选中文章时的恢复点。",
+      "v2Destination": "src/components/gitbook/TableOfContents/TableOfContents.tsx",
+      "migrationStatus": "adapted_responsive_navigation"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/TableOfContents/PagesList.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/TableOfContents/PagesList.tsx",
+      "sha256": "f04c3ee849bc38ef230bd875bb4bcef34e949d54098b387c7c22f135c3040099",
+      "bytes": 1733,
+      "decision": "adapt_ui",
+      "note": "加入上游 group 分支；用类型和稳定 ID 作为节点 key，当前路径变化时重置展开；递归分类树仅接收服务器已裁剪节点。",
+      "v2Destination": "src/components/gitbook/TableOfContents/PagesList.tsx",
+      "migrationStatus": "adapted_group_navigation"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/TableOfContents/PageGroupItem.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/TableOfContents/PageGroupItem.tsx",
+      "sha256": "331cf72b03a92adcfa5fd3ac435965e4372a573d6ca08b687190879bc35dd6da",
+      "bytes": 6095,
+      "decision": "adapt_ui",
+      "note": "适配原分组 state、button 和递归 descendants；以 JUYU 样式及图标替换供应商依赖，移除分组 sticky sentinel 避免多层标题重叠；增加 aria-controls 和 hidden，折叠内容不可聚焦。",
+      "v2Destination": "src/components/gitbook/TableOfContents/PageGroupItem.tsx",
+      "migrationStatus": "adapted_group_navigation"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/TableOfContents/ToggleableLinkItem.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/TableOfContents/ToggleableLinkItem.tsx",
+      "sha256": "4cf6b7b308e8c3b981519b549dcc4d8f0a7c59ac8ef23f0179e2559502bef64a",
+      "bytes": 6182,
+      "decision": "adapt_ui",
+      "note": "改编：保留无后代 LinkItem 分支、精确路径匹配、data-active/aria-current；使用固定站内 anchor，服务器提供当前项。",
+      "v2Destination": "src/components/gitbook/TableOfContents/ToggleableLinkItem.tsx",
+      "migrationStatus": "adapted_document_navigation"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "sha256": "f466467bbb0bb7d0fe1ad69aac6e3513099d881d09301ceb3c0d45ca55b770b7",
+      "bytes": 8897,
+      "decision": "adapt_ui",
+      "note": "在T019基础正文适配中接上PageHeader、PageFooterNavigation和回到顶部；仍不包含封面、反馈或完整富内容。",
+      "v2Destination": "src/components/gitbook/Reading/PageBody.tsx",
+      "migrationStatus": "adapted_page_navigation"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Block.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/Block.tsx",
+      "sha256": "dc900af8f32dcb46e28746be0c1682f0ee9348acf9e7fa4c5a37c03bea679ec2",
+      "bytes": 6906,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageAside/PageAside.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/PageAside/PageAside.tsx",
+      "sha256": "391a033fbab7c93dafad5df6435bcb31ae2dd4f980e35501329b29842a4b1571",
+      "bytes": 9356,
+      "decision": "adapt_ui",
+      "note": "保留 aside/outline/sections 结构；响应式原生 details 替换 SideSheet，移除广告、AI、主题和外部服务。",
+      "v2Destination": "src/components/gitbook/Reading/PageAside.tsx",
+      "migrationStatus": "adapted_basic_reading"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageAside/ScrollSectionsList.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/PageAside/ScrollSectionsList.tsx",
+      "sha256": "55014884bd444fe05fbd43e6f2e4dfc92db72788861f21b610f34bb451a3362e",
+      "bytes": 6880,
+      "decision": "adapt_ui",
+      "note": "保留 section 映射、深度、活动引用和滚动；JUYU 样式替换供应商主题，移除 API 标签过滤。",
+      "v2Destination": "src/components/gitbook/Reading/ScrollSectionsList.tsx",
+      "migrationStatus": "adapted_basic_reading"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Search/SearchInput.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/Search/SearchInput.tsx",
+      "sha256": "1f7b70f1c2dba00836d323c985c7954b0e9ee7c332c94d33b715a3c74af6c6a3",
+      "bytes": 6739,
+      "decision": "adapt_ui",
+      "note": "保留带图标的标题输入、清空与快捷键入口，改用原生 GET 表单和 JUYU 样式，增加中文组合输入及明确长度校验；移除弹出框/AI/GitBook 上下文。",
+      "v2Destination": "src/components/gitbook/Search/SearchInput.tsx",
+      "migrationStatus": "adapted_title_search_ui"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Search/SearchResults.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/Search/SearchResults.tsx",
+      "sha256": "2f5cd4291368389d331febf58d61ff4a35d795a70f95efe81e90c3b28ed2c588",
+      "bytes": 15466,
+      "decision": "adapt_ui",
+      "note": "保留结果列表与错误/空状态分支，改为完整搜索页的原生列表/链接语义；加入已授权计数与分页，移除 AI、动画、供应商统计和浏览器搜索历史。",
+      "v2Destination": "src/components/gitbook/Search/SearchResults.tsx",
+      "migrationStatus": "adapted_title_search_ui"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Search/SearchPageResultItem.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/Search/SearchPageResultItem.tsx",
+      "sha256": "9a134d2d3a4c74e8d749cf7288af6373d1d8432e2377d0e418472f7bba5f7a62",
+      "bytes": 7539,
+      "decision": "adapt_ui",
+      "note": "保留图标、分类路径、文章标题与关键词高亮组合；输入仅接收服务器核准正式标题，不包含正文摘要或草稿。",
+      "v2Destination": "src/components/gitbook/Search/SearchPageResultItem.tsx",
+      "migrationStatus": "adapted_title_search_ui"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Header/HeaderMobileMenu.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/Header/HeaderMobileMenu.tsx",
+      "sha256": "942aa0809f488622faf13bca6a36b3d0a17f894dd85a7bee97d1b97dbc076eb9",
+      "bytes": 1085,
+      "decision": "adapt_ui",
+      "note": "保留手机目录按钮与导航后关闭意图，以当前文章路径属性代替供应商 pathname/global class；JUYU 增加原生 dialog、桌面侧栏与 details 回退、滚动锁恢复、断点处理。",
+      "v2Destination": "src/components/gitbook/Header/HeaderMobileMenu.tsx",
+      "migrationStatus": "adapted_responsive_navigation"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageBody/PageHeader.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/PageBody/PageHeader.tsx",
+      "sha256": "8d04d4c0365d18f343029024cc523a49c093faf2d34f93af122aa0902f0ca45a",
+      "bytes": 24010,
+      "decision": "adapt_ui",
+      "note": "保留面包屑nav/ol、祖先遍历、分隔符及标题结构；只使用同一授权目录的分类层级，首页可返回目录，分类无独立页面故不造链接，去除vendor下拉、标签和页面动作。",
+      "v2Destination": "src/components/gitbook/Reading/PageHeader.tsx",
+      "migrationStatus": "adapted_page_navigation"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageBody/BreadcrumbItemDropdown.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/PageBody/BreadcrumbItemDropdown.tsx",
+      "sha256": "9ddf5fece150abe1f1c01498b5ad50284a84b100e24e0f2a5bf2e3cdd58e8242",
+      "bytes": 3855,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageBody/PageFooterNavigation.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/PageBody/PageFooterNavigation.tsx",
+      "sha256": "fb067fb98d13916039be77b131f200efdb661f0d2eefd072208d3ab0465ab8ea",
+      "bytes": 4130,
+      "decision": "adapt_ui",
+      "note": "保留上一篇/下一篇条件卡片、箭头/标签/标题与反向排列；服务器核准的目录投影替换vendor context/linker/统计；首尾不循环。",
+      "v2Destination": "src/components/gitbook/Reading/PageFooterNavigation.tsx",
+      "migrationStatus": "adapted_page_navigation"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageAside/ScrollToTopButton.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/PageAside/ScrollToTopButton.tsx",
+      "sha256": "6d8cc5c7d8c5a32db85b37089df58c7bd15ef103eeb115dbf4cca9ad099a2f6c",
+      "bytes": 483,
+      "decision": "adapt_ui",
+      "note": "保留button、可取消点击与window.scrollTo；新增减少动画设置及标题焦点恢复，不改写文章URL或章节hash。",
+      "v2Destination": "src/components/gitbook/Reading/ScrollToTopButton.tsx",
+      "migrationStatus": "adapted_page_navigation"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/ThemeToggler/ThemeToggler.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/ThemeToggler/ThemeToggler.tsx",
+      "sha256": "f11009759c94bcd5e860a12334ceb384602150a6487950147e5d57986546a967",
+      "bytes": 2016,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Announcement/AnnouncementBanner.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/Announcement/AnnouncementBanner.tsx",
+      "sha256": "66e0973e39fa341b3aed67b1e227d2620c498feafdc8ed272286a400f7f7dbd7",
+      "bytes": 6872,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Footer/Footer.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/Footer/Footer.tsx",
+      "sha256": "9d6427da93c86db57e570e5205c98e483ce140f84fbccd809b65816bec94ba61",
+      "bytes": 8385,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageBody/PageCover.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/PageBody/PageCover.tsx",
+      "sha256": "1f13774736ca75b67e16f2e5b526c0f0937f60ab3f2490d5ca921caeecc29d0e",
+      "bytes": 6144,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageBody/PageCoverImage.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/PageBody/PageCoverImage.tsx",
+      "sha256": "b143f22669180c3d9a987f814d53136c781cdf93977b176846e367f7a7a42cf9",
+      "bytes": 3839,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageBody/PageTags.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/PageBody/PageTags.tsx",
+      "sha256": "7af4b94ad7119923949fc6c22a2b86831a35155e60fd496f81c23c8e739f9d6d",
+      "bytes": 842,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageFeedback/PageFeedbackForm.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/PageFeedback/PageFeedbackForm.tsx",
+      "sha256": "8375dfb2e7b2e0c2faf96c11c494b1b092ff445e96e96363bff4a3a54cd6be13",
+      "bytes": 7695,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PDF/PDFPage.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/PDF/PDFPage.tsx",
+      "sha256": "8fd9d7db17031107d24cedea703b95817ecd22c86244ef228ef5d764b6d10cfe",
+      "bytes": 11138,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PDF/PrintButton.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/PDF/PrintButton.tsx",
+      "sha256": "67c3b9c7f6ee991f6a7f6841cced7ae550268918a8ad7139940634e655289e0c",
+      "bytes": 249,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PDF/pdf.css",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/PDF/pdf.css",
+      "sha256": "399480f0f30221ab0a8dbdd8852d9e2a6fce1d07a94c1b61ca4f8fa26d1619bf",
+      "bytes": 1508,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Images.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/Images.tsx",
+      "sha256": "742895a14f5bffb9b0d2177dabf3e477bf9aa3f51446d34de6f782c49fa4a364",
+      "bytes": 5278,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Embed.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/Embed.tsx",
+      "sha256": "8c85daff9ad115a06388c8fc826e2ff95a1d930830b5eddc1f99f7106e7fe4c5",
+      "bytes": 3093,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/File.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/File.tsx",
+      "sha256": "0f72bbb06f521b3a69bca3270b2f20e55607395bf9192f1aa2af362967f5ad7e",
+      "bytes": 4482,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Table/Table.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/Table/Table.tsx",
+      "sha256": "6763410db8106dec358aa9efd4c30f1b5bb1d1f88bddf29cc1eb264cf08e51e0",
+      "bytes": 6614,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Hint.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/Hint.tsx",
+      "sha256": "b6bb7a204a7b509a73e77b841dc4fc544013d0500198f20f4122a2be71681521",
+      "bytes": 6894,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/CodeBlock.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/CodeBlock/CodeBlock.tsx",
+      "sha256": "a4a93744fedb5abe0b1ac6726b6b798ec5f47cc55116a59c1944f3d381279dfa",
+      "bytes": 4093,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/CopyCodeButton.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/CodeBlock/CopyCodeButton.tsx",
+      "sha256": "f6b92238a4ac9412fbc87420cc2974633f88e2bd7c232ed09465104aac45f08e",
+      "bytes": 1375,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Tabs/DynamicTabs.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/Tabs/DynamicTabs.tsx",
+      "sha256": "0c6a08e1c48d7959f00ba884168076ff078f8ba9fba83df247eeb99800acb65d",
+      "bytes": 11954,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Math.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/Math.tsx",
+      "sha256": "6dffdf6eb694d81da0a30616763f29ec4756b893e36fefe43818089f84da4025",
+      "bytes": 862,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/MermaidCodeBlock.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/CodeBlock/MermaidCodeBlock.tsx",
+      "sha256": "feaa5a2512b412852ebe8e6a9d54a1b833994140fab9f372840211d6a4dc0221",
+      "bytes": 14101,
+      "decision": "adapt_ui",
+      "note": "候选原始 UI 源码；需要替换 GitBook 数据上下文、路由、图标与授权，不代表可直接运行。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:README.md",
+      "source": "gitbook",
+      "path": "README.md",
+      "sha256": "df84e6a678134df2d2eb045dd5acc01e5cd0866b6b0bf278960cd1bc52ff1f70",
+      "bytes": 7805,
+      "decision": "reference_only",
+      "note": "记录本地快照及组件依赖，不照搬整个 monorepo 或托管 API。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:package.json",
+      "source": "gitbook",
+      "path": "package.json",
+      "sha256": "51e9edb900bbd00f2612cb1f01bbd195008cc72df5d35c686e55e49c79d4eb31",
+      "bytes": 2453,
+      "decision": "reference_only",
+      "note": "记录本地快照及组件依赖，不照搬整个 monorepo 或托管 API。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/package.json",
+      "source": "gitbook",
+      "path": "packages/gitbook/package.json",
+      "sha256": "2a49680c52b66ac67abf83ad4925f4b1d9944e318b6cb7549f2fa52e42ebaa66",
+      "bytes": 6624,
+      "decision": "reference_only",
+      "note": "记录本地快照及组件依赖，不照搬整个 monorepo 或托管 API。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/AnnouncementBanner.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/AnnouncementBanner.tsx",
+      "sha256": "fe99de94987bc96fe203db084feacf3d823ca3af36be2e55772d57c37938362c",
+      "bytes": 1268,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/CopyCodeButton.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/CopyCodeButton.tsx",
+      "sha256": "20abe4751aa9ad66009a4b785928511b00431d0fed77cd76d02e122fb0283a3e",
+      "bytes": 1287,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/Dialog.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/Dialog.tsx",
+      "sha256": "2b90bdef86508219eb4c841dacc46ea95cbe83e81f2737691e86ed89caf5444e",
+      "bytes": 1652,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/DynamicTabs.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/DynamicTabs.tsx",
+      "sha256": "baf7d010a6bfad6496d976ba670309dbd1d1d71bc8940e8285d39f1acdd16def",
+      "bytes": 3903,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/Footer.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/Footer.tsx",
+      "sha256": "894c31425a280db542c012d08014a78b6974cb7c1e88239117248e4817d976c7",
+      "bytes": 601,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/Hint.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/Hint.tsx",
+      "sha256": "317e495fb54927a1002ef48da6fdbc88815386260310e8741692fccf2c45bf1b",
+      "bytes": 747,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/MarkdownBlocks.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/MarkdownBlocks.tsx",
+      "sha256": "8438ee9e7002eda38dd60e5dc1284a3044bec5b7b491d8cc33c01b74e4741587",
+      "bytes": 6840,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/PageFeedbackForm.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/PageFeedbackForm.tsx",
+      "sha256": "349191e99be9bdba88dd692db1a808af4ebeb26e5290b06550abc0661fa4a383",
+      "bytes": 1392,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/PageFooterNavigation.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/PageFooterNavigation.tsx",
+      "sha256": "7a1ddf0512a3877492147244de5fd45997bfa389f8ba4155818fcd12c8ebf94f",
+      "bytes": 1286,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/PageMetadata.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/PageMetadata.tsx",
+      "sha256": "070985ebaa83531079bbfd0f229cf01ce97f0a23c70bb8ffee359534c1666275",
+      "bytes": 765,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/PrintButton.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/PrintButton.tsx",
+      "sha256": "3fa7c44835d433da61d01a415f75bb307777763467ff80f24c21241a9f744b5d",
+      "bytes": 247,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/README.md",
+      "source": "site",
+      "path": "app/help-centre/gitbook/README.md",
+      "sha256": "c2addc7e30876a5c5941b17f5b6a7eeff0c3ad4c6a8eda11ba01f139a4253015",
+      "bytes": 2422,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/ReaderTheme.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/ReaderTheme.tsx",
+      "sha256": "c2500107fa757c78d88c4feba0f631aec7e1a8ef2a893b9252128354f3dc52bd",
+      "bytes": 1747,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/ScrollSectionsList.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/ScrollSectionsList.tsx",
+      "sha256": "40a5e7e687341398d7efc9514668321b1f4207000aacef93950d01ca59d1e51e",
+      "bytes": 1413,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/ScrollToTopButton.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/ScrollToTopButton.tsx",
+      "sha256": "f779070e04983975ac41ab975caa11fe172325766e83c33b85267dc776f1f420",
+      "bytes": 549,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/SearchPageResultItem.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/SearchPageResultItem.tsx",
+      "sha256": "9a7b18af2a50f0cb071478d9cee8601b02939eae76a1684142f46d88f35b1b04",
+      "bytes": 1746,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/ThemeToggler.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/ThemeToggler.tsx",
+      "sha256": "8dd4f2c43f756716cf80be1f76a495fb66a479f59273be8c82d1671ef7bacc1e",
+      "bytes": 939,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/ToggleableLinkItem.tsx",
+      "source": "site",
+      "path": "app/help-centre/gitbook/ToggleableLinkItem.tsx",
+      "sha256": "469cbdf2f2fcb8335e3cc8f98648692e8054756f5e628af39f834aa9aec10a76",
+      "bytes": 2020,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/UPSTREAM.json",
+      "source": "site",
+      "path": "app/help-centre/gitbook/UPSTREAM.json",
+      "sha256": "6342014647600fa49b927997b40ac5fd1e9e700ebd5b421b8ad1472bdefe69bf",
+      "bytes": 1750,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/reader.css",
+      "source": "site",
+      "path": "app/help-centre/gitbook/reader.css",
+      "sha256": "818d22fe155ef418cb8f89f675a03ab5c4b6f6dc8c3bd412088fcde101d30d0d",
+      "bytes": 31397,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/remark-reader-typography.ts",
+      "source": "site",
+      "path": "app/help-centre/gitbook/remark-reader-typography.ts",
+      "sha256": "1e7a74bb6c638bf54ceeaf2a3e6c96aeeaa6a63bb3af43e68e65cbcb4571a0f5",
+      "bytes": 2402,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/help-centre/gitbook/remark-tabs.ts",
+      "source": "site",
+      "path": "app/help-centre/gitbook/remark-tabs.ts",
+      "sha256": "e9b0e3b1fee00bf61298c416b87de26f5ee682e16ce20c97ed8131ca87bac4b9",
+      "bytes": 3897,
+      "decision": "adaptation_reference",
+      "note": "旧站中已改编的阅读组件或适配说明；仍以 GitBook 原始源码追溯，采用前需复核 V2 数据接口。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:package.json",
+      "source": "site",
+      "path": "package.json",
+      "sha256": "9b0ac27f05e462ed46e961cecb1bd41e8266842d7e3b8da1d93d6d8079f2df63",
+      "bytes": 2602,
+      "decision": "reference_only",
+      "note": "依赖版本参考，不整包复制旧站依赖。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:lib/clerk-server.ts",
+      "source": "site",
+      "path": "lib/clerk-server.ts",
+      "sha256": "6c1a173b0fe60eb1353ef74dda073a518336435ac468e7077c8b671dfb5668c6",
+      "bytes": 11195,
+      "decision": "rewrite_before_reuse",
+      "note": "复用服务端获取身份的思路；重做一次性初始化与 Slack 校验可信边界。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:lib/api-authorization.ts",
+      "source": "site",
+      "path": "lib/api-authorization.ts",
+      "sha256": "88e849005e495d853d4f991c70ad95e80d047ab09fe9a8bcb0a0d51203b670a3",
+      "bytes": 1664,
+      "decision": "reference_only",
+      "note": "参考集中授权的接口形状；不继承 Trainer 和旧站权限矩阵。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:lib/roles.ts",
+      "source": "site",
+      "path": "lib/roles.ts",
+      "sha256": "34773908c9ac55baf29716e8090c2305f6f01352aec38a15a4872460cf2e425d",
+      "bytes": 1860,
+      "decision": "rewrite_before_reuse",
+      "note": "包含 Trainer，禁止照搬；V2 使用现有 src/domain/access.ts 和 model.ts 的三个角色。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:lib/supabase-server.ts",
+      "source": "site",
+      "path": "lib/supabase-server.ts",
+      "sha256": "0ce388092dd78cf2b2b86680bdd2c63de5e745195f569cf35bfeb2721f3630fa",
+      "bytes": 460,
+      "decision": "reference_only",
+      "note": "旧站使用 service-role 客户端；V2 必须单独落实服务端检查和数据库/存储授权。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:lib/article-workflow.ts",
+      "source": "site",
+      "path": "lib/article-workflow.ts",
+      "sha256": "72a75dfa3936564bd514b7fb61e3d833674fe8c935fee001a908a091b2f24b5a",
+      "bytes": 6808,
+      "decision": "rewrite_before_reuse",
+      "note": "旧工作流仅参考；V2 使用自己的指定二审与不可变版本规则。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:lib/article-revisions.ts",
+      "source": "site",
+      "path": "lib/article-revisions.ts",
+      "sha256": "77dc6cf4f932e073f00e3ed21651f9ce03e6bae0d26dd41e130d07464e70b59a",
+      "bytes": 2185,
+      "decision": "reference_only",
+      "note": "历史数据处理参考，不视为已实现 V2 原子发布事务。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:lib/article-blocks.ts",
+      "source": "site",
+      "path": "lib/article-blocks.ts",
+      "sha256": "ebb5f5b712629553a70ce71c8631ef73f4ab03993a470bc40583a6fb7012958e",
+      "bytes": 29107,
+      "decision": "reference_only",
+      "note": "内容结构参考，BlockNote JSON 与阅读端之间需建立经过验证的转换。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/api/article-images/route.ts",
+      "source": "site",
+      "path": "app/api/article-images/route.ts",
+      "sha256": "42892e0958c65024eee1cc86fbb27820e5a9ad26a2501556108129b4aa7e0be1",
+      "bytes": 8276,
+      "decision": "rewrite_before_reuse",
+      "note": "禁止照搬下载授权；当前有路径的 GET 只检查登录，没有按所属文章和版本授权。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/api/content-categories/route.ts",
+      "source": "site",
+      "path": "app/api/content-categories/route.ts",
+      "sha256": "7b279737b9facc6122d3e2583a11f6e267ca3a829b64f13c7560c799c7d3e189",
+      "bytes": 7760,
+      "decision": "reference_only",
+      "note": "分类维护参考；V2 以稳定分类 ID 关联文章，并检查层级和可见范围。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:app/api/admin/members/route.ts",
+      "source": "site",
+      "path": "app/api/admin/members/route.ts",
+      "sha256": "8a329431febb584383726c6e5b301a6af6a0348019787a7fe242e50521a03d89",
+      "bytes": 3647,
+      "decision": "reference_only",
+      "note": "Clerk 角色修改参考；移除 Trainer，验证直接在 Clerk 改角色后的生效逻辑。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "site:public/brand/juyu-logo-color.png",
+      "source": "site",
+      "path": "public/brand/juyu-logo-color.png",
+      "sha256": "5166e53c0ce8871079f6ee97ce7cb4ad41837c4e84480fe3f8b5e423c0b418c6",
+      "bytes": 22719,
+      "decision": "reference_only",
+      "note": "用户提供的 JUYU 品牌资源候选；未复制进 V2 运行时。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/board/tasks-board.tsx",
+      "source": "tasks",
+      "path": "templates/tasks/components/tasks/board/tasks-board.tsx",
+      "sha256": "9657d0f709565a04ed6e890d872a358b26a90e71b37052296ab1802f6dc7ce4c",
+      "bytes": 1402,
+      "decision": "adapt_ui",
+      "note": "采用界面结构，替换模拟用户/状态/计数；后台调用 V2 审核命令，不能直接设置发布状态。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/board/task-column.tsx",
+      "source": "tasks",
+      "path": "templates/tasks/components/tasks/board/task-column.tsx",
+      "sha256": "276cd98e1b26497a86dde98d501ab02b47891841552afa197ce757077c65a6cc",
+      "bytes": 1616,
+      "decision": "adapt_ui",
+      "note": "采用界面结构，替换模拟用户/状态/计数；后台调用 V2 审核命令，不能直接设置发布状态。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/board/task-card.tsx",
+      "source": "tasks",
+      "path": "templates/tasks/components/tasks/board/task-card.tsx",
+      "sha256": "613a59c5b8bfa0ccd4f74eeb52b7fdc170016001cf716fa95ed7d64c70887086",
+      "bytes": 3007,
+      "decision": "adapt_ui",
+      "note": "采用界面结构，替换模拟用户/状态/计数；后台调用 V2 审核命令，不能直接设置发布状态。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/filters/tasks-filters.tsx",
+      "source": "tasks",
+      "path": "templates/tasks/components/tasks/filters/tasks-filters.tsx",
+      "sha256": "17b67aea10f2b35b7fd0345a5c6e22941075bc3e247520d46afe3991480e99f3",
+      "bytes": 1087,
+      "decision": "adapt_ui",
+      "note": "采用界面结构，替换模拟用户/状态/计数；后台调用 V2 审核命令，不能直接设置发布状态。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/filters/filter-dropdown.tsx",
+      "source": "tasks",
+      "path": "templates/tasks/components/tasks/filters/filter-dropdown.tsx",
+      "sha256": "e0c0291eed459572c12276add43b1d43bf6bae7abab57dfd42d29ce0ae079b39",
+      "bytes": 1999,
+      "decision": "adapt_ui",
+      "note": "采用界面结构，替换模拟用户/状态/计数；后台调用 V2 审核命令，不能直接设置发布状态。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/sidebar/tasks-sidebar.tsx",
+      "source": "tasks",
+      "path": "templates/tasks/components/tasks/sidebar/tasks-sidebar.tsx",
+      "sha256": "fcb52a46d479ddd763c802ff750f8c7bd200148898c1d44ba01fd3bcd806b6a4",
+      "bytes": 5091,
+      "decision": "adapt_ui",
+      "note": "采用界面结构，替换模拟用户/状态/计数；后台调用 V2 审核命令，不能直接设置发布状态。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/header/tasks-header.tsx",
+      "source": "tasks",
+      "path": "templates/tasks/components/tasks/header/tasks-header.tsx",
+      "sha256": "3cedd82bddc8cffe7c5d692c3265bc1ce5399e16245ec5896e9c186a9b8363ed",
+      "bytes": 8087,
+      "decision": "adapt_ui",
+      "note": "采用界面结构，替换模拟用户/状态/计数；后台调用 V2 审核命令，不能直接设置发布状态。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "tasks:templates/tasks/package.json",
+      "source": "tasks",
+      "path": "templates/tasks/package.json",
+      "sha256": "2cbede4cb401ca87fb6c8996df83049b15ec48724b435bee95f828e35ae7552a",
+      "bytes": 1506,
+      "decision": "exclude_as_implementation",
+      "note": "模板依赖参考，不全部安装。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "tasks:templates/tasks/store/tasks-store.ts",
+      "source": "tasks",
+      "path": "templates/tasks/store/tasks-store.ts",
+      "sha256": "15bcff329c9a88335f062f7955d401a9a6488701d025e1dbd04b4cadaf8d7baf",
+      "bytes": 2822,
+      "decision": "exclude_as_implementation",
+      "note": "仅 Zustand 内存与 mock-data；禁止作为持久化后台或发布权限实现。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/filters/add-task-dialog.tsx",
+      "source": "tasks",
+      "path": "templates/tasks/components/tasks/filters/add-task-dialog.tsx",
+      "sha256": "8eb4443d38519d320e1c162ccf83231cd80a956a12f3e4e1960701e46a53362e",
+      "bytes": 4665,
+      "decision": "exclude_as_implementation",
+      "note": "新增弹窗仅参考布局；创建 V2 资料只能进入草稿，不允许任选已发布状态。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/filters/import-export-dropdown.tsx",
+      "source": "tasks",
+      "path": "templates/tasks/components/tasks/filters/import-export-dropdown.tsx",
+      "sha256": "ae84263ad3ea9456a56c7484b5a26de945df58dc83126d2a48c6dfe3850c1170",
+      "bytes": 1485,
+      "decision": "exclude_as_implementation",
+      "note": "菜单没有导入导出处理逻辑，不能视为现成功能。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/charts/revenue-flow-chart.tsx",
+      "source": "tasks",
+      "path": "templates/tasks/components/tasks/charts/revenue-flow-chart.tsx",
+      "sha256": "91b16e888dfd4e696d01ea93d4d6f4e8c0ba152e5c98eeadf6468fe5bc1e0ea4",
+      "bytes": 6447,
+      "decision": "exclude_as_implementation",
+      "note": "销售/收入图表与本项目用途无关，不移植。",
+      "v2Destination": null,
+      "migrationStatus": "not_migrated"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/TableOfContents/PageDocumentItem.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/TableOfContents/PageDocumentItem.tsx",
+      "sha256": "c645fcfb8dff59a636e160e61affdb401866baf8dcf2409f9cdff56954296295",
+      "bytes": 2400,
+      "decision": "adapt_ui",
+      "note": "改编：保留 li、叶节点链接和标题；供应商图标、标签、OpenAPI 及后代暂不移植。",
+      "v2Destination": "src/components/gitbook/TableOfContents/PageDocumentItem.tsx",
+      "migrationStatus": "adapted_document_navigation"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/TableOfContents/styles.ts",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/TableOfContents/styles.ts",
+      "sha256": "41cb018d113d060b9033642923306e16e262bcc96bcbf36a62af9123f61e1bc9",
+      "bytes": 2065,
+      "decision": "adapt_ui",
+      "note": "原样复制：保留上游全部样式数组；JUYU globals.css 适配供应商主题 token/variant。",
+      "v2Destination": "src/components/gitbook/TableOfContents/styles.ts",
+      "migrationStatus": "copied"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/primitives/ScrollContainer.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/primitives/ScrollContainer.tsx",
+      "sha256": "aa1759f9624b22704a30eaa325ded2286558e9173d1d59ee844d55110f4b09ca",
+      "bytes": 13661,
+      "decision": "adapt_ui",
+      "note": "改编：保留当前项 useEffect 与原始 scrollToElementInContainer 函数；仅滚动容器为客户端，略去供应商按钮、i18n 和溢出装饰。",
+      "v2Destination": "src/components/gitbook/TableOfContents/ScrollContainer.tsx",
+      "migrationStatus": "adapted_document_navigation"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/hooks/useScrollActiveId.ts",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/hooks/useScrollActiveId.ts",
+      "sha256": "0c5172ae58afa95d1d58778ec9264049c3d6c73ab42f7513787b5d382d29e683",
+      "bytes": 2639,
+      "decision": "adapt_ui",
+      "note": "保留 observer 驱动的标题状态；新增 rAF 滚动位置与页尾判断、反向滚动、hash 深链接及重复同 hash 点击定位，清理所有监听。",
+      "v2Destination": "src/components/gitbook/Reading/useScrollActiveId.ts",
+      "migrationStatus": "adapted_basic_reading"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Heading.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/Heading.tsx",
+      "sha256": "e6726507782c3296549843281e665b84d275f45c3c7329da1ef7518d1d2bd63d",
+      "bytes": 3449,
+      "decision": "adapt_ui",
+      "note": "保留 h2/h3/h4 层级、标题 ID、文本 span 和直接定位链接；文本快照节点替换 vendor Inlines。",
+      "v2Destination": "src/components/gitbook/Reading/Heading.tsx",
+      "migrationStatus": "adapted_basic_reading"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Paragraph.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/Paragraph.tsx",
+      "sha256": "fabd346550302b608a1f43e9367afdfaeeb4e17a564d84dd1de8168a23ff2ccb",
+      "bytes": 2193,
+      "decision": "adapt_ui",
+      "note": "保留 paragraph 元素及样式标记；使用 React 文本节点替换 vendor Inlines，不包含 AI 请求。",
+      "v2Destination": "src/components/gitbook/Reading/Paragraph.tsx",
+      "migrationStatus": "adapted_basic_reading"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/DocumentView.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/DocumentView.tsx",
+      "sha256": "eb19546c3654a92d189cdabfad3fd528f21c1562bc3ecdd61d40de18d37267fe",
+      "bytes": 3243,
+      "decision": "adapt_ui",
+      "note": "保留块列表与换行语义；以 JUYU 基础文本块分派替换 GitBook Blocks 数据接口，不包含完整块类型。",
+      "v2Destination": "src/components/gitbook/Reading/DocumentView.tsx",
+      "migrationStatus": "adapted_basic_reading"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Search/SearchResultItem.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/Search/SearchResultItem.tsx",
+      "sha256": "ce48e639272fe9aecd3da679b2131377e2334c4e447c23f4ce28f3ee5693790c",
+      "bytes": 2643,
+      "decision": "adapt_ui",
+      "note": "保留图标/内容/尾部动作结构，使用原生链接取代供应商 Link，去除嵌套按钮和弹出框 option 语义。",
+      "v2Destination": "src/components/gitbook/Search/SearchResultItem.tsx",
+      "migrationStatus": "adapted_title_search_ui"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Search/HighlightQuery.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/Search/HighlightQuery.tsx",
+      "sha256": "22d19b3264cefe3b0fb969946d2c2e2d2545878996d55fbf414a0ecf3c302cc5",
+      "bytes": 2575,
+      "decision": "adapt_ui",
+      "note": "保留字符串分段匹配、reduce 与 React 文本节点渲染；替换主题样式，过滤空词并用保持字符偏移的 ASCII 大小写折叠。",
+      "v2Destination": "src/components/gitbook/Search/HighlightQuery.tsx",
+      "migrationStatus": "adapted_title_search_ui"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/primitives/SideSheet.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/primitives/SideSheet.tsx",
+      "sha256": "3877aefcf0ed6849771f296386efb50f226e5ab748f48c7281c6d6fccecd2cbe",
+      "bytes": 10749,
+      "decision": "adapt_ui",
+      "note": "仅改编首尾 Tab 循环分支并过滤隐藏节点；原生 dialog 处理背景 inert/取消事件，未照搬 MutationObserver、portal、global class、动画或供应商主题。",
+      "v2Destination": "src/components/gitbook/Header/HeaderMobileMenu.tsx",
+      "migrationStatus": "adapted_responsive_navigation"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/lib/pages.ts",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/lib/pages.ts",
+      "sha256": "be1ed5cd5be420ba0a10d8ec3a0f6453408da14fac2b37cf3b52512788364513",
+      "bytes": 12034,
+      "decision": "adapt_ui",
+      "note": "仅改编resolvePrevNextPages的扁平列表/当前下标/前后项分支；JUYU新增迭代祖先链、ID去重和规范内部链接，输入必须是已授权正式目录，不替代鉴权。",
+      "v2Destination": "src/reader/page-navigation.ts",
+      "migrationStatus": "adapted_page_navigation"
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/CodeBlockRenderer.tsx",
+      "source": "gitbook",
+      "path": "packages/gitbook/src/components/DocumentView/CodeBlock/CodeBlockRenderer.tsx",
+      "sha256": "ac9de52c919d24634a240fbe6ae136f8e9c9cd298e2e9dd0ed886d1c53c10bf7",
+      "bytes": 10200,
+      "decision": "adapt_ui",
+      "note": "T028补充追踪代码框内部渲染组件；本次读取哈希。",
+      "v2Destination": null,
+      "migrationStatus": "baseline_only"
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "source": "tasks",
+      "path": "templates/tasks/components/tasks/tasks-main.tsx",
+      "sha256": "f7cf4a0ca2c3a8f355df85af7408b82c45d21e8b5d6d6765f81c9bf93211b148",
+      "bytes": 436,
+      "decision": "adapt_ui",
+      "note": "沿用筛选/看板的纵向组合；去掉收入图表和演示统计，加入工作台入口、真实错误/空状态、分页及列表切换。",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "migrationStatus": "adapted_workspace"
+    }
+  ],
+  "readerFeatures": [
+    {
+      "number": 1,
+      "name": "左侧文章目录",
+      "tasks": "T017",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/TableOfContents/TableOfContents.tsx",
+        "gitbook:packages/gitbook/src/components/TableOfContents/PagesList.tsx"
+      ],
+      "status": "source_located_not_implemented"
+    },
+    {
+      "number": 2,
+      "name": "目录分组和子目录",
+      "tasks": "T018",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/TableOfContents/PageGroupItem.tsx",
+        "gitbook:packages/gitbook/src/components/TableOfContents/ToggleableLinkItem.tsx"
+      ],
+      "status": "source_located_not_implemented"
+    },
+    {
+      "number": 3,
+      "name": "中央文章阅读区",
+      "tasks": "T019",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+        "gitbook:packages/gitbook/src/components/DocumentView/Block.tsx"
+      ],
+      "status": "source_located_not_implemented"
+    },
+    {
+      "number": 4,
+      "name": "右侧文章小目录",
+      "tasks": "T019",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/PageAside/PageAside.tsx",
+        "gitbook:packages/gitbook/src/components/PageAside/ScrollSectionsList.tsx"
+      ],
+      "status": "source_located_not_implemented"
+    },
+    {
+      "number": 5,
+      "name": "顶部搜索框",
+      "tasks": "T020 / T041",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/Search/SearchInput.tsx"
+      ],
+      "status": "adapted_unified_publication_search_local_verified_real_services_pending"
+    },
+    {
+      "number": 6,
+      "name": "搜索结果页面",
+      "tasks": "T020 / T041",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/Search/SearchResults.tsx",
+        "gitbook:packages/gitbook/src/components/Search/SearchPageResultItem.tsx"
+      ],
+      "status": "adapted_unified_publication_search_local_verified_real_services_pending"
+    },
+    {
+      "number": 7,
+      "name": "手机版目录菜单",
+      "tasks": "T021",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/Header/HeaderMobileMenu.tsx"
+      ],
+      "status": "adapted_mobile_navigation_local_verified_real_devices_pending"
+    },
+    {
+      "number": 8,
+      "name": "面包屑",
+      "tasks": "T022",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/PageBody/PageHeader.tsx",
+        "gitbook:packages/gitbook/src/components/PageBody/BreadcrumbItemDropdown.tsx"
+      ],
+      "status": "adapted_page_navigation_local_verified_real_services_pending"
+    },
+    {
+      "number": 9,
+      "name": "上一篇和下一篇",
+      "tasks": "T022",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/PageBody/PageFooterNavigation.tsx"
+      ],
+      "status": "adapted_page_navigation_local_verified_real_services_pending"
+    },
+    {
+      "number": 10,
+      "name": "回到顶部",
+      "tasks": "T022",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/PageAside/ScrollToTopButton.tsx"
+      ],
+      "status": "adapted_page_navigation_local_verified_real_services_pending"
+    },
+    {
+      "number": 11,
+      "name": "深色和浅色模式",
+      "tasks": "T023",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/ThemeToggler/ThemeToggler.tsx"
+      ],
+      "status": "source_located_not_implemented"
+    },
+    {
+      "number": 12,
+      "name": "公告栏",
+      "tasks": "T023 / T054",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/Announcement/AnnouncementBanner.tsx"
+      ],
+      "status": "source_located_not_implemented"
+    },
+    {
+      "number": 13,
+      "name": "页脚",
+      "tasks": "T023",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/Footer/Footer.tsx"
+      ],
+      "status": "source_located_not_implemented"
+    },
+    {
+      "number": 14,
+      "name": "文章封面",
+      "tasks": "T024",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/PageBody/PageCover.tsx",
+        "gitbook:packages/gitbook/src/components/PageBody/PageCoverImage.tsx"
+      ],
+      "status": "source_located_not_implemented"
+    },
+    {
+      "number": 15,
+      "name": "文章标签",
+      "tasks": "T024",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/PageBody/PageTags.tsx"
+      ],
+      "status": "source_located_not_implemented"
+    },
+    {
+      "number": 16,
+      "name": "文章有帮助吗反馈",
+      "tasks": "T025",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/PageFeedback/PageFeedbackForm.tsx"
+      ],
+      "status": "source_located_not_implemented"
+    },
+    {
+      "number": 17,
+      "name": "PDF 阅读和导出界面",
+      "tasks": "T026",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/PDF/PDFPage.tsx",
+        "gitbook:packages/gitbook/src/components/PDF/PrintButton.tsx",
+        "gitbook:packages/gitbook/src/components/PDF/pdf.css"
+      ],
+      "status": "source_located_not_implemented"
+    },
+    {
+      "number": 18,
+      "name": "图片、影片、文件和表格",
+      "tasks": "T027",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/DocumentView/Images.tsx",
+        "gitbook:packages/gitbook/src/components/DocumentView/Embed.tsx",
+        "gitbook:packages/gitbook/src/components/DocumentView/File.tsx",
+        "gitbook:packages/gitbook/src/components/DocumentView/Table/Table.tsx"
+      ],
+      "status": "source_located_not_implemented"
+    },
+    {
+      "number": 19,
+      "name": "提示框、代码框和分页标签",
+      "tasks": "T028",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/DocumentView/Hint.tsx",
+        "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/CodeBlock.tsx",
+        "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/CopyCodeButton.tsx",
+        "gitbook:packages/gitbook/src/components/DocumentView/Tabs/DynamicTabs.tsx"
+      ],
+      "status": "source_located_not_implemented"
+    },
+    {
+      "number": 20,
+      "name": "数学公式和流程图",
+      "tasks": "T029",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/DocumentView/Math.tsx",
+        "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/MermaidCodeBlock.tsx"
+      ],
+      "status": "source_located_not_implemented"
+    },
+    {
+      "number": 21,
+      "name": "电脑和手机自适应",
+      "tasks": "T021 / T057",
+      "sourceFileIds": [
+        "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+        "gitbook:packages/gitbook/src/components/PageAside/PageAside.tsx",
+        "gitbook:packages/gitbook/src/components/Header/HeaderMobileMenu.tsx"
+      ],
+      "status": "responsive_reader_layout_local_verified_rich_content_and_devices_pending"
+    }
+  ],
+  "licenseSnapshots": [
+    {
+      "source": "gitbook",
+      "path": "LICENSE",
+      "destination": "licenses/gitbook-GPL-3.0.txt",
+      "sha256": "f817886ee6bb65ed3098a7987b1e9781653d15c71f85589ce0d2af663c66d373",
+      "description": "GNU GPL version 3, as supplied"
+    },
+    {
+      "source": "tasks",
+      "path": "LICENSE.md",
+      "destination": "licenses/square-ui-ln-dev.txt",
+      "sha256": "3f98390a9790f765b8f6b58852c909939816a9ba6c6cf0b57402339fbda2b6bc",
+      "description": "ln-dev UI License, as supplied"
+    },
+    {
+      "source": "site",
+      "path": "app/help-centre/gitbook/LICENSE",
+      "destination": "licenses/site-gitbook-GPL-3.0.txt",
+      "sha256": "f817886ee6bb65ed3098a7987b1e9781653d15c71f85589ce0d2af663c66d373",
+      "description": "Nested adapted GitBook components; not a license for the entire site"
+    }
+  ],
+  "siteUpstreamChecks": [
+    {
+      "path": "PageAside/ScrollToTopButton.tsx",
+      "recordedSha256": "6d8cc5c7d8c5a32db85b37089df58c7bd15ef103eeb115dbf4cca9ad099a2f6c",
+      "currentSha256": "6d8cc5c7d8c5a32db85b37089df58c7bd15ef103eeb115dbf4cca9ad099a2f6c",
+      "matches": true
+    },
+    {
+      "path": "PDF/PrintButton.tsx",
+      "recordedSha256": "67c3b9c7f6ee991f6a7f6841cced7ae550268918a8ad7139940634e655289e0c",
+      "currentSha256": "67c3b9c7f6ee991f6a7f6841cced7ae550268918a8ad7139940634e655289e0c",
+      "matches": true
+    },
+    {
+      "path": "PageBody/PageFooterNavigation.tsx",
+      "recordedSha256": "fb067fb98d13916039be77b131f200efdb661f0d2eefd072208d3ab0465ab8ea",
+      "currentSha256": "fb067fb98d13916039be77b131f200efdb661f0d2eefd072208d3ab0465ab8ea",
+      "matches": true
+    },
+    {
+      "path": "TableOfContents/ToggleableLinkItem.tsx",
+      "recordedSha256": "4cf6b7b308e8c3b981519b549dcc4d8f0a7c59ac8ef23f0179e2559502bef64a",
+      "currentSha256": "4cf6b7b308e8c3b981519b549dcc4d8f0a7c59ac8ef23f0179e2559502bef64a",
+      "matches": true
+    },
+    {
+      "path": "ThemeToggler/ThemeToggler.tsx",
+      "recordedSha256": "f11009759c94bcd5e860a12334ceb384602150a6487950147e5d57986546a967",
+      "currentSha256": "f11009759c94bcd5e860a12334ceb384602150a6487950147e5d57986546a967",
+      "matches": true
+    },
+    {
+      "path": "DocumentView/CodeBlock/CopyCodeButton.tsx",
+      "recordedSha256": "f6b92238a4ac9412fbc87420cc2974633f88e2bd7c232ed09465104aac45f08e",
+      "currentSha256": "f6b92238a4ac9412fbc87420cc2974633f88e2bd7c232ed09465104aac45f08e",
+      "matches": true
+    },
+    {
+      "path": "DocumentView/Tabs/DynamicTabs.tsx",
+      "recordedSha256": "0c6a08e1c48d7959f00ba884168076ff078f8ba9fba83df247eeb99800acb65d",
+      "currentSha256": "0c6a08e1c48d7959f00ba884168076ff078f8ba9fba83df247eeb99800acb65d",
+      "matches": true
+    },
+    {
+      "path": "PageFeedback/PageFeedbackForm.tsx",
+      "recordedSha256": "8375dfb2e7b2e0c2faf96c11c494b1b092ff445e96e96363bff4a3a54cd6be13",
+      "currentSha256": "8375dfb2e7b2e0c2faf96c11c494b1b092ff445e96e96363bff4a3a54cd6be13",
+      "matches": true
+    },
+    {
+      "path": "Announcement/AnnouncementBanner.tsx",
+      "recordedSha256": "66e0973e39fa341b3aed67b1e227d2620c498feafdc8ed272286a400f7f7dbd7",
+      "currentSha256": "66e0973e39fa341b3aed67b1e227d2620c498feafdc8ed272286a400f7f7dbd7",
+      "matches": true
+    },
+    {
+      "path": "PageAside/ScrollSectionsList.tsx",
+      "recordedSha256": "55014884bd444fe05fbd43e6f2e4dfc92db72788861f21b610f34bb451a3362e",
+      "currentSha256": "55014884bd444fe05fbd43e6f2e4dfc92db72788861f21b610f34bb451a3362e",
+      "matches": true
+    },
+    {
+      "path": "PageBody/PageCover.tsx",
+      "recordedSha256": "1f13774736ca75b67e16f2e5b526c0f0937f60ab3f2490d5ca921caeecc29d0e",
+      "currentSha256": "1f13774736ca75b67e16f2e5b526c0f0937f60ab3f2490d5ca921caeecc29d0e",
+      "matches": true
+    },
+    {
+      "path": "PageBody/PageTags.tsx",
+      "recordedSha256": "7af4b94ad7119923949fc6c22a2b86831a35155e60fd496f81c23c8e739f9d6d",
+      "currentSha256": "7af4b94ad7119923949fc6c22a2b86831a35155e60fd496f81c23c8e739f9d6d",
+      "matches": true
+    },
+    {
+      "path": "DocumentView/Hint.tsx",
+      "recordedSha256": "b6bb7a204a7b509a73e77b841dc4fc544013d0500198f20f4122a2be71681521",
+      "currentSha256": "b6bb7a204a7b509a73e77b841dc4fc544013d0500198f20f4122a2be71681521",
+      "matches": true
+    },
+    {
+      "path": "Search/SearchPageResultItem.tsx",
+      "recordedSha256": "9a134d2d3a4c74e8d749cf7288af6373d1d8432e2377d0e418472f7bba5f7a62",
+      "currentSha256": "9a134d2d3a4c74e8d749cf7288af6373d1d8432e2377d0e418472f7bba5f7a62",
+      "matches": true
+    },
+    {
+      "path": "Footer/Footer.tsx",
+      "recordedSha256": "9d6427da93c86db57e570e5205c98e483ce140f84fbccd809b65816bec94ba61",
+      "currentSha256": "9d6427da93c86db57e570e5205c98e483ce140f84fbccd809b65816bec94ba61",
+      "matches": true
+    }
+  ],
+  "actualRuntimeMigrations": [
+    {
+      "task": "T017",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/TableOfContents/TableOfContents.tsx",
+      "v2Destination": "src/components/gitbook/TableOfContents/TableOfContents.tsx",
+      "sha256": "0c4b5ded0f60f636eb23d0d795fb76ff8462819a694a7ea715e3bc3775602f47",
+      "changeSummary": "改编：保留侧栏、标题、列表和滚动容器结构；以已授权页面替换 GitBook context/encoder；暂不含 SideSheet、品牌服务及外部追踪。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-navigation.md"
+    },
+    {
+      "task": "T017",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/TableOfContents/PagesList.tsx",
+      "v2Destination": "src/components/gitbook/TableOfContents/PagesList.tsx",
+      "sha256": "05c89a94c04e814e8257579cc9935a88e37795ef6a3446affd4599b6f49f73b7",
+      "changeSummary": "改编：保留 ul/list 映射及 document 分支；分组/链接/子目录未在 T017 实现。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-navigation.md"
+    },
+    {
+      "task": "T017",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/TableOfContents/PageDocumentItem.tsx",
+      "v2Destination": "src/components/gitbook/TableOfContents/PageDocumentItem.tsx",
+      "sha256": "48f8bc104e1023aa76a92200d4b068e4cd071ceed8a49794aa2f1b0c158bd49b",
+      "changeSummary": "改编：保留 li、叶节点链接和标题；供应商图标、标签、OpenAPI 及后代暂不移植。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-navigation.md"
+    },
+    {
+      "task": "T017",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/TableOfContents/ToggleableLinkItem.tsx",
+      "v2Destination": "src/components/gitbook/TableOfContents/ToggleableLinkItem.tsx",
+      "sha256": "75a011b0445e74f5ec67f5a62abfef00adddbcb07353aa27765ea37c6bf9dd79",
+      "changeSummary": "改编：保留无后代 LinkItem 分支、精确路径匹配、data-active/aria-current；使用固定站内 anchor，服务器提供当前项。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-navigation.md"
+    },
+    {
+      "task": "T017",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/TableOfContents/styles.ts",
+      "v2Destination": "src/components/gitbook/TableOfContents/styles.ts",
+      "sha256": "41cb018d113d060b9033642923306e16e262bcc96bcbf36a62af9123f61e1bc9",
+      "changeSummary": "原样复制：保留上游全部样式数组；JUYU globals.css 适配供应商主题 token/variant。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-navigation.md"
+    },
+    {
+      "task": "T017",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/primitives/ScrollContainer.tsx",
+      "v2Destination": "src/components/gitbook/TableOfContents/ScrollContainer.tsx",
+      "sha256": "fd402bc8f33e0c99fd2f955d2d1073c8676d9b7f4a011c33289e7b26aee4ca7c",
+      "changeSummary": "改编：保留当前项 useEffect 与原始 scrollToElementInContainer 函数；仅滚动容器为客户端，略去供应商按钮、i18n 和溢出装饰。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-navigation.md"
+    },
+    {
+      "task": "T018",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/TableOfContents/PageGroupItem.tsx",
+      "v2Destination": "src/components/gitbook/TableOfContents/PageGroupItem.tsx",
+      "sha256": "f6daec6428ee540732920b3043e838ba3ab9c75d5b5dfd832de869b172af09c8",
+      "changeSummary": "适配原分组 state、button 和递归 descendants；以 JUYU 样式及图标替换供应商依赖，移除分组 sticky sentinel 避免多层标题重叠；增加 aria-controls 和 hidden，折叠内容不可聚焦。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-groups.md"
+    },
+    {
+      "task": "T018",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/TableOfContents/PagesList.tsx",
+      "v2Destination": "src/components/gitbook/TableOfContents/PagesList.tsx",
+      "sha256": "eb77a4a1d15dc63f778bd55dff7504b9cad2925081f8414f32a65c8b1a0ee62b",
+      "changeSummary": "加入上游 group 分支；用类型和稳定 ID 作为节点 key，当前路径变化时重置展开；递归分类树仅接收服务器已裁剪节点。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-groups.md"
+    },
+    {
+      "task": "T018",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/TableOfContents/TableOfContents.tsx",
+      "v2Destination": "src/components/gitbook/TableOfContents/TableOfContents.tsx",
+      "sha256": "c97da5273eb7516e401771b500393154add087f05905a420ffb957b6b370da05",
+      "changeSummary": "T017 侧栏接收 NavigationNode 树，根列表传入 isRoot，原有当前项定位保持。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-groups.md"
+    },
+    {
+      "task": "T019",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageBody.tsx",
+      "sha256": "212591c7960202f66767197e500bdcb5ea4b55bd2e54ff2a8c04cb8157af8d00",
+      "changeSummary": "保留 main/header/content/empty-body 结构；服务器正式版本替换供应商上下文。封面/分页/反馈留给后续任务。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-body.md"
+    },
+    {
+      "task": "T019",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageAside/PageAside.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageAside.tsx",
+      "sha256": "5b0daed885ad50bb9bd9c5a568cc001aff06ca3e9b468c6b691741d42ede5918",
+      "changeSummary": "保留 aside/outline/sections 结构；响应式原生 details 替换 SideSheet，移除广告、AI、主题和外部服务。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-body.md"
+    },
+    {
+      "task": "T019",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageAside/ScrollSectionsList.tsx",
+      "v2Destination": "src/components/gitbook/Reading/ScrollSectionsList.tsx",
+      "sha256": "d989bec49cdaf9f8a1f096aa249af6e2ffc122e17871c5ae7a6fd38f6c099dc3",
+      "changeSummary": "保留 section 映射、深度、活动引用和滚动；JUYU 样式替换供应商主题，移除 API 标签过滤。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-body.md"
+    },
+    {
+      "task": "T019",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/hooks/useScrollActiveId.ts",
+      "v2Destination": "src/components/gitbook/Reading/useScrollActiveId.ts",
+      "sha256": "d0b56fb8e97f6bf4ba683501337395a07d96c9e86df0f373174c17968fc0b7fb",
+      "changeSummary": "保留 observer 驱动的标题状态；新增 rAF 滚动位置与页尾判断、反向滚动、hash 深链接及重复同 hash 点击定位，清理所有监听。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-body.md"
+    },
+    {
+      "task": "T019",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/Heading.tsx",
+      "v2Destination": "src/components/gitbook/Reading/Heading.tsx",
+      "sha256": "42316e4052977ec00638d3e0e634b76f1cda6d00bde1f2a2822ab176a34e1279",
+      "changeSummary": "保留 h2/h3/h4 层级、标题 ID、文本 span 和直接定位链接；文本快照节点替换 vendor Inlines。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-body.md"
+    },
+    {
+      "task": "T019",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/Paragraph.tsx",
+      "v2Destination": "src/components/gitbook/Reading/Paragraph.tsx",
+      "sha256": "409d0fc8d7605c5e6490e6797a0c2b5bd4975aee57185150c015e5f6e4b210c7",
+      "changeSummary": "保留 paragraph 元素及样式标记；使用 React 文本节点替换 vendor Inlines，不包含 AI 请求。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-body.md"
+    },
+    {
+      "task": "T019",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/DocumentView.tsx",
+      "v2Destination": "src/components/gitbook/Reading/DocumentView.tsx",
+      "sha256": "404452910d9da1365f94c4abf88dde653b95fbf38c0203f7e32a07d95b766b98",
+      "changeSummary": "保留块列表与换行语义；以 JUYU 基础文本块分派替换 GitBook Blocks 数据接口，不包含完整块类型。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-body.md"
+    },
+    {
+      "task": "T020",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/Search/SearchInput.tsx",
+      "v2Destination": "src/components/gitbook/Search/SearchInput.tsx",
+      "sha256": "58ce38d02a43b75a7d7cbfe9f8de71b63370309a97a2ccdb3b7d3e885cfbec25",
+      "changeSummary": "保留带图标的标题输入、清空与快捷键入口，改用原生 GET 表单和 JUYU 样式，增加中文组合输入及明确长度校验；移除弹出框/AI/GitBook 上下文。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-search.md"
+    },
+    {
+      "task": "T020",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/Search/SearchResults.tsx",
+      "v2Destination": "src/components/gitbook/Search/SearchResults.tsx",
+      "sha256": "9663e2f4a24e5a3fb8e536da3b456a81648c92777d3e947f55da3f83c2061a29",
+      "changeSummary": "保留结果列表与错误/空状态分支，改为完整搜索页的原生列表/链接语义；加入已授权计数与分页，移除 AI、动画、供应商统计和浏览器搜索历史。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-search.md"
+    },
+    {
+      "task": "T020",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/Search/SearchPageResultItem.tsx",
+      "v2Destination": "src/components/gitbook/Search/SearchPageResultItem.tsx",
+      "sha256": "83cfb0581c94dae8d0ca12899386610ac94cfc63e14fd1d1de610d2c057c02ef",
+      "changeSummary": "保留图标、分类路径、文章标题与关键词高亮组合；输入仅接收服务器核准正式标题，不包含正文摘要或草稿。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-search.md"
+    },
+    {
+      "task": "T020",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/Search/SearchResultItem.tsx",
+      "v2Destination": "src/components/gitbook/Search/SearchResultItem.tsx",
+      "sha256": "1a2e9fb5f23b23f7987f3db3b32dc8f72a4c01a1aeb6b5a2bbdac7197b332ed8",
+      "changeSummary": "保留图标/内容/尾部动作结构，使用原生链接取代供应商 Link，去除嵌套按钮和弹出框 option 语义。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-search.md"
+    },
+    {
+      "task": "T020",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/Search/HighlightQuery.tsx",
+      "v2Destination": "src/components/gitbook/Search/HighlightQuery.tsx",
+      "sha256": "b8611846f15492bd14200ccdc5bd1a3128f6b52ab2e772d9bc050e25210a2080",
+      "changeSummary": "保留字符串分段匹配、reduce 与 React 文本节点渲染；替换主题样式，过滤空词并用保持字符偏移的 ASCII 大小写折叠。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-search.md"
+    },
+    {
+      "task": "T021",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/Header/HeaderMobileMenu.tsx",
+      "v2Destination": "src/components/gitbook/Header/HeaderMobileMenu.tsx",
+      "sha256": "3b6f7c8dc5e2c4ec4c6af810c0b5179368557ac1801b3fa2973c313e241e1d7a",
+      "changeSummary": "保留手机目录按钮与导航后关闭意图，以当前文章路径属性代替供应商 pathname/global class；JUYU 增加原生 dialog、桌面侧栏与 details 回退、滚动锁恢复、断点处理。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-mobile-navigation.md"
+    },
+    {
+      "task": "T021",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/primitives/SideSheet.tsx",
+      "v2Destination": "src/components/gitbook/Header/HeaderMobileMenu.tsx",
+      "sha256": "3b6f7c8dc5e2c4ec4c6af810c0b5179368557ac1801b3fa2973c313e241e1d7a",
+      "changeSummary": "仅改编首尾 Tab 循环分支并过滤隐藏节点；原生 dialog 处理背景 inert/取消事件，未照搬 MutationObserver、portal、global class、动画或供应商主题。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-mobile-navigation.md"
+    },
+    {
+      "task": "T021",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/TableOfContents/TableOfContents.tsx",
+      "v2Destination": "src/components/gitbook/TableOfContents/TableOfContents.tsx",
+      "sha256": "cfd3c5743f87a568de4cd49275b5b819689f3c18bdf647e29ebc2809f1ec0f73",
+      "changeSummary": "沿用 T017 已授权目录与滚动结构，增加统一响应式菜单包裹；标题允许程序化焦点作为桌面切换后无选中文章时的恢复点。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-mobile-navigation.md"
+    },
+    {
+      "task": "T022",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageHeader.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageHeader.tsx",
+      "sha256": "415ab74ef302a2f76368f24f58fa1b83fcd327f487595998e1660972158ebced",
+      "changeSummary": "保留面包屑nav/ol、祖先遍历、分隔符及标题结构；只使用同一授权目录的分类层级，首页可返回目录，分类无独立页面故不造链接，去除vendor下拉、标签和页面动作。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-page-navigation.md"
+    },
+    {
+      "task": "T022",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageFooterNavigation.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageFooterNavigation.tsx",
+      "sha256": "a68b3d6092dc5cb038b2dbfaee406f42ea4048c047787085aa98a9976e433533",
+      "changeSummary": "保留上一篇/下一篇条件卡片、箭头/标签/标题与反向排列；服务器核准的目录投影替换vendor context/linker/统计；首尾不循环。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-page-navigation.md"
+    },
+    {
+      "task": "T022",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageAside/ScrollToTopButton.tsx",
+      "v2Destination": "src/components/gitbook/Reading/ScrollToTopButton.tsx",
+      "sha256": "ac809d14760ae70c665bf5182339fbac448d27d625c5c41bac26b5e2e0c067eb",
+      "changeSummary": "保留button、可取消点击与window.scrollTo；新增减少动画设置及标题焦点恢复，不改写文章URL或章节hash。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-page-navigation.md"
+    },
+    {
+      "task": "T022",
+      "sourceFileId": "gitbook:packages/gitbook/src/lib/pages.ts",
+      "v2Destination": "src/reader/page-navigation.ts",
+      "sha256": "db6987ea026ce6d8fbec7bf1707c58c00537c2e969550b0471548210ca08a795",
+      "changeSummary": "仅改编resolvePrevNextPages的扁平列表/当前下标/前后项分支；JUYU新增迭代祖先链、ID去重和规范内部链接，输入必须是已授权正式目录，不替代鉴权。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-page-navigation.md"
+    },
+    {
+      "task": "T022",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageBody.tsx",
+      "sha256": "1a1bcfdaa35d190bb4b7b3a8740fe55790763b12a65c9dfeef87dbb12ac18860",
+      "changeSummary": "在T019基础正文适配中接上PageHeader、PageFooterNavigation和回到顶部；仍不包含封面、反馈或完整富内容。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-page-navigation.md"
+    },
+    {
+      "task": "T023",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/ThemeToggler/ThemeToggler.tsx",
+      "v2Destination": "src/components/gitbook/ThemeToggler/ThemeToggler.tsx",
+      "sha256": "996590731970ac10c3f4f636460029565eb6c16d71b22871ccbca7c576533bd6",
+      "changeSummary": "保留浅色/系统/深色三选一结构，改用原生radio和JUYU主题状态；替换next-themes、vendor按钮/图标/i18n；增加键盘、跨标签同步、存储异常回退。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-presentation.md"
+    },
+    {
+      "task": "T023",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/Announcement/AnnouncementBanner.tsx",
+      "v2Destination": "src/components/gitbook/Announcement/AnnouncementBanner.tsx",
+      "sha256": "8539c47871dba367ef8699e86bb0a9f8236c848f3c0b9758d83dcc9d91247d2b",
+      "changeSummary": "保留消息、提示图标、关闭按钮及data-nosnippet结构；改为可信通用内部提醒，不接vendor链接/统计；按公告ID和版本记忆关闭，隐藏服务端快照避免已关闭公告闪现，关闭恢复主区焦点。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-presentation.md"
+    },
+    {
+      "task": "T023",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/Footer/Footer.tsx",
+      "v2Destination": "src/components/gitbook/Footer/Footer.tsx",
+      "sha256": "4b09c8fc26780c8867a96efb5490ad2ebc6a140465f6311f0945c8eb2d241b5b",
+      "changeSummary": "保留footer、品牌说明、主题控制和访问说明区域；改为JUYU文案，移除不存在的外链/社交/供应商资源与配置读取。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-presentation.md"
+    },
+    {
+      "task": "T023",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/primitives/ScrollContainer.tsx",
+      "v2Destination": "src/components/gitbook/TableOfContents/ScrollContainer.tsx",
+      "sha256": "442a8d21c144e2a498b857500a14498cdb7fb826c422618459fd00ed282ffdcd",
+      "changeSummary": "在T017的当前项定位适配上增加尺寸观察；解决SSR公告出现、目录高度变化后当前末项被裁切，不在普通滚动时重置位置。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-reader-presentation.md"
+    },
+    {
+      "task": "T024",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageCover.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageCover.tsx",
+      "sha256": "97e812fcd73862d093007abb66ff0d3cb5e03e1306d18a26b5c953a73084e6c1",
+      "changeSummary": "保留hero封面容器和data标记；只接受版本内的私有图片ID，移除vendor引用解析、远程缩图、默认图/暗色替代图及背景蒙版分支。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-cover-tags.md"
+    },
+    {
+      "task": "T024",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageCoverImage.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageCoverImage.tsx",
+      "sha256": "f16a1c9c548779ae33797d6acbb6e71b44e7e650f441f7830eaaf1434ab2a8b6",
+      "changeSummary": "保留原生img、1990/480比例、object-cover与纵向定位；只请求同源私有/api/assets，使用管理员保存的替代文字，补充加载失败及hydration前失败恢复。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-cover-tags.md"
+    },
+    {
+      "task": "T024",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageTags.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageTags.tsx",
+      "sha256": "d5ae75a96ccf465f6bdcbb6afae0da77d5a0ad801d2a60c82b11282894c1c76c",
+      "changeSummary": "保留无标签不显示、逐项渲染和flex-wrap；改为当前正式版本的文本标签，用ul/li标识集合，不造标签检索链接。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-cover-tags.md"
+    },
+    {
+      "task": "T024",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/Tag.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageTags.tsx",
+      "sha256": "d5ae75a96ccf465f6bdcbb6afae0da77d5a0ad801d2a60c82b11282894c1c76c",
+      "changeSummary": "保留data-tag、title、胶囊形span；替换vendor颜色与图标解析为共用主题色，长中文自然换行。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-cover-tags.md"
+    },
+    {
+      "task": "T024",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageHeader.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageHeader.tsx",
+      "sha256": "90f4d7fa2ef25613e567261c7db0a7737d417a369dbad15b33e407044673094d",
+      "changeSummary": "在T022的标题与面包屑中接回PageTags分支，只显示正式快照的标签。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-cover-tags.md"
+    },
+    {
+      "task": "T024",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageBody.tsx",
+      "sha256": "5ec7e9744ea04319a74f8758a3be202e955955b094864ba4388af2d6048bd221",
+      "changeSummary": "在T019/T022正文适配中接回正文上方的PageCover，未配置封面时不显示默认图。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-cover-tags.md"
+    },
+    {
+      "task": "T025",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageFeedback/PageFeedbackForm.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageFeedbackForm.tsx",
+      "sha256": "e5b0819496ab20e6b89d3f2476b6e4f79e15951c969d620d5946fd5f9d85f83c",
+      "changeSummary": "保留文章评价、可选说明、输入聚焦和成功状态的结构。改为有帮助/没有帮助两项、显式提交、服务端确认后成功，支持当前正式版本的一份可修改反馈；移除GitBook事件追踪和供应商依赖。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-feedback.md"
+    },
+    {
+      "task": "T025",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageBody.tsx",
+      "sha256": "5d281d95ea48da72abf30da698b1feb1f0a5514ae185cb5abbd48f72b81e5724",
+      "changeSummary": "在既有正文和文章翻页之间接入反馈；按文章ID和正式版本重建表单状态，仅在已授权正文存在时显示。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-feedback.md"
+    },
+    {
+      "task": "T026",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PDF/PDFPage.tsx",
+      "v2Destination": "src/components/gitbook/PDF/PDFPage.tsx",
+      "sha256": "433cb59c46f3688f25effd16b49fb1f0108b5479db1304d7e8cc0cc5b41ae5c4",
+      "changeSummary": "沿用独立白色打印页和页外返回/操作控件；只显示服务端授权单篇正式版本，PDF附件单独同源打开，不复制全空间导出或供应商读取接口。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-pdf.md"
+    },
+    {
+      "task": "T026",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PDF/PrintButton.tsx",
+      "v2Destination": "src/components/gitbook/PDF/PrintButton.tsx",
+      "sha256": "957a47e58ccab2adad312986c4a53d37157b82ec8fc891e4c9e264c4abf52b14",
+      "changeSummary": "保留window.print入口；新增每次点击的服务端当前版本及封面权限复核，失败不打印。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-pdf.md"
+    },
+    {
+      "task": "T026",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PDF/PDFPrintControls.tsx",
+      "v2Destination": "src/components/gitbook/PDF/PDFPrintControls.tsx",
+      "sha256": "5e24ec46b604f03430ff0948b5a0bae82a9cc89ee16f5bf6ec5e2a43328d059a",
+      "changeSummary": "从打印按钮外壳改编为返回、服务器下载、打印操作栏；加入进度、失败恢复与图片就绪状态。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-pdf.md"
+    },
+    {
+      "task": "T026",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PDF/ImagesLoadingStatus.tsx",
+      "v2Destination": "src/components/gitbook/PDF/PDFPrintControls.tsx",
+      "sha256": "5e24ec46b604f03430ff0948b5a0bae82a9cc89ee16f5bf6ec5e2a43328d059a",
+      "changeSummary": "沿用图片未就绪提示方向，监听加载/失败，在图片失败时禁用浏览器打印；服务器导出独立重新读取私有图片。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-pdf.md"
+    },
+    {
+      "task": "T026",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PDF/pdf.css",
+      "v2Destination": "src/pdf/render.ts",
+      "sha256": "48bfb7cde5410243385bf8ae81a374d24b12a18d77cd05fd0c054fd8bec8ff6e",
+      "changeSummary": "保留A4尺寸、白底、标题不拆页及打印规则，改为文字转义的共享HTML输出；补充重复表头、长表格分页、中文字体回退与页边距。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-pdf.md"
+    },
+    {
+      "task": "T026",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageBody.tsx",
+      "sha256": "99adc8355e398b1a91132e0f60479c4cbf73b292277cf767913f889ebe44031a",
+      "changeSummary": "在既有正文适配中增加当前文章ID/正式版本绑定的PDF阅读与导出入口。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-pdf.md"
+    },
+    {
+      "task": "T026",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/DocumentView.tsx",
+      "v2Destination": "src/components/gitbook/Reading/DocumentView.tsx",
+      "sha256": "9f48dde0d78c7cc61665e781bd71303a65d8779708be2331f495ef7b01d51abd",
+      "changeSummary": "在既有正文遍历适配上加入基础文本表格输出；阅读和PDF共用解析结果，单元格转义，不解释HTML或外部图片。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-pdf.md"
+    },
+    {
+      "task": "T027",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/Images.tsx",
+      "v2Destination": "src/components/gitbook/Media/MediaBlocks.tsx",
+      "sha256": "0277a649dd056622799b7ef973d6d17a5c465428b82378d6166378e99d27ba8c",
+      "changeSummary": "借用图片和说明容器方向；改为私有图片原生元素及出错提示，未移植多图网格、图像优化或供应商引用解析。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-media.md"
+    },
+    {
+      "task": "T027",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/File.tsx",
+      "v2Destination": "src/components/gitbook/Media/MediaBlocks.tsx",
+      "sha256": "0277a649dd056622799b7ef973d6d17a5c465428b82378d6166378e99d27ba8c",
+      "changeSummary": "借用文件卡片的打开/下载操作方向；身份复核私有地址替换供应商下载URL。文件图标、尺寸格式化未移植。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-media.md"
+    },
+    {
+      "task": "T027",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageBody.tsx",
+      "sha256": "1d6d127a9a1369e780b9f7c55d410c855cbb6b8f6261e6be534fbbc72e7fd0eb",
+      "changeSummary": "在已适配正文末尾接入版本绑定的媒体与结构化表格，反馈区仍在其后。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-media.md"
+    },
+    {
+      "task": "T027",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PDF/pdf.css",
+      "v2Destination": "src/pdf/render.ts",
+      "sha256": "491a64bce3c87c3f398e1f2bbca7f3ae18ff8620689764c0dcc2ded9ed674019",
+      "changeSummary": "延续T026打印样式，加入正文图片与结构化表格；影片和文件导出说明文字并复核附件权限。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-media.md"
+    },
+    {
+      "task": "T028",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/Hint.tsx",
+      "v2Destination": "src/components/gitbook/RichBlocks/Hint.tsx",
+      "sha256": "3765efc0dc95b95eedc50b5a3013efd5f8872fe1b2037df1025cb5326f8358f6",
+      "changeSummary": "改编四种语义提示、边框、标题与正文容器；移除供应商文档上下文，正文为安全纯文本。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-rich-blocks.md"
+    },
+    {
+      "task": "T028",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/CodeBlockRenderer.tsx",
+      "v2Destination": "src/components/gitbook/RichBlocks/CodeBlock.tsx",
+      "sha256": "5461e0988e3103db217d593080d2cd2c1e4affc7c1c8a3524ce2e87c8685d4e1",
+      "changeSummary": "改编代码容器、语言/复制操作与可滚动pre；不接供应商AI、表达式或语法高亮，保留原文。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-rich-blocks.md"
+    },
+    {
+      "task": "T028",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/CopyCodeButton.tsx",
+      "v2Destination": "src/components/gitbook/RichBlocks/CopyCodeButton.tsx",
+      "sha256": "24937ec799744ab0f3f77149ed9e30f3bae89cae38c965f00177406696762277",
+      "changeSummary": "沿用复制按钮及短暂成功状态，改为等待剪贴板写入确认，补充失败和超时提示。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-rich-blocks.md"
+    },
+    {
+      "task": "T028",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/Tabs/DynamicTabs.tsx",
+      "v2Destination": "src/components/gitbook/RichBlocks/DynamicTabs.tsx",
+      "sha256": "4010367c6a7cc15662c5c6e38b826578e4cb042e90af9123a64fcdf23f8b0f6e",
+      "changeSummary": "改编标签列表、稳定ID和关联面板；以本地选择状态替换全局供应商select，增加方向键/Home/End与焦点轮换，打印展开全部面板。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-rich-blocks.md"
+    },
+    {
+      "task": "T028",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/Images.tsx",
+      "v2Destination": "src/components/gitbook/Media/MediaBlocks.tsx",
+      "sha256": "ee0017157ad5b673efa04f7260e419b3cc18bc54e00644004c5d5c07c817fb51",
+      "changeSummary": "延续T027媒体容器并分派三种文字块；媒体权限接口不变。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-rich-blocks.md"
+    },
+    {
+      "task": "T028",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PDF/pdf.css",
+      "v2Destination": "src/pdf/render.ts",
+      "sha256": "eacf16d90bf02164a5f161772bb784356b07aa518edd0bbdb8cc9bab41111ab7",
+      "changeSummary": "延续打印排版，增加提示容器、保留原文的代码和全部标签展开；全部文本转义。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-08-rich-blocks.md"
+    },
+    {
+      "task": "T029",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/Math.tsx",
+      "v2Destination": "src/components/gitbook/RichBlocks/Math.tsx",
+      "sha256": "3cd0932a10407cea2abb3ff8633d967ed4f6ccb41107526b37fbd4175d4f4d27",
+      "changeSummary": "沿用块公式与横向滚动方向；供应商数学资源替换为本地 KaTeX MathML，增加错误及原文。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-science.md"
+    },
+    {
+      "task": "T029",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/MermaidCodeBlock.tsx",
+      "v2Destination": "src/components/gitbook/RichBlocks/Diagram.tsx",
+      "sha256": "1cc8222e93a6872d6ff504348a224df128add782e209a1dbc6d278c483eaa245",
+      "changeSummary": "改编图形容器和失败回退交互；改为私有服务器 SVG 图片及手动草稿预览。原上游客户端 SVG 注入、缩放和全屏未移植。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-science.md"
+    },
+    {
+      "task": "T029",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/DocumentView.tsx",
+      "v2Destination": "src/components/gitbook/Reading/DocumentView.tsx",
+      "sha256": "e5009c0991ec8a09ac516a7a046196c58d3b209adb7265536f45952dc04499a2",
+      "changeSummary": "延续基础正文分派，列表文字接入 JUYU 有限强调适配。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-science.md"
+    },
+    {
+      "task": "T029",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/Paragraph.tsx",
+      "v2Destination": "src/components/gitbook/Reading/Paragraph.tsx",
+      "sha256": "60db317535ceb24af335256656039cba2b3b2a030127a0c8a91f4851f1757ba2",
+      "changeSummary": "段落文字接入安全的基础强调与行内代码。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-science.md"
+    },
+    {
+      "task": "T029",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/Heading.tsx",
+      "v2Destination": "src/components/gitbook/Reading/Heading.tsx",
+      "sha256": "c814bdad68d1ae1b5245ba21b1a9950b47c1c72e1eee0f32f6e442f467831436",
+      "changeSummary": "标题接入基础强调，目录标题去除已识别标记。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-science.md"
+    },
+    {
+      "task": "T029",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageBody.tsx",
+      "sha256": "0ce2e0fa3fddec4548272cab3625dde6d109a28d4d523a311a467c0403e5e5fe",
+      "changeSummary": "传递已授权文章 ID 与正式版本，供图形接口复核。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-science.md"
+    },
+    {
+      "task": "T029",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/Images.tsx",
+      "v2Destination": "src/components/gitbook/Media/MediaBlocks.tsx",
+      "sha256": "ba46e572f366c63f38648f04f7b8efe867454fe22857ec7f66b9694d679f82ad",
+      "changeSummary": "延续媒体容器并增加公式和流程图分派。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-science.md"
+    },
+    {
+      "task": "T029",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PDF/pdf.css",
+      "v2Destination": "src/pdf/render.ts",
+      "sha256": "ec0321c6bad56d1d4a98343c307a05e3d36616635683b1a7a80793b50674fa88",
+      "changeSummary": "延续打印排版，接入 MathML、已授权流程图图片和基础文字强调；显式恢复列表标记。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-science.md"
+    },
+    {
+      "task": "T030",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/board/tasks-board.tsx",
+      "v2Destination": "src/components/tasks/TasksBoard.tsx",
+      "sha256": "75dbc24443a56360280f565f5b8297fa3988bf4ac822fc2c2f1c437db35c1c4d",
+      "changeSummary": "保留横向分栏和按状态渲染结构；供应商store与演示数据替换为服务端授权分页。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-09-workspace.md"
+    },
+    {
+      "task": "T030",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/board/task-column.tsx",
+      "v2Destination": "src/components/tasks/TaskColumn.tsx",
+      "sha256": "fafdc290580a4871f3e9f00b421cfc2b35d425bca07649649af8d91f6c158a13",
+      "changeSummary": "保留圆角列容器、状态徽标、数量和卡片堆叠；标注本页/总数，新增空列说明。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-09-workspace.md"
+    },
+    {
+      "task": "T030",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/board/task-card.tsx",
+      "v2Destination": "src/components/tasks/TaskCard.tsx",
+      "sha256": "c8dc58f30a74ee8267227ab96695f17e3d958008ef9790e8ab2f69b12b883202",
+      "changeSummary": "保留圆角卡片、标题、元数据及分隔页脚；替换为当前工作版本、正式版、编辑人和二审人，去除演示优先级、评论数和外部头像。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-09-workspace.md"
+    },
+    {
+      "task": "T030",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/filters/tasks-filters.tsx",
+      "v2Destination": "src/components/tasks/TasksFilters.tsx",
+      "sha256": "32fc55447ec052ff26d06e0e2f6502a37f98e5dfe2b6a4d2274140d0204a894d",
+      "changeSummary": "保留搜索与筛选行；使用带标签的原生GET控件，接当前个人范围、类型和状态；不移植空操作的导入导出菜单。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-09-workspace.md"
+    },
+    {
+      "task": "T030",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "0b47e4e0a358ca11522cd907ab8fbfe12ee40cc073f2db1aa6b7c76350dd4037",
+      "changeSummary": "沿用筛选/看板的纵向组合；去掉收入图表和演示统计，加入工作台入口、真实错误/空状态、分页及列表切换。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-09-workspace.md"
+    },
+    {
+      "task": "T031",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/DocumentView.tsx",
+      "v2Destination": "src/components/gitbook/Reading/DocumentView.tsx",
+      "sha256": "4c6d23260b6ce2ed4b0f51fd9e52e5fe7b05795478f58f7f5b2f6d9ec93bbbaa",
+      "changeSummary": "接入有顺序的 BlockNote 文档，传递私有媒体草稿或正式阅读授权参数。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-blocknote.md"
+    },
+    {
+      "task": "T031",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageBody.tsx",
+      "sha256": "17ac1d18fe65d362503c6784ede08f853062158680aa1383afe8254c36483978",
+      "changeSummary": "结构化正文直接混排媒体，不重复追加媒体投影；旧文稿继续兼容。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-blocknote.md"
+    },
+    {
+      "task": "T031",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PDF/pdf.css",
+      "v2Destination": "src/pdf/render.ts",
+      "sha256": "e7acdb967d42974a917846a0a6f349ee2be0bd72061381a4f8efe8ed24611fa3",
+      "changeSummary": "结构化正文按原顺序输出文本、嵌套列表、表格和私有媒体，延续打印排版和权限复核。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-blocknote.md"
+    },
+    {
+      "task": "T031",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/board/task-card.tsx",
+      "v2Destination": "src/components/tasks/TaskCard.tsx",
+      "sha256": "0b7c5f6b3d5cbc5781aab56d7925f4281cb94b13552bd296cf40e6aaa6103072",
+      "changeSummary": "卡片文章标题接入完整文章编辑入口。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-09-blocknote.md"
+    },
+    {
+      "task": "T031",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "bd7431f35514868cee5e44b5b86cf5377b7425ef996dd879559960a7ec9edd66",
+      "changeSummary": "工作台增加新建文章入口与编辑说明。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-09-blocknote.md"
+    },
+    {
+      "task": "T033",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "b194e1a31acbb9cd5dba7297480162249cdf69d800f4464d285b3c0324f7b170",
+      "changeSummary": "工作台增加回收站入口；删除恢复及清理后端为JUYU新增。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-09-trash-recovery.md"
+    },
+    {
+      "task": "T038",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "557373b17236f4f288a049ba1858c13566201af883258e12db56a5572d596eb0",
+      "changeSummary": "工作台增加归档资料入口，并更新已接入的审核发布及改稿说明；归档与下线服务为JUYU新增。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-09-availability.md"
+    },
+    {
+      "task": "T039",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/Images.tsx",
+      "v2Destination": "src/components/gitbook/Media/MediaBlocks.tsx",
+      "sha256": "9771604dc9a6d5f1dede97e20ff891e4635d07be6d693ae27df545a01b30354d",
+      "changeSummary": "历史管理预览的图片、影片与文件改为明确文章/旧版本私有路径；员工阅读路径保留。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-history.md"
+    },
+    {
+      "task": "T039",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/MermaidCodeBlock.tsx",
+      "v2Destination": "src/components/gitbook/RichBlocks/Diagram.tsx",
+      "sha256": "c89c28473538e8e5bca389300400cca98973fd34f379d37004fa7272b56558e4",
+      "changeSummary": "历史管理预览使用选定文章/版本授权的流程图生成接口；保留现有预览与失败回退。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-history.md"
+    },
+    {
+      "task": "T039",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "5eaa78e6c950bd1876991f7bc4be53e1e294358c7ce52c0cfa03566a9f5d916f",
+      "changeSummary": "增加永久删除记录入口，更新已接入的历史记录说明。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-09-history.md"
+    },
+    {
+      "task": "T041",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/Search/SearchInput.tsx",
+      "v2Destination": "src/components/gitbook/Search/SearchInput.tsx",
+      "sha256": "31429170c46e231f3d78cea0c87dae3704bd2be1066abd17422e8589aa497e42",
+      "changeSummary": "扩展统一正式标题/标签/正文搜索的文字说明、类型版本标签和安全摘要；保留原生交互、GitBook组合和转义高亮。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-unified-search.md"
+    },
+    {
+      "task": "T041",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/Search/SearchPageResultItem.tsx",
+      "v2Destination": "src/components/gitbook/Search/SearchPageResultItem.tsx",
+      "sha256": "6da5302db3c183b3bc2fefceb556a87515746ed1419fa655be2446cde9bb680b",
+      "changeSummary": "扩展统一正式标题/标签/正文搜索的文字说明、类型版本标签和安全摘要；保留原生交互、GitBook组合和转义高亮。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-unified-search.md"
+    },
+    {
+      "task": "T041",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/Search/SearchResults.tsx",
+      "v2Destination": "src/components/gitbook/Search/SearchResults.tsx",
+      "sha256": "325a424b8688e84211922d2e6c9f2cb8129c3ff0603a7aa63f954f1d3c246b8e",
+      "changeSummary": "扩展统一正式标题/标签/正文搜索的文字说明、类型版本标签和安全摘要；保留原生交互、GitBook组合和转义高亮。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-unified-search.md"
+    },
+    {
+      "task": "T044",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageBody.tsx",
+      "sha256": "406670c5d23a7bf30c5f00178987dcb3527fc94d8a470925b4329ea82ca600b0",
+      "changeSummary": "接入已授权文章的个人收藏操作槽，保留既有正文、翻页、反馈和PDF入口。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-favorites.md"
+    },
+    {
+      "task": "T047",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "6f4488cf9a9c230a3268057a07b422f5ae6bfe451d8ca0fb08571574a37abc13",
+      "changeSummary": "内容工具增加仅管理员使用的使用分析入口；统计后台为JUYU实现。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-09-analytics-dashboard.md"
+    },
+    {
+      "task": "T048",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageBody.tsx",
+      "sha256": "6145d8deb99afe8da2af17bc772011ea17c6fb1ad14b318d27d2fbf8bcc44da6",
+      "changeSummary": "增加自定义字段版本快照显示或管理入口；字段定义、校验及存储为JUYU实现。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-custom-fields.md"
+    },
+    {
+      "task": "T048",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "0e4555938e485f9e026ba2604cf3c5dba441c8668c69e34243c8a73ae90b1844",
+      "changeSummary": "增加自定义字段版本快照显示或管理入口；字段定义、校验及存储为JUYU实现。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-09-custom-fields.md"
+    },
+    {
+      "task": "T048",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PDF/pdf.css",
+      "v2Destination": "src/pdf/render.ts",
+      "sha256": "f78768a9624a8f196cf906e22dfa89f0d0f18b59a8266621ad977032b4bb8565",
+      "changeSummary": "增加自定义字段版本快照显示或管理入口；字段定义、校验及存储为JUYU实现。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-09-custom-fields.md"
+    },
+    {
+      "task": "T049",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "328fc4309fe8e43e80993c00358a352e1c7a4bfcc32d558b38c28791860bcfb9",
+      "changeSummary": "增加分类设置管理入口；分类存储、访问策略和文章选择由 JUYU 实现。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-09-categories.md"
+    },
+    {
+      "task": "T050",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "e493fff904ae57684c71c7c2e6fc134b0bc40e6b265a0dbafb2393d97d1d2567",
+      "changeSummary": "增加自定义表单配置与提交记录入口；表单界面、权限、记录和处理为 JUYU 实现。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-09-forms.md"
+    },
+    {
+      "task": "T051",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "65836bf28bd944a47e924094a8d3c90d6738b180d20f89a25eff42ed6b073126",
+      "changeSummary": "增加管理员导航设置入口；快捷菜单与分类入口、权限和版本保存为JUYU实现。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-10-navigation-settings.md"
+    },
+    {
+      "task": "T052",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "v2Destination": "src/components/gitbook/Reading/PageBody.tsx",
+      "sha256": "ae8131ba2d83fd3f139c6ec840177c9e19204c2a40234faeafb7d7bd45cd7268",
+      "changeSummary": "按当前功能开关隐藏阅读区PDF/反馈与相关后台入口，保留功能设置恢复入口；功能配置与服务端保护为JUYU实现。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-10-feature-flags.md"
+    },
+    {
+      "task": "T052",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "b3162d5d959c764c75bcab85426e4cf62a6b86f5f579ad60a06f3c30a026305e",
+      "changeSummary": "按当前功能开关隐藏阅读区PDF/反馈与相关后台入口，保留功能设置恢复入口；功能配置与服务端保护为JUYU实现。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-10-feature-flags.md"
+    },
+    {
+      "task": "T053",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "d883ceb55b57e0a23985e9e6ebf11c4be6ac0f8749126c4730b1d65c5794e55d",
+      "changeSummary": "Tasks工作台增加设置变更记录入口；统一历史、恢复验证和来源回执为JUYU实现。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-10-setting-history.md"
+    },
+    {
+      "task": "T054",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "2c2ae0615232b4b558cedbe003787e749ae92015424b8566ed22c7fbd56419f3",
+      "changeSummary": "Tasks工作台增加新功能公告管理入口；角色功能过滤、动态公告与收件记录为JUYU实现。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-10-announcements.md"
+    },
+    {
+      "task": "T057",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "v2Destination": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "5d8063bd4375ecbdfba2293b7f1acb1215f47462cc474c606fd825f927e688e3",
+      "changeSummary": "管理入口分为两个常用入口和原生可折叠工具组；保留所有目标链接和功能开关过滤，支持手机与键盘。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-10-ui-accessibility.md"
+    },
+    {
+      "task": "T057",
+      "sourceFileId": "tasks:templates/tasks/components/tasks/board/task-column.tsx",
+      "v2Destination": "src/components/tasks/TaskColumn.tsx",
+      "sha256": "faa21944fd395d4826f48671ce933504febd3aa25fdbaf8cca1e751340aa884a",
+      "changeSummary": "移除通用 span 上无效的 aria-label，由已有列标题及本页/总数说明提供数量上下文；保持原有布局。",
+      "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+      "verification": "docs/verification/2026-09-10-ui-accessibility.md"
+    },
+    {
+      "task": "T057",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/CodeBlockRenderer.tsx",
+      "v2Destination": "src/components/gitbook/RichBlocks/CodeBlock.tsx",
+      "sha256": "30be5e6b7fc8857f83d7857849692f490db7d4591bc0f7863438dfa0e0ef8b93",
+      "changeSummary": "代码滚动区增加 region 角色，使现有名称与键盘焦点具备有效语义。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-10-secondary-ui-accessibility.md"
+    },
+    {
+      "task": "T057",
+      "sourceFileId": "gitbook:packages/gitbook/src/components/DocumentView/Math.tsx",
+      "v2Destination": "src/components/gitbook/RichBlocks/Math.tsx",
+      "sha256": "c8cdca263bc8de6b54bf803ace799e92a76b660a1399c89fab3dab30995e19fa",
+      "changeSummary": "块公式增加 group 角色，保留名称、键盘焦点与 MathML。",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+      "verification": "docs/verification/2026-09-10-secondary-ui-accessibility.md"
+    }
+  ],
+  "actualRuntimeMigrationRule": "Before importing or adapting a runtime file, append source file ids, destination, destination sha256, modifications, license references and verification evidence. Candidate entries are not completed migrations."
+}

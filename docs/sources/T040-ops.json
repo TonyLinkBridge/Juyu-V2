@@ -1,0 +1,69 @@
+{
+  "task": "T040",
+  "scope": "Current-role OPS published collection and defense verification; local acceptance only",
+  "files": [
+    {
+      "target": "src/app/api/ops/route.ts",
+      "targetSha256": "5151ebdc7f07c95f9c0bb95255b2d66759801834522b188a64a68f2f70d3891b",
+      "origin": "JUYU application code; composed existing GitBook-derived reader components without copying new upstream source"
+    },
+    {
+      "target": "src/app/help-centre/ops/page.tsx",
+      "targetSha256": "6741f2abe7648b21ff0b83b2e3a3291271fd6c8b04ccc43b118c1583668a6360",
+      "origin": "JUYU application code; composed existing GitBook-derived reader components without copying new upstream source"
+    },
+    {
+      "target": "src/app/help-centre/page.tsx",
+      "targetSha256": "bb76c583194979e0f7c2de8c5286ad11f2437a5a7fca22da6577eee0fb77976f",
+      "origin": "JUYU application code; composed existing GitBook-derived reader components without copying new upstream source"
+    },
+    {
+      "target": "src/components/ops/OpsCollection.tsx",
+      "targetSha256": "083c36e152c8ac53d3f9d320016ced05fc0ad656f20f191bad2e5dedcb74bc53",
+      "origin": "JUYU application code; composed existing GitBook-derived reader components without copying new upstream source"
+    },
+    {
+      "target": "src/components/ops/OpsEntryLink.tsx",
+      "targetSha256": "64c4a4a9b967e5cfcbacfc8bc5bd555b7f0c68465bd79250492b8e85ed4fd8db",
+      "origin": "JUYU application code; composed existing GitBook-derived reader components without copying new upstream source"
+    },
+    {
+      "target": "src/ops/model.ts",
+      "targetSha256": "9f05d01633cf7c4e51ffdc8c5c770d961a6b05e780714424e38927546f51a277",
+      "origin": "JUYU application code; composed existing GitBook-derived reader components without copying new upstream source"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "5b9ccf83fb2916c98b429cbeb05294c362dcc40fbbefbb791735c6d099844983",
+      "origin": "JUYU application code; composed existing GitBook-derived reader components without copying new upstream source"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "bc87e8fcb6f57f97bbce9925a1d4a337340209245f0943e95eb125d82496e06f",
+      "origin": "JUYU application code; composed existing GitBook-derived reader components without copying new upstream source"
+    },
+    {
+      "target": "src/server/database/migrations/0013_ops_collection.sql",
+      "targetSha256": "64e7a29219ddf74f147ec546b00b8e4eed56b7e882e788fbd90be86702db9a33",
+      "origin": "JUYU application code; composed existing GitBook-derived reader components without copying new upstream source"
+    },
+    {
+      "target": "src/server/ops/http.ts",
+      "targetSha256": "d540a94b373b7239dafe443062e5d99fde11889819ec9ef9b56b2a6ead8063ae",
+      "origin": "JUYU application code; composed existing GitBook-derived reader components without copying new upstream source"
+    },
+    {
+      "target": "src/server/ops/repository.ts",
+      "targetSha256": "48cb083cae731b6123ae71bfabdd35db1bd332c36e0ee09ca641ada5b5d7a9d3",
+      "origin": "JUYU application code; composed existing GitBook-derived reader components without copying new upstream source"
+    }
+  ],
+  "integration": "0013_ops_collection adds narrow publication projection. Existing raw-table policies and reader/media/PDF protections unchanged. No new dependencies.",
+  "verification": "docs/verification/2026-09-09-ops.md",
+  "limitations": [
+    "No real Clerk/Supabase/company/device/deployment acceptance",
+    "Global title search remains existing behavior; full text/summary search is T041",
+    "No fabricated operational SOP contents",
+    "Already delivered content cannot be recalled from devices"
+  ]
+}

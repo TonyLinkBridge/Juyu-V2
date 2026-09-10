@@ -1,0 +1,4 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {fieldInputValue,fieldValueText} from '../src/fields/editor.ts';
+test('field inputs distinguish missing, zero and false without coercing invalid numbers',()=>{assert.equal(fieldInputValue('number','0'),0);assert.equal(fieldInputValue('boolean','false'),false);assert.equal(fieldInputValue('boolean',''),null);assert.equal(fieldInputValue('text','备注'),'备注');assert.equal(fieldInputValue('number',''),null);for(const v of ['-','Infinity','0x10','  ','1e999'])assert.throws(()=>fieldInputValue('number',v),/INVALID_INPUT/);});
+test('snapshot display preserves literal text and uses Chinese boolean/empty labels',()=>{assert.equal(fieldValueText(false),'否');assert.equal(fieldValueText(true),'是');assert.equal(fieldValueText(null),'未填写');assert.equal(fieldValueText(0),'0');assert.equal(fieldValueText('<script>'),'<script>');});

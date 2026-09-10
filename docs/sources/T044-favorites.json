@@ -1,0 +1,86 @@
+{
+  "task": "T044",
+  "scope": "Personal server-persisted favorites; current authorized formal metadata only; reader action and collection UI",
+  "files": [
+    {
+      "target": "src/app/api/favorites/[id]/route.ts",
+      "targetSha256": "217514bbf0562b68670734444466001272aa60461426517417f3d90f54ee0bb6",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/app/api/favorites/route.ts",
+      "targetSha256": "774b0fc7d287a527e9f0736574f54bcc30707158f4e29bfaafb338bc61a097f8",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/app/globals.css",
+      "targetSha256": "c10edf890885e5b4543e88aab3a58dd5185cd735a6bfdcc1fb717b8e7dd43db8",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/favorites/page.tsx",
+      "targetSha256": "74b360b65f3a21c02ac9d0ba40116eeaca8080197cc3d7a47587bbd18c0121f3",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/page.tsx",
+      "targetSha256": "a2e28ff362a5377073488f610251ca6dca6a55bec17dd4b36136a408dd37b62b",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/components/favorites/FavoriteButton.tsx",
+      "targetSha256": "37e9da19f248ed870b3e7435b3e6dddf7449de695ae2b24cdee26215383b232f",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/components/favorites/FavoritesView.tsx",
+      "targetSha256": "8bb47fba60bcd8fa67a564d59505f9907a542f791697227d3514ab2c0da42150",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/components/gitbook/Reading/PageBody.tsx",
+      "targetSha256": "406670c5d23a7bf30c5f00178987dcb3527fc94d8a470925b4329ea82ca600b0",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/components/reader-navigation.tsx",
+      "targetSha256": "204ad8b37560e0e6de87a1e09907e640706bdd3aa6ba65cd43a6bdc412837e3a",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/favorites/client.ts",
+      "targetSha256": "7122262de85a2ae4f84257710a13c293748ba2f0f62590f7cde65f7a76143369",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/favorites/model.ts",
+      "targetSha256": "177071da156a4203068ea50ca01575381fffcccddd2bddee024d04c87983b458",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "37beff1611cd50ea306b6754a4c0853cf024d44a74a764c2fa73358d9f2601f1",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "d1785843dd75375bfaaf6661ec0fee7bff164eb9135fcd55b078c9bdc1288c01",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrations/0017_favorites.sql",
+      "targetSha256": "c13852bf55d7880fdd9bf48b9acf622d1bd6b17afe3e01d2b17ec1602c4205ac",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/server/favorites/http.ts",
+      "targetSha256": "201416b899a4652f6af6227d1a1e6323830d0b31a450919bb897d5ecf4803921",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/server/favorites/repository.ts",
+      "targetSha256": "1eb90b7d9153dafc0915f83409d4bc1f7d470409fbb8ed8578553dcb2fcf6742",
+      "origin": "JUYU personal favorites implementation composing existing GitBook-derived reading/results; no new vendor source"
+    }
+  ]
+}

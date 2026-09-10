@@ -1,0 +1,68 @@
+{
+  "task": "T041",
+  "scope": "Unified authorized publication title/tag/display-text literal search; native revision GIN projection and bounded snippets",
+  "files": [
+    {
+      "target": "src/app/globals.css",
+      "targetSha256": "7825fa42892f2e96993d85fa240cd5eac1ad028e0121209666f146f47bf5cf6f",
+      "origin": "JUYU application implementation"
+    },
+    {
+      "target": "src/components/gitbook/Search/SearchInput.tsx",
+      "targetSha256": "31429170c46e231f3d78cea0c87dae3704bd2be1066abd17422e8589aa497e42",
+      "origin": "Existing GitBook-derived component; no new upstream copy",
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/Search/SearchInput.tsx",
+      "sourceSha256": "1f7b70f1c2dba00836d323c985c7954b0e9ee7c332c94d33b715a3c74af6c6a3",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt"
+    },
+    {
+      "target": "src/components/gitbook/Search/SearchPageResultItem.tsx",
+      "targetSha256": "6da5302db3c183b3bc2fefceb556a87515746ed1419fa655be2446cde9bb680b",
+      "origin": "Existing GitBook-derived component; no new upstream copy",
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/Search/SearchPageResultItem.tsx",
+      "sourceSha256": "9a134d2d3a4c74e8d749cf7288af6373d1d8432e2377d0e418472f7bba5f7a62",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt"
+    },
+    {
+      "target": "src/components/gitbook/Search/SearchResults.tsx",
+      "targetSha256": "325a424b8688e84211922d2e6c9f2cb8129c3ff0603a7aa63f954f1d3c246b8e",
+      "origin": "Existing GitBook-derived component; no new upstream copy",
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/Search/SearchResults.tsx",
+      "sourceSha256": "2f5cd4291368389d331febf58d61ff4a35d795a70f95efe81e90c3b28ed2c588",
+      "license": "docs/sources/licenses/gitbook-GPL-3.0.txt"
+    },
+    {
+      "target": "src/reader/search.ts",
+      "targetSha256": "25b8e67991632120e2587d75fff927023067666362b7a5b3ba23f508bae681b8",
+      "origin": "JUYU application implementation"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "8fededa008413a1154f43916cdd2349d70ec1325c4a3567bd3988e6716c65e2a",
+      "origin": "JUYU application implementation"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "88eec8aebbac0bd563283df9060fa45278d50600fd870b7a469bb99400794184",
+      "origin": "JUYU application implementation"
+    },
+    {
+      "target": "src/server/database/migrations/0014_publication_search.sql",
+      "targetSha256": "61ebd0c93e6e4dc71738e77af573c6a2fc5456c84f56c0b5a4f143d8e5b4e826",
+      "origin": "JUYU application implementation"
+    },
+    {
+      "target": "src/server/search/repository.ts",
+      "targetSha256": "f0a03b819fcf039248d89e74e37bfc7717b6a2bd5504a17017214d53a077af4e",
+      "origin": "JUYU application implementation"
+    }
+  ],
+  "integration": "0014 backfills existing revisions and synchronously indexes immutable inserts; current publication pointer and can_read_revision filter every count/result. No new dependency or extension.",
+  "verification": "docs/verification/2026-09-09-unified-search.md",
+  "limitations": [
+    "No real Clerk/Supabase/company/device/deployment acceptance",
+    "No OCR, attachment bytes, semantic or fuzzy search",
+    "Native character grams improve candidate selection; no production-scale performance claim",
+    "T046 analytics collection is not implemented by this task"
+  ]
+}

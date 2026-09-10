@@ -1,0 +1,191 @@
+{
+  "task": "T048",
+  "scope": "Versioned Admin custom-field definitions, strict article values, immutable field snapshots, review/history/reader/PDF preservation and database validation",
+  "files": [
+    {
+      "target": "src/app/admin/editor/page.tsx",
+      "targetSha256": "861a6b39278d5e6239c26b0b5458dd1766a7912956a402ffc95e3e9df536a501",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/settings/fields/page.tsx",
+      "targetSha256": "a0d5ad4885e0a528d711e785227b212409f2c20d89fbfa5a4fbb241ee78a64ed",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/fields/[id]/route.ts",
+      "targetSha256": "650d7d5dacdf16488126a116665b74842e8ece6cf3fa31ad3cee8964dfee5267",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/fields/route.ts",
+      "targetSha256": "7fca8256b531ee2f80292043d3e9b115f4eba3430cf584d7c666fe2071e7074e",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/fields-settings.css",
+      "targetSha256": "8a3869c4bdef9a9f10e765fabd0dbd39e994c0dbe7cc12db6b66c3fa10e5890d",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/globals.css",
+      "targetSha256": "4bcedcc98c94ab802581162ead1089b8b44c9f22f72db877ef3b667c542698e0",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/editor/ArticleEditor.tsx",
+      "targetSha256": "9549ba55453a6de012427251a1de50675b857e7782e7bdc70bf29ffc723d3d10",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/editor/EditorLoader.tsx",
+      "targetSha256": "45f970c5af8f4f39b2c581eeb527480ae8b4f58cda1c5e38773606da42eb6c6e",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/fields/FieldInputs.tsx",
+      "targetSha256": "4818479bd11bdabfd79009f1721fcac4e1e38cd8ce8896058d607f41d115e891",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/fields/FieldSettings.tsx",
+      "targetSha256": "3f1237f41ce24bb19efa09fc23da9d9f95791ee3d2aab6d2102b9c7fb64c56f1",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/fields/FieldValues.tsx",
+      "targetSha256": "42af8487ef9d1563a1183d0973f47a2af46ea6bf3af93f835a6022ae0f98e7ae",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/gitbook/Reading/PageBody.tsx",
+      "targetSha256": "6145d8deb99afe8da2af17bc772011ea17c6fb1ad14b318d27d2fbf8bcc44da6",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/history/HistoryVersionPanel.tsx",
+      "targetSha256": "1aa45f5a1c83a9f08ec1b49ec9394bc8c2e1b276e309b6419347d0f8924db418",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/review/PublicationPanel.tsx",
+      "targetSha256": "c5615d947b698b894bd93d699ab221a017fde54fed459ffaf2562d423ce7d5e1",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/review/ReviewDecision.tsx",
+      "targetSha256": "8e32e388aeeceb04db710881ff61ff51322edafcec63767bcb36ecc0c77d3bfb",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/tasks/TasksWorkspace.tsx",
+      "targetSha256": "0e4555938e485f9e026ba2604cf3c5dba441c8668c69e34243c8a73ae90b1844",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/domain/model.ts",
+      "targetSha256": "3fe229a403277f9079f89bab6136d8114bb1633bccea4bf8f12fe95834f2e993",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/domain/workflow.ts",
+      "targetSha256": "d08aee1e4256c05e6729722f947017db79c1377aea0ea5701e0f6d019dabd3a9",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/editor/contract.ts",
+      "targetSha256": "5670aa260b0dba01f64fd6a684aebf83ffa315e0bbe1d477d7ecd163fe6c7f4a",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/editor/recovery.ts",
+      "targetSha256": "c1cf94ba50b6d13cf04b05d811b977a710affa5f03af9ec3c818f50ffcfba628",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/fields/client.ts",
+      "targetSha256": "780df7c58c80c256fff07d7e57c3e5d590a4b5d24a41ca5f151000c4c78a00d2",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/fields/editor.ts",
+      "targetSha256": "ca3460d41f70147265397ef809d681013d8814c9ff26c3485910cff2ee37f71a",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/fields/model.ts",
+      "targetSha256": "d65ff09a8433a54613e0be8d6cdd3d42baeda4e769d1ed6950ebe558533df427",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/history/client.ts",
+      "targetSha256": "62cd368592dc6e89d5276ebcd8ec10d0aa8ec5c6378769a964e4bc6b9cd42689",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/history/model.ts",
+      "targetSha256": "5a6669a899c010e51f7679ce5b4137d3807ef1c1188ca2def785a54ac0059b5b",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/pdf/render.ts",
+      "targetSha256": "f78768a9624a8f196cf906e22dfa89f0d0f18b59a8266621ad977032b4bb8565",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/reader/body.ts",
+      "targetSha256": "ea8693c089e93e991f2899e30c80b511f7496fc4eaf0097c64e3df69b2088026",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "afaba18191936accfffe0ba567e4136c390f8761bcb1bcbec9d0886e09c855aa",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/database/SUPPORTING_DATA.md",
+      "targetSha256": "463ae8c5dca8d867fedff8e12aa95fe8b08de38988ee731130f4cf81758713dc",
+      "origin": "JUYU supporting-data documentation update for T048 implementation status"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "14fa9dec899e28e66aecc8f8c4a70a0ff3d8fe8386fa1f78e77ede1d48ffa098",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrations/0020_custom_fields.sql",
+      "targetSha256": "995368b0a51271d8152bb6e86ea880eaabcc03a63b724b4fac2dfb9da87be636",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/database/repository.ts",
+      "targetSha256": "ba030a694a086434996858dd4c1081ccf14167418075c067ac7998c7c01dfeea",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/editor/input.ts",
+      "targetSha256": "85c44e708f3feea2ae70dce11d01817cfa4dd1e77c6706a9177d501b474b92ec",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/editor/response.ts",
+      "targetSha256": "c175a22ce069b7ba4c65b0a56827355aeef5d4c5801c09ad9c23e3020bf9d6fa",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/fields/http.ts",
+      "targetSha256": "ddf21aee30c0e4cd33a15c1124de424c234ceccc6ee1672e059ef43426f4d908",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/fields/repository.ts",
+      "targetSha256": "e8b4fc19fbb478db1c45706087ab44e073bd0abe010f48abfbe2cad10d81a2d0",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/history/repository.ts",
+      "targetSha256": "7dcb669b1b608c7042f0c81966bc6b72008810678ca89d6bbc750e29bce92caf",
+      "origin": "JUYU custom-fields implementation, composing or extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    }
+  ]
+}

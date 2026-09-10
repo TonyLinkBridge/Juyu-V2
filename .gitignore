@@ -1,0 +1,17 @@
+node_modules/
+.next/
+.env*
+!.env.example
+coverage/
+*.tsbuildinfo
+.DS_Store
+
+/playwright-report/
+/test-results/
+next-env.d.ts
+
+# Local generated artifacts and deployment linkage
+/output/
+/.vercel/
+*.pem
+*.key

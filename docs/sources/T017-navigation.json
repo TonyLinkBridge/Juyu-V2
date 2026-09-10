@@ -1,0 +1,49 @@
+{
+  "task": "T017",
+  "sourceRoot": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/TableOfContents",
+  "license": "GPL-3.0; see docs/sources/licenses/gitbook-GPL-3.0.txt",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/TableOfContents/TableOfContents.tsx",
+      "target": "src/components/gitbook/TableOfContents/TableOfContents.tsx",
+      "sourceSha256": "0667ddf2de7b3c8d0a3c1e0310c6c34edb41580957d9ff2c4ed5cd9a76020a97",
+      "targetSha256": "0c4b5ded0f60f636eb23d0d795fb76ff8462819a694a7ea715e3bc3775602f47",
+      "adaptation": "改编：保留侧栏、标题、列表和滚动容器结构；以已授权页面替换 GitBook context/encoder；暂不含 SideSheet、品牌服务及外部追踪。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/TableOfContents/PagesList.tsx",
+      "target": "src/components/gitbook/TableOfContents/PagesList.tsx",
+      "sourceSha256": "f04c3ee849bc38ef230bd875bb4bcef34e949d54098b387c7c22f135c3040099",
+      "targetSha256": "05c89a94c04e814e8257579cc9935a88e37795ef6a3446affd4599b6f49f73b7",
+      "adaptation": "改编：保留 ul/list 映射及 document 分支；分组/链接/子目录未在 T017 实现。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/TableOfContents/PageDocumentItem.tsx",
+      "target": "src/components/gitbook/TableOfContents/PageDocumentItem.tsx",
+      "sourceSha256": "c645fcfb8dff59a636e160e61affdb401866baf8dcf2409f9cdff56954296295",
+      "targetSha256": "48f8bc104e1023aa76a92200d4b068e4cd071ceed8a49794aa2f1b0c158bd49b",
+      "adaptation": "改编：保留 li、叶节点链接和标题；供应商图标、标签、OpenAPI 及后代暂不移植。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/TableOfContents/ToggleableLinkItem.tsx",
+      "target": "src/components/gitbook/TableOfContents/ToggleableLinkItem.tsx",
+      "sourceSha256": "4cf6b7b308e8c3b981519b549dcc4d8f0a7c59ac8ef23f0179e2559502bef64a",
+      "targetSha256": "75a011b0445e74f5ec67f5a62abfef00adddbcb07353aa27765ea37c6bf9dd79",
+      "adaptation": "改编：保留无后代 LinkItem 分支、精确路径匹配、data-active/aria-current；使用固定站内 anchor，服务器提供当前项。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/TableOfContents/styles.ts",
+      "target": "src/components/gitbook/TableOfContents/styles.ts",
+      "sourceSha256": "41cb018d113d060b9033642923306e16e262bcc96bcbf36a62af9123f61e1bc9",
+      "targetSha256": "41cb018d113d060b9033642923306e16e262bcc96bcbf36a62af9123f61e1bc9",
+      "adaptation": "原样复制：保留上游全部样式数组；JUYU globals.css 适配供应商主题 token/variant。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/primitives/ScrollContainer.tsx",
+      "target": "src/components/gitbook/TableOfContents/ScrollContainer.tsx",
+      "sourceSha256": "aa1759f9624b22704a30eaa325ded2286558e9173d1d59ee844d55110f4b09ca",
+      "targetSha256": "fd402bc8f33e0c99fd2f955d2d1073c8676d9b7f4a011c33289e7b26aee4ca7c",
+      "adaptation": "改编：保留当前项 useEffect 与原始 scrollToElementInContainer 函数；仅滚动容器为客户端，略去供应商按钮、i18n 和溢出装饰。"
+    }
+  ]
+}

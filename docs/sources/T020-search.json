@@ -1,0 +1,42 @@
+{
+  "task": "T020",
+  "scope": "Authorized published navigation title search UI; no unified body, Reference or QA search claim",
+  "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/Search/SearchInput.tsx",
+      "target": "src/components/gitbook/Search/SearchInput.tsx",
+      "sourceSha256": "1f7b70f1c2dba00836d323c985c7954b0e9ee7c332c94d33b715a3c74af6c6a3",
+      "targetSha256": "58ce38d02a43b75a7d7cbfe9f8de71b63370309a97a2ccdb3b7d3e885cfbec25",
+      "adaptation": "保留带图标的标题输入、清空与快捷键入口，改用原生 GET 表单和 JUYU 样式，增加中文组合输入及明确长度校验；移除弹出框/AI/GitBook 上下文。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/Search/SearchResults.tsx",
+      "target": "src/components/gitbook/Search/SearchResults.tsx",
+      "sourceSha256": "2f5cd4291368389d331febf58d61ff4a35d795a70f95efe81e90c3b28ed2c588",
+      "targetSha256": "9663e2f4a24e5a3fb8e536da3b456a81648c92777d3e947f55da3f83c2061a29",
+      "adaptation": "保留结果列表与错误/空状态分支，改为完整搜索页的原生列表/链接语义；加入已授权计数与分页，移除 AI、动画、供应商统计和浏览器搜索历史。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/Search/SearchPageResultItem.tsx",
+      "target": "src/components/gitbook/Search/SearchPageResultItem.tsx",
+      "sourceSha256": "9a134d2d3a4c74e8d749cf7288af6373d1d8432e2377d0e418472f7bba5f7a62",
+      "targetSha256": "83cfb0581c94dae8d0ca12899386610ac94cfc63e14fd1d1de610d2c057c02ef",
+      "adaptation": "保留图标、分类路径、文章标题与关键词高亮组合；输入仅接收服务器核准正式标题，不包含正文摘要或草稿。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/Search/SearchResultItem.tsx",
+      "target": "src/components/gitbook/Search/SearchResultItem.tsx",
+      "sourceSha256": "ce48e639272fe9aecd3da679b2131377e2334c4e447c23f4ce28f3ee5693790c",
+      "targetSha256": "1a2e9fb5f23b23f7987f3db3b32dc8f72a4c01a1aeb6b5a2bbdac7197b332ed8",
+      "adaptation": "保留图标/内容/尾部动作结构，使用原生链接取代供应商 Link，去除嵌套按钮和弹出框 option 语义。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/Search/HighlightQuery.tsx",
+      "target": "src/components/gitbook/Search/HighlightQuery.tsx",
+      "sourceSha256": "22d19b3264cefe3b0fb969946d2c2e2d2545878996d55fbf414a0ecf3c302cc5",
+      "targetSha256": "b8611846f15492bd14200ccdc5bd1a3128f6b52ab2e772d9bc050e25210a2080",
+      "adaptation": "保留字符串分段匹配、reduce 与 React 文本节点渲染；替换主题样式，过滤空词并用保持字符偏移的 ASCII 大小写折叠。"
+    }
+  ]
+}

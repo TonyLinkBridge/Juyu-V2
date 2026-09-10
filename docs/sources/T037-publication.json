@@ -1,0 +1,59 @@
+{
+  "task": "T037",
+  "scope": "Explicit approved-to-queued-to-published admin workflow; local acceptance only",
+  "files": [
+    {
+      "target": "src/review/publication.ts",
+      "targetSha256": "310de3564ef5065579bb832cdafb8fdd33ada315f939c8f87ece1aec2eeea079",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/review/publication-client.ts",
+      "targetSha256": "4b1a464f8ba201850e616ad2858ebdeb8dc7db88a2d2623160f33e6d96ba2d25",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/review/publication.ts",
+      "targetSha256": "a61c74f368f68ff5ab6f39c29ac1cbbde5e25a47b2eb4350145e58c5ebe39f54",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "71ce5f75784520b930382d6c8670f1e34edb41e3ff11e4a32310b1a574c65b06",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/review/PublicationPanel.tsx",
+      "targetSha256": "0441fd629908bb29f7b88bb0fef038fc8dbbe49332f10ca11f7596e395149589",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/review/ReviewDecision.tsx",
+      "targetSha256": "61e1c4c3c18d5cf3faeb64b2a66c77c9af01aa0b8702ee98990a113027f3bb1d",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/review/http.ts",
+      "targetSha256": "e4d76883b92fd3b5d217f0f41e36144e5436cb5bdebbdcb05bc972bc89139f61",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/api/admin/review/[id]/publication/route.ts",
+      "targetSha256": "403041b437f746d87e96067fc31f62ec05a96bc279ea20c1fce6bdb9b4c2168a",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/admin/review/publish/page.tsx",
+      "targetSha256": "eebb1178feb2a8c7cdb78021006477a24db0b9cc3b46672e37509f70bc758df2",
+      "origin": "JUYU application code; no new upstream source copied"
+    }
+  ],
+  "integration": "Existing workflow and atomic persistence, current-publication reader permissions and GitBook-derived rendering. No new migrations or dependencies.",
+  "verification": "docs/verification/2026-09-09-publication.md",
+  "limitations": [
+    "Manual queue and publish only; no timed scheduler",
+    "No real Clerk/Supabase/company/device/deployment acceptance",
+    "Historical valid approval survives later reviewer deactivation; current operator must remain eligible",
+    "Full lifecycle management and full history are subsequent tasks"
+  ]
+}

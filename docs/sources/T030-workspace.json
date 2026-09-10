@@ -1,0 +1,56 @@
+{
+  "task": "T030",
+  "scope": "Admin-only current workflow board and list, native GET filters and bounded pagination",
+  "license": "docs/sources/licenses/square-ui-ln-dev.txt",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/square-ui-master/templates/tasks/components/tasks/board/tasks-board.tsx",
+      "target": "src/components/tasks/TasksBoard.tsx",
+      "sourceSha256": "9657d0f709565a04ed6e890d872a358b26a90e71b37052296ab1802f6dc7ce4c",
+      "targetSha256": "75dbc24443a56360280f565f5b8297fa3988bf4ac822fc2c2f1c437db35c1c4d",
+      "adaptation": "保留横向分栏和按状态渲染结构；供应商store与演示数据替换为服务端授权分页。"
+    },
+    {
+      "source": "/Users/tony/Downloads/square-ui-master/templates/tasks/components/tasks/board/task-column.tsx",
+      "target": "src/components/tasks/TaskColumn.tsx",
+      "sourceSha256": "276cd98e1b26497a86dde98d501ab02b47891841552afa197ce757077c65a6cc",
+      "targetSha256": "fafdc290580a4871f3e9f00b421cfc2b35d425bca07649649af8d91f6c158a13",
+      "adaptation": "保留圆角列容器、状态徽标、数量和卡片堆叠；标注本页/总数，新增空列说明。"
+    },
+    {
+      "source": "/Users/tony/Downloads/square-ui-master/templates/tasks/components/tasks/board/task-card.tsx",
+      "target": "src/components/tasks/TaskCard.tsx",
+      "sourceSha256": "613a59c5b8bfa0ccd4f74eeb52b7fdc170016001cf716fa95ed7d64c70887086",
+      "targetSha256": "c8dc58f30a74ee8267227ab96695f17e3d958008ef9790e8ab2f69b12b883202",
+      "adaptation": "保留圆角卡片、标题、元数据及分隔页脚；替换为当前工作版本、正式版、编辑人和二审人，去除演示优先级、评论数和外部头像。"
+    },
+    {
+      "source": "/Users/tony/Downloads/square-ui-master/templates/tasks/components/tasks/filters/tasks-filters.tsx",
+      "target": "src/components/tasks/TasksFilters.tsx",
+      "sourceSha256": "17b67aea10f2b35b7fd0345a5c6e22941075bc3e247520d46afe3991480e99f3",
+      "targetSha256": "32fc55447ec052ff26d06e0e2f6502a37f98e5dfe2b6a4d2274140d0204a894d",
+      "adaptation": "保留搜索与筛选行；使用带标签的原生GET控件，接当前个人范围、类型和状态；不移植空操作的导入导出菜单。"
+    },
+    {
+      "source": "/Users/tony/Downloads/square-ui-master/templates/tasks/components/tasks/tasks-main.tsx",
+      "target": "src/components/tasks/TasksWorkspace.tsx",
+      "sourceSha256": "f7cf4a0ca2c3a8f355df85af7408b82c45d21e8b5d6d6765f81c9bf93211b148",
+      "targetSha256": "0b47e4e0a358ca11522cd907ab8fbfe12ee40cc073f2db1aa6b7c76350dd4037",
+      "adaptation": "沿用筛选/看板的纵向组合；去掉收入图表和演示统计，加入工作台入口、真实错误/空状态、分页及列表切换。"
+    }
+  ],
+  "juyuAdditions": [
+    "Workspace query validation and current publication labels",
+    "Restricted repeatable-read SQL counts and pagination",
+    "Admin workspace service and read-only endpoint",
+    "Responsive TasksList using the same server page",
+    "Role/empty/error/contrast/local browser tests"
+  ],
+  "excluded": [
+    "Demo Zustand data and statistics",
+    "Revenue and burndown charts",
+    "External avatars and fake priority/comment metrics",
+    "Drag-to-change workflow status",
+    "New/edit full document editor or approve/publish controls"
+  ]
+}

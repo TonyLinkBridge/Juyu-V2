@@ -1,0 +1,56 @@
+{
+  "task": "T047",
+  "scope": "Admin-only usage dashboard, rolling periods, fingerprint-only search groups, distinct-impression CTR, currently readable publications and current-version feedback",
+  "files": [
+    {
+      "target": "src/analytics/dashboard-format.ts",
+      "targetSha256": "79fc48a2ffe79ae5c7d49aaafc933e750fe7b032e9ab388034f6d45d11dc6585",
+      "origin": "JUYU analytics dashboard implementation; existing Tasks-derived workspace receives navigation link; no new vendor code"
+    },
+    {
+      "target": "src/analytics/dashboard.ts",
+      "targetSha256": "1b45eb4edf1c6d10e9a20c064b6e46ba2edbed4ba7630f2709f967d098b42bd1",
+      "origin": "JUYU analytics dashboard implementation; existing Tasks-derived workspace receives navigation link; no new vendor code"
+    },
+    {
+      "target": "src/app/admin/analytics/page.tsx",
+      "targetSha256": "01314417ae7cc8f932d76278e17f5d3c636e6f03667e1ed7419d730cb8fed4bb",
+      "origin": "JUYU analytics dashboard implementation; existing Tasks-derived workspace receives navigation link; no new vendor code"
+    },
+    {
+      "target": "src/app/api/admin/analytics/route.ts",
+      "targetSha256": "1b979083f46ee67a92bfb2ee15539fa5d30c3c3f8f4b832648ee85a83592b76e",
+      "origin": "JUYU analytics dashboard implementation; existing Tasks-derived workspace receives navigation link; no new vendor code"
+    },
+    {
+      "target": "src/app/globals.css",
+      "targetSha256": "2eb24a5896bd8d2e7168fab8312cea36dcd3ca83347bb38560e498441e2d5da9",
+      "origin": "JUYU analytics dashboard implementation; existing Tasks-derived workspace receives navigation link; no new vendor code"
+    },
+    {
+      "target": "src/components/analytics/AnalyticsDashboard.tsx",
+      "targetSha256": "93adb367ce399e95a30d7f775eab2cc0788f79133faf983cb8e587304e3e974b",
+      "origin": "JUYU analytics dashboard implementation; existing Tasks-derived workspace receives navigation link; no new vendor code"
+    },
+    {
+      "target": "src/components/tasks/TasksWorkspace.tsx",
+      "targetSha256": "6f4488cf9a9c230a3268057a07b422f5ae6bfe451d8ca0fb08571574a37abc13",
+      "origin": "JUYU analytics dashboard implementation; existing Tasks-derived workspace receives navigation link; no new vendor code"
+    },
+    {
+      "target": "src/server/analytics/dashboard-http.ts",
+      "targetSha256": "7559f90490c430fcde7e31f7c4ef16b73afab90b48e105fe1d858ef3ad4af808",
+      "origin": "JUYU analytics dashboard implementation; existing Tasks-derived workspace receives navigation link; no new vendor code"
+    },
+    {
+      "target": "src/server/analytics/dashboard.ts",
+      "targetSha256": "95112bb7f46441fccaa7517ed36da3a69cad049a25d22f33e724aa41a30f8735",
+      "origin": "JUYU analytics dashboard implementation; existing Tasks-derived workspace receives navigation link; no new vendor code"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "a0b40e52907f293c5ef55971e07bb72d81e55ab7bd00e8585e18eb924494b885",
+      "origin": "JUYU analytics dashboard implementation; existing Tasks-derived workspace receives navigation link; no new vendor code"
+    }
+  ]
+}

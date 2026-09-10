@@ -1,0 +1,76 @@
+{
+  "task": "T029",
+  "scope": "Limited block formulas, flowcharts and basic Chinese inline formatting; local acceptance only",
+  "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/Math.tsx",
+      "target": "src/components/gitbook/RichBlocks/Math.tsx",
+      "sourceSha256": "6dffdf6eb694d81da0a30616763f29ec4756b893e36fefe43818089f84da4025",
+      "targetSha256": "3cd0932a10407cea2abb3ff8633d967ed4f6ccb41107526b37fbd4175d4f4d27",
+      "adaptation": "沿用块公式与横向滚动方向；供应商数学资源替换为本地 KaTeX MathML，增加错误及原文。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/CodeBlock/MermaidCodeBlock.tsx",
+      "target": "src/components/gitbook/RichBlocks/Diagram.tsx",
+      "sourceSha256": "feaa5a2512b412852ebe8e6a9d54a1b833994140fab9f372840211d6a4dc0221",
+      "targetSha256": "1cc8222e93a6872d6ff504348a224df128add782e209a1dbc6d278c483eaa245",
+      "adaptation": "改编图形容器和失败回退交互；改为私有服务器 SVG 图片及手动草稿预览。原上游客户端 SVG 注入、缩放和全屏未移植。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/DocumentView.tsx",
+      "target": "src/components/gitbook/Reading/DocumentView.tsx",
+      "sourceSha256": "eb19546c3654a92d189cdabfad3fd528f21c1562bc3ecdd61d40de18d37267fe",
+      "targetSha256": "e5009c0991ec8a09ac516a7a046196c58d3b209adb7265536f45952dc04499a2",
+      "adaptation": "延续基础正文分派，列表文字接入 JUYU 有限强调适配。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/Paragraph.tsx",
+      "target": "src/components/gitbook/Reading/Paragraph.tsx",
+      "sourceSha256": "fabd346550302b608a1f43e9367afdfaeeb4e17a564d84dd1de8168a23ff2ccb",
+      "targetSha256": "60db317535ceb24af335256656039cba2b3b2a030127a0c8a91f4851f1757ba2",
+      "adaptation": "段落文字接入安全的基础强调与行内代码。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/Heading.tsx",
+      "target": "src/components/gitbook/Reading/Heading.tsx",
+      "sourceSha256": "e6726507782c3296549843281e665b84d275f45c3c7329da1ef7518d1d2bd63d",
+      "targetSha256": "c814bdad68d1ae1b5245ba21b1a9950b47c1c72e1eee0f32f6e442f467831436",
+      "adaptation": "标题接入基础强调，目录标题去除已识别标记。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "target": "src/components/gitbook/Reading/PageBody.tsx",
+      "sourceSha256": "f466467bbb0bb7d0fe1ad69aac6e3513099d881d09301ceb3c0d45ca55b770b7",
+      "targetSha256": "0ce2e0fa3fddec4548272cab3625dde6d109a28d4d523a311a467c0403e5e5fe",
+      "adaptation": "传递已授权文章 ID 与正式版本，供图形接口复核。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/Images.tsx",
+      "target": "src/components/gitbook/Media/MediaBlocks.tsx",
+      "sourceSha256": "742895a14f5bffb9b0d2177dabf3e477bf9aa3f51446d34de6f782c49fa4a364",
+      "targetSha256": "ba46e572f366c63f38648f04f7b8efe867454fe22857ec7f66b9694d679f82ad",
+      "adaptation": "延续媒体容器并增加公式和流程图分派。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PDF/pdf.css",
+      "target": "src/pdf/render.ts",
+      "sourceSha256": "399480f0f30221ab0a8dbdd8852d9e2a6fce1d07a94c1b61ca4f8fa26d1619bf",
+      "targetSha256": "ec0321c6bad56d1d4a98343c307a05e3d36616635683b1a7a80793b50674fa88",
+      "adaptation": "延续打印排版，接入 MathML、已授权流程图图片和基础文字强调；显式恢复列表标记。"
+    }
+  ],
+  "juyuAdditions": [
+    "KaTeX bounded MathML validation",
+    "Offline server Mermaid rendering, bounded queue and authorization rechecks",
+    "Admin science fields and draft preview API",
+    "Finite text inline token parser and escaped HTML serializer",
+    "PDF diagram embedding and invalid formula rejection"
+  ],
+  "excluded": [
+    "Full upstream Mermaid pan/zoom/fullscreen",
+    "Other Mermaid diagram types, links, HTML and custom styling",
+    "Full Markdown nesting or inline math syntax",
+    "Full BlockNote editing and real service/device acceptance"
+  ]
+}

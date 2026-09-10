@@ -1,0 +1,5 @@
+import {applicationAuthorization} from '../../../../../server/authorization/application';
+import {mediaResponse,readBounded,requireMediaOrigin} from '../../../../../server/media/upload';
+export const dynamic='force-dynamic';
+export async function GET(_request:Request,context:{params:Promise<{id:string}>}){return mediaResponse(async()=>(await applicationAuthorization()).media((await context.params).id));}
+export async function PATCH(request:Request,context:{params:Promise<{id:string}>}){return mediaResponse(async()=>{const service=await applicationAuthorization();const id=(await context.params).id;await service.media(id);requireMediaOrigin(request,process.env.APP_ORIGIN);if(request.headers.get('content-type')?.split(';')[0]!=='application/json')throw new Error('INVALID_INPUT');let input;try{input=JSON.parse((await readBounded(request.body,1500000,AbortSignal.any([request.signal,AbortSignal.timeout(15000)]))).toString('utf8'));}catch{throw new Error('INVALID_INPUT');}return service.saveMedia(id,input);});}

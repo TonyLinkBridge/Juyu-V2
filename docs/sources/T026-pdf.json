@@ -1,0 +1,56 @@
+{
+  "task": "T026",
+  "scope": "Single authorized published article PDF reading and server export; native private PDF attachment view; basic tables and cover; full rich content and draft editor preview pending",
+  "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PDF/PDFPage.tsx",
+      "target": "src/components/gitbook/PDF/PDFPage.tsx",
+      "sourceSha256": "8fd9d7db17031107d24cedea703b95817ecd22c86244ef228ef5d764b6d10cfe",
+      "targetSha256": "433cb59c46f3688f25effd16b49fb1f0108b5479db1304d7e8cc0cc5b41ae5c4",
+      "adaptation": "沿用独立白色打印页和页外返回/操作控件；只显示服务端授权单篇正式版本，PDF附件单独同源打开，不复制全空间导出或供应商读取接口。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PDF/PrintButton.tsx",
+      "target": "src/components/gitbook/PDF/PrintButton.tsx",
+      "sourceSha256": "67c3b9c7f6ee991f6a7f6841cced7ae550268918a8ad7139940634e655289e0c",
+      "targetSha256": "957a47e58ccab2adad312986c4a53d37157b82ec8fc891e4c9e264c4abf52b14",
+      "adaptation": "保留window.print入口；新增每次点击的服务端当前版本及封面权限复核，失败不打印。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PDF/PDFPrintControls.tsx",
+      "target": "src/components/gitbook/PDF/PDFPrintControls.tsx",
+      "sourceSha256": "590233040e0c3ff5b09d6ac7541148e1fbf3684e65a493ef049d49b5e0e1d639",
+      "targetSha256": "5e24ec46b604f03430ff0948b5a0bae82a9cc89ee16f5bf6ec5e2a43328d059a",
+      "adaptation": "从打印按钮外壳改编为返回、服务器下载、打印操作栏；加入进度、失败恢复与图片就绪状态。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PDF/ImagesLoadingStatus.tsx",
+      "target": "src/components/gitbook/PDF/PDFPrintControls.tsx",
+      "sourceSha256": "eeb5b11b43588be06b7adb5687faa1a195ac9d8ee13ec2062986a9e178485073",
+      "targetSha256": "5e24ec46b604f03430ff0948b5a0bae82a9cc89ee16f5bf6ec5e2a43328d059a",
+      "adaptation": "沿用图片未就绪提示方向，监听加载/失败，在图片失败时禁用浏览器打印；服务器导出独立重新读取私有图片。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PDF/pdf.css",
+      "target": "src/pdf/render.ts",
+      "sourceSha256": "399480f0f30221ab0a8dbdd8852d9e2a6fce1d07a94c1b61ca4f8fa26d1619bf",
+      "targetSha256": "48bfb7cde5410243385bf8ae81a374d24b12a18d77cd05fd0c054fd8bec8ff6e",
+      "adaptation": "保留A4尺寸、白底、标题不拆页及打印规则，改为文字转义的共享HTML输出；补充重复表头、长表格分页、中文字体回退与页边距。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "target": "src/components/gitbook/Reading/PageBody.tsx",
+      "sourceSha256": "f466467bbb0bb7d0fe1ad69aac6e3513099d881d09301ceb3c0d45ca55b770b7",
+      "targetSha256": "99adc8355e398b1a91132e0f60479c4cbf73b292277cf767913f889ebe44031a",
+      "adaptation": "在既有正文适配中增加当前文章ID/正式版本绑定的PDF阅读与导出入口。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/DocumentView.tsx",
+      "target": "src/components/gitbook/Reading/DocumentView.tsx",
+      "sourceSha256": "eb19546c3654a92d189cdabfad3fd528f21c1562bc3ecdd61d40de18d37267fe",
+      "targetSha256": "9f48dde0d78c7cc61665e781bd71303a65d8779708be2331f495ef7b01d51abd",
+      "adaptation": "在既有正文遍历适配上加入基础文本表格输出；阅读和PDF共用解析结果，单元格转义，不解释HTML或外部图片。"
+    }
+  ]
+}

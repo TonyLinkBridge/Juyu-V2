@@ -1,0 +1,10 @@
+'use client';
+import type {MediaBlock,ManagedAsset} from '../../media/model';
+import {RichBlockFields} from '../rich-block-fields';
+import {ScienceFields} from '../science-fields';
+export function MediaFields({block,assets,onChange}:{block:MediaBlock;assets:ManagedAsset[];onChange:(b:MediaBlock)=>void}){
+ if(block.type==='hint'||block.type==='code'||block.type==='tabs')return <RichBlockFields block={block} onChange={onChange}/>;
+ if(block.type==='math'||block.type==='diagram')return <ScienceFields block={block} onChange={onChange}/>;
+ if(block.type==='table')return <><div className="reader-scroll-region"><table><thead><tr>{block.headers.map((v,c)=><th key={c}><input aria-label={`表头 ${c+1}`} value={v} maxLength={200} onChange={e=>onChange({...block,headers:block.headers.map((old,j)=>j===c?e.target.value:old)})}/><button type="button" disabled={block.headers.length===1} onClick={()=>onChange({...block,headers:block.headers.filter((_,j)=>j!==c),rows:block.rows.map(r=>r.filter((_,j)=>j!==c))})}>删除列 {c+1}</button></th>)}</tr></thead><tbody>{block.rows.map((row,r)=><tr key={r}>{row.map((v,c)=><td key={c}><textarea aria-label={`第 ${r+1} 行第 ${c+1} 列`} value={v} rows={2} maxLength={2000} onChange={e=>onChange({...block,rows:block.rows.map((old,i)=>i===r?old.map((t,j)=>j===c?e.target.value:t):old)})}/></td>)}<td><button type="button" onClick={()=>onChange({...block,rows:block.rows.filter((_,i)=>i!==r)})}>删除行 {r+1}</button></td></tr>)}</tbody></table></div><div className="media-toolbar"><button type="button" disabled={block.rows.length>=200} onClick={()=>onChange({...block,rows:[...block.rows,block.headers.map(()=>'')]})}>增加行</button><button type="button" disabled={block.headers.length>=8} onClick={()=>onChange({...block,headers:[...block.headers,'新列'],rows:block.rows.map(r=>[...r,''])})}>增加列</button></div></>;
+ return <><p>{assets.find(a=>a.id===block.assetId)?.filename??'本篇附件'}</p><label>说明<input value={block.caption} maxLength={500} onChange={e=>onChange({...block,caption:e.target.value})}/></label><label>替代文字<textarea value={block.alt} maxLength={500} onChange={e=>onChange({...block,alt:e.target.value})}/></label></>;
+}

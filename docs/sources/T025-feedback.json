@@ -1,0 +1,21 @@
+{
+  "task": "T025",
+  "scope": "Versioned employee feedback form and Admin overview/details; local persistence, authorization and UI; real services pending",
+  "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageFeedback/PageFeedbackForm.tsx",
+      "target": "src/components/gitbook/Reading/PageFeedbackForm.tsx",
+      "sourceSha256": "8375dfb2e7b2e0c2faf96c11c494b1b092ff445e96e96363bff4a3a54cd6be13",
+      "targetSha256": "e5b0819496ab20e6b89d3f2476b6e4f79e15951c969d620d5946fd5f9d85f83c",
+      "adaptation": "保留文章评价、可选说明、输入聚焦和成功状态的结构。改为有帮助/没有帮助两项、显式提交、服务端确认后成功，支持当前正式版本的一份可修改反馈；移除GitBook事件追踪和供应商依赖。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "target": "src/components/gitbook/Reading/PageBody.tsx",
+      "sourceSha256": "f466467bbb0bb7d0fe1ad69aac6e3513099d881d09301ceb3c0d45ca55b770b7",
+      "targetSha256": "5d281d95ea48da72abf30da698b1feb1f0a5514ae185cb5abbd48f72b81e5724",
+      "adaptation": "在既有正文和文章翻页之间接入反馈；按文章ID和正式版本重建表单状态，仅在已授权正文存在时显示。"
+    }
+  ]
+}

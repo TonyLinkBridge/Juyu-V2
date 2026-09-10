@@ -1,0 +1,35 @@
+{
+  "task": "T032",
+  "scope": "JUYU editor conflict comparison and page-local input recovery; local acceptance only",
+  "files": [
+    {
+      "target": "src/editor/recovery.ts",
+      "targetSha256": "51b1bf5e76badfa8b82b9e0caf9d13b00335476de4dc51ce34fcb38acdb4ec4c",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/editor/EditorRecovery.tsx",
+      "targetSha256": "4f60b32a24e1e28301a4b548fd655631af854e772cd6e09d082660296b942538",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/editor/ArticleEditor.tsx",
+      "targetSha256": "34fc766de0e9babd06ede730868cf28cfe908408c777487f52b841176144e240",
+      "origin": "JUYU application code; no new upstream source copied"
+    }
+  ],
+  "integration": "Uses existing BlockNote 0.54.0 editor and existing Admin-authorized GET/PUT with sequence checks. Server/database authorization unchanged.",
+  "behavior": [
+    "Read latest version without writing",
+    "Verify matching document and non-decreasing acknowledged sequence",
+    "Explicitly adopt server copy and keep complete local input backups in parent component",
+    "Clipboard failure keeps manually selectable input",
+    "Submitted and inactive snapshots remain read-only"
+  ],
+  "limitations": [
+    "Backups live only in current page memory; reload/close clears them",
+    "No automatic document merge or local recovery-file import",
+    "No Liveblocks or real service/device/deployment acceptance"
+  ],
+  "verification": "docs/verification/2026-09-09-editor-recovery.md"
+}

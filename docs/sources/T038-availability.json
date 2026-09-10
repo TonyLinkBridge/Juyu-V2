@@ -1,0 +1,109 @@
+{
+  "task": "T038",
+  "scope": "Published re-edit guidance, archive, unpublish and restore as unpublished draft; local acceptance only",
+  "files": [
+    {
+      "target": "src/availability/model.ts",
+      "targetSha256": "0644d68651787be956190d188021b39c5a13eb78fd96f3f35f2191f8c977573d",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/availability/client.ts",
+      "targetSha256": "168336097f67b7cc0159b24eb2334e2e36e5f81c4e69623020beb0e39c4ab005",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/availability/repository.ts",
+      "targetSha256": "ca92b16e5147011212f2fbb1a3a9263a1f993668bed4a93edc140f1251987ce7",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/availability/http.ts",
+      "targetSha256": "a0e39315f2e3f88fdedd0344d529d95fcd87958420273957d33fabddbddf09c3",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/database/migrations/0011_document_availability.sql",
+      "targetSha256": "4fb5db7cb64b60c0b273cc25114c6d461d4163cf451dcb7d17c133d584a181bc",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "1920dc49f1fef2da11b81aa07dd0d01c96e4ca4326ef8d3fc9b9d406dfd4c6ea",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "c976b438ab60f7b14d4145248a295d14aa16b291ea6fb611ce4d2a5bddab144a",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/domain/model.ts",
+      "targetSha256": "88da2064fd6ceee71bf73e427eb92de4c2c050cf2ab487347f81511f3f78c7c6",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/storage/delivery.ts",
+      "targetSha256": "66f0abe346f7a2b6386e89aaf22bbe6153ac44dd95cd7facacb525cb2c6f8a1f",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/availability/AvailabilityPanel.tsx",
+      "targetSha256": "5c1780957734bbe4fff82ff8fc7332e16ba22d8a94ea24bcd7223eb870a3296d",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/availability/ArchivesList.tsx",
+      "targetSha256": "b484d19438183f7643d3cf3330249d264e5f8593b3deae523354b6dc16d16db3",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/admin/availability/page.tsx",
+      "targetSha256": "1e57ba10bee3cda84266e0c962c918bfffbb9034846af2c466eff605753e650b",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/api/admin/availability/[id]/route.ts",
+      "targetSha256": "50ec1bf401109de8064e972f0e4dc8c19270d1599889afccf5c52b2980906e78",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/api/admin/archives/route.ts",
+      "targetSha256": "7359639a338e276cb5184ebc80c0ad3161c94830b2f34402876a503f95235a7b",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/editor/ArticleEditor.tsx",
+      "targetSha256": "f92f3f77405ec85f38dcf3bd612d9d55548c5cf46b64f614b131fa30c71a7e51",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/tasks/TasksWorkspace.tsx",
+      "targetSha256": "557373b17236f4f288a049ba1858c13566201af883258e12db56a5572d596eb0",
+      "origin": "Existing Tasks-derived workspace adaptation; upstream recorded in SOURCES.json"
+    },
+    {
+      "target": "src/components/review/ReviewDecision.tsx",
+      "targetSha256": "93b9364d3282b37c219dbc84e35976f6fa874a719ad94181c771d5865817906a",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/review/PublicationPanel.tsx",
+      "targetSha256": "7d67e1f3b4e0c4d3580fc270ba8f827c431fe0404b03882a2f3815904c3f4226",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/globals.css",
+      "targetSha256": "c26e360bb1802a02affa3ae15d80dd9647cfd459f8a4f30b5c09c9107a4dc57e",
+      "origin": "JUYU application code; no new upstream source copied"
+    }
+  ],
+  "integration": "Adds migration 0011; old migrations retained. Atomic lifecycle, review reset and audit, current-publication authorization plus attachment pre-delivery recheck. No new dependencies.",
+  "verification": "docs/verification/2026-09-09-availability.md",
+  "limitations": [
+    "No live Clerk/Supabase/company/device/deployment acceptance",
+    "Delivered or downloaded bytes cannot be recalled; subsequent requests and pre-delivery authorization are checked",
+    "Availability history shows latest 20 entries; full version history is T039",
+    "Unarchive restores only unpublished draft and requires new review and publication"
+  ]
+}

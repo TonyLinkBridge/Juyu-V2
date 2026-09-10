@@ -1,0 +1,43 @@
+[WebServer] (node:76265) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 32 tests using 1 worker
+
+(node:76266) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [desktop] › tests/e2e/accessibility.spec.ts:27:155 › login has no automated accessibility violations in both themes (435ms)
+  ✓   2 [desktop] › tests/e2e/accessibility.spec.ts:27:155 › reader has no automated accessibility violations in both themes (769ms)
+  ✓   3 [desktop] › tests/e2e/accessibility.spec.ts:27:155 › workspace has no automated accessibility violations in both themes (1.2s)
+  ✓   4 [desktop] › tests/e2e/accessibility.spec.ts:27:155 › workspace-tools has no automated accessibility violations in both themes (985ms)
+  ✓   5 [desktop] › tests/e2e/accessibility.spec.ts:27:155 › workspace-empty has no automated accessibility violations in both themes (356ms)
+  ✓   6 [desktop] › tests/e2e/accessibility.spec.ts:27:155 › workspace-error has no automated accessibility violations in both themes (314ms)
+  ✓   7 [desktop] › tests/e2e/accessibility.spec.ts:27:155 › features has no automated accessibility violations in both themes (448ms)
+  ✓   8 [desktop] › tests/e2e/accessibility.spec.ts:27:155 › features-error has no automated accessibility violations in both themes (390ms)
+  ✓   9 [desktop] › tests/e2e/accessibility.spec.ts:27:155 › editor has no automated accessibility violations in both themes (785ms)
+  ✓  10 [desktop] › tests/e2e/accessibility.spec.ts:27:155 › decision has no automated accessibility violations in both themes (477ms)
+  ✓  11 [desktop] › tests/e2e/accessibility.spec.ts:44:1 › workspace keeps frequent actions visible and tools keyboard operable at 320 pixels (309ms)
+  ✓  12 [desktop] › tests/e2e/accessibility.spec.ts:57:1 › actual login skip link and named editor can be reached with the keyboard (497ms)
+  ✓  13 [desktop] › tests/e2e/workspace.spec.ts:7:1 › workspace renders real-count contract and responsive list with safe titles (586ms)
+  ✓  14 [desktop] › tests/e2e/workspace.spec.ts:30:1 › workspace filters by personal scope, kind and status and resets page via keyboard (813ms)
+  ✓  15 [desktop] › tests/e2e/workspace.spec.ts:40:1 › workspace service failure is distinct from empty and retry recovers (150ms)
+  ✓  16 [desktop] › tests/e2e/workspace.spec.ts:45:1 › real workspace endpoint and admin page reject missing or forged identities (125ms)
+(node:76442) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  17 [mobile] › tests/e2e/accessibility.spec.ts:27:155 › login has no automated accessibility violations in both themes (321ms)
+  ✓  18 [mobile] › tests/e2e/accessibility.spec.ts:27:155 › reader has no automated accessibility violations in both themes (545ms)
+  ✓  19 [mobile] › tests/e2e/accessibility.spec.ts:27:155 › workspace has no automated accessibility violations in both themes (950ms)
+  ✓  20 [mobile] › tests/e2e/accessibility.spec.ts:27:155 › workspace-tools has no automated accessibility violations in both themes (930ms)
+  ✓  21 [mobile] › tests/e2e/accessibility.spec.ts:27:155 › workspace-empty has no automated accessibility violations in both themes (329ms)
+  ✓  22 [mobile] › tests/e2e/accessibility.spec.ts:27:155 › workspace-error has no automated accessibility violations in both themes (262ms)
+  ✓  23 [mobile] › tests/e2e/accessibility.spec.ts:27:155 › features has no automated accessibility violations in both themes (399ms)
+  ✓  24 [mobile] › tests/e2e/accessibility.spec.ts:27:155 › features-error has no automated accessibility violations in both themes (327ms)
+  ✓  25 [mobile] › tests/e2e/accessibility.spec.ts:27:155 › editor has no automated accessibility violations in both themes (666ms)
+  ✓  26 [mobile] › tests/e2e/accessibility.spec.ts:27:155 › decision has no automated accessibility violations in both themes (481ms)
+  ✓  27 [mobile] › tests/e2e/accessibility.spec.ts:44:1 › workspace keeps frequent actions visible and tools keyboard operable at 320 pixels (277ms)
+  ✓  28 [mobile] › tests/e2e/accessibility.spec.ts:57:1 › actual login skip link and named editor can be reached with the keyboard (434ms)
+  ✓  29 [mobile] › tests/e2e/workspace.spec.ts:7:1 › workspace renders real-count contract and responsive list with safe titles (318ms)
+  ✓  30 [mobile] › tests/e2e/workspace.spec.ts:30:1 › workspace filters by personal scope, kind and status and resets page via keyboard (807ms)
+  ✓  31 [mobile] › tests/e2e/workspace.spec.ts:40:1 › workspace service failure is distinct from empty and retry recovers (144ms)
+  ✓  32 [mobile] › tests/e2e/workspace.spec.ts:45:1 › real workspace endpoint and admin page reject missing or forged identities (105ms)
+
+  32 passed (19.7s)

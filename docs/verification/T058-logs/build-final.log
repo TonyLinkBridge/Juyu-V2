@@ -1,0 +1,128 @@
+
+> juyu-help-centre-v2@0.1.0 build
+> next build
+
+▲ Next.js 16.3.4 (Turbopack)
+✓ Running next.config.ts took 10ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1422ms
+  Running TypeScript ...
+  Finished TypeScript in 2.3s ...
+  Collecting page data using 9 workers ...
+  Generating static pages using 9 workers (0/3) ...
+✓ Generating static pages using 9 workers (3/3) in 86ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /admin
+├ ƒ /admin/access-denied
+├ ƒ /admin/analytics
+├ ƒ /admin/announcements
+├ ƒ /admin/availability
+├ ƒ /admin/editor
+├ ƒ /admin/feedback
+├ ƒ /admin/forms
+├ ƒ /admin/forms/[id]
+├ ƒ /admin/history
+├ ƒ /admin/media
+├ ƒ /admin/members
+├ ƒ /admin/review
+├ ƒ /admin/review/manage
+├ ƒ /admin/review/publish
+├ ƒ /admin/settings/categories
+├ ƒ /admin/settings/features
+├ ƒ /admin/settings/fields
+├ ƒ /admin/settings/forms
+├ ƒ /admin/settings/history
+├ ƒ /admin/settings/navigation
+├ ƒ /admin/sign-in/[[...sign-in]]
+├ ƒ /admin/sign-in/error
+├ ƒ /admin/trash
+├ ƒ /api/admin/access
+├ ƒ /api/admin/analytics
+├ ƒ /api/admin/announcements
+├ ƒ /api/admin/announcements/[id]
+├ ƒ /api/admin/archives
+├ ƒ /api/admin/articles/[id]
+├ ƒ /api/admin/assets/[id]
+├ ƒ /api/admin/availability/[id]
+├ ƒ /api/admin/categories
+├ ƒ /api/admin/categories/[id]
+├ ƒ /api/admin/editor/[id]
+├ ƒ /api/admin/features
+├ ƒ /api/admin/feedback
+├ ƒ /api/admin/fields
+├ ƒ /api/admin/fields/[id]
+├ ƒ /api/admin/form-records
+├ ƒ /api/admin/form-records/[id]
+├ ƒ /api/admin/forms
+├ ƒ /api/admin/forms/[id]
+├ ƒ /api/admin/history/[id]
+├ ƒ /api/admin/history/[id]/versions/[revision]
+├ ƒ /api/admin/history/[id]/versions/[revision]/assets/[assetId]
+├ ƒ /api/admin/history/[id]/versions/[revision]/diagram
+├ ƒ /api/admin/lifecycle/[id]
+├ ƒ /api/admin/lifecycle/[id]/cleanup
+├ ƒ /api/admin/media/[id]
+├ ƒ /api/admin/media/[id]/diagram
+├ ƒ /api/admin/media/[id]/upload
+├ ƒ /api/admin/members
+├ ƒ /api/admin/members/[id]
+├ ƒ /api/admin/members/operations/[id]
+├ ƒ /api/admin/navigation
+├ ƒ /api/admin/review/[id]
+├ ƒ /api/admin/review/[id]/control
+├ ƒ /api/admin/review/[id]/decision
+├ ƒ /api/admin/review/[id]/publication
+├ ƒ /api/admin/settings/history
+├ ƒ /api/admin/settings/history/detail
+├ ƒ /api/admin/settings/history/restore
+├ ƒ /api/admin/trash
+├ ƒ /api/admin/workspace
+├ ƒ /api/analytics
+├ ƒ /api/announcements
+├ ƒ /api/announcements/[id]
+├ ƒ /api/articles/[id]
+├ ƒ /api/articles/[id]/diagram
+├ ƒ /api/articles/[id]/feedback
+├ ƒ /api/articles/[id]/pdf
+├ ƒ /api/assets/[id]
+├ ƒ /api/auth/company
+├ ƒ /api/auth/enrollment
+├ ƒ /api/favorites
+├ ƒ /api/favorites/[id]
+├ ƒ /api/features
+├ ƒ /api/forms
+├ ƒ /api/forms/[id]
+├ ƒ /api/forms/[id]/submissions
+├ ƒ /api/health
+├ ƒ /api/navigation
+├ ƒ /api/ops
+├ ƒ /api/qa
+├ ƒ /api/reader-menu
+├ ƒ /api/readiness
+├ ƒ /api/recent
+├ ƒ /api/recent/[id]
+├ ƒ /api/reference
+├ ƒ /help-centre
+├ ƒ /help-centre/categories/[id]
+├ ƒ /help-centre/favorites
+├ ƒ /help-centre/forms
+├ ƒ /help-centre/forms/[id]
+├ ƒ /help-centre/ops
+├ ƒ /help-centre/pdf
+├ ƒ /help-centre/qa
+├ ƒ /help-centre/recent
+├ ƒ /help-centre/reference
+├ ƒ /sign-in/[[...sign-in]]
+└ ƒ /sign-in/error
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

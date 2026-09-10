@@ -1,0 +1,15 @@
+
+> juyu-help-centre-v2@0.1.0 test:scale
+> node --experimental-strip-types --test --test-concurrency=1 tests/performance/*.test.ts
+
+✔ T058 indexed Chinese search, authorized directory and concurrent durable draft saves (32346.0195ms)
+✔ T058 actual large PDF export, explicit size boundary, busy rejection and recovery (1539.795583ms)
+✔ T058 maximum-size upload integrity, rejection, cancellation and process concurrency (529.348292ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 34732.602709

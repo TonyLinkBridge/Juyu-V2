@@ -1,0 +1,68 @@
+{
+  "task": "T034",
+  "scope": "JUYU Admin review candidate selection, atomic saved-revision submission, and explicit uncertainty recovery; local acceptance only",
+  "files": [
+    {
+      "target": "src/review/model.ts",
+      "targetSha256": "e00606b12952254181fb0ba55d2216cf6effb03e0edee0b79eb55920c2b0df86",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/review/client.ts",
+      "targetSha256": "ef0d2ff9b9a69b54b143fd1cafd756b007e377c13ed8d6593e1f877708779134",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/review/repository.ts",
+      "targetSha256": "51e35f26dbbba23171c02c6977981e02f90132d77194ff3f0059923458945aff",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/review/http.ts",
+      "targetSha256": "186c2727e888922d2e70050901ab4d5341072b36517bdb633ce7552c0968631c",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/database/migrations/0010_review_submission.sql",
+      "targetSha256": "2abc182315b50a79bb4543a186b5800632e81c231989ab8ec37b82b4e19bb984",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/database/repository.ts",
+      "targetSha256": "49613bc33d5e0f320d046380d181857b0036fc7ef933f0b8cdc879e07c1add08",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "e0a3abfb6d207bcfd80c5d433b7ce13b40b0ee0aa468fbc66011b643ca0d9393",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/api/admin/review/[id]/route.ts",
+      "targetSha256": "0b85ff82cb48e9b213b14e7f53e0481f5ab0e8312e62729d1e73aae7d416a443",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/review/SubmitReview.tsx",
+      "targetSha256": "747a062c696da76e1256da6cf914f3d234daa98761931d48d9515a4fbfa72bc5",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/editor/ArticleEditor.tsx",
+      "targetSha256": "f786e6461287347892ac48a7faf7fd96b2ff547303dab95e72f05ab76f0d00bd",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/globals.css",
+      "origin": "JUYU review form styles added to existing application styles",
+      "targetSha256": "11d3bee79511a9c6eb4173010dfcf725f6501aa6f6d836d674c334cd20cdbe32"
+    }
+  ],
+  "integration": "Existing BlockNote editor, domain transition, immutable reviews/audit and authorized database transactions; no new vendor dependency",
+  "verification": "docs/verification/2026-09-09-review-submission.md",
+  "limitations": [
+    "Candidate status uses synchronized DB observations; live Clerk changes require integrated acceptance",
+    "No real Clerk/Supabase/company/device/deployment acceptance",
+    "Approval, rejection, withdrawal and publishing UI remain subsequent tasks"
+  ]
+}

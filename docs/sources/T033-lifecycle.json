@@ -1,0 +1,82 @@
+{
+  "task": "T033",
+  "scope": "Admin-only trash, unpublished restore, confirmed purge and retryable private storage cleanup; local acceptance only",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/square-ui-master/templates/tasks/components/tasks/tasks-main.tsx",
+      "target": "src/components/tasks/TasksWorkspace.tsx",
+      "sourceSha256": "f7cf4a0ca2c3a8f355df85af7408b82c45d21e8b5d6d6765f81c9bf93211b148",
+      "targetSha256": "b194e1a31acbb9cd5dba7297480162249cdf69d800f4464d285b3c0324f7b170",
+      "adaptation": "在既有 Tasks 工作台加入回收站入口；保留此前来源及许可证。"
+    },
+    {
+      "target": "src/components/editor/ArticleEditor.tsx",
+      "targetSha256": "6cf027db0b28b6daa888d7fb25c0a470391a0e700db27a52d0bd935e80ec6ef7",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/lifecycle/DocumentTrashAction.tsx",
+      "targetSha256": "db489996c0a44798e84db19ac8866b18255bb71388fb234b4bc15574ba1f2bd4",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/lifecycle/TrashManager.tsx",
+      "targetSha256": "f8b2645d44f214034f232de3be0a32dc16761383caa777377668d26aaa176c66",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/lifecycle/model.ts",
+      "targetSha256": "4e7a868959c690b0023bab1a47d27d03bc59be43481883b15e1de7f52054a7a4",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/lifecycle/client.ts",
+      "targetSha256": "8f51b9d9aa376c37725b0c2ca0c7ef65d409e5bd2b5dfe4f681f269185fefe92",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/lifecycle/cleanup.ts",
+      "targetSha256": "802ad048eaf2ea366f5d7d143b1ee923ac3f7d253797c3069b0e5acbe1119ff2",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/lifecycle/http.ts",
+      "targetSha256": "bd5a3f65a63e08a80d52c9335d61377e094fe3a638f0f566ab2250914872449e",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/storage/cleanup.ts",
+      "targetSha256": "308c084dd31024bac5d6a430d9ab0f843734ffeb624cea8530c17522d691ce4f",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/storage/supabase.ts",
+      "targetSha256": "8f4bfb9e6b72047bb9e906dd7796b84f381cf6d5044aa814727021ef1f567096",
+      "origin": "JUYU application code; no new upstream source copied"
+    }
+  ],
+  "backend": "JUYU migration0009 and scoped lifecycle/authorization repository; metadata-only immutable deletion receipts, asset identity tombstones and actual-attempt queue ordering",
+  "verification": "docs/verification/2026-09-09-trash-recovery.md",
+  "limitations": [
+    "Real Clerk/Supabase/company admission not accepted",
+    "No deployment or real-device acceptance",
+    "Storage deletion is not atomic with database purge; unknown results remain pending"
+  ],
+  "backendFiles": [
+    {
+      "target": "src/server/database/migrations/0009_document_lifecycle.sql",
+      "targetSha256": "a9e06525af434b3f23f08c44e2b3723e78180d0bed201a49abbe075b6e046a63",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/lifecycle/repository.ts",
+      "targetSha256": "d5e93410a77711ad3a160137ca9ef344f5b83a3f86533bc12e321202196b0ac6",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "bcae2894abdf651c87b7a31f2a5218085682db565e2b6164e97cc88bd6aaac8e",
+      "origin": "JUYU application code; no new upstream source copied"
+    }
+  ]
+}

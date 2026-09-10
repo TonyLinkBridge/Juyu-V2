@@ -1,0 +1,5 @@
+import type {PoolClient} from 'pg';
+import {parseHistoryQuery,parseHistoryTarget,parseRestore,normalizeHistoryPage,normalizeHistoryDetail,normalizeRestoreAck} from '../../setting-history/model.ts';
+export async function readHistory(c:PoolClient,value:{kind:string;page:number}){const x=parseHistoryQuery(new URLSearchParams({kind:value.kind,page:String(value.page)}));return normalizeHistoryPage((await c.query('SELECT juyu.read_setting_history($1,$2) AS result',[x.kind,x.page])).rows[0].result);}
+export async function readHistoryDetail(c:PoolClient,value:unknown){const x=parseHistoryTarget(value);return normalizeHistoryDetail((await c.query('SELECT juyu.read_setting_history_detail($1,$2,$3) AS result',[x.kind,x.id,x.version])).rows[0].result);}
+export async function restoreSetting(c:PoolClient,value:unknown){const x=parseRestore(value);return normalizeRestoreAck((await c.query('SELECT juyu.restore_setting($1,$2,$3,$4,$5) AS result',[x.kind,x.id,x.version,x.expectedVersion,x.requestId])).rows[0].result);}

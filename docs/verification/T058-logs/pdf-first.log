@@ -1,0 +1,21 @@
+✖ T058 actual large PDF export, explicit size boundary, busy rejection and recovery (1362.450875ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1535.572708
+
+✖ failing tests:
+
+test at tests/performance/pdf.test.ts:4:1
+✖ T058 actual large PDF export, explicit size boundary, busy rejection and recovery (1362.450875ms)
+  TypeError [ERR_INVALID_STATE]: Invalid state: ReadableStream is locked
+      at ReadableStream.cancel (node:internal/webstreams/readablestream:348:9)
+      at TestContext.<anonymous> (file:///Users/tony/Documents/ChatGPT/Juyu%20V2/tests/performance/pdf.test.ts:12:344)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    code: 'ERR_INVALID_STATE'
+  }

@@ -1,0 +1,789 @@
+[WebServer] (node:77787) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 28 tests using 1 worker
+
+(node:77792) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search secondary UI audit (1.0s)
+  ✓   2 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search-empty secondary UI audit (598ms)
+  ✓   3 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search-error secondary UI audit (577ms)
+  ✘   4 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › rich-blocks secondary UI audit (775ms)
+(node:77820) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   5 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › qa secondary UI audit (712ms)
+(node:77826) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   6 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics secondary UI audit (810ms)
+(node:77832) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   7 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics-error secondary UI audit (595ms)
+  ✓   8 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-records secondary UI audit (493ms)
+  ✓   9 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › review-control secondary UI audit (468ms)
+  ✓  10 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › archives secondary UI audit (460ms)
+  ✓  11 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › deleted-history secondary UI audit (565ms)
+  ✓  12 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › category-landing secondary UI audit (748ms)
+  ✓  13 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › media secondary UI audit (784ms)
+  ✘  14 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › science secondary UI audit (770ms)
+(node:77848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  15 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search secondary UI audit (1.0s)
+  ✓  16 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search-empty secondary UI audit (595ms)
+  ✓  17 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search-error secondary UI audit (545ms)
+  ✘  18 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › rich-blocks secondary UI audit (752ms)
+(node:77863) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  19 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › qa secondary UI audit (685ms)
+(node:77868) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  20 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics secondary UI audit (787ms)
+(node:77875) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  21 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics-error secondary UI audit (585ms)
+  ✓  22 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-records secondary UI audit (476ms)
+  ✓  23 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › review-control secondary UI audit (533ms)
+  ✓  24 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › archives secondary UI audit (394ms)
+  ✓  25 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › deleted-history secondary UI audit (582ms)
+  ✓  26 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › category-landing secondary UI audit (763ms)
+  ✓  27 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › media secondary UI audit (686ms)
+  ✘  28 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › science secondary UI audit (752ms)
+
+
+  1) [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › rich-blocks secondary UI audit ───
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 48
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "description": "Ensure ARIA attributes are not prohibited for an element's role",
+    +     "help": "Elements must only use permitted ARIA attributes",
+    +     "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-prohibited-attr?application=axeAPI",
+    +     "id": "aria-prohibited-attr",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "all": Array [],
+    +         "any": Array [],
+    +         "failureSummary": "Fix all of the following:
+    +   aria-label attribute is not well supported on a pre with no valid role attribute.",
+    +         "html": "<pre tabindex=\"0\" aria-label=\"代码内容，可横向滚动\"><code>const message = \"本地示例\";
+    + console.log(message);</code></pre>",
+    +         "impact": "serious",
+    +         "none": Array [
+    +           Object {
+    +             "data": Object {
+    +               "messageKey": "noRoleSingular",
+    +               "nodeName": "pre",
+    +               "prohibited": Array [
+    +                 "aria-label",
+    +               ],
+    +               "role": null,
+    +             },
+    +             "id": "aria-prohibited-attr",
+    +             "impact": "serious",
+    +             "message": "aria-label attribute is not well supported on a pre with no valid role attribute.",
+    +             "relatedNodes": Array [],
+    +           },
+    +         ],
+    +         "target": Array [
+    +           "pre",
+    +         ],
+    +       },
+    +     ],
+    +     "tags": Array [
+    +       "cat.aria",
+    +       "wcag2a",
+    +       "wcag412",
+    +       "EN-301-549",
+    +       "EN-9.4.1.2",
+    +       "RGAAv4",
+    +       "RGAA-7.1.1",
+    +     ],
+    +   },
+    + ]
+
+      15 |   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}.png`,fullPage:true,animations:'disabled'});
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+    > 17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+         |                                                                           ^
+      18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:17:75
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 48
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "description": "Ensure ARIA attributes are not prohibited for an element's role",
+    +     "help": "Elements must only use permitted ARIA attributes",
+    +     "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-prohibited-attr?application=axeAPI",
+    +     "id": "aria-prohibited-attr",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "all": Array [],
+    +         "any": Array [],
+    +         "failureSummary": "Fix all of the following:
+    +   aria-label attribute is not well supported on a pre with no valid role attribute.",
+    +         "html": "<pre tabindex=\"0\" aria-label=\"代码内容，可横向滚动\"><code>const message = \"本地示例\";
+    + console.log(message);</code></pre>",
+    +         "impact": "serious",
+    +         "none": Array [
+    +           Object {
+    +             "data": Object {
+    +               "messageKey": "noRoleSingular",
+    +               "nodeName": "pre",
+    +               "prohibited": Array [
+    +                 "aria-label",
+    +               ],
+    +               "role": null,
+    +             },
+    +             "id": "aria-prohibited-attr",
+    +             "impact": "serious",
+    +             "message": "aria-label attribute is not well supported on a pre with no valid role attribute.",
+    +             "relatedNodes": Array [],
+    +           },
+    +         ],
+    +         "target": Array [
+    +           "pre",
+    +         ],
+    +       },
+    +     ],
+    +     "tags": Array [
+    +       "cat.aria",
+    +       "wcag2a",
+    +       "wcag412",
+    +       "EN-301-549",
+    +       "EN-9.4.1.2",
+    +       "RGAAv4",
+    +       "RGAA-7.1.1",
+    +     ],
+    +   },
+    + ]
+
+      15 |   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}.png`,fullPage:true,animations:'disabled'});
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+    > 17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+         |                                                                           ^
+      18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:17:75
+
+    Error Context: test-results/accessibility-secondary-rich-blocks-secondary-UI-audit-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-secondary-rich-blocks-secondary-UI-audit-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-secondary-rich-blocks-secondary-UI-audit-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › qa secondary UI audit ────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 16
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "target-size",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Target has insufficient size (57.1px by 23.1px, should be at least 24px by 24px)
+    +   Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 23px instead of at least 24px.",
+    +         "target": Array [
+    +           "a[aria-label=\"查看分类：账户操作\"]",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+      17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+    > 18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+      21 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:18:137
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 16
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "target-size",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Target has insufficient size (57.1px by 23.1px, should be at least 24px by 24px)
+    +   Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 23px instead of at least 24px.",
+    +         "target": Array [
+    +           "a[aria-label=\"查看分类：账户操作\"]",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+      17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+    > 18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+      21 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:18:137
+
+    Error Context: test-results/accessibility-secondary-qa-secondary-UI-audit-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-secondary-qa-secondary-UI-audit-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-secondary-qa-secondary-UI-audit-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics secondary UI audit ─────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 15
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "definition-list",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix all of the following:
+    +   dl element has direct children that are not allowed: div > p",
+    +         "target": Array [
+    +           "dl",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+      17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+    > 18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+      21 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:18:137
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 15
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "definition-list",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix all of the following:
+    +   dl element has direct children that are not allowed: div > p",
+    +         "target": Array [
+    +           "dl",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+      17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+    > 18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+      21 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:18:137
+
+    Error Context: test-results/accessibility-secondary-analytics-secondary-UI-audit-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-secondary-analytics-secondary-UI-audit-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-secondary-analytics-secondary-UI-audit-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › science secondary UI audit ───────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 15
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "aria-prohibited-attr",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix all of the following:
+    +   aria-label attribute cannot be used on a div with no valid role attribute.",
+    +         "target": Array [
+    +           ".science-math",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+      17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+    > 18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+      21 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:18:137
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 15
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "aria-prohibited-attr",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix all of the following:
+    +   aria-label attribute cannot be used on a div with no valid role attribute.",
+    +         "target": Array [
+    +           ".science-math",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+      17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+    > 18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+      21 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:18:137
+
+    Error Context: test-results/accessibility-secondary-science-secondary-UI-audit-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-secondary-science-secondary-UI-audit-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-secondary-science-secondary-UI-audit-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › rich-blocks secondary UI audit ────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 48
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "description": "Ensure ARIA attributes are not prohibited for an element's role",
+    +     "help": "Elements must only use permitted ARIA attributes",
+    +     "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-prohibited-attr?application=axeAPI",
+    +     "id": "aria-prohibited-attr",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "all": Array [],
+    +         "any": Array [],
+    +         "failureSummary": "Fix all of the following:
+    +   aria-label attribute is not well supported on a pre with no valid role attribute.",
+    +         "html": "<pre tabindex=\"0\" aria-label=\"代码内容，可横向滚动\"><code>const message = \"本地示例\";
+    + console.log(message);</code></pre>",
+    +         "impact": "serious",
+    +         "none": Array [
+    +           Object {
+    +             "data": Object {
+    +               "messageKey": "noRoleSingular",
+    +               "nodeName": "pre",
+    +               "prohibited": Array [
+    +                 "aria-label",
+    +               ],
+    +               "role": null,
+    +             },
+    +             "id": "aria-prohibited-attr",
+    +             "impact": "serious",
+    +             "message": "aria-label attribute is not well supported on a pre with no valid role attribute.",
+    +             "relatedNodes": Array [],
+    +           },
+    +         ],
+    +         "target": Array [
+    +           "pre",
+    +         ],
+    +       },
+    +     ],
+    +     "tags": Array [
+    +       "cat.aria",
+    +       "wcag2a",
+    +       "wcag412",
+    +       "EN-301-549",
+    +       "EN-9.4.1.2",
+    +       "RGAAv4",
+    +       "RGAA-7.1.1",
+    +     ],
+    +   },
+    + ]
+
+      15 |   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}.png`,fullPage:true,animations:'disabled'});
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+    > 17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+         |                                                                           ^
+      18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:17:75
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 48
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "description": "Ensure ARIA attributes are not prohibited for an element's role",
+    +     "help": "Elements must only use permitted ARIA attributes",
+    +     "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-prohibited-attr?application=axeAPI",
+    +     "id": "aria-prohibited-attr",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "all": Array [],
+    +         "any": Array [],
+    +         "failureSummary": "Fix all of the following:
+    +   aria-label attribute is not well supported on a pre with no valid role attribute.",
+    +         "html": "<pre tabindex=\"0\" aria-label=\"代码内容，可横向滚动\"><code>const message = \"本地示例\";
+    + console.log(message);</code></pre>",
+    +         "impact": "serious",
+    +         "none": Array [
+    +           Object {
+    +             "data": Object {
+    +               "messageKey": "noRoleSingular",
+    +               "nodeName": "pre",
+    +               "prohibited": Array [
+    +                 "aria-label",
+    +               ],
+    +               "role": null,
+    +             },
+    +             "id": "aria-prohibited-attr",
+    +             "impact": "serious",
+    +             "message": "aria-label attribute is not well supported on a pre with no valid role attribute.",
+    +             "relatedNodes": Array [],
+    +           },
+    +         ],
+    +         "target": Array [
+    +           "pre",
+    +         ],
+    +       },
+    +     ],
+    +     "tags": Array [
+    +       "cat.aria",
+    +       "wcag2a",
+    +       "wcag412",
+    +       "EN-301-549",
+    +       "EN-9.4.1.2",
+    +       "RGAAv4",
+    +       "RGAA-7.1.1",
+    +     ],
+    +   },
+    + ]
+
+      15 |   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}.png`,fullPage:true,animations:'disabled'});
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+    > 17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+         |                                                                           ^
+      18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:17:75
+
+    Error Context: test-results/accessibility-secondary-rich-blocks-secondary-UI-audit-mobile/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-secondary-rich-blocks-secondary-UI-audit-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-secondary-rich-blocks-secondary-UI-audit-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › qa secondary UI audit ─────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 16
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "target-size",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Target has insufficient size (57.1px by 23.1px, should be at least 24px by 24px)
+    +   Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 23px instead of at least 24px.",
+    +         "target": Array [
+    +           "a[aria-label=\"查看分类：账户操作\"]",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+      17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+    > 18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+      21 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:18:137
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 16
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "target-size",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Target has insufficient size (57.1px by 23.1px, should be at least 24px by 24px)
+    +   Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 23px instead of at least 24px.",
+    +         "target": Array [
+    +           "a[aria-label=\"查看分类：账户操作\"]",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+      17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+    > 18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+      21 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:18:137
+
+    Error Context: test-results/accessibility-secondary-qa-secondary-UI-audit-mobile/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-secondary-qa-secondary-UI-audit-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-secondary-qa-secondary-UI-audit-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics secondary UI audit ──────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 15
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "definition-list",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix all of the following:
+    +   dl element has direct children that are not allowed: div > p",
+    +         "target": Array [
+    +           "dl",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+      17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+    > 18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+      21 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:18:137
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 15
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "definition-list",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix all of the following:
+    +   dl element has direct children that are not allowed: div > p",
+    +         "target": Array [
+    +           "dl",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+      17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+    > 18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+      21 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:18:137
+
+    Error Context: test-results/accessibility-secondary-analytics-secondary-UI-audit-mobile/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-secondary-analytics-secondary-UI-audit-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-secondary-analytics-secondary-UI-audit-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › science secondary UI audit ────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 15
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "aria-prohibited-attr",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix all of the following:
+    +   aria-label attribute cannot be used on a div with no valid role attribute.",
+    +         "target": Array [
+    +           ".science-math",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+      17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+    > 18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+      21 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:18:137
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 15
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "aria-prohibited-attr",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix all of the following:
+    +   aria-label attribute cannot be used on a div with no valid role attribute.",
+    +         "target": Array [
+    +           ".science-math",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+      17 |   expect.soft(result.incomplete.filter(v=>v.id==='aria-prohibited-attr')).toEqual([]);
+    > 18 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      19 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      20 |  }
+      21 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:18:137
+
+    Error Context: test-results/accessibility-secondary-science-secondary-UI-audit-mobile/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-secondary-science-secondary-UI-audit-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-secondary-science-secondary-UI-audit-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8 failed
+    [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › rich-blocks secondary UI audit ────
+    [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › qa secondary UI audit ─────────────
+    [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics secondary UI audit ──────
+    [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › science secondary UI audit ────────
+    [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › rich-blocks secondary UI audit ─────
+    [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › qa secondary UI audit ──────────────
+    [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics secondary UI audit ───────
+    [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › science secondary UI audit ─────────
+  20 passed (23.1s)

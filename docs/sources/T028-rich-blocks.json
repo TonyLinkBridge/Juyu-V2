@@ -1,0 +1,63 @@
+{
+  "task": "T028",
+  "scope": "Hint, literal code copy and text-only tabs via existing immutable block editor; full BlockNote integration remains T031",
+  "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/Hint.tsx",
+      "target": "src/components/gitbook/RichBlocks/Hint.tsx",
+      "sourceSha256": "b6bb7a204a7b509a73e77b841dc4fc544013d0500198f20f4122a2be71681521",
+      "targetSha256": "3765efc0dc95b95eedc50b5a3013efd5f8872fe1b2037df1025cb5326f8358f6",
+      "adaptation": "改编四种语义提示、边框、标题与正文容器；移除供应商文档上下文，正文为安全纯文本。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/CodeBlock/CodeBlockRenderer.tsx",
+      "target": "src/components/gitbook/RichBlocks/CodeBlock.tsx",
+      "sourceSha256": "ac9de52c919d24634a240fbe6ae136f8e9c9cd298e2e9dd0ed886d1c53c10bf7",
+      "targetSha256": "5461e0988e3103db217d593080d2cd2c1e4affc7c1c8a3524ce2e87c8685d4e1",
+      "adaptation": "改编代码容器、语言/复制操作与可滚动pre；不接供应商AI、表达式或语法高亮，保留原文。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/CodeBlock/CopyCodeButton.tsx",
+      "target": "src/components/gitbook/RichBlocks/CopyCodeButton.tsx",
+      "sourceSha256": "f6b92238a4ac9412fbc87420cc2974633f88e2bd7c232ed09465104aac45f08e",
+      "targetSha256": "24937ec799744ab0f3f77149ed9e30f3bae89cae38c965f00177406696762277",
+      "adaptation": "沿用复制按钮及短暂成功状态，改为等待剪贴板写入确认，补充失败和超时提示。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/Tabs/DynamicTabs.tsx",
+      "target": "src/components/gitbook/RichBlocks/DynamicTabs.tsx",
+      "sourceSha256": "0c6a08e1c48d7959f00ba884168076ff078f8ba9fba83df247eeb99800acb65d",
+      "targetSha256": "4010367c6a7cc15662c5c6e38b826578e4cb042e90af9123a64fcdf23f8b0f6e",
+      "adaptation": "改编标签列表、稳定ID和关联面板；以本地选择状态替换全局供应商select，增加方向键/Home/End与焦点轮换，打印展开全部面板。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/Images.tsx",
+      "target": "src/components/gitbook/Media/MediaBlocks.tsx",
+      "sourceSha256": "742895a14f5bffb9b0d2177dabf3e477bf9aa3f51446d34de6f782c49fa4a364",
+      "targetSha256": "ee0017157ad5b673efa04f7260e419b3cc18bc54e00644004c5d5c07c817fb51",
+      "adaptation": "延续T027媒体容器并分派三种文字块；媒体权限接口不变。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PDF/pdf.css",
+      "target": "src/pdf/render.ts",
+      "sourceSha256": "399480f0f30221ab0a8dbdd8852d9e2a6fce1d07a94c1b61ca4f8fa26d1619bf",
+      "targetSha256": "eacf16d90bf02164a5f161772bb784356b07aa518edd0bbdb8cc9bab41111ab7",
+      "adaptation": "延续打印排版，增加提示容器、保留原文的代码和全部标签展开；全部文本转义。"
+    }
+  ],
+  "juyuAdditions": [
+    "TextBlock normalization and limits",
+    "RichBlockFields admin inputs",
+    "Clipboard error/timeout verification",
+    "Local keyboard selection and print visibility",
+    "Asset-only database and PDF filters"
+  ],
+  "excluded": [
+    "Syntax highlighting and executable code",
+    "Vendor AI or dynamic expressions",
+    "Nested blocks within tabs",
+    "Full BlockNote inline editing",
+    "Global cross-page tab selection and URL hash synchronization"
+  ]
+}

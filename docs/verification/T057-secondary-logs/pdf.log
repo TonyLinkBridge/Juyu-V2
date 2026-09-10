@@ -1,0 +1,21 @@
+
+> juyu-help-centre-v2@0.1.0 test:pdf
+> node --experimental-strip-types --test --test-concurrency=1 tests/pdf/*.test.ts
+
+✔ T031 real PDF exports interleaved text, private image, nested list, table and marked heading in original order (317.300458ms)
+✔ custom fields render saved labels values and literal markup in a real offline PDF (127.096958ms)
+✔ real server PDF exports Chinese, private cover and 140 table rows without external requests (147.669417ms)
+✔ real renderer rejects undecodable image bytes and can recover for a later job (193.492583ms)
+✔ T027 real PDF includes inline private image, structured cells and file/video descriptions (120.477209ms)
+✔ T028 real PDF prints hint literal code and all tab panels without storage access (128.692333ms)
+✔ T029 actual offline Mermaid render accepts Chinese flowchart and rejects unsafe/malformed source (689.254041ms)
+✔ T029 PDF contains rendered formula and actual flowchart with all text (700.607125ms)
+✔ T029 two simultaneous diagram renders both complete (1391.356292ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4460.083291

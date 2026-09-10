@@ -1,0 +1,13 @@
+✔ media blocks keep order, text, cells and asset IDs while rejecting remote or malformed data (0.770875ms)
+✔ ordinary edits preserve content blocks and explicit changes produce a separate draft (0.343792ms)
+✔ upload extension, actual signature and size must agree (0.164417ms)
+✔ upload readback confirms bytes before ready; failed or forbidden uploads never look successful (8.831667ms)
+✔ T058 maximum-size upload integrity, rejection, cancellation and process concurrency (570.381875ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 645.148416

@@ -1,0 +1,241 @@
+[WebServer] (node:73801) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 16 tests using 1 worker
+
+(node:73803) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [desktop] › tests/e2e/accessibility.spec.ts:24:126 › login has no automated accessibility violations in both themes (364ms)
+  ✓   2 [desktop] › tests/e2e/accessibility.spec.ts:24:126 › reader has no automated accessibility violations in both themes (553ms)
+  ✓   3 [desktop] › tests/e2e/accessibility.spec.ts:24:126 › workspace has no automated accessibility violations in both themes (866ms)
+  ✓   4 [desktop] › tests/e2e/accessibility.spec.ts:24:126 › workspace-empty has no automated accessibility violations in both themes (291ms)
+  ✓   5 [desktop] › tests/e2e/accessibility.spec.ts:24:126 › workspace-error has no automated accessibility violations in both themes (260ms)
+  ✓   6 [desktop] › tests/e2e/accessibility.spec.ts:24:126 › features has no automated accessibility violations in both themes (350ms)
+  ✓   7 [desktop] › tests/e2e/accessibility.spec.ts:24:126 › features-error has no automated accessibility violations in both themes (308ms)
+  ✘   8 [desktop] › tests/e2e/accessibility.spec.ts:24:126 › editor has no automated accessibility violations in both themes (845ms)
+(node:73844) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [mobile] › tests/e2e/accessibility.spec.ts:24:126 › login has no automated accessibility violations in both themes (245ms)
+  ✓  10 [mobile] › tests/e2e/accessibility.spec.ts:24:126 › reader has no automated accessibility violations in both themes (519ms)
+  ✓  11 [mobile] › tests/e2e/accessibility.spec.ts:24:126 › workspace has no automated accessibility violations in both themes (896ms)
+  ✓  12 [mobile] › tests/e2e/accessibility.spec.ts:24:126 › workspace-empty has no automated accessibility violations in both themes (313ms)
+  ✓  13 [mobile] › tests/e2e/accessibility.spec.ts:24:126 › workspace-error has no automated accessibility violations in both themes (208ms)
+  ✓  14 [mobile] › tests/e2e/accessibility.spec.ts:24:126 › features has no automated accessibility violations in both themes (370ms)
+  ✓  15 [mobile] › tests/e2e/accessibility.spec.ts:24:126 › features-error has no automated accessibility violations in both themes (288ms)
+  ✘  16 [mobile] › tests/e2e/accessibility.spec.ts:24:126 › editor has no automated accessibility violations in both themes (809ms)
+
+
+  1) [desktop] › tests/e2e/accessibility.spec.ts:24:126 › editor has no automated accessibility violations in both themes 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 17
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "aria-input-field-name",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   aria-label attribute does not exist or is empty
+    +   aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+    +   Element has no title attribute",
+    +         "target": Array [
+    +           ".tiptap",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      32 |  await writeFile(`output/verification/T057/${surface}-${theme}-${info.project.name}.json`,JSON.stringify({surface,theme,project:info.project.name,at:new Date().toISOString(),url:page.url(),...result},null,2));
+      33 |  await page.screenshot({path:`output/verification/T057/${surface}-${theme}-${info.project.name}.png`,fullPage:true});
+    > 34 |  expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                        ^
+      35 |  expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+      36 |  }
+      37 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility.spec.ts:34:136
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 44
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "aria-input-field-name",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   aria-label attribute does not exist or is empty
+    +   aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+    +   Element has no title attribute",
+    +         "target": Array [
+    +           ".tiptap",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    +   Object {
+    +     "id": "color-contrast",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a:nth-child(1)",
+    +         ],
+    +       },
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a:nth-child(2)",
+    +         ],
+    +       },
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a:nth-child(3)",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      32 |  await writeFile(`output/verification/T057/${surface}-${theme}-${info.project.name}.json`,JSON.stringify({surface,theme,project:info.project.name,at:new Date().toISOString(),url:page.url(),...result},null,2));
+      33 |  await page.screenshot({path:`output/verification/T057/${surface}-${theme}-${info.project.name}.png`,fullPage:true});
+    > 34 |  expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                        ^
+      35 |  expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+      36 |  }
+      37 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility.spec.ts:34:136
+
+    Error Context: test-results/accessibility-editor-has-n-e8884-y-violations-in-both-themes-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-editor-has-n-e8884-y-violations-in-both-themes-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-editor-has-n-e8884-y-violations-in-both-themes-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile] › tests/e2e/accessibility.spec.ts:24:126 › editor has no automated accessibility violations in both themes 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 17
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "aria-input-field-name",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   aria-label attribute does not exist or is empty
+    +   aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+    +   Element has no title attribute",
+    +         "target": Array [
+    +           ".tiptap",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      32 |  await writeFile(`output/verification/T057/${surface}-${theme}-${info.project.name}.json`,JSON.stringify({surface,theme,project:info.project.name,at:new Date().toISOString(),url:page.url(),...result},null,2));
+      33 |  await page.screenshot({path:`output/verification/T057/${surface}-${theme}-${info.project.name}.png`,fullPage:true});
+    > 34 |  expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                        ^
+      35 |  expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+      36 |  }
+      37 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility.spec.ts:34:136
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 44
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "aria-input-field-name",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   aria-label attribute does not exist or is empty
+    +   aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+    +   Element has no title attribute",
+    +         "target": Array [
+    +           ".tiptap",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    +   Object {
+    +     "id": "color-contrast",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a:nth-child(1)",
+    +         ],
+    +       },
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a:nth-child(2)",
+    +         ],
+    +       },
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Element has insufficient color contrast of 2.62 (foreground color: #ae2832, background color: #19191f, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    +         "target": Array [
+    +           "a:nth-child(3)",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      32 |  await writeFile(`output/verification/T057/${surface}-${theme}-${info.project.name}.json`,JSON.stringify({surface,theme,project:info.project.name,at:new Date().toISOString(),url:page.url(),...result},null,2));
+      33 |  await page.screenshot({path:`output/verification/T057/${surface}-${theme}-${info.project.name}.png`,fullPage:true});
+    > 34 |  expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                        ^
+      35 |  expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+      36 |  }
+      37 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility.spec.ts:34:136
+
+    Error Context: test-results/accessibility-editor-has-n-e8884-y-violations-in-both-themes-mobile/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-editor-has-n-e8884-y-violations-in-both-themes-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-editor-has-n-e8884-y-violations-in-both-themes-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [desktop] › tests/e2e/accessibility.spec.ts:24:126 › editor has no automated accessibility violations in both themes 
+    [mobile] › tests/e2e/accessibility.spec.ts:24:126 › editor has no automated accessibility violations in both themes 
+  14 passed (11.5s)

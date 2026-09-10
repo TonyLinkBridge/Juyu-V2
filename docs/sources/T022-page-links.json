@@ -1,0 +1,42 @@
+{
+  "task": "T022",
+  "scope": "Breadcrumbs, permitted previous/next documents and scroll to top; no standalone category pages",
+  "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageBody/PageHeader.tsx",
+      "target": "src/components/gitbook/Reading/PageHeader.tsx",
+      "sourceSha256": "8d04d4c0365d18f343029024cc523a49c093faf2d34f93af122aa0902f0ca45a",
+      "targetSha256": "415ab74ef302a2f76368f24f58fa1b83fcd327f487595998e1660972158ebced",
+      "adaptation": "保留面包屑nav/ol、祖先遍历、分隔符及标题结构；只使用同一授权目录的分类层级，首页可返回目录，分类无独立页面故不造链接，去除vendor下拉、标签和页面动作。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageBody/PageFooterNavigation.tsx",
+      "target": "src/components/gitbook/Reading/PageFooterNavigation.tsx",
+      "sourceSha256": "fb067fb98d13916039be77b131f200efdb661f0d2eefd072208d3ab0465ab8ea",
+      "targetSha256": "a68b3d6092dc5cb038b2dbfaee406f42ea4048c047787085aa98a9976e433533",
+      "adaptation": "保留上一篇/下一篇条件卡片、箭头/标签/标题与反向排列；服务器核准的目录投影替换vendor context/linker/统计；首尾不循环。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageAside/ScrollToTopButton.tsx",
+      "target": "src/components/gitbook/Reading/ScrollToTopButton.tsx",
+      "sourceSha256": "6d8cc5c7d8c5a32db85b37089df58c7bd15ef103eeb115dbf4cca9ad099a2f6c",
+      "targetSha256": "ac809d14760ae70c665bf5182339fbac448d27d625c5c41bac26b5e2e0c067eb",
+      "adaptation": "保留button、可取消点击与window.scrollTo；新增减少动画设置及标题焦点恢复，不改写文章URL或章节hash。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/lib/pages.ts",
+      "target": "src/reader/page-navigation.ts",
+      "sourceSha256": "be1ed5cd5be420ba0a10d8ec3a0f6453408da14fac2b37cf3b52512788364513",
+      "targetSha256": "db6987ea026ce6d8fbec7bf1707c58c00537c2e969550b0471548210ca08a795",
+      "adaptation": "仅改编resolvePrevNextPages的扁平列表/当前下标/前后项分支；JUYU新增迭代祖先链、ID去重和规范内部链接，输入必须是已授权正式目录，不替代鉴权。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "target": "src/components/gitbook/Reading/PageBody.tsx",
+      "sourceSha256": "f466467bbb0bb7d0fe1ad69aac6e3513099d881d09301ceb3c0d45ca55b770b7",
+      "targetSha256": "1a1bcfdaa35d190bb4b7b3a8740fe55790763b12a65c9dfeef87dbb12ac18860",
+      "adaptation": "在T019基础正文适配中接上PageHeader、PageFooterNavigation和回到顶部；仍不包含封面、反馈或完整富内容。"
+    }
+  ]
+}

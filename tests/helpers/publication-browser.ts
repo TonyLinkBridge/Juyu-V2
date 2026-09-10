@@ -1,0 +1,17 @@
+import {readFile,writeFile,mkdir,readdir} from 'node:fs/promises';
+import {resolve,dirname} from 'node:path';
+import {createRequire} from 'node:module';
+import ts from 'typescript';
+import type {PublicationDetail} from '../../src/review/publication';
+const require=createRequire(import.meta.url);
+export const publicationFixture:PublicationDetail={article:{documentId:'publication-local',title:'新版处理流程',body:'# 发布前核对\n\n已批准的完整正文',sequence:5,status:'approved',lifecycle:'active',blocks:[],cover:null,tags:['流程'],assets:[],kind:'article',audience:'staff',publishedRevision:1},revision:2,approval:{revision:2,reviewerId:'admin-b',reviewerName:'Ivy',approvedAt:'2026-09-09T01:00:00Z'},canQueue:true,canPublish:false,history:[],historyMore:false};
+export async function publicationBrowserBundle(){
+ const dir=resolve('output/verification/publication-fixture');await mkdir(dir,{recursive:true});
+ const files=['categories/model.ts','categories/editor.ts','components/categories/ArticleCategories.tsx','fields/model.ts','fields/editor.ts','components/fields/FieldValues.tsx','qa/metadata.ts','history/paths.ts','components/review/PublicationPanel.tsx','review/publication-client.ts','editor/recovery.ts','editor/legacy.ts','editor/document.ts','workspace/model.ts','domain/presentation.ts','media/model.ts','reader/body.ts','reader/inline.ts','science/model.ts','components/gitbook/Media/MediaBlocks.tsx',...['StructuredDocument','DocumentView','Inline','Heading','Paragraph'].map(f=>`components/gitbook/Reading/${f}.tsx`),...['Math','Diagram','Hint','CodeBlock','CopyCodeButton','DynamicTabs'].map(f=>`components/gitbook/RichBlocks/${f}.tsx`)];
+ for(const file of files){const target=resolve(dir,file.replace(/\.tsx?$/,'.js'));await mkdir(dirname(target),{recursive:true});await writeFile(target,ts.transpileModule(await readFile(`src/${file}`,'utf8'),{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022,rewriteRelativeImportExtensions:true}}).outputText);}
+ await writeFile(resolve(dir,'entry.js'),`import React from 'react';import {createRoot} from 'react-dom/client';import {PublicationPanel} from './components/review/PublicationPanel';const initial=JSON.parse(document.getElementById('data').textContent);createRoot(document.getElementById('review')).render(React.createElement(PublicationPanel,{initial}));`);
+ const {webpack}=require('next/dist/compiled/webpack/webpack');
+ await new Promise<void>((done,reject)=>{const compiler=webpack({mode:'development',devtool:false,entry:resolve(dir,'entry.js'),output:{path:dir,filename:'bundle.js',publicPath:'/__publication_assets/'},resolve:{modules:[resolve('node_modules')]},module:{rules:[{test:/\.m?js$/,resolve:{fullySpecified:false}}]}});compiler.run((error:Error|null,stats:{hasErrors():boolean;toString():string})=>compiler.close(()=>error||stats.hasErrors()?reject(error??new Error(stats.toString())):done()));});
+ const css=(await Promise.all((await readdir('.next/static/chunks')).filter(f=>f.endsWith('.css')).map(f=>readFile(resolve('.next/static/chunks',f),'utf8')))).join('\n')+await readFile('src/app/globals.css','utf8');
+ return {script:await readFile(resolve(dir,'bundle.js'),'utf8'),css};
+}

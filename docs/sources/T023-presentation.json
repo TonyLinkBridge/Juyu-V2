@@ -1,0 +1,35 @@
+{
+  "task": "T023",
+  "scope": "Light/system/dark themes, version-dismissable general internal announcement and footer; no backend or role-targeted notification authoring",
+  "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/ThemeToggler/ThemeToggler.tsx",
+      "target": "src/components/gitbook/ThemeToggler/ThemeToggler.tsx",
+      "sourceSha256": "f11009759c94bcd5e860a12334ceb384602150a6487950147e5d57986546a967",
+      "targetSha256": "996590731970ac10c3f4f636460029565eb6c16d71b22871ccbca7c576533bd6",
+      "adaptation": "保留浅色/系统/深色三选一结构，改用原生radio和JUYU主题状态；替换next-themes、vendor按钮/图标/i18n；增加键盘、跨标签同步、存储异常回退。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/Announcement/AnnouncementBanner.tsx",
+      "target": "src/components/gitbook/Announcement/AnnouncementBanner.tsx",
+      "sourceSha256": "66e0973e39fa341b3aed67b1e227d2620c498feafdc8ed272286a400f7f7dbd7",
+      "targetSha256": "8539c47871dba367ef8699e86bb0a9f8236c848f3c0b9758d83dcc9d91247d2b",
+      "adaptation": "保留消息、提示图标、关闭按钮及data-nosnippet结构；改为可信通用内部提醒，不接vendor链接/统计；按公告ID和版本记忆关闭，隐藏服务端快照避免已关闭公告闪现，关闭恢复主区焦点。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/Footer/Footer.tsx",
+      "target": "src/components/gitbook/Footer/Footer.tsx",
+      "sourceSha256": "9d6427da93c86db57e570e5205c98e483ce140f84fbccd809b65816bec94ba61",
+      "targetSha256": "4b09c8fc26780c8867a96efb5490ad2ebc6a140465f6311f0945c8eb2d241b5b",
+      "adaptation": "保留footer、品牌说明、主题控制和访问说明区域；改为JUYU文案，移除不存在的外链/社交/供应商资源与配置读取。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/primitives/ScrollContainer.tsx",
+      "target": "src/components/gitbook/TableOfContents/ScrollContainer.tsx",
+      "sourceSha256": "aa1759f9624b22704a30eaa325ded2286558e9173d1d59ee844d55110f4b09ca",
+      "targetSha256": "442a8d21c144e2a498b857500a14498cdb7fb826c422618459fd00ed282ffdcd",
+      "adaptation": "在T017的当前项定位适配上增加尺寸观察；解决SSR公告出现、目录高度变化后当前末项被裁切，不在普通滚动时重置位置。"
+    }
+  ]
+}

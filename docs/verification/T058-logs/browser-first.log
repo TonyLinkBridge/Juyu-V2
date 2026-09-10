@@ -1,0 +1,95 @@
+[WebServer] (node:81727) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:81728) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [desktop] › tests/e2e/performance.spec.ts:9:1 › T058 1000-entry directory and 300-block reading stay usable (7.5s)
+  ✘  2 [desktop] › tests/e2e/performance.spec.ts:19:1 › T058 300-block BlockNote edit autosave and reload preserve every block (18.6s)
+(node:81801) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [desktop] › tests/e2e/performance.spec.ts:28:1 › T058 200-row eight-column Reference filters last row without overflow (804ms)
+(node:81806) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  4 [mobile] › tests/e2e/performance.spec.ts:9:1 › T058 1000-entry directory and 300-block reading stay usable (7.5s)
+  ✘  5 [mobile] › tests/e2e/performance.spec.ts:19:1 › T058 300-block BlockNote edit autosave and reload preserve every block (18.9s)
+(node:81868) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  6 [mobile] › tests/e2e/performance.spec.ts:28:1 › T058 200-row eight-column Reference filters last row without overflow (682ms)
+
+
+  1) [desktop] › tests/e2e/performance.spec.ts:19:1 › T058 300-block BlockNote edit autosave and reload preserve every block 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('.bn-editor')
+    Expected substring: "保存核对4"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for locator('.bn-editor')
+        - waiting for navigation to finish...
+        - navigated to "http://127.0.0.1:3210/admin/sign-in"
+
+
+      24 |   const begin=performance.now();await area.focus();await area.press('ControlOrMeta+End');await page.keyboard.insertText(` 保存核对${i}`);await expect.poll(()=>writes,{timeout:10000}).toBe(i+1);await expect(page.locator('.editor-save-bar')).toContainText('所有修改已保存');saves.push(performance.now()-begin);expect(decodeEditorBody(saved.body)).toHaveLength(300);expect(saved.body).toContain(`保存核对${i}`);await noOverflow(page);
+      25 |  }
+    > 26 |  await page.reload();await expect(page.locator('.bn-editor')).toContainText('保存核对4');await page.locator('.editor-save-bar').scrollIntoViewIfNeeded();await page.screenshot({path:`output/verification/T058/editor-${info.project.name}.png`});await writeReport(`browser-editor-${info.project.name}`,{scope:'Actual BlockNote component, simulated save transport; not durable database timing.',blocks:300,bodyChars:body.length,load:summary(loads),saveConfirmation:summary(saves),writes});expect(Math.max(...loads)).toBeLessThan(5000);expect(Math.max(...saves)).toBeLessThan(5000);
+         |                                                               ^
+      27 | });
+      28 | test('T058 200-row eight-column Reference filters last row without overflow',async({page},info)=>{
+      29 |  test.setTimeout(90000);const detail={id:'scale-reference',title:'规模速查表',revision:1,tags:[],tables:[longTable]};await mount(page,'reference',()=>({state:'ready',detailState:'ready',data:{items:[detail],total:1,page:1,pages:1,canEdit:false},detail}));const filters:number[]=[];
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/performance.spec.ts:26:63
+
+    Error Context: test-results/performance-T058-300-block-85674-reload-preserve-every-block-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/performance-T058-300-block-85674-reload-preserve-every-block-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/performance-T058-300-block-85674-reload-preserve-every-block-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile] › tests/e2e/performance.spec.ts:19:1 › T058 300-block BlockNote edit autosave and reload preserve every block 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('.bn-editor')
+    Expected substring: "保存核对4"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for locator('.bn-editor')
+        - waiting for navigation to finish...
+        - navigated to "http://127.0.0.1:3210/admin/sign-in"
+
+
+      24 |   const begin=performance.now();await area.focus();await area.press('ControlOrMeta+End');await page.keyboard.insertText(` 保存核对${i}`);await expect.poll(()=>writes,{timeout:10000}).toBe(i+1);await expect(page.locator('.editor-save-bar')).toContainText('所有修改已保存');saves.push(performance.now()-begin);expect(decodeEditorBody(saved.body)).toHaveLength(300);expect(saved.body).toContain(`保存核对${i}`);await noOverflow(page);
+      25 |  }
+    > 26 |  await page.reload();await expect(page.locator('.bn-editor')).toContainText('保存核对4');await page.locator('.editor-save-bar').scrollIntoViewIfNeeded();await page.screenshot({path:`output/verification/T058/editor-${info.project.name}.png`});await writeReport(`browser-editor-${info.project.name}`,{scope:'Actual BlockNote component, simulated save transport; not durable database timing.',blocks:300,bodyChars:body.length,load:summary(loads),saveConfirmation:summary(saves),writes});expect(Math.max(...loads)).toBeLessThan(5000);expect(Math.max(...saves)).toBeLessThan(5000);
+         |                                                               ^
+      27 | });
+      28 | test('T058 200-row eight-column Reference filters last row without overflow',async({page},info)=>{
+      29 |  test.setTimeout(90000);const detail={id:'scale-reference',title:'规模速查表',revision:1,tags:[],tables:[longTable]};await mount(page,'reference',()=>({state:'ready',detailState:'ready',data:{items:[detail],total:1,page:1,pages:1,canEdit:false},detail}));const filters:number[]=[];
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/performance.spec.ts:26:63
+
+    Error Context: test-results/performance-T058-300-block-85674-reload-preserve-every-block-mobile/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/performance-T058-300-block-85674-reload-preserve-every-block-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/performance-T058-300-block-85674-reload-preserve-every-block-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [desktop] › tests/e2e/performance.spec.ts:19:1 › T058 300-block BlockNote edit autosave and reload preserve every block 
+    [mobile] › tests/e2e/performance.spec.ts:19:1 › T058 300-block BlockNote edit autosave and reload preserve every block 
+  4 passed (59.5s)

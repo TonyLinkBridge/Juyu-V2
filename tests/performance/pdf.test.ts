@@ -1,0 +1,15 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {mkdir,writeFile} from 'node:fs/promises';
+import {renderPDF} from '../../src/server/pdf/chromium.ts';import {exportPDF} from '../../src/server/pdf/export.ts';import {encodeEditorBody,decodeEditorBody,editorMedia} from '../../src/editor/document.ts';
+import {largeBody,longTable} from './fixtures.ts';import {summary,writeReport} from './report.ts';
+test('T058 actual large PDF export, explicit size boundary, busy rejection and recovery',{timeout:120000},async()=>{
+ const nodes=decodeEditorBody(largeBody(100,600))!;const table={id:longTable.id,type:'juyu',props:{payload:JSON.stringify(longTable)},children:[]};const body=encodeEditorBody([...nodes,table,{id:'end',type:'paragraph',content:[{type:'text',text:'T058-END 中文导出核对完成',styles:{}}],children:[]}]);
+ const article={id:'scale-pdf',title:'T058 大文章与长表格 · 仅本地验收',revision:1,body,blocks:editorMedia(decodeEditorBody(body)!)};
+ const deps={snapshot:async()=>({article,files:[]}),asset:async()=>{throw new Error('UNEXPECTED_ASSET');},storage:()=>{throw new Error('UNEXPECTED_STORAGE');},render:renderPDF};
+ const report:Record<string,unknown>={scope:'Actual offline Chromium renderer, synthetic authorized snapshot; no real identity/storage.',bodyChars:body.length,bodyBytes:Buffer.byteLength(body),tableRows:200,tableColumns:8,textBlocks:101};const samples:number[]=[];
+ try{
+  let bytes:Buffer|undefined;for(let i=0;i<5;i++){const start=performance.now();const response=await exportPDF(new Request('http://local?download=1'),article.id,1,deps);assert.equal(response.status,200,await response.clone().text());bytes=Buffer.from(await response.arrayBuffer());samples.push(performance.now()-start);assert.equal(bytes.subarray(0,5).toString(),'%PDF-');}report.export={...summary(samples),bytes:bytes!.length};await mkdir('output/pdf',{recursive:true});await writeFile('output/pdf/T058-large-content.pdf',bytes!);assert.ok(Math.max(...samples)<20000,'PDF exceeded 20s');
+  const tooLarge={...article,body:largeBody(),blocks:[]};let rendered=false;const oversized=await exportPDF(new Request('http://local'),article.id,1,{...deps,snapshot:async()=>({article:tooLarge,files:[]}),render:async()=>{rendered=true;throw new Error('MUST_NOT_RENDER');}});assert.equal(oversized.status,413);assert.deepEqual(await oversized.json(),{error:'PDF_TOO_LARGE'});assert.equal(rendered,false);
+  const busy=await Promise.all([exportPDF(new Request('http://local'),article.id,1,deps),exportPDF(new Request('http://local'),article.id,1,deps)]);assert.deepEqual(busy.map(r=>r.status).sort(),[200,429]);const rejected=busy.find(r=>r.status===429)!;assert.deepEqual(await rejected.json(),{error:'PDF_BUSY'});for(const r of busy)if(!r.bodyUsed)await r.body?.cancel();
+  const recovered=await exportPDF(new Request('http://local'),article.id,1,deps);assert.equal(recovered.status,200);await recovered.body?.cancel();report.boundaries='passed: large accepted export, 300-block export rejected before renderer, 1 active/second 429, retry recovery';
+ }finally{await writeReport('pdf',report);}
+});

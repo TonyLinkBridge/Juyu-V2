@@ -1,0 +1,31 @@
+{
+  "task": "T056",
+  "scope": "Local two-admin continuous service/database workflow rehearsal; real account acceptance pending; no subagents; no product changes",
+  "files": [
+    {
+      "target": "tests/database/two-admin-workflow.test.ts",
+      "targetSha256": "e449d723fd84b24a3ffcfbf46d829b04b83d9a08a7beb7613dd9479d1b0fe3be",
+      "origin": "JUYU test and acceptance evidence; no vendor code"
+    },
+    {
+      "target": "docs/superpowers/plans/2026-09-10-two-admin-workflow.md",
+      "targetSha256": "6437892395d97bf732a649bb1a6450150f142df8ca1dfdbd94f63672f2cd673c",
+      "origin": "JUYU test and acceptance evidence; no vendor code"
+    },
+    {
+      "target": "docs/verification/2026-09-10-two-admin-workflow.md",
+      "targetSha256": "6764df9c6a55e81f0a6ff0def034864618642cb1e93244721486a75f8d0991d5",
+      "origin": "JUYU test and acceptance evidence; no vendor code"
+    },
+    {
+      "target": "docs/verification/T056-two-admin-workflow.json",
+      "targetSha256": "e78fc47b9a416ee52b1414f5e258e76b27eab593ce7b2332bf0a35744731bdc1",
+      "origin": "JUYU test and acceptance evidence; no vendor code"
+    },
+    {
+      "target": "docs/verification/T056-real-account-checklist.md",
+      "targetSha256": "3c33318e8997fce31edccde4dca8c0886f59638a36e29b23ff61fd5c72d31f79",
+      "origin": "JUYU test and acceptance evidence; no vendor code"
+    }
+  ]
+}

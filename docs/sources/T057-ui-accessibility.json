@@ -1,0 +1,518 @@
+{
+  "task": "T057",
+  "at": "2026-09-10T04:03:46.239300+00:00",
+  "stage": "core-ui-audit",
+  "originalSourceFiles": [
+    {
+      "id": "gitbook:packages/gitbook/src/components/TableOfContents/TableOfContents.tsx",
+      "sha256": "0667ddf2de7b3c8d0a3c1e0310c6c34edb41580957d9ff2c4ed5cd9a76020a97",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/TableOfContents/PagesList.tsx",
+      "sha256": "f04c3ee849bc38ef230bd875bb4bcef34e949d54098b387c7c22f135c3040099",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/TableOfContents/PageGroupItem.tsx",
+      "sha256": "331cf72b03a92adcfa5fd3ac435965e4372a573d6ca08b687190879bc35dd6da",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/TableOfContents/ToggleableLinkItem.tsx",
+      "sha256": "4cf6b7b308e8c3b981519b549dcc4d8f0a7c59ac8ef23f0179e2559502bef64a",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "sha256": "f466467bbb0bb7d0fe1ad69aac6e3513099d881d09301ceb3c0d45ca55b770b7",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Block.tsx",
+      "sha256": "dc900af8f32dcb46e28746be0c1682f0ee9348acf9e7fa4c5a37c03bea679ec2",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageAside/PageAside.tsx",
+      "sha256": "391a033fbab7c93dafad5df6435bcb31ae2dd4f980e35501329b29842a4b1571",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageAside/ScrollSectionsList.tsx",
+      "sha256": "55014884bd444fe05fbd43e6f2e4dfc92db72788861f21b610f34bb451a3362e",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Search/SearchInput.tsx",
+      "sha256": "1f7b70f1c2dba00836d323c985c7954b0e9ee7c332c94d33b715a3c74af6c6a3",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Search/SearchResults.tsx",
+      "sha256": "2f5cd4291368389d331febf58d61ff4a35d795a70f95efe81e90c3b28ed2c588",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Search/SearchPageResultItem.tsx",
+      "sha256": "9a134d2d3a4c74e8d749cf7288af6373d1d8432e2377d0e418472f7bba5f7a62",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Header/HeaderMobileMenu.tsx",
+      "sha256": "942aa0809f488622faf13bca6a36b3d0a17f894dd85a7bee97d1b97dbc076eb9",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageBody/PageHeader.tsx",
+      "sha256": "8d04d4c0365d18f343029024cc523a49c093faf2d34f93af122aa0902f0ca45a",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageBody/BreadcrumbItemDropdown.tsx",
+      "sha256": "9ddf5fece150abe1f1c01498b5ad50284a84b100e24e0f2a5bf2e3cdd58e8242",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageBody/PageFooterNavigation.tsx",
+      "sha256": "fb067fb98d13916039be77b131f200efdb661f0d2eefd072208d3ab0465ab8ea",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageAside/ScrollToTopButton.tsx",
+      "sha256": "6d8cc5c7d8c5a32db85b37089df58c7bd15ef103eeb115dbf4cca9ad099a2f6c",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/ThemeToggler/ThemeToggler.tsx",
+      "sha256": "f11009759c94bcd5e860a12334ceb384602150a6487950147e5d57986546a967",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Announcement/AnnouncementBanner.tsx",
+      "sha256": "66e0973e39fa341b3aed67b1e227d2620c498feafdc8ed272286a400f7f7dbd7",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Footer/Footer.tsx",
+      "sha256": "9d6427da93c86db57e570e5205c98e483ce140f84fbccd809b65816bec94ba61",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageBody/PageCover.tsx",
+      "sha256": "1f13774736ca75b67e16f2e5b526c0f0937f60ab3f2490d5ca921caeecc29d0e",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageBody/PageCoverImage.tsx",
+      "sha256": "b143f22669180c3d9a987f814d53136c781cdf93977b176846e367f7a7a42cf9",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageBody/PageTags.tsx",
+      "sha256": "7af4b94ad7119923949fc6c22a2b86831a35155e60fd496f81c23c8e739f9d6d",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PageFeedback/PageFeedbackForm.tsx",
+      "sha256": "8375dfb2e7b2e0c2faf96c11c494b1b092ff445e96e96363bff4a3a54cd6be13",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PDF/PDFPage.tsx",
+      "sha256": "8fd9d7db17031107d24cedea703b95817ecd22c86244ef228ef5d764b6d10cfe",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PDF/PrintButton.tsx",
+      "sha256": "67c3b9c7f6ee991f6a7f6841cced7ae550268918a8ad7139940634e655289e0c",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/PDF/pdf.css",
+      "sha256": "399480f0f30221ab0a8dbdd8852d9e2a6fce1d07a94c1b61ca4f8fa26d1619bf",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Images.tsx",
+      "sha256": "742895a14f5bffb9b0d2177dabf3e477bf9aa3f51446d34de6f782c49fa4a364",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Embed.tsx",
+      "sha256": "8c85daff9ad115a06388c8fc826e2ff95a1d930830b5eddc1f99f7106e7fe4c5",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/File.tsx",
+      "sha256": "0f72bbb06f521b3a69bca3270b2f20e55607395bf9192f1aa2af362967f5ad7e",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Table/Table.tsx",
+      "sha256": "6763410db8106dec358aa9efd4c30f1b5bb1d1f88bddf29cc1eb264cf08e51e0",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Hint.tsx",
+      "sha256": "b6bb7a204a7b509a73e77b841dc4fc544013d0500198f20f4122a2be71681521",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/CodeBlock.tsx",
+      "sha256": "a4a93744fedb5abe0b1ac6726b6b798ec5f47cc55116a59c1944f3d381279dfa",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/CopyCodeButton.tsx",
+      "sha256": "f6b92238a4ac9412fbc87420cc2974633f88e2bd7c232ed09465104aac45f08e",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Tabs/DynamicTabs.tsx",
+      "sha256": "0c6a08e1c48d7959f00ba884168076ff078f8ba9fba83df247eeb99800acb65d",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Math.tsx",
+      "sha256": "6dffdf6eb694d81da0a30616763f29ec4756b893e36fefe43818089f84da4025",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/MermaidCodeBlock.tsx",
+      "sha256": "feaa5a2512b412852ebe8e6a9d54a1b833994140fab9f372840211d6a4dc0221",
+      "matches": true
+    },
+    {
+      "id": "gitbook:README.md",
+      "sha256": "df84e6a678134df2d2eb045dd5acc01e5cd0866b6b0bf278960cd1bc52ff1f70",
+      "matches": true
+    },
+    {
+      "id": "gitbook:package.json",
+      "sha256": "51e9edb900bbd00f2612cb1f01bbd195008cc72df5d35c686e55e49c79d4eb31",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/package.json",
+      "sha256": "2a49680c52b66ac67abf83ad4925f4b1d9944e318b6cb7549f2fa52e42ebaa66",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/AnnouncementBanner.tsx",
+      "sha256": "fe99de94987bc96fe203db084feacf3d823ca3af36be2e55772d57c37938362c",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/CopyCodeButton.tsx",
+      "sha256": "20abe4751aa9ad66009a4b785928511b00431d0fed77cd76d02e122fb0283a3e",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/Dialog.tsx",
+      "sha256": "2b90bdef86508219eb4c841dacc46ea95cbe83e81f2737691e86ed89caf5444e",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/DynamicTabs.tsx",
+      "sha256": "baf7d010a6bfad6496d976ba670309dbd1d1d71bc8940e8285d39f1acdd16def",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/Footer.tsx",
+      "sha256": "894c31425a280db542c012d08014a78b6974cb7c1e88239117248e4817d976c7",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/Hint.tsx",
+      "sha256": "317e495fb54927a1002ef48da6fdbc88815386260310e8741692fccf2c45bf1b",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/MarkdownBlocks.tsx",
+      "sha256": "8438ee9e7002eda38dd60e5dc1284a3044bec5b7b491d8cc33c01b74e4741587",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/PageFeedbackForm.tsx",
+      "sha256": "349191e99be9bdba88dd692db1a808af4ebeb26e5290b06550abc0661fa4a383",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/PageFooterNavigation.tsx",
+      "sha256": "7a1ddf0512a3877492147244de5fd45997bfa389f8ba4155818fcd12c8ebf94f",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/PageMetadata.tsx",
+      "sha256": "070985ebaa83531079bbfd0f229cf01ce97f0a23c70bb8ffee359534c1666275",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/PrintButton.tsx",
+      "sha256": "3fa7c44835d433da61d01a415f75bb307777763467ff80f24c21241a9f744b5d",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/README.md",
+      "sha256": "c2addc7e30876a5c5941b17f5b6a7eeff0c3ad4c6a8eda11ba01f139a4253015",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/ReaderTheme.tsx",
+      "sha256": "c2500107fa757c78d88c4feba0f631aec7e1a8ef2a893b9252128354f3dc52bd",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/ScrollSectionsList.tsx",
+      "sha256": "40a5e7e687341398d7efc9514668321b1f4207000aacef93950d01ca59d1e51e",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/ScrollToTopButton.tsx",
+      "sha256": "f779070e04983975ac41ab975caa11fe172325766e83c33b85267dc776f1f420",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/SearchPageResultItem.tsx",
+      "sha256": "9a7b18af2a50f0cb071478d9cee8601b02939eae76a1684142f46d88f35b1b04",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/ThemeToggler.tsx",
+      "sha256": "8dd4f2c43f756716cf80be1f76a495fb66a479f59273be8c82d1671ef7bacc1e",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/ToggleableLinkItem.tsx",
+      "sha256": "469cbdf2f2fcb8335e3cc8f98648692e8054756f5e628af39f834aa9aec10a76",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/UPSTREAM.json",
+      "sha256": "6342014647600fa49b927997b40ac5fd1e9e700ebd5b421b8ad1472bdefe69bf",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/reader.css",
+      "sha256": "818d22fe155ef418cb8f89f675a03ab5c4b6f6dc8c3bd412088fcde101d30d0d",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/remark-reader-typography.ts",
+      "sha256": "1e7a74bb6c638bf54ceeaf2a3e6c96aeeaa6a63bb3af43e68e65cbcb4571a0f5",
+      "matches": true
+    },
+    {
+      "id": "site:app/help-centre/gitbook/remark-tabs.ts",
+      "sha256": "e9b0e3b1fee00bf61298c416b87de26f5ee682e16ce20c97ed8131ca87bac4b9",
+      "matches": true
+    },
+    {
+      "id": "site:package.json",
+      "sha256": "9b0ac27f05e462ed46e961cecb1bd41e8266842d7e3b8da1d93d6d8079f2df63",
+      "matches": true
+    },
+    {
+      "id": "site:lib/clerk-server.ts",
+      "sha256": "6c1a173b0fe60eb1353ef74dda073a518336435ac468e7077c8b671dfb5668c6",
+      "matches": true
+    },
+    {
+      "id": "site:lib/api-authorization.ts",
+      "sha256": "88e849005e495d853d4f991c70ad95e80d047ab09fe9a8bcb0a0d51203b670a3",
+      "matches": true
+    },
+    {
+      "id": "site:lib/roles.ts",
+      "sha256": "34773908c9ac55baf29716e8090c2305f6f01352aec38a15a4872460cf2e425d",
+      "matches": true
+    },
+    {
+      "id": "site:lib/supabase-server.ts",
+      "sha256": "0ce388092dd78cf2b2b86680bdd2c63de5e745195f569cf35bfeb2721f3630fa",
+      "matches": true
+    },
+    {
+      "id": "site:lib/article-workflow.ts",
+      "sha256": "72a75dfa3936564bd514b7fb61e3d833674fe8c935fee001a908a091b2f24b5a",
+      "matches": true
+    },
+    {
+      "id": "site:lib/article-revisions.ts",
+      "sha256": "77dc6cf4f932e073f00e3ed21651f9ce03e6bae0d26dd41e130d07464e70b59a",
+      "matches": true
+    },
+    {
+      "id": "site:lib/article-blocks.ts",
+      "sha256": "ebb5f5b712629553a70ce71c8631ef73f4ab03993a470bc40583a6fb7012958e",
+      "matches": true
+    },
+    {
+      "id": "site:app/api/article-images/route.ts",
+      "sha256": "42892e0958c65024eee1cc86fbb27820e5a9ad26a2501556108129b4aa7e0be1",
+      "matches": true
+    },
+    {
+      "id": "site:app/api/content-categories/route.ts",
+      "sha256": "7b279737b9facc6122d3e2583a11f6e267ca3a829b64f13c7560c799c7d3e189",
+      "matches": true
+    },
+    {
+      "id": "site:app/api/admin/members/route.ts",
+      "sha256": "8a329431febb584383726c6e5b301a6af6a0348019787a7fe242e50521a03d89",
+      "matches": true
+    },
+    {
+      "id": "site:public/brand/juyu-logo-color.png",
+      "sha256": "5166e53c0ce8871079f6ee97ce7cb4ad41837c4e84480fe3f8b5e423c0b418c6",
+      "matches": true
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/board/tasks-board.tsx",
+      "sha256": "9657d0f709565a04ed6e890d872a358b26a90e71b37052296ab1802f6dc7ce4c",
+      "matches": true
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/board/task-column.tsx",
+      "sha256": "276cd98e1b26497a86dde98d501ab02b47891841552afa197ce757077c65a6cc",
+      "matches": true
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/board/task-card.tsx",
+      "sha256": "613a59c5b8bfa0ccd4f74eeb52b7fdc170016001cf716fa95ed7d64c70887086",
+      "matches": true
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/filters/tasks-filters.tsx",
+      "sha256": "17b67aea10f2b35b7fd0345a5c6e22941075bc3e247520d46afe3991480e99f3",
+      "matches": true
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/filters/filter-dropdown.tsx",
+      "sha256": "e0c0291eed459572c12276add43b1d43bf6bae7abab57dfd42d29ce0ae079b39",
+      "matches": true
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/sidebar/tasks-sidebar.tsx",
+      "sha256": "fcb52a46d479ddd763c802ff750f8c7bd200148898c1d44ba01fd3bcd806b6a4",
+      "matches": true
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/header/tasks-header.tsx",
+      "sha256": "3cedd82bddc8cffe7c5d692c3265bc1ce5399e16245ec5896e9c186a9b8363ed",
+      "matches": true
+    },
+    {
+      "id": "tasks:templates/tasks/package.json",
+      "sha256": "2cbede4cb401ca87fb6c8996df83049b15ec48724b435bee95f828e35ae7552a",
+      "matches": true
+    },
+    {
+      "id": "tasks:templates/tasks/store/tasks-store.ts",
+      "sha256": "15bcff329c9a88335f062f7955d401a9a6488701d025e1dbd04b4cadaf8d7baf",
+      "matches": true
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/filters/add-task-dialog.tsx",
+      "sha256": "8eb4443d38519d320e1c162ccf83231cd80a956a12f3e4e1960701e46a53362e",
+      "matches": true
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/filters/import-export-dropdown.tsx",
+      "sha256": "ae84263ad3ea9456a56c7484b5a26de945df58dc83126d2a48c6dfe3850c1170",
+      "matches": true
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/charts/revenue-flow-chart.tsx",
+      "sha256": "91b16e888dfd4e696d01ea93d4d6f4e8c0ba152e5c98eeadf6468fe5bc1e0ea4",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/TableOfContents/PageDocumentItem.tsx",
+      "sha256": "c645fcfb8dff59a636e160e61affdb401866baf8dcf2409f9cdff56954296295",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/TableOfContents/styles.ts",
+      "sha256": "41cb018d113d060b9033642923306e16e262bcc96bcbf36a62af9123f61e1bc9",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/primitives/ScrollContainer.tsx",
+      "sha256": "aa1759f9624b22704a30eaa325ded2286558e9173d1d59ee844d55110f4b09ca",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/hooks/useScrollActiveId.ts",
+      "sha256": "0c5172ae58afa95d1d58778ec9264049c3d6c73ab42f7513787b5d382d29e683",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Heading.tsx",
+      "sha256": "e6726507782c3296549843281e665b84d275f45c3c7329da1ef7518d1d2bd63d",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/Paragraph.tsx",
+      "sha256": "fabd346550302b608a1f43e9367afdfaeeb4e17a564d84dd1de8168a23ff2ccb",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/DocumentView.tsx",
+      "sha256": "eb19546c3654a92d189cdabfad3fd528f21c1562bc3ecdd61d40de18d37267fe",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Search/SearchResultItem.tsx",
+      "sha256": "ce48e639272fe9aecd3da679b2131377e2334c4e447c23f4ce28f3ee5693790c",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/Search/HighlightQuery.tsx",
+      "sha256": "22d19b3264cefe3b0fb969946d2c2e2d2545878996d55fbf414a0ecf3c302cc5",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/primitives/SideSheet.tsx",
+      "sha256": "3877aefcf0ed6849771f296386efb50f226e5ab748f48c7281c6d6fccecd2cbe",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/lib/pages.ts",
+      "sha256": "be1ed5cd5be420ba0a10d8ec3a0f6453408da14fac2b37cf3b52512788364513",
+      "matches": true
+    },
+    {
+      "id": "gitbook:packages/gitbook/src/components/DocumentView/CodeBlock/CodeBlockRenderer.tsx",
+      "sha256": "ac9de52c919d24634a240fbe6ae136f8e9c9cd298e2e9dd0ed886d1c53c10bf7",
+      "matches": true
+    },
+    {
+      "id": "tasks:templates/tasks/components/tasks/tasks-main.tsx",
+      "sha256": "f7cf4a0ca2c3a8f355df85af7408b82c45d21e8b5d6d6765f81c9bf93211b148",
+      "matches": true
+    }
+  ],
+  "latestRuntimeFilesVerified": 47,
+  "licenseSnapshotsVerified": 3,
+  "productChanges": [
+    {
+      "path": "src/components/editor/ArticleEditor.tsx",
+      "sha256": "673aa6c7b96e20759c3b5913cd27ed2e53910457cf79a9b887c91e56174ff96c"
+    },
+    {
+      "path": "src/components/tasks/TasksWorkspace.tsx",
+      "sha256": "5d8063bd4375ecbdfba2293b7f1acb1215f47462cc474c606fd825f927e688e3"
+    },
+    {
+      "path": "src/components/tasks/TaskColumn.tsx",
+      "sha256": "faa21944fd395d4826f48671ce933504febd3aa25fdbaf8cca1e751340aa884a"
+    },
+    {
+      "path": "src/app/globals.css",
+      "sha256": "745bc42d5890ff0394b7426c557ba1d7bb99da62a7633720dea11ba6b51b6841"
+    }
+  ],
+  "scope": "Local UI only; all-page manual audit and real-account/device acceptance remain pending."
+}

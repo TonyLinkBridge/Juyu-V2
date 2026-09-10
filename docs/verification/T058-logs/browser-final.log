@@ -1,0 +1,17 @@
+[WebServer] (node:81930) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:81931) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [desktop] › tests/e2e/performance.spec.ts:9:1 › T058 1000-entry directory and 300-block reading stay usable (7.4s)
+  ✓  2 [desktop] › tests/e2e/performance.spec.ts:19:1 › T058 300-block BlockNote edit autosave and reload preserve every block (13.4s)
+  ✓  3 [desktop] › tests/e2e/performance.spec.ts:28:1 › T058 200-row eight-column Reference filters last row without overflow (530ms)
+(node:81954) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  4 [mobile] › tests/e2e/performance.spec.ts:9:1 › T058 1000-entry directory and 300-block reading stay usable (7.4s)
+  ✓  5 [mobile] › tests/e2e/performance.spec.ts:19:1 › T058 300-block BlockNote edit autosave and reload preserve every block (13.8s)
+  ✓  6 [mobile] › tests/e2e/performance.spec.ts:28:1 › T058 200-row eight-column Reference filters last row without overflow (545ms)
+
+  6 passed (44.3s)

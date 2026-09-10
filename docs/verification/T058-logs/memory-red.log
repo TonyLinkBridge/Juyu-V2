@@ -1,0 +1,15 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Fresh-process upload peak exceeds the local 512 MiB diagnostic budget (excluding Next.js).
+    at file:///Users/tony/Documents/ChatGPT/Juyu%20V2/tests/performance/upload-memory.ts:10:550 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

@@ -1,0 +1,22 @@
+✖ T058 indexed Chinese search, authorized directory and concurrent durable draft saves (30650.113917ms)
+✔ T058 maximum-size upload integrity, rejection, cancellation and process concurrency (648.383125ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 31482.149708
+
+✖ failing tests:
+
+test at tests/performance/database.test.ts:4:1
+✖ T058 indexed Chinese search, authorized directory and concurrent durable draft saves (30650.113917ms)
+  Error: INVALID_INPUT
+      at DocumentRepository.saveEditor (file:///Users/tony/Documents/ChatGPT/Juyu%20V2/src/server/database/repository.ts:136:120)
+      at AuthorizationService.saveDraft (file:///Users/tony/Documents/ChatGPT/Juyu%20V2/src/server/authorization/service.ts:189:109)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///Users/tony/Documents/ChatGPT/Juyu%20V2/tests/performance/database.test.ts:20:146)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)

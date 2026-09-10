@@ -1,0 +1,59 @@
+{
+  "task": "T036",
+  "scope": "Withdraw pending review or reassign independent reviewer; local acceptance only",
+  "files": [
+    {
+      "target": "src/review/control.ts",
+      "targetSha256": "4354642fc99a2ff30026502aee8d0be32d6497ddda426edf194cd9a87f78c0ae",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/review/control-client.ts",
+      "targetSha256": "12dcb6180f771fa5927b5f017e194c16ee16984cfa44635279df29e25ffc09a3",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/review/control.ts",
+      "targetSha256": "05311dd8066193b40408b3e47b67a46926d423582794c8782dbcd82e2a2e908c",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "17eaa68974305a6bf64896e021380b2453a5d8a64d7efad454e6e37844a3bea0",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/api/admin/review/[id]/control/route.ts",
+      "targetSha256": "12746b3e6dfe59a721700a0280d720f72187e0e27979f684c6370888d96bd716",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/admin/review/manage/page.tsx",
+      "targetSha256": "8f5503de91787863d156da029f64c17d4a9fd6ce9767638080c811d8985823e5",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/review/ReviewControl.tsx",
+      "targetSha256": "0fdb2e34c98b2fbe8251fb6725c776dc360e0c91d6b46379b2dfd35c53a81c4a",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/components/review/ReviewDecision.tsx",
+      "targetSha256": "f24c6cb5545f9ce8f458fc95d7d84592f0b0b3e8b4a74b581181cfa152fe1db8",
+      "origin": "JUYU application code; no new upstream source copied"
+    },
+    {
+      "target": "src/app/globals.css",
+      "targetSha256": "2e6bdabe2ff71399e61c0c0a0d718a0869d2dcb01bcd5e9e0c9df6003bdac79c",
+      "origin": "JUYU application code; no new upstream source copied"
+    }
+  ],
+  "integration": "Uses existing atomic review and audit persistence. Dedicated management page linked from review detail. No new dependencies or migrations.",
+  "verification": "docs/verification/2026-09-09-review-control.md",
+  "limitations": [
+    "Local role observations are not live Clerk acceptance",
+    "No external account, storage, device or deployment acceptance",
+    "History UI shows latest 20 control entries only; full history is T039",
+    "Queue and publish UI is T037"
+  ]
+}

@@ -1,0 +1,111 @@
+import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
+import {before,after,beforeEach,test} from 'node:test';
+import {randomBytes,randomUUID} from 'node:crypto';
+import type {Pool} from 'pg';
+import {temporaryDatabase} from './fixture.ts';
+import {migrate} from '../../src/server/database/migrate.ts';
+import {ScopedDatabase} from '../../src/server/database/scoped.ts';
+import {readForms,readForm,writeForm,submitForm,readFormRecords,readFormRecord,processFormRecord} from '../../src/server/forms/repository.ts';
+import {writeFieldDefinition} from '../../src/server/fields/repository.ts';
+import type {FormWrite,SubmissionInput} from '../../src/forms/model.ts';
+import type {Viewer} from '../../src/domain/model.ts';
+let fixture:Awaited<ReturnType<typeof temporaryDatabase>>,runtime:Pool,issuer:Pool,db:ScopedDatabase;
+const admin:Viewer={id:'a',role:'admin',companyVerified:true},reviewer:Viewer={...admin,id:'b'},support:Viewer={id:'s',role:'support',companyVerified:true},ops:Viewer={id:'o',role:'ops',companyVerified:true};
+let config:FormWrite;
+const write=(id:string,value:FormWrite=config,v=admin)=>db.run(v,c=>writeForm(c,id,value));
+const read=(v=admin,adminMode=true)=>db.run(v,c=>readForms(c,adminMode),true);
+const get=(id:string,v=admin,adminMode=true)=>db.run(v,c=>readForm(c,id,adminMode),true);
+const submit=(id:string,value:SubmissionInput,v=support)=>db.run(v,c=>submitForm(c,id,value));
+const records=(v=admin,page=1)=>db.run(v,c=>readFormRecords(c,page),true);
+const detail=(id:string,v=admin)=>db.run(v,c=>readFormRecord(c,id),true);
+const process=(id:string,value:unknown,v=admin)=>db.run(v,c=>processFormRecord(c,id,value));
+const field=(type:'text'|'number'|'date'|'select'|'boolean'='text')=>db.run(admin,c=>writeFieldDefinition(c,randomUUID(),{expectedVersion:null,name:type,type,required:false,enabled:true,options:type==='select'?['A','B']:[]}));
+before(async()=>{fixture=await temporaryDatabase();await migrate(fixture.pool);await fixture.pool.query("INSERT INTO juyu.members(clerk_user_id,display_name,observed_role,verified_email,observed_at) VALUES('a','Admin','admin','a@example.test',now()),('b','Reviewer','admin','b@example.test',now()),('s','Support','support','s@example.test',now()),('o','Ops','ops','o@example.test',now())");const rp=randomBytes(24).toString('hex'),ip=randomBytes(24).toString('hex');await fixture.pool.query(`CREATE ROLE forms_runtime LOGIN PASSWORD '${rp}' IN ROLE juyu_runtime; CREATE ROLE forms_issuer LOGIN PASSWORD '${ip}' IN ROLE juyu_context_issuer`);runtime=fixture.connectAs('forms_runtime',rp);issuer=fixture.connectAs('forms_issuer',ip);db=new ScopedDatabase(runtime,issuer);});
+after(async()=>{await runtime?.end();await issuer?.end();await fixture?.close();});
+beforeEach(async()=>{await fixture.pool.query('TRUNCATE juyu.forms,juyu.settings CASCADE');const f=await field();config={expectedVersion:null,title:'Request',description:'Description',audience:'staff',enabled:true,fields:[{id:f.id,version:f.version,required:true,width:'full'}]};});
+test('forms resolve field metadata and enforce versioned exact actor retries and immutable history',async()=>{
+ const id=randomUUID(),created=await write(id);assert.equal(created.version,1);assert.equal(created.fields[0].field.id,config.fields[0].id);assert.equal(created.fields[0].required,true);assert.equal(created.fields[0].field.required,false);assert.deepEqual(await write(id),created);
+ await assert.rejects(write(id,{...config,title:'Other'}),/FORM_CONFLICT/);await assert.rejects(write(id,config,reviewer),/FORM_CONFLICT/);
+ const changed=await write(id,{...config,expectedVersion:1,title:'Changed'});assert.equal(changed.version,2);assert.deepEqual(await write(id,{...config,expectedVersion:1,title:'Changed'}),changed);
+ assert.deepEqual(await get(id),changed);assert.deepEqual(await read(),[changed]);assert.equal((await fixture.pool.query('SELECT count(*)::int n FROM juyu.form_versions')).rows[0].n,2);
+ await assert.rejects(fixture.pool.query("UPDATE juyu.form_versions SET config='{}' WHERE form_id=$1",[id]),/IMMUTABLE/);await assert.rejects(fixture.pool.query('DELETE FROM juyu.forms WHERE id=$1',[id]),/IMMUTABLE/);
+});
+test('field versions stay snapshotted; old bindings preserve disabled metadata but new bindings require current enabled versions',async()=>{
+ const created=await write(randomUUID()),binding=config.fields[0];await db.run(admin,c=>writeFieldDefinition(c,binding.id,{expectedVersion:1,name:'Renamed',type:'text',required:true,enabled:false,options:[]}));assert.equal((await get(created.id)).fields[0].field.name,'text');
+ const changed=await write(created.id,{...config,expectedVersion:1,title:'Revised',fields:[{...binding,required:false,width:'half'}]});assert.equal(changed.fields[0].field.version,1);assert.equal(changed.fields[0].required,false);
+ await assert.rejects(write(randomUUID()),/FIELD_CONFLICT/);await assert.rejects(write(created.id,{...config,expectedVersion:2,fields:[{...binding,version:2}]}),/INVALID_INPUT/);
+ assert.deepEqual(await write(created.id,{...config,expectedVersion:1,title:'Revised',fields:[{...binding,required:false,width:'half'}]}),changed);
+ const submitted=await submit(created.id,{id:randomUUID(),formVersion:2,values:[{fieldId:binding.id,value:null}]});const saved=await detail(submitted.id);assert.equal(saved.fields[0].field.name,'text');assert.equal(saved.values[0].value,null);
+});
+test('submission validates all typed values including zero false real dates exact membership and optional null',async()=>{
+ const fields=[];for(const type of ['number','boolean','date','select'] as const)fields.push(await field(type));const form=await write(randomUUID(),{...config,fields:[...config.fields,...fields.map(f=>({id:f.id,version:1,required:true,width:'half' as const}))]});
+ const base:SubmissionInput={id:randomUUID(),formVersion:1,values:[{fieldId:config.fields[0].id,value:'text'},...fields.map(f=>({fieldId:f.id,value:({number:0,boolean:false,date:'2024-02-29',select:'A'} as Record<string,string|number|boolean>)[f.type]}))]};
+ const receipt=await submit(form.id,base);assert.equal(receipt.formVersion,1);const saved=await detail(receipt.id);assert.ok(saved.values.some(v=>v.value===false));assert.ok(saved.values.some(v=>v.value===0));assert.equal(saved.status,'new');assert.equal(saved.sequence,0);
+ for(const values of [base.values.slice(1),[...base.values,{fieldId:randomUUID(),value:null}],base.values.map((v,i)=>i===0?{...v,value:null}:v),base.values.map(v=>({...v,fieldId:base.values[0].fieldId}))])await assert.rejects(submit(form.id,{...base,id:randomUUID(),values}),/INVALID_INPUT/);
+ for(const [type,value] of [['number','0'],['boolean','false'],['date','2026-02-29'],['date','0000-01-01'],['select','Unknown'],['text','\u00a0\u2003']] as const){const target=type==='text'?config.fields[0].id:fields.find(f=>f.type===type)!.id;await assert.rejects(submit(form.id,{...base,id:randomUUID(),values:base.values.map(v=>v.fieldId===target?{...v,value}:v)}),/INVALID_INPUT/);}
+});
+test('only current permitted roles can read or first-submit enabled forms; own exact retries survive configuration changes',async()=>{
+ const form=await write(randomUUID()),input={id:randomUUID(),formVersion:1,values:[{fieldId:config.fields[0].id,value:'Answer'}]},receipt=await submit(form.id,input);assert.deepEqual(await submit(form.id,{...input,values:[...input.values].reverse()}),receipt);
+ await write(form.id,{...config,expectedVersion:1,audience:'ops'});assert.deepEqual(await read(support,false),[]);await assert.rejects(get(form.id,support,false),/NOT_FOUND/);await assert.rejects(submit(form.id,{...input,id:randomUUID(),formVersion:2}),/NOT_FOUND/);assert.equal((await read(ops,false)).length,1);await assert.rejects(submit(form.id,{...input,id:randomUUID()},ops),/FORM_CONFLICT/);
+ await write(form.id,{...config,expectedVersion:2,enabled:false});assert.deepEqual(await submit(form.id,input),receipt);await assert.rejects(submit(form.id,{...input,id:randomUUID(),formVersion:3},admin),/NOT_FOUND/);
+ await assert.rejects(submit(form.id,input,ops),/SUBMISSION_CONFLICT/);await assert.rejects(submit(form.id,{...input,values:[{fieldId:config.fields[0].id,value:'Different'}]}),/SUBMISSION_CONFLICT/);
+ for(const v of [support,ops]){await assert.rejects(read(v,true),/FORBIDDEN/);await assert.rejects(write(randomUUID(),config,v),/FORBIDDEN/);await assert.rejects(records(v),/FORBIDDEN/);await assert.rejects(detail(receipt.id,v),/FORBIDDEN/);}
+});
+test('processing uses exact actor CAS audits and immutable submission snapshots across edits',async()=>{
+ const form=await write(randomUUID()),receipt=await submit(form.id,{id:randomUUID(),formVersion:1,values:[{fieldId:config.fields[0].id,value:'Saved'}]});const action={expectedSequence:0,status:'processing',note:'Checking'},first=await process(receipt.id,action);assert.equal(first.sequence,1);assert.deepEqual(await process(receipt.id,action),first);await assert.rejects(process(receipt.id,action,reviewer),/CONFLICT/);await assert.rejects(process(receipt.id,{...action,note:'Changed'}),/CONFLICT/);
+ const resolved=await process(receipt.id,{expectedSequence:1,status:'resolved',note:'Done'},reviewer);assert.equal(resolved.sequence,2);const reopened=await process(receipt.id,{expectedSequence:2,status:'processing',note:'Again'});assert.equal(reopened.sequence,3);
+ await write(form.id,{...config,expectedVersion:1,title:'New title',fields:[{...config.fields[0],required:false}]});const saved=await detail(receipt.id);assert.equal(saved.title,'Request');assert.equal(saved.formVersion,1);assert.equal(saved.fields[0].required,true);assert.equal(saved.values[0].value,'Saved');assert.equal(saved.sequence,3);
+ for(const v of [support,ops])await assert.rejects(process(receipt.id,{expectedSequence:3,status:'resolved',note:''},v),/FORBIDDEN/);
+ await assert.rejects(fixture.pool.query("UPDATE juyu.form_submissions SET values='[]' WHERE id=$1",[receipt.id]),/IMMUTABLE/);await assert.rejects(fixture.pool.query("UPDATE juyu.form_processing_events SET note='forged' WHERE record_id=$1",[receipt.id]),/IMMUTABLE/);assert.equal((await fixture.pool.query('SELECT count(*)::int n FROM juyu.form_processing_events')).rows[0].n,3);
+});
+test('simultaneous submission and processing retries commit once; different processing payloads have one winner',async()=>{
+ const form=await write(randomUUID()),input={id:randomUUID(),formVersion:1,values:[{fieldId:config.fields[0].id,value:'Answer'}]};const receipts=await Promise.all([submit(form.id,input),submit(form.id,input)]);assert.deepEqual(receipts[0],receipts[1]);assert.equal((await records()).total,1);
+ const actions=await Promise.allSettled([process(input.id,{expectedSequence:0,status:'processing',note:'A'}),process(input.id,{expectedSequence:0,status:'resolved',note:'B'})]);assert.equal(actions.filter(x=>x.status==='fulfilled').length,1);assert.match(String((actions.find(x=>x.status==='rejected') as PromiseRejectedResult).reason),/CONFLICT/);
+});
+test('runtime has no raw table writes or submission reads and cannot forge SQL metadata or extra value keys',async()=>{
+ const form=await write(randomUUID());for(const relation of ['forms','form_versions','form_submissions','form_record_states','form_processing_events']){await assert.rejects(db.run(admin,c=>c.query(`SELECT * FROM juyu.${relation}`)),/permission denied/);await assert.rejects(db.run(admin,c=>c.query(`DELETE FROM juyu.${relation}`)),/permission denied/);}
+ await assert.rejects(runtime.query('SELECT juyu.read_forms(false)'),/FORBIDDEN/);await assert.rejects(db.run(support,c=>c.query('SELECT juyu.form_record_json($1)',[randomUUID()])),/permission denied/);
+ const {expectedVersion,...rest}=config;assert.equal(expectedVersion,null);for(const patch of [{fields:[{...config.fields[0],field:{name:'forged'}}]},{title:' Bad '},{fields:[]},{fields:[config.fields[0],config.fields[0]]},{audience:'support'},{enabled:'true'},{extra:true}])await assert.rejects(db.run(admin,c=>c.query('SELECT juyu.write_form($1,NULL,$2)',[randomUUID(),JSON.stringify({...rest,...patch})])),/INVALID_INPUT/);
+ await assert.rejects(db.run(support,c=>c.query('SELECT juyu.submit_form($1,$2,1,$3)',[form.id,randomUUID(),JSON.stringify([{fieldId:config.fields[0].id,value:'X',metadata:'forged'}])])),/INVALID_INPUT/);
+ const acls=(await fixture.pool.query("SELECT p.proname FROM pg_proc p CROSS JOIN LATERAL aclexplode(p.proacl) a WHERE p.pronamespace='juyu'::regnamespace AND p.proname IN('read_forms','read_form','write_form','submit_form','read_form_record','read_form_records','process_form_record','form_record_json') AND a.grantee=0 AND a.privilege_type='EXECUTE'")).rows;assert.deepEqual(acls,[]);
+});
+test('inclusive form limit and records pagination stay bounded and stable',async()=>{
+ const form=await write(randomUUID());for(let n=1;n<49;n++)await write(randomUUID(),{...config,enabled:false,title:`Disabled ${n}`});const attempts=await Promise.allSettled([write(randomUUID()),write(randomUUID())]);assert.equal(attempts.filter(r=>r.status==='fulfilled').length,1);assert.match(String((attempts.find(r=>r.status==='rejected') as PromiseRejectedResult).reason),/FORM_LIMIT/);assert.equal((await read()).length,50);
+ for(let n=0;n<21;n++)await submit(form.id,{id:randomUUID(),formVersion:1,values:[{fieldId:config.fields[0].id,value:`Answer ${n}`}]});const first=await records(),last=await records(admin,999);assert.equal(first.items.length,20);assert.equal(last.items.length,1);assert.equal(last.total,21);assert.equal(last.pages,2);assert.equal(last.page,2);assert.equal(new Set([...first.items,...last.items].map(x=>x.id)).size,21);assert.deepEqual(await records(),first);
+});
+test('revoked verification pending membership and enrollment deny reads writes receipts and processing',async()=>{
+ const form=await write(randomUUID()),input={id:randomUUID(),formVersion:1,values:[{fieldId:config.fields[0].id,value:'Saved'}]};await submit(form.id,input);
+ for(const state of ["disabled_at=now()","observed_role='ops'","verified_email=null","observed_at=null"]){await fixture.pool.query(`UPDATE juyu.members SET ${state} WHERE clerk_user_id='s'`);try{await assert.rejects(read(support,false),/FORBIDDEN/);await assert.rejects(submit(form.id,input),/FORBIDDEN/);}finally{await fixture.pool.query("UPDATE juyu.members SET disabled_at=null,observed_role='support',verified_email='s@example.test',observed_at=now() WHERE clerk_user_id='s'");}}
+ for(const target of ['s','a']){const operation=(await fixture.pool.query("INSERT INTO juyu.member_operations(actor_id,target_id,kind,requested_role) VALUES('b',$1,'role','ops') RETURNING id",[target])).rows[0].id;try{if(target==='s'){await assert.rejects(read(support,false),/FORBIDDEN/);await assert.rejects(submit(form.id,input),/FORBIDDEN/);}else{await assert.rejects(read(),/FORBIDDEN/);await assert.rejects(write(randomUUID()),/FORBIDDEN/);await assert.rejects(records(),/FORBIDDEN/);await assert.rejects(process(input.id,{expectedSequence:0,status:'resolved',note:''}),/FORBIDDEN/);}}finally{await fixture.pool.query("UPDATE juyu.member_operations SET status='conflict',finished_at=now() WHERE id=$1",[operation]);}}
+ await fixture.pool.query("INSERT INTO juyu.role_enrollments(member_id,requested_role,purpose) VALUES('s','support','default')");try{await assert.rejects(read(support,false),/FORBIDDEN/);await assert.rejects(submit(form.id,input),/FORBIDDEN/);}finally{await fixture.pool.query("UPDATE juyu.role_enrollments SET state='complete',confirmed_at=now() WHERE member_id='s'");}
+});
+async function waitForLock(query:string){const deadline=Date.now()+3000;while(Date.now()<deadline){if((await fixture.pool.query("SELECT count(*)::int n FROM pg_stat_activity WHERE wait_event_type='Lock' AND query LIKE $1",[query])).rows[0].n>0)return;await new Promise(r=>setTimeout(r,5));}assert.fail('concurrent database lock was not reached');}
+test('waiting new submissions recheck current form version and disabled policy',async()=>{
+ for(const enabled of [true,false]){const form=await write(randomUUID());let unlock!:()=>void,locked!:()=>void;const acquired=new Promise<void>(r=>{locked=r;}),release=new Promise<void>(r=>{unlock=r;});const changing=db.run(admin,async c=>{await writeForm(c,form.id,{...config,expectedVersion:1,enabled,title:'Changed'});locked();await release;});await acquired;
+ const submitting=submit(form.id,{id:randomUUID(),formVersion:1,values:[{fieldId:config.fields[0].id,value:'Waiting'}]}).then(()=>null,error=>error);try{await waitForLock('SELECT juyu.submit_form%');}finally{unlock();}await changing;assert.match((await submitting)?.message??'unexpected success',enabled?/FORM_CONFLICT/:/NOT_FOUND/);}
+ assert.equal((await records()).total,0);
+});
+test('field binding saves recheck a concurrent global definition change after waiting',async()=>{
+ const binding=config.fields[0];let unlock!:()=>void,locked!:()=>void;const acquired=new Promise<void>(r=>{locked=r;}),release=new Promise<void>(r=>{unlock=r;});const changing=db.run(admin,async c=>{await writeFieldDefinition(c,binding.id,{expectedVersion:1,name:'Changed',type:'text',required:false,enabled:true,options:[]});locked();await release;});await acquired;
+ const saving=write(randomUUID()).then(()=>null,error=>error);try{await waitForLock('SELECT juyu.write_form%');}finally{unlock();}await changing;assert.match((await saving)?.message??'unexpected success',/FIELD_CONFLICT/);assert.equal((await read()).length,0);
+});
+test('processing rechecks administrator eligibility after a concurrent demotion',async()=>{
+ const form=await write(randomUUID()),receipt=await submit(form.id,{id:randomUUID(),formVersion:1,values:[{fieldId:config.fields[0].id,value:'Waiting'}]}),blocker=await fixture.pool.connect();await blocker.query('BEGIN');await blocker.query("UPDATE juyu.members SET observed_role='ops' WHERE clerk_user_id='a'");const action=process(receipt.id,{expectedSequence:0,status:'resolved',note:'Review'}).then(()=>null,error=>error);
+ try{await waitForLock('SELECT juyu.process_form_record%');}finally{await blocker.query('COMMIT');blocker.release();}try{assert.match((await action)?.message??'unexpected success',/FORBIDDEN/);assert.equal((await detail(receipt.id,reviewer)).sequence,0);}finally{await fixture.pool.query("UPDATE juyu.members SET observed_role='admin' WHERE clerk_user_id='a'");}
+});
+test('raw SQL independently validates every value and processing payload boundary',async()=>{
+ const n=await field('number'),b=await field('boolean'),d=await field('date'),s=await field('select');const fields=[n,b,d,s],form=await write(randomUUID(),{...config,fields:fields.map(f=>({id:f.id,version:1,required:true,width:'full'}))}),values=[{fieldId:n.id,value:0},{fieldId:b.id,value:false},{fieldId:d.id,value:'2024-02-29'},{fieldId:s.id,value:'A'}];
+ const raw=(entries:unknown)=>db.run(support,c=>c.query('SELECT juyu.submit_form($1,$2,1,$3)',[form.id,randomUUID(),JSON.stringify(entries)]));
+ for(const entries of [[],[...values,values[0]],values.map(v=>v.fieldId===n.id?{...v,value:'0'}:v),values.map(v=>v.fieldId===b.id?{...v,value:0}:v),values.map(v=>v.fieldId===d.id?{...v,value:'2026-02-29'}:v),values.map(v=>v.fieldId===s.id?{...v,value:'C'}:v),values.map(v=>({...v,value:null}))])await assert.rejects(raw(entries),/INVALID_INPUT/);
+ await assert.rejects(db.run(support,c=>c.query('SELECT juyu.submit_form($1,$2,1,$3)',[form.id,randomUUID(),JSON.stringify(values).replace('"value":0','"value":1e309')])),/INVALID_INPUT/);
+ const receipt=await submit(form.id,{id:randomUUID(),formVersion:1,values});for(const [expected,status,note] of [[-1,'resolved',''],[0,'new',''],[0,'resolved','x'.repeat(2001)]] as const)await assert.rejects(db.run(admin,c=>c.query('SELECT juyu.process_form_record($1,$2,$3,$4)',[receipt.id,expected,status,note])),/INVALID_INPUT/);
+});
+test('migration22 preserves populated fields category history and legacy settings and replays safely',async()=>{
+ const old=await temporaryDatabase();try{await old.pool.query('CREATE SCHEMA juyu; CREATE TABLE juyu.schema_migrations(version text PRIMARY KEY,checksum text NOT NULL,applied_at timestamptz NOT NULL DEFAULT now())');const versions=(await fixture.pool.query("SELECT version FROM juyu.schema_migrations WHERE version<'0022_forms' ORDER BY version")).rows;
+ for(const {version} of versions){const sql=await readFile(new URL(`../../src/server/database/migrations/${version}.sql`,import.meta.url),'utf8');await old.pool.query(sql);await old.pool.query('INSERT INTO juyu.schema_migrations(version,checksum) VALUES($1,$2)',[version,createHash('sha256').update(sql).digest('hex')]);}
+ const id=randomUUID();await old.pool.query("INSERT INTO juyu.members(clerk_user_id,display_name) VALUES('legacy','Legacy'); INSERT INTO juyu.categories(name) VALUES('Preserved')");const c=await old.pool.connect();try{await c.query('BEGIN');await c.query("INSERT INTO juyu.settings(id,key,kind,current_version) VALUES($1,'legacy-form','form',1)",[id]);await c.query("INSERT INTO juyu.setting_versions(setting_id,version,config,changed_by) VALUES($1,1,'{}','legacy')",[id]);await c.query('COMMIT');}finally{c.release();}
+ const before=(await old.pool.query('SELECT * FROM juyu.setting_versions')).rows,categories=(await old.pool.query('SELECT * FROM juyu.category_versions')).rows;assert.deepEqual(await migrate(old.pool),['0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements']);assert.deepEqual(await migrate(old.pool),[]);assert.deepEqual((await old.pool.query('SELECT * FROM juyu.setting_versions')).rows,before);assert.deepEqual((await old.pool.query('SELECT * FROM juyu.category_versions')).rows,categories);assert.equal((await old.pool.query('SELECT count(*)::int n FROM juyu.forms')).rows[0].n,0);
+ }finally{await old.close();}
+});

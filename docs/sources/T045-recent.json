@@ -1,0 +1,76 @@
+{
+  "task": "T045",
+  "scope": "Personal recent browsing from visible mounted publications; server time,100-document cap and current authorized formal metadata",
+  "files": [
+    {
+      "target": "src/app/api/recent/[id]/route.ts",
+      "targetSha256": "90ca4fe8293aa501db0a3099700600e4bd44565d1e82bab3435770e8b5835e05",
+      "origin": "JUYU recent browsing implementation composing existing unmodified GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/app/api/recent/route.ts",
+      "targetSha256": "2fa85a9ffd808014532b7f0e9ca9c893356e0017e44ed283ac514de0c150b101",
+      "origin": "JUYU recent browsing implementation composing existing unmodified GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/app/globals.css",
+      "targetSha256": "f506b9d2afe8d47c3a93400e8f0b529ffb73c1f2f991c4d5301e11779f6214ed",
+      "origin": "JUYU recent browsing implementation composing existing unmodified GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/page.tsx",
+      "targetSha256": "21e1204433091c555080c18ca278fe16b392d1ee4c4bcb5c873fcc4fc3abb282",
+      "origin": "JUYU recent browsing implementation composing existing unmodified GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/recent/page.tsx",
+      "targetSha256": "884fe8ca3d351aecb77ee56e2193903e07ccd5f5ae901096de5f032dfb2aa91b",
+      "origin": "JUYU recent browsing implementation composing existing unmodified GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/components/recent/RecentRecorder.tsx",
+      "targetSha256": "a5313a9eb0240aea6fbacbcf06e37d8f56cd46b244bea510b10777377a010001",
+      "origin": "JUYU recent browsing implementation composing existing unmodified GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/components/recent/RecentView.tsx",
+      "targetSha256": "fc222c0632548af88dd47fa6884dc609999c658854656456148ce11b0c12a47f",
+      "origin": "JUYU recent browsing implementation composing existing unmodified GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/recent/client.ts",
+      "targetSha256": "503d52bc43f62fb832f1ebdb80e787823333dbbae5786549f3f6c740b4baa3a2",
+      "origin": "JUYU recent browsing implementation composing existing unmodified GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/recent/model.ts",
+      "targetSha256": "9d4328f5fd8a2b894aedafadc80a0c4991a0e96075291b2f27f8b08c2259aa42",
+      "origin": "JUYU recent browsing implementation composing existing unmodified GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "780d74b26579e01430319eb4bdf2f81dc4907a896e6c1db701c87b513b3cc1c4",
+      "origin": "JUYU recent browsing implementation composing existing unmodified GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "563f43325d3ec54e846c5b4415e03413f218320f63a5ed3c3240f29ed6d8f571",
+      "origin": "JUYU recent browsing implementation composing existing unmodified GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrations/0018_recent_views.sql",
+      "targetSha256": "5bd059496c173925706d6503f7ae808b8ccc51cafe57027b02c93c611c14e430",
+      "origin": "JUYU recent browsing implementation composing existing unmodified GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/server/recent/http.ts",
+      "targetSha256": "0df2b8c6e48e832339544d0534188b3cec275da0d9a6e924d21458762e4969d5",
+      "origin": "JUYU recent browsing implementation composing existing unmodified GitBook-derived reading/results; no new vendor source"
+    },
+    {
+      "target": "src/server/recent/repository.ts",
+      "targetSha256": "1689817ad9afcacceb7f12b29a230c4536cb42305b99a8f150b60e7165cb022f",
+      "origin": "JUYU recent browsing implementation composing existing unmodified GitBook-derived reading/results; no new vendor source"
+    }
+  ]
+}

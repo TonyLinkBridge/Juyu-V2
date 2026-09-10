@@ -1,0 +1,146 @@
+{
+  "task": "T049",
+  "scope": "Versioned Admin category hierarchy and current access policy, immutable revision memberships, editor assignment and review display, strict concurrent writes and inherited read/search/asset/PDF boundaries",
+  "files": [
+    {
+      "target": "src/app/admin/editor/page.tsx",
+      "targetSha256": "346eac3f83c0ced06fe16bc1790a8571234aafae360b28806db4d82c9fa55c36",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/settings/categories/page.tsx",
+      "targetSha256": "7724c4bcfde8706f0115645571b89b35d9c9719e200a34821d4c48bd8276332b",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/categories/[id]/route.ts",
+      "targetSha256": "012601543d7c61c6ae61c3797dda97e6b1b4429e29fc3108430a7fc873c104e8",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/categories/route.ts",
+      "targetSha256": "26be352c80fc79d2fe90b27eb08e958e15cd3296d70bbc5401fa332a357d6169",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/categories-settings.css",
+      "targetSha256": "3247a9f7ef6f548c2eac68ad7719fc0dedc5c6b3497a093482693996c1b8fd67",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/globals.css",
+      "targetSha256": "261b3c53fda94d16e6f0676c1d3977686ebac8c69561d318218991412ed38858",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/categories/client.ts",
+      "targetSha256": "a80edf9eb243c039bd984f59b625d8eb07941474fb623e4d6d8035c9461fdb31",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/categories/editor.ts",
+      "targetSha256": "44507d3b45b64c3e0b7619d1a8aff919dafa579e134e5203c168e8d949530ffb",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/categories/model.ts",
+      "targetSha256": "ba38b8a17be17d8f1349af8dbbbe02eee8925e980d560cd9b8eae95990f36294",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/categories/ArticleCategories.tsx",
+      "targetSha256": "306a85f925ce4ec3ce0fd8d9672c99c12fe209e88105f88497e79e64f72b9196",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/categories/CategorySettings.tsx",
+      "targetSha256": "427f84f35efacf2a39a3bc40f05b6991d38a5e6efaa05b76c2af40271bc1cc59",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/editor/ArticleEditor.tsx",
+      "targetSha256": "fc56613ea39c8a6cebf22adf393445a60e21c36971741242ed0600f9657c9113",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/editor/EditorLoader.tsx",
+      "targetSha256": "69fe27232141cc2a8a49ed9662780f618a1bb2f676b65968de5a32bdde4c6494",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/review/PublicationPanel.tsx",
+      "targetSha256": "7259f1570e25d5050dc0d9283294c84ef814c63f34e6a57012e4f75d771bd61a",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/review/ReviewDecision.tsx",
+      "targetSha256": "c25f7f1d1bdd6b95a09e98048fa1219148c4efb35c709ea2c1acd367dac051b2",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/tasks/TasksWorkspace.tsx",
+      "targetSha256": "328fc4309fe8e43e80993c00358a352e1c7a4bfcc32d558b38c28791860bcfb9",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/domain/model.ts",
+      "targetSha256": "e6dd3ff1dbd766c409dedcf7683c9324011eca89b5795720f26f32bf1a9fd68e",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/domain/workflow.ts",
+      "targetSha256": "319ff591660605eed1cae0d324c96fe59a6c6229305f6f217e2e060c103b21cd",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/editor/contract.ts",
+      "targetSha256": "22b39c0a1752c539ef0e16f3f7434f2f89e2dc44e86901678e62ab1d50d12ab8",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/editor/recovery.ts",
+      "targetSha256": "60f649c30a0b89e645306356d556635169d47f69c0a576c7036745f7c6197f05",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "78ce115303cbab97855bc3192d28cbfcbe53078f6b786703f619dc2e749f2058",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/categories/http.ts",
+      "targetSha256": "341c54d02df7df2dd4536ffaf7ec11366111a167d0d8cc76c641a93ea862cb66",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/categories/repository.ts",
+      "targetSha256": "8218883fd8d941f96351529c1487ef028440fc61b5affbfded1d8b7c2217f45e",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "20e866aa2345791f4cdec3392d9e7e8a28f6e153693c0594b3ae8c1cb2edfc9a",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrations/0021_categories.sql",
+      "targetSha256": "4dcdc62ae673dff56e5e19206b5d8fa7181d26f1ce3f604167be53abb7a8690c",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/database/repository.ts",
+      "targetSha256": "5f12ab249eee155a04cb7cdff7311ef9942f5bb733002b4cc36eb4679d9d6804",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/editor/input.ts",
+      "targetSha256": "33c1064be44cc170585c5a8041dda186358d6dec0b5d12330032a2d6cbbc3a59",
+      "origin": "JUYU category settings implementation extending existing documented GitBook/Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "docs/verification/2026-09-09-categories.md",
+      "targetSha256": "42368fa5373092b8142d5091051e456b44e1afc9a318dc0796293049ba1b529e",
+      "origin": "JUYU local T049 category acceptance evidence"
+    }
+  ]
+}

@@ -1,0 +1,985 @@
+{
+  "task": "T056",
+  "result": "local_passed",
+  "realAccountAcceptance": "pending_configuration",
+  "identity": "test-only trusted adapters; no actual Clerk session",
+  "database": "temporary PostgreSQL with production restricted runtime/issuer",
+  "storage": "local HTTP Supabase-shaped fixture with actual bytes",
+  "documentId": "eddbe47d-125e-41d6-8257-d680f266df52",
+  "generatedAt": "2026-09-10T03:30:20.713Z",
+  "checkpoints": [
+    {
+      "step": 1,
+      "label": "A 新建 BlockNote 草稿；重试不重复建稿",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 0,
+      "status": "draft",
+      "statusLabel": "草稿",
+      "revision": 1,
+      "publishedRevision": null,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:19.287Z"
+    },
+    {
+      "step": 2,
+      "label": "A 上传私有封面并保存",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 1,
+      "status": "draft",
+      "statusLabel": "草稿",
+      "revision": 2,
+      "publishedRevision": null,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:19.346Z"
+    },
+    {
+      "step": 3,
+      "label": "A 不能选择自己做二审",
+      "actor": "a",
+      "result": "rejected_without_mutation",
+      "sequence": 1,
+      "expectedError": "INVALID_REVIEWER",
+      "at": "2026-09-10T03:30:19.358Z"
+    },
+    {
+      "step": 4,
+      "label": "A 指定 B 提交二审",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 2,
+      "status": "in_review",
+      "statusLabel": "等待审核",
+      "revision": 2,
+      "publishedRevision": null,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:19.405Z"
+    },
+    {
+      "step": 5,
+      "label": "提交者 A 不能代替 B 批准",
+      "actor": "a",
+      "result": "rejected_without_mutation",
+      "sequence": 2,
+      "expectedError": "NOT_REVIEWER",
+      "at": "2026-09-10T03:30:19.418Z"
+    },
+    {
+      "step": 6,
+      "label": "未指定的管理员 C 不能批准",
+      "actor": "c",
+      "result": "rejected_without_mutation",
+      "sequence": 2,
+      "expectedError": "NOT_REVIEWER",
+      "at": "2026-09-10T03:30:19.427Z"
+    },
+    {
+      "step": 7,
+      "label": "审核期间不能修改被审正文",
+      "actor": "a",
+      "result": "rejected_without_mutation",
+      "sequence": 2,
+      "expectedError": "FROZEN|INVALID_STATE",
+      "at": "2026-09-10T03:30:19.435Z"
+    },
+    {
+      "step": 8,
+      "label": "未批准不能进入等待发布",
+      "actor": "a",
+      "result": "rejected_without_mutation",
+      "sequence": 2,
+      "expectedError": "INVALID_STATE",
+      "at": "2026-09-10T03:30:19.443Z"
+    },
+    {
+      "step": 9,
+      "label": "B 退回时必须填写原因",
+      "actor": "b",
+      "result": "rejected_without_mutation",
+      "sequence": 2,
+      "expectedError": "REASON_REQUIRED",
+      "at": "2026-09-10T03:30:19.449Z"
+    },
+    {
+      "step": 10,
+      "label": "B 填原因退回 A",
+      "actor": "b",
+      "result": "passed",
+      "sequence": 3,
+      "status": "changes_requested",
+      "statusLabel": "需要修改",
+      "revision": 2,
+      "publishedRevision": null,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:19.475Z"
+    },
+    {
+      "step": 11,
+      "label": "未修改不能直接重新提交",
+      "actor": "a",
+      "result": "rejected_without_mutation",
+      "sequence": 3,
+      "expectedError": "EDIT_REQUIRED",
+      "at": "2026-09-10T03:30:19.492Z"
+    },
+    {
+      "step": 12,
+      "label": "A 修改并保存新草稿",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 4,
+      "status": "draft",
+      "statusLabel": "草稿",
+      "revision": 3,
+      "publishedRevision": null,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:19.522Z"
+    },
+    {
+      "step": 13,
+      "label": "A 指定 B 提交二审",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 5,
+      "status": "in_review",
+      "statusLabel": "等待审核",
+      "revision": 3,
+      "publishedRevision": null,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:19.570Z"
+    },
+    {
+      "step": 14,
+      "label": "B 批准；原请求重试不重复审批",
+      "actor": "b",
+      "result": "passed",
+      "sequence": 6,
+      "status": "approved",
+      "statusLabel": "已经批准",
+      "revision": 3,
+      "publishedRevision": null,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:19.605Z"
+    },
+    {
+      "step": 15,
+      "label": "批准后不能跳过等待发布",
+      "actor": "a",
+      "result": "rejected_without_mutation",
+      "sequence": 6,
+      "expectedError": "INVALID_STATE",
+      "at": "2026-09-10T03:30:19.618Z"
+    },
+    {
+      "step": 16,
+      "label": "A 安排等待发布",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 7,
+      "status": "queued",
+      "statusLabel": "等待发布",
+      "revision": 3,
+      "publishedRevision": null,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:19.645Z"
+    },
+    {
+      "step": 17,
+      "label": "A 发布；员工正式版本原子替换",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 8,
+      "status": "published",
+      "statusLabel": "已经发布",
+      "revision": 3,
+      "publishedRevision": 3,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:19.701Z"
+    },
+    {
+      "step": 18,
+      "label": "A 修改已发布文章；员工继续读第三版",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 9,
+      "status": "draft",
+      "statusLabel": "草稿",
+      "revision": 4,
+      "publishedRevision": 3,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:19.760Z"
+    },
+    {
+      "step": 19,
+      "label": "新草稿不能沿用上一次批准直接发布",
+      "actor": "a",
+      "result": "rejected_without_mutation",
+      "sequence": 9,
+      "expectedError": "INVALID_STATE",
+      "at": "2026-09-10T03:30:19.775Z"
+    },
+    {
+      "step": 20,
+      "label": "A 指定 B 提交二审",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 10,
+      "status": "in_review",
+      "statusLabel": "等待审核",
+      "revision": 4,
+      "publishedRevision": 3,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:19.851Z"
+    },
+    {
+      "step": 21,
+      "label": "B 批准；原请求重试不重复审批",
+      "actor": "b",
+      "result": "passed",
+      "sequence": 11,
+      "status": "approved",
+      "statusLabel": "已经批准",
+      "revision": 4,
+      "publishedRevision": 3,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:19.912Z"
+    },
+    {
+      "step": 22,
+      "label": "批准后不能跳过等待发布",
+      "actor": "a",
+      "result": "rejected_without_mutation",
+      "sequence": 11,
+      "expectedError": "INVALID_STATE",
+      "at": "2026-09-10T03:30:19.928Z"
+    },
+    {
+      "step": 23,
+      "label": "A 安排等待发布",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 12,
+      "status": "queued",
+      "statusLabel": "等待发布",
+      "revision": 4,
+      "publishedRevision": 3,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:19.980Z"
+    },
+    {
+      "step": 24,
+      "label": "A 发布；员工正式版本原子替换",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 13,
+      "status": "published",
+      "statusLabel": "已经发布",
+      "revision": 4,
+      "publishedRevision": 4,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:20.042Z"
+    },
+    {
+      "step": 25,
+      "label": "旧页面不能覆盖已经发布的新状态",
+      "actor": "a",
+      "result": "rejected_without_mutation",
+      "sequence": 13,
+      "expectedError": "CONFLICT",
+      "at": "2026-09-10T03:30:20.060Z"
+    },
+    {
+      "step": 26,
+      "label": "A 删除；正文搜索封面及PDF同时下线",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 14,
+      "status": "draft",
+      "statusLabel": "草稿",
+      "revision": 4,
+      "publishedRevision": null,
+      "lifecycle": "trashed",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:20.085Z"
+    },
+    {
+      "step": 27,
+      "label": "A 从回收站恢复；只恢复成未发布草稿",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 15,
+      "status": "draft",
+      "statusLabel": "草稿",
+      "revision": 4,
+      "publishedRevision": null,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:20.115Z"
+    },
+    {
+      "step": 28,
+      "label": "恢复后不能凭历史批准直接排队",
+      "actor": "a",
+      "result": "rejected_without_mutation",
+      "sequence": 15,
+      "expectedError": "INVALID_STATE",
+      "at": "2026-09-10T03:30:20.133Z"
+    },
+    {
+      "step": 29,
+      "label": "A 指定 B 提交二审",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 16,
+      "status": "in_review",
+      "statusLabel": "等待审核",
+      "revision": 4,
+      "publishedRevision": null,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:20.188Z"
+    },
+    {
+      "step": 30,
+      "label": "B 批准；原请求重试不重复审批",
+      "actor": "b",
+      "result": "passed",
+      "sequence": 17,
+      "status": "approved",
+      "statusLabel": "已经批准",
+      "revision": 4,
+      "publishedRevision": null,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:20.228Z"
+    },
+    {
+      "step": 31,
+      "label": "批准后不能跳过等待发布",
+      "actor": "a",
+      "result": "rejected_without_mutation",
+      "sequence": 17,
+      "expectedError": "INVALID_STATE",
+      "at": "2026-09-10T03:30:20.245Z"
+    },
+    {
+      "step": 32,
+      "label": "A 安排等待发布",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 18,
+      "status": "queued",
+      "statusLabel": "等待发布",
+      "revision": 4,
+      "publishedRevision": null,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:20.276Z"
+    },
+    {
+      "step": 33,
+      "label": "A 发布；员工正式版本原子替换",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 19,
+      "status": "published",
+      "statusLabel": "已经发布",
+      "revision": 4,
+      "publishedRevision": 4,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:20.337Z"
+    },
+    {
+      "step": 34,
+      "label": "A 恢复历史第三版为新草稿；第四版仍正式可读",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 20,
+      "status": "draft",
+      "statusLabel": "草稿",
+      "revision": 5,
+      "publishedRevision": 4,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:20.394Z"
+    },
+    {
+      "step": 35,
+      "label": "A 指定 B 提交二审",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 21,
+      "status": "in_review",
+      "statusLabel": "等待审核",
+      "revision": 5,
+      "publishedRevision": 4,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:20.485Z"
+    },
+    {
+      "step": 36,
+      "label": "B 批准；原请求重试不重复审批",
+      "actor": "b",
+      "result": "passed",
+      "sequence": 22,
+      "status": "approved",
+      "statusLabel": "已经批准",
+      "revision": 5,
+      "publishedRevision": 4,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:20.553Z"
+    },
+    {
+      "step": 37,
+      "label": "批准后不能跳过等待发布",
+      "actor": "a",
+      "result": "rejected_without_mutation",
+      "sequence": 22,
+      "expectedError": "INVALID_STATE",
+      "at": "2026-09-10T03:30:20.573Z"
+    },
+    {
+      "step": 38,
+      "label": "A 安排等待发布",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 23,
+      "status": "queued",
+      "statusLabel": "等待发布",
+      "revision": 5,
+      "publishedRevision": 4,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:20.632Z"
+    },
+    {
+      "step": 39,
+      "label": "A 发布；员工正式版本原子替换",
+      "actor": "a",
+      "result": "passed",
+      "sequence": 24,
+      "status": "published",
+      "statusLabel": "已经发布",
+      "revision": 5,
+      "publishedRevision": 5,
+      "lifecycle": "active",
+      "readerChecks": [
+        "Support",
+        "Ops"
+      ],
+      "at": "2026-09-10T03:30:20.698Z"
+    }
+  ],
+  "final": {
+    "sequence": 24,
+    "revision": 5,
+    "publishedRevision": 5,
+    "versionCount": 5,
+    "eventCount": 25,
+    "reviewCount": 5
+  },
+  "reviews": [
+    {
+      "revision_id": 2,
+      "submitted_by": "a",
+      "reviewer_id": "b",
+      "status": "rejected",
+      "reason": "请补充异常处理依据"
+    },
+    {
+      "revision_id": 3,
+      "submitted_by": "a",
+      "reviewer_id": "b",
+      "status": "approved",
+      "reason": null
+    },
+    {
+      "revision_id": 4,
+      "submitted_by": "a",
+      "reviewer_id": "b",
+      "status": "approved",
+      "reason": null
+    },
+    {
+      "revision_id": 4,
+      "submitted_by": "a",
+      "reviewer_id": "b",
+      "status": "approved",
+      "reason": null
+    },
+    {
+      "revision_id": 5,
+      "submitted_by": "a",
+      "reviewer_id": "b",
+      "status": "approved",
+      "reason": null
+    }
+  ],
+  "history": [
+    {
+      "sequence": 24,
+      "action": "publish",
+      "revision": 5,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:20.643Z"
+    },
+    {
+      "sequence": 23,
+      "action": "queue",
+      "revision": 5,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:20.579Z"
+    },
+    {
+      "sequence": 22,
+      "action": "approve",
+      "revision": 5,
+      "actorId": "b",
+      "actorName": "管理员 B",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:20.495Z"
+    },
+    {
+      "sequence": 21,
+      "action": "submit",
+      "revision": 5,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": null,
+      "previousReviewerName": null,
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:20.408Z"
+    },
+    {
+      "sequence": 20,
+      "action": "restore_version",
+      "revision": 5,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": null,
+      "reviewerName": null,
+      "previousReviewerId": null,
+      "previousReviewerName": null,
+      "reason": null,
+      "sourceRevision": 3,
+      "previousPublishedRevision": 4,
+      "at": "2026-09-10T03:30:20.343Z"
+    },
+    {
+      "sequence": 19,
+      "action": "publish",
+      "revision": 4,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:20.285Z"
+    },
+    {
+      "sequence": 18,
+      "action": "queue",
+      "revision": 4,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:20.251Z"
+    },
+    {
+      "sequence": 17,
+      "action": "approve",
+      "revision": 4,
+      "actorId": "b",
+      "actorName": "管理员 B",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:20.197Z"
+    },
+    {
+      "sequence": 16,
+      "action": "submit",
+      "revision": 4,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": null,
+      "previousReviewerName": null,
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:20.141Z"
+    },
+    {
+      "sequence": 15,
+      "action": "restore",
+      "revision": 4,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": null,
+      "reviewerName": null,
+      "previousReviewerId": null,
+      "previousReviewerName": null,
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:20.092Z"
+    },
+    {
+      "sequence": 14,
+      "action": "trash",
+      "revision": 4,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": null,
+      "reviewerName": null,
+      "previousReviewerId": null,
+      "previousReviewerName": null,
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:20.062Z"
+    },
+    {
+      "sequence": 13,
+      "action": "publish",
+      "revision": 4,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:19.989Z"
+    },
+    {
+      "sequence": 12,
+      "action": "queue",
+      "revision": 4,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:19.933Z"
+    },
+    {
+      "sequence": 11,
+      "action": "approve",
+      "revision": 4,
+      "actorId": "b",
+      "actorName": "管理员 B",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:19.859Z"
+    },
+    {
+      "sequence": 10,
+      "action": "submit",
+      "revision": 4,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": null,
+      "previousReviewerName": null,
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:19.782Z"
+    },
+    {
+      "sequence": 9,
+      "action": "edit",
+      "revision": 4,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": null,
+      "reviewerName": null,
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:19.710Z"
+    },
+    {
+      "sequence": 8,
+      "action": "publish",
+      "revision": 3,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:19.653Z"
+    },
+    {
+      "sequence": 7,
+      "action": "queue",
+      "revision": 3,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:19.622Z"
+    },
+    {
+      "sequence": 6,
+      "action": "approve",
+      "revision": 3,
+      "actorId": "b",
+      "actorName": "管理员 B",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:19.577Z"
+    },
+    {
+      "sequence": 5,
+      "action": "submit",
+      "revision": 3,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": null,
+      "previousReviewerName": null,
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:19.528Z"
+    },
+    {
+      "sequence": 4,
+      "action": "edit",
+      "revision": 3,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": null,
+      "reviewerName": null,
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:19.495Z"
+    },
+    {
+      "sequence": 3,
+      "action": "reject",
+      "revision": 2,
+      "actorId": "b",
+      "actorName": "管理员 B",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": "b",
+      "previousReviewerName": "管理员 B",
+      "reason": "请补充异常处理依据",
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:19.452Z"
+    },
+    {
+      "sequence": 2,
+      "action": "submit",
+      "revision": 2,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": "b",
+      "reviewerName": "管理员 B",
+      "previousReviewerId": null,
+      "previousReviewerName": null,
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:19.364Z"
+    },
+    {
+      "sequence": 1,
+      "action": "edit",
+      "revision": 2,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": null,
+      "reviewerName": null,
+      "previousReviewerId": null,
+      "previousReviewerName": null,
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:19.317Z"
+    },
+    {
+      "sequence": 0,
+      "action": "create",
+      "revision": 1,
+      "actorId": "a",
+      "actorName": "管理员 A",
+      "reviewerId": null,
+      "reviewerName": null,
+      "previousReviewerId": null,
+      "previousReviewerName": null,
+      "reason": null,
+      "sourceRevision": null,
+      "previousPublishedRevision": null,
+      "at": "2026-09-10T03:30:19.255Z"
+    }
+  ]
+}

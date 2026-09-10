@@ -1,0 +1,56 @@
+{
+  "task": "T055",
+  "scope": "Local permission audit and private error/cache hardening; no real Clerk/Supabase acceptance; no subagents",
+  "files": [
+    {
+      "target": "next.config.ts",
+      "targetSha256": "437cd15e09730e5d45be99348fa81ec57830d7ff3246d0ad9dd7b1a5c1e03185",
+      "origin": "JUYU permission audit and error/cache boundary; no new vendor source"
+    },
+    {
+      "target": "src/server/science/response.ts",
+      "targetSha256": "d4a8670a23ff8c3474232755cef2ae7c792a9b1474e30b590b79f6a56500eb52",
+      "origin": "JUYU permission audit and error/cache boundary; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/media/[id]/diagram/route.ts",
+      "targetSha256": "5e1704a070d79d62d01146363ae7893e153818dac40dfe84f0ea6929ac523d09",
+      "origin": "JUYU permission audit and error/cache boundary; no new vendor source"
+    },
+    {
+      "target": "tests/permission-boundary.test.ts",
+      "targetSha256": "f6c9ccec4f32853a971e6001d3c164b0d67374b4e50929545271941802a189b6",
+      "origin": "JUYU permission audit and error/cache boundary; no new vendor source"
+    },
+    {
+      "target": "tests/database/permission-matrix.test.ts",
+      "targetSha256": "ce9a3991d61c95f02aebdec7b97b3faa21507b9972611e302e95374ebf3c48d9",
+      "origin": "JUYU permission audit and error/cache boundary; no new vendor source"
+    },
+    {
+      "target": "tests/e2e/permission-audit.spec.ts",
+      "targetSha256": "70b98128d6969ee3bb5976c6deb09f27113f9556d51809650cc762108ea8d900",
+      "origin": "JUYU permission audit and error/cache boundary; no new vendor source"
+    },
+    {
+      "target": "tests/science.test.ts",
+      "targetSha256": "42e7e41ce7dbb9715336ac40202a201f55f6c7825c17951a18f1011c6af4abef",
+      "origin": "JUYU permission audit and error/cache boundary; no new vendor source"
+    },
+    {
+      "target": "docs/verification/2026-09-10-permission-audit.md",
+      "targetSha256": "0d3294738f3824e15f1a948f4ba4b65ff48c43e8590606965afb87958c6e45d3",
+      "origin": "JUYU permission audit and error/cache boundary; no new vendor source"
+    },
+    {
+      "target": "docs/verification/T055-route-inventory.json",
+      "targetSha256": "7892ba0395a43dafb61984dae8b9dc811b7bd95f8f244222f6d6a53cb8b4a4b6",
+      "origin": "JUYU permission audit and error/cache boundary; no new vendor source"
+    },
+    {
+      "target": "docs/superpowers/plans/2026-09-10-permission-audit.md",
+      "targetSha256": "0755e54d925f5d1c6f77109f387dd3384dae10c835499629472dee66fcbc3127",
+      "origin": "JUYU permission audit and error/cache boundary; no new vendor source"
+    }
+  ]
+}

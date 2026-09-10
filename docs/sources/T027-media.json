@@ -1,0 +1,45 @@
+{
+  "task": "T027",
+  "scope": "Existing article media editor and published media blocks; private verified uploads; images and tables in PDF. Not the full BlockNote editor.",
+  "license": "docs/sources/licenses/gitbook-GPL-3.0.txt",
+  "files": [
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/Images.tsx",
+      "target": "src/components/gitbook/Media/MediaBlocks.tsx",
+      "sourceSha256": "742895a14f5bffb9b0d2177dabf3e477bf9aa3f51446d34de6f782c49fa4a364",
+      "targetSha256": "0277a649dd056622799b7ef973d6d17a5c465428b82378d6166378e99d27ba8c",
+      "adaptation": "借用图片和说明容器方向；改为私有图片原生元素及出错提示，未移植多图网格、图像优化或供应商引用解析。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/DocumentView/File.tsx",
+      "target": "src/components/gitbook/Media/MediaBlocks.tsx",
+      "sourceSha256": "0f72bbb06f521b3a69bca3270b2f20e55607395bf9192f1aa2af362967f5ad7e",
+      "targetSha256": "0277a649dd056622799b7ef973d6d17a5c465428b82378d6166378e99d27ba8c",
+      "adaptation": "借用文件卡片的打开/下载操作方向；身份复核私有地址替换供应商下载URL。文件图标、尺寸格式化未移植。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PageBody/PageBody.tsx",
+      "target": "src/components/gitbook/Reading/PageBody.tsx",
+      "sourceSha256": "f466467bbb0bb7d0fe1ad69aac6e3513099d881d09301ceb3c0d45ca55b770b7",
+      "targetSha256": "1d6d127a9a1369e780b9f7c55d410c855cbb6b8f6261e6be534fbbc72e7fd0eb",
+      "adaptation": "在已适配正文末尾接入版本绑定的媒体与结构化表格，反馈区仍在其后。"
+    },
+    {
+      "source": "/Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/PDF/pdf.css",
+      "target": "src/pdf/render.ts",
+      "sourceSha256": "399480f0f30221ab0a8dbdd8852d9e2a6fce1d07a94c1b61ca4f8fa26d1619bf",
+      "targetSha256": "491a64bce3c87c3f398e1f2bbca7f3ae18ff8620689764c0dcc2ded9ed674019",
+      "adaptation": "延续T026打印样式，加入正文图片与结构化表格；影片和文件导出说明文字并复核附件权限。"
+    }
+  ],
+  "juyuAdditions": [
+    "Native private video; structured table data/editing; media draft form; asset upload verification; migration and authorization; storage delivery download switch; PDF media permission checks."
+  ],
+  "excluded": [
+    "GitBook API document tree and editor",
+    "External embeds and public URLs",
+    "Multiple image grid",
+    "Merged cells and nested table blocks",
+    "Arbitrary inline placement in text; BlockNote remains T031"
+  ]
+}

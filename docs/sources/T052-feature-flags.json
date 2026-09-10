@@ -1,0 +1,251 @@
+{
+  "task": "T052",
+  "scope": "Seven fixed feature switches with current server request guards, data retention and versioned admin configuration; local acceptance only; current assistant self-review without subagents",
+  "files": [
+    {
+      "target": "src/app/admin/analytics/page.tsx",
+      "targetSha256": "631ae33a2c3b68d906f86ba8120a73f3e95d3da2c01e64c521bc689e197e1b2c",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/feedback/page.tsx",
+      "targetSha256": "5ec3001d23a9de269a4ed4a2cbbcbe85212f42ce34c31f4c14a57b748026fb77",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/forms/[id]/page.tsx",
+      "targetSha256": "b4ab8a697c6737cd4df8865c360fde3bd0210d1670044d7cf29021ca8acc4fe3",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/forms/page.tsx",
+      "targetSha256": "5323353ecde176d28367f3fadb4baf74d59ba2e8aa6984b1c4f49a0486a30842",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/page.tsx",
+      "targetSha256": "88be348fd09f41b49b02d58de39e12f66419c2e2dd55ab5cd44cb22e2dcff3fc",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/settings/features/page.tsx",
+      "targetSha256": "00ee64378db84072f1e1b2dd57340b96190c81234fd7bd0ae8d02c7026c4c47f",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/admin/settings/forms/page.tsx",
+      "targetSha256": "f3f649a61bd8f028f64562ad93f794569a4ec03cc8ea49ff81048ed186322d42",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/admin/features/route.ts",
+      "targetSha256": "4a6338bb4183dbde453d8d3d22f27d463d9d413954f24e48ad5731fd3ef9949a",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/api/features/route.ts",
+      "targetSha256": "097c936229abe2c0f082af81f1c1c297553be2c103bef7809079a80c86d38916",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/feature-settings.css",
+      "targetSha256": "df8416c692ce1e130a0085ed046c5b0b9526614d67746cc6b46bb05b4876156d",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/categories/[id]/page.tsx",
+      "targetSha256": "cd08dac1ded7349c237a39ad45e891950fa32a8aadfe851ac5b039212d91491b",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/favorites/page.tsx",
+      "targetSha256": "1540100df640306c4d97cf4f3ce11cf503fb7f730744db6f8cf36ecb9b2adb87",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/forms/[id]/page.tsx",
+      "targetSha256": "43d95bfaf2c026575f7483c0df3ec2ac0e5bb18ecd7ea35622152f3698b0d507",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/forms/page.tsx",
+      "targetSha256": "4e23ccf81a3ec258c431e8f9a4fa8a2ec5761d0170e80d2b5065e701bf6c452c",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/ops/page.tsx",
+      "targetSha256": "c80e418c6510f380015b48ee7bc078d1b6ee76e1a3ebdd3a0ac523690ca04df7",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/page.tsx",
+      "targetSha256": "629ae6770ca58b218c22ca60a7ab64f61ca17a8e04adcfff5f18332cf2a9c708",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/pdf/page.tsx",
+      "targetSha256": "717566025dcfdd092955805be8433dfa21e24127f132125947529ceea8c1c64e",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/qa/page.tsx",
+      "targetSha256": "2916a800f3ed983e092366d71d81778605202f335fcf600edb1af7ffc8455b54",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/recent/page.tsx",
+      "targetSha256": "c73c870fe770c9d2c55a4bf482b758b06919b5c4c9925b84bc3fcdc4024e34ad",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/app/help-centre/reference/page.tsx",
+      "targetSha256": "e0bb27cc78125c343aac9d6a3d6819a7c9fd621fb73549bf71e9f166aabb1c74",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/features/FeatureNotice.tsx",
+      "targetSha256": "fad737d20ab9c90bb74a696af809ceb3a2690a12ea818d21058b9c76558ff84a",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/features/FeaturePage.tsx",
+      "targetSha256": "1d1b0d61df14b5bc111c81866f74ca553a3a0baa2302881dcf577fdbfbccf765",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/features/FeatureSearch.tsx",
+      "targetSha256": "a745ad04175d1f99cec88e0277a36192a64ed6c0fe5f37aae655e801a94b299f",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/features/FeatureSettings.tsx",
+      "targetSha256": "3fc73b2b43bdc2011f47998ea0a93d30d50c9d4acd65c6fc786d8f039f0d70fd",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/gitbook/Reading/PageBody.tsx",
+      "targetSha256": "ae8131ba2d83fd3f139c6ec840177c9e19204c2a40234faeafb7d7bd45cd7268",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/reader-navigation.tsx",
+      "targetSha256": "79a1c919f5c4dae4e5697f52e0a414b355d4ee4bbec842b6e26fe708e12f5c70",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/components/tasks/TasksWorkspace.tsx",
+      "targetSha256": "b3162d5d959c764c75bcab85426e4cf62a6b86f5f579ad60a06f3c30a026305e",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/features/client.ts",
+      "targetSha256": "c2955bac6649270f3a259ec068b4597e5626ba6589912c19648d3410027042e1",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/features/model.ts",
+      "targetSha256": "314c40166de2df865312a2f89ff10e16fab40fb9c5f689714a45a1075a7b07a2",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/analytics/dashboard.ts",
+      "targetSha256": "b61bab2df5c5718b86b347ed9fcdf049262547e1bc1a4ea9c905eb57d27b94ee",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/analytics/http.ts",
+      "targetSha256": "054849c6b59b050ba7021e0c034f65b14e4931c4c1a8046b48e8bdd34f4b44ed",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/analytics/repository.ts",
+      "targetSha256": "93cf9ee4b439182d5cbe50945458e3f2853b9f6586990edac5b4307059d7a8b5",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/authorization/service.ts",
+      "targetSha256": "15ade2b86dd51908332d5530b7c9800032f0555717ddeec8de5558f0f6c23495",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrate.ts",
+      "targetSha256": "fa099cae8cd6ca7f4d7fdc9787968a13202533c60a63974e12a9fd7d74c7fb2b",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/database/migrations/0024_feature_flags.sql",
+      "targetSha256": "a425f0a561c3fdc16ea245276bff69f900015a00876746328b25d086b96ff311",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/favorites/http.ts",
+      "targetSha256": "c3391bfa244da266b9aee6ad4ab6905c9a7810d2c60af6a6e03de86de487ba0c",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/favorites/repository.ts",
+      "targetSha256": "396ac53eaabd0280e31b6fa1420ac6afe8e3bfaaa6b1da81aed412c76bec68dd",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/features/http.ts",
+      "targetSha256": "f09095ca061edfaddbfe670a2932f97b498c93a232c0bc37c4fa727673c28ba5",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/features/repository.ts",
+      "targetSha256": "84c537e9ab16d6c42b94f754dd588b73c8edf364dcdb416d2cb80b6b4c26dd84",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/feedback/http.ts",
+      "targetSha256": "f073cf754f4b6fb0bcacac1502b3c12bbed44e1181ec7845535d5954385248e5",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/feedback/repository.ts",
+      "targetSha256": "9ba5c1dfe38d446c56efc1eab1fd2a2440c5e1afdc259b9ee24fe4d8d2588370",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/forms/http.ts",
+      "targetSha256": "ff828c58172ce413aa330008cf671924b98681a49ebd97fc1e46a621bc19e141",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/forms/repository.ts",
+      "targetSha256": "11a8620682a743578b3e641d6caf0bfde418077b89d5edd5da258a1403f9b2fd",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/navigation-settings/repository.ts",
+      "targetSha256": "9e38aa0ef82c7618b8d8c0546779624176f0bd04422d34237358f7d5385b5993",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/pdf/export.ts",
+      "targetSha256": "d6fdf101a0930b52ac221237df0b9e12ad5d2e5b68cb172af9f6997e01c7e289",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/recent/http.ts",
+      "targetSha256": "629465b22ddb99830a61a9f10d2ed840569e91aee1744dd1db1df7ca36468611",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/recent/repository.ts",
+      "targetSha256": "5c36b3ef51c04a3ec91104ca238c32ce1a160ba20dce0ddac411edd1fc0b9c72",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "src/server/search/repository.ts",
+      "targetSha256": "fb903e39ae6f21f89d6a091767b1034d316c702dae1378907ba3484af879c4de",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    },
+    {
+      "target": "docs/verification/2026-09-10-feature-flags.md",
+      "targetSha256": "89ca0b13d79957bba83eb2ac3876b6b36d785f0bc99cfdce58c878e66a3e0e18",
+      "origin": "JUYU feature-switch implementation composing existing documented GitBook reader and Tasks adaptations; no new vendor source"
+    }
+  ]
+}

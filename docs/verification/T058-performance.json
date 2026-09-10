@@ -1,0 +1,720 @@
+{
+  "task": "T058",
+  "at": "2026-09-10T05:11:46.198681+00:00",
+  "status": "local scale accepted; cloud capacity and authenticated service acceptance pending",
+  "checks": {
+    "unit": {
+      "passed": 326,
+      "failed": 0
+    },
+    "scale": {
+      "passed": 3,
+      "failed": 0
+    },
+    "affectedBrowser": {
+      "passed": 64,
+      "failed": 0
+    },
+    "offlinePdfAndDiagram": {
+      "passed": 9,
+      "failed": 0
+    },
+    "build": "passed",
+    "typecheck": "passed",
+    "lint": "passed",
+    "freshProcessMemoryBudgetMiB": 512,
+    "freshProcessMemory": "before failed; after passed for 1 and 2 uploads",
+    "preview": {
+      "/api/health": 200,
+      "/api/readiness": 503,
+      "/sign-in": 200
+    },
+    "fullBrowserSuite": "not rerun",
+    "fullDatabaseSuite": "not rerun; 26 migrations unchanged"
+  },
+  "budgets": "docs/verification/T058-plan.md",
+  "measurements": {
+    "browser-editor-mobile": {
+      "at": "2026-09-10T05:07:40.927Z",
+      "environment": {
+        "node": "v24.19.0",
+        "platform": "darwin",
+        "release": "25.5.0",
+        "arch": "arm64",
+        "cpu": "Apple M5",
+        "logicalCpus": 10,
+        "ramBytes": 17179869184
+      },
+      "scope": "Actual BlockNote component, simulated save transport; not durable database timing.",
+      "blocks": 300,
+      "bodyChars": 349438,
+      "load": {
+        "samplesMs": [
+          539.1724999999933,
+          587.8836669999873,
+          576.943499999994,
+          593.1029589999962,
+          596.2516250000044
+        ],
+        "medianMs": 587.8836669999873,
+        "maxMs": 596.2516250000044
+      },
+      "saveConfirmation": {
+        "samplesMs": [
+          1897.509665999998,
+          1900.3333339999954,
+          1899.5219170000055,
+          1899.9517500000075,
+          1900.0035420000058
+        ],
+        "medianMs": 1899.9517500000075,
+        "maxMs": 1900.3333339999954
+      },
+      "writes": 5
+    },
+    "upload": {
+      "at": "2026-09-10T05:05:01.781Z",
+      "environment": {
+        "node": "v24.19.0",
+        "platform": "darwin",
+        "release": "25.5.0",
+        "arch": "arm64",
+        "cpu": "Apple M5",
+        "logicalCpus": 10,
+        "ramBytes": 17179869184
+      },
+      "scope": "Signature-valid synthetic bytes; local in-memory storage, not decodable media or Supabase throughput.",
+      "sample.csv": {
+        "bytes": 5242880,
+        "samplesMs": [
+          16.443582999999997,
+          7.743832999999995,
+          6.8649580000000086,
+          7.154708999999997,
+          6.2961250000000035
+        ],
+        "medianMs": 7.154708999999997,
+        "maxMs": 16.443582999999997
+      },
+      "sample.png": {
+        "bytes": 5242880,
+        "samplesMs": [
+          4.987707999999998,
+          4.556125000000009,
+          5.2407910000000015,
+          4.597082999999998,
+          5.188874999999996
+        ],
+        "medianMs": 4.987707999999998,
+        "maxMs": 5.2407910000000015
+      },
+      "sample.pdf": {
+        "bytes": 20971520,
+        "samplesMs": [
+          25.51891599999999,
+          23.651708000000013,
+          20.320374999999984,
+          18.24562499999999,
+          18.042040999999983
+        ],
+        "medianMs": 20.320374999999984,
+        "maxMs": 25.51891599999999
+      },
+      "sample.mp4": {
+        "bytes": 52428800,
+        "samplesMs": [
+          63.62620800000002,
+          76.70695800000004,
+          44.75458400000002,
+          49.010208999999975,
+          53.322250000000054
+        ],
+        "medianMs": 53.322250000000054,
+        "maxMs": 76.70695800000004
+      },
+      "boundaries": "passed: exact maxima, +1 byte, corrupt read-back, denied identity, abort, 2 active/third 429, recovery",
+      "maxProcessRssKiB": 2115072
+    },
+    "upload-memory-1": {
+      "at": "2026-09-10T05:02:30.014Z",
+      "environment": {
+        "node": "v24.19.0",
+        "platform": "darwin",
+        "release": "25.5.0",
+        "arch": "arm64",
+        "cpu": "Apple M5",
+        "logicalCpus": 10,
+        "ramBytes": 17179869184
+      },
+      "scope": "Fresh process, generated streaming requests, temporary disk storage; includes harness and filesystem stream overhead, no real cloud. Signature-only synthetic video.",
+      "concurrent": 1,
+      "fileBytes": 52428800,
+      "elapsedMs": 63.04254099999999,
+      "initialRssBytes": 84246528,
+      "sampledPeakRssBytes": 238616576,
+      "maxProcessRssKiB": 233024,
+      "final": {
+        "rss": 238616576,
+        "heapTotal": 17186816,
+        "heapUsed": 12741392,
+        "external": 102990981,
+        "arrayBuffers": 92617923
+      }
+    },
+    "browser-reader-mobile": {
+      "at": "2026-09-10T05:07:27.231Z",
+      "environment": {
+        "node": "v24.19.0",
+        "platform": "darwin",
+        "release": "25.5.0",
+        "arch": "arm64",
+        "cpu": "Apple M5",
+        "logicalCpus": 10,
+        "ramBytes": 17179869184
+      },
+      "scope": "Existing development component fixture with built CSS; no auth or network backend; bundle compilation excluded.",
+      "entries": 1000,
+      "groups": 20,
+      "blocks": 300,
+      "bodyChars": 349438,
+      "load": {
+        "samplesMs": [
+          1221.840333,
+          1235.6270829999994,
+          1232.3612500000017,
+          1237.790875000006,
+          1241.0691250000018
+        ],
+        "medianMs": 1235.6270829999994,
+        "maxMs": 1241.0691250000018
+      },
+      "menu": {
+        "samplesMs": [
+          102.58329100000265,
+          98.07841699999699,
+          90.12399999999616,
+          102.90249999999651,
+          80.25391700000182
+        ],
+        "medianMs": 98.07841699999699,
+        "maxMs": 102.90249999999651
+      },
+      "domNodes": 9941
+    },
+    "browser-reader-desktop": {
+      "at": "2026-09-10T05:06:09.592Z",
+      "environment": {
+        "node": "v24.19.0",
+        "platform": "darwin",
+        "release": "25.5.0",
+        "arch": "arm64",
+        "cpu": "Apple M5",
+        "logicalCpus": 10,
+        "ramBytes": 17179869184
+      },
+      "scope": "Existing development component fixture with built CSS; no auth or network backend; bundle compilation excluded.",
+      "entries": 1000,
+      "groups": 20,
+      "blocks": 300,
+      "bodyChars": 349438,
+      "load": {
+        "samplesMs": [
+          1222.159166999998,
+          1247.7238329999964,
+          1244.7059999999983,
+          1256.9649579999968,
+          1258.127790999999
+        ],
+        "medianMs": 1247.7238329999964,
+        "maxMs": 1258.127790999999
+      },
+      "menu": {
+        "samplesMs": [
+          140.4417089999988,
+          144.59675000000425,
+          124.47937500000262,
+          131.66716700000688,
+          129.531041000002
+        ],
+        "medianMs": 131.66716700000688,
+        "maxMs": 144.59675000000425
+      },
+      "domNodes": 9941
+    },
+    "browser-table-desktop": {
+      "at": "2026-09-10T05:06:23.554Z",
+      "environment": {
+        "node": "v24.19.0",
+        "platform": "darwin",
+        "release": "25.5.0",
+        "arch": "arm64",
+        "cpu": "Apple M5",
+        "logicalCpus": 10,
+        "ramBytes": 17179869184
+      },
+      "rows": 200,
+      "columns": 8,
+      "visibleRows": 20,
+      "filter": {
+        "samplesMs": [
+          8.822083000006387,
+          6.45191600000544,
+          7.284249999996973,
+          7.120374999998603,
+          6.423666999995476
+        ],
+        "medianMs": 7.120374999998603,
+        "maxMs": 8.822083000006387
+      }
+    },
+    "browser-table-mobile": {
+      "at": "2026-09-10T05:07:41.478Z",
+      "environment": {
+        "node": "v24.19.0",
+        "platform": "darwin",
+        "release": "25.5.0",
+        "arch": "arm64",
+        "cpu": "Apple M5",
+        "logicalCpus": 10,
+        "ramBytes": 17179869184
+      },
+      "rows": 200,
+      "columns": 8,
+      "visibleRows": 20,
+      "filter": {
+        "samplesMs": [
+          9.974583000002895,
+          6.5527080000028946,
+          6.385458999997354,
+          5.860916000005091,
+          6.5584169999929145
+        ],
+        "medianMs": 6.5527080000028946,
+        "maxMs": 9.974583000002895
+      }
+    },
+    "pdf-inspection": {
+      "pages": 59,
+      "tableCellsVerified": 1600,
+      "all200RowsPresent": true,
+      "finalChineseTextPresent": true,
+      "textNormalization": "NFKC and layout whitespace removed for CJK glyph mapping",
+      "selectedPages": [
+        1,
+        29,
+        37,
+        59
+      ],
+      "rendered": true
+    },
+    "browser-editor-desktop": {
+      "at": "2026-09-10T05:06:22.988Z",
+      "environment": {
+        "node": "v24.19.0",
+        "platform": "darwin",
+        "release": "25.5.0",
+        "arch": "arm64",
+        "cpu": "Apple M5",
+        "logicalCpus": 10,
+        "ramBytes": 17179869184
+      },
+      "scope": "Actual BlockNote component, simulated save transport; not durable database timing.",
+      "blocks": 300,
+      "bodyChars": 349438,
+      "load": {
+        "samplesMs": [
+          535.7192080000023,
+          512.2639999999956,
+          517.6760829999985,
+          519.6314589999965,
+          519.3795419999951
+        ],
+        "medianMs": 519.3795419999951,
+        "maxMs": 535.7192080000023
+      },
+      "saveConfirmation": {
+        "samplesMs": [
+          1893.6427500000063,
+          1902.9194169999973,
+          1898.5524170000135,
+          1901.458375000002,
+          1898.9584170000016
+        ],
+        "medianMs": 1898.9584170000016,
+        "maxMs": 1902.9194169999973
+      },
+      "writes": 5
+    },
+    "pdf": {
+      "at": "2026-09-10T05:05:01.208Z",
+      "environment": {
+        "node": "v24.19.0",
+        "platform": "darwin",
+        "release": "25.5.0",
+        "arch": "arm64",
+        "cpu": "Apple M5",
+        "logicalCpus": 10,
+        "ramBytes": 17179869184
+      },
+      "scope": "Actual offline Chromium renderer, synthetic authorized snapshot; no real identity/storage.",
+      "bodyChars": 118758,
+      "bodyBytes": 280022,
+      "tableRows": 200,
+      "tableColumns": 8,
+      "export": {
+        "samplesMs": [
+          377.35258400000004,
+          197.80500000000006,
+          192.76079100000004,
+          192.44791700000007,
+          192.03841699999998
+        ],
+        "medianMs": 192.76079100000004,
+        "maxMs": 377.35258400000004,
+        "bytes": 395906
+      },
+      "boundaries": "passed: large accepted export, 300-block export rejected before renderer, 1 active/second 429, retry recovery",
+      "textBlocks": 101
+    },
+    "database": {
+      "at": "2026-09-10T05:04:59.460Z",
+      "environment": {
+        "node": "v24.19.0",
+        "platform": "darwin",
+        "release": "25.5.0",
+        "arch": "arm64",
+        "cpu": "Apple M5",
+        "logicalCpus": 10,
+        "ramBytes": 17179869184
+      },
+      "scope": "Temporary PostgreSQL, real scoped runtime roles/transactions. Bulk synthetic seed with integrity triggers retained. Not Clerk/Supabase network latency.",
+      "seed": {
+        "documents": 1400,
+        "published": 1300,
+        "staff": 1000,
+        "ops": 200,
+        "admin": 100,
+        "draft": 100,
+        "elapsedMs": 1414.458834
+      },
+      "metrics": {
+        "support:search:续费": {
+          "samplesMs": [
+            493.049792,
+            475.9357500000001,
+            474.68279200000006,
+            475.2826249999998,
+            479.0622079999998
+          ],
+          "medianMs": 475.9357500000001,
+          "maxMs": 493.049792
+        },
+        "support:search:稀有针尖": {
+          "samplesMs": [
+            333.3077920000005,
+            332.0235419999999,
+            334.2069999999994,
+            355.65833400000065,
+            334.8538749999998
+          ],
+          "medianMs": 334.2069999999994,
+          "maxMs": 355.65833400000065
+        },
+        "support:search:没有的词": {
+          "samplesMs": [
+            335.9862499999999,
+            338.0729160000001,
+            334.0756249999995,
+            336.25975000000017,
+            334.63758300000063
+          ],
+          "medianMs": 335.9862499999999,
+          "maxMs": 338.0729160000001
+        },
+        "support:search:费": {
+          "samplesMs": [
+            481.3951670000006,
+            479.0031249999993,
+            478.10941600000115,
+            480.45550000000003,
+            480.9071670000012
+          ],
+          "medianMs": 480.45550000000003,
+          "maxMs": 481.3951670000006
+        },
+        "support:navigation": {
+          "samplesMs": [
+            337.10445900000013,
+            333.1148749999993,
+            356.53708299999926,
+            335.3220419999998,
+            333.6993330000005
+          ],
+          "medianMs": 335.3220419999998,
+          "maxMs": 356.53708299999926
+        },
+        "ops:search:续费": {
+          "samplesMs": [
+            541.5614999999998,
+            539.2939999999999,
+            539.9054169999999,
+            540.116833,
+            537.7434580000008
+          ],
+          "medianMs": 539.9054169999999,
+          "maxMs": 541.5614999999998
+        },
+        "ops:search:稀有针尖": {
+          "samplesMs": [
+            378.7923329999994,
+            378.5427499999987,
+            380.28379099999984,
+            379.7556249999998,
+            384.27379199999996
+          ],
+          "medianMs": 379.7556249999998,
+          "maxMs": 384.27379199999996
+        },
+        "ops:search:没有的词": {
+          "samplesMs": [
+            383.4574160000011,
+            379.73658299999806,
+            404.09799999999814,
+            382.05754199999865,
+            379.223750000001
+          ],
+          "medianMs": 382.05754199999865,
+          "maxMs": 404.09799999999814
+        },
+        "ops:search:费": {
+          "samplesMs": [
+            537.2283749999988,
+            536.6548340000008,
+            541.4776249999995,
+            538.6885419999999,
+            539.5253750000011
+          ],
+          "medianMs": 538.6885419999999,
+          "maxMs": 541.4776249999995
+        },
+        "ops:navigation": {
+          "samplesMs": [
+            379.6087919999991,
+            388.0433750000011,
+            394.1604580000021,
+            380.73675000000003,
+            382.69195800000307
+          ],
+          "medianMs": 382.69195800000307,
+          "maxMs": 394.1604580000021
+        },
+        "admin:search:续费": {
+          "samplesMs": [
+            399.6025000000009,
+            401.57912499999657,
+            401.01687500000116,
+            400.77829199999906,
+            399.8058749999982
+          ],
+          "medianMs": 400.77829199999906,
+          "maxMs": 401.57912499999657
+        },
+        "admin:search:稀有针尖": {
+          "samplesMs": [
+            238.1924579999977,
+            238.33916599999793,
+            238.38366600000154,
+            238.60599999999977,
+            239.26987500000178
+          ],
+          "medianMs": 238.38366600000154,
+          "maxMs": 239.26987500000178
+        },
+        "admin:search:没有的词": {
+          "samplesMs": [
+            238.5257500000007,
+            238.34204099999988,
+            238.26854200000162,
+            237.57137499999953,
+            238.05208299999867
+          ],
+          "medianMs": 238.26854200000162,
+          "maxMs": 238.5257500000007
+        },
+        "admin:search:费": {
+          "samplesMs": [
+            398.82370900000024,
+            399.9862080000021,
+            401.37083300000086,
+            401.474209,
+            399.09137499999997
+          ],
+          "medianMs": 399.9862080000021,
+          "maxMs": 401.474209
+        },
+        "admin:navigation": {
+          "samplesMs": [
+            237.83991700000115,
+            236.35470799999894,
+            236.22508300000118,
+            236.0191249999989,
+            236.1817919999994
+          ],
+          "medianMs": 236.22508300000118,
+          "maxMs": 237.83991700000115
+        }
+      },
+      "concurrentSaves": {
+        "bodyChars": 349438,
+        "bodyBytes": 933038,
+        "blocks": 300,
+        "samplesMs": [
+          298.37620799999786,
+          301.682041,
+          298.85079199999745,
+          300.89083299999766,
+          311.8399580000005
+        ],
+        "medianMs": 300.89083299999766,
+        "maxMs": 311.8399580000005,
+        "winners": 5,
+        "conflicts": 5,
+        "auditEntries": 6
+      }
+    },
+    "upload-memory-2": {
+      "at": "2026-09-10T05:02:30.170Z",
+      "environment": {
+        "node": "v24.19.0",
+        "platform": "darwin",
+        "release": "25.5.0",
+        "arch": "arm64",
+        "cpu": "Apple M5",
+        "logicalCpus": 10,
+        "ramBytes": 17179869184
+      },
+      "scope": "Fresh process, generated streaming requests, temporary disk storage; includes harness and filesystem stream overhead, no real cloud. Signature-only synthetic video.",
+      "concurrent": 2,
+      "fileBytes": 52428800,
+      "elapsedMs": 111.33124999999998,
+      "initialRssBytes": 84197376,
+      "sampledPeakRssBytes": 346898432,
+      "maxProcessRssKiB": 338832,
+      "final": {
+        "rss": 343244800,
+        "heapTotal": 18120704,
+        "heapUsed": 6967664,
+        "external": 124159173,
+        "arrayBuffers": 113786115
+      }
+    }
+  },
+  "pending": [
+    "real Clerk/Supabase company account acceptance",
+    "real storage throughput and large decodable files",
+    "actual deployment memory and sustained concurrency",
+    "physical mobile devices"
+  ],
+  "artifacts": [
+    {
+      "path": "output/verification/T058/browser-editor-desktop.json",
+      "sha256": "28013bc45e02e9d08dc8057eed9aaa029a037ae54fd8da4bdc7c63208de5ff5e"
+    },
+    {
+      "path": "output/verification/T058/browser-editor-mobile.json",
+      "sha256": "1794475af61e1e7e394cd0872925f0092d4d81215b9a751f99507a94e72b4e7d"
+    },
+    {
+      "path": "output/verification/T058/browser-reader-desktop.json",
+      "sha256": "1a6d9dce374dde6dc0bc78cf8a35c2de9139a22def27d6efcaa373bec3abe380"
+    },
+    {
+      "path": "output/verification/T058/browser-reader-mobile.json",
+      "sha256": "7855ac360d9b0ceca8d253b2129ddadaba92ef359bcfebfdd5a2828ecbb5c3bb"
+    },
+    {
+      "path": "output/verification/T058/browser-table-desktop.json",
+      "sha256": "5fc07bf63b1fe010af3d70837e66d02c5914afa4ee3562d841edff8f7d372832"
+    },
+    {
+      "path": "output/verification/T058/browser-table-mobile.json",
+      "sha256": "5ba4959a7d15f9cc0e7b33d8fdd97ca27d5d6587f3694c7b991cc4a111896434"
+    },
+    {
+      "path": "output/verification/T058/database.json",
+      "sha256": "5326b9a3ab8e24c21cf5ca6dcc09e7810de74919df890217fe3fa75671091549"
+    },
+    {
+      "path": "output/verification/T058/editor-desktop.png",
+      "sha256": "3bb77910acfd1b13987a62e35236b9c63917233daa1d694e9fd02fdcd65b3085"
+    },
+    {
+      "path": "output/verification/T058/editor-mobile.png",
+      "sha256": "14943d8b7d76ca6cd8f09b39eb0dee244063a7e3a7e231123a7b8dda4d9845b3"
+    },
+    {
+      "path": "output/verification/T058/pdf-inspection.json",
+      "sha256": "7c6d6cb51eecddb7960d8683ed6b6474ef8d042189970a000c4332aaab496af3"
+    },
+    {
+      "path": "output/verification/T058/pdf-page-1.png",
+      "sha256": "239d21fca93eca61b9f018dd8535eabc34f72580626170ec4c36cfb76e2b33b1"
+    },
+    {
+      "path": "output/verification/T058/pdf-page-29.png",
+      "sha256": "3065f32ba4e685c7f7692a679e8a87eb5b72713fce1305014b8c465a444b6107"
+    },
+    {
+      "path": "output/verification/T058/pdf-page-37.png",
+      "sha256": "32c64214c781a35de565cb011d3550fa53afc65e0fd1bcfb892427f07c3a55eb"
+    },
+    {
+      "path": "output/verification/T058/pdf-page-59.png",
+      "sha256": "a8ac9b41388c8c5b789a9f3785df33e042c74262bc0540b1ac7d853060d7cfc9"
+    },
+    {
+      "path": "output/verification/T058/pdf.json",
+      "sha256": "241cb3805f7f322ad06e5b55a1e7a4565b4279112e799713261642aa30a5e2cb"
+    },
+    {
+      "path": "output/verification/T058/reader-desktop.png",
+      "sha256": "18349bc33266d2087cd9134e1eae753fcf4b8f762ffb3d146e7bac08909d97ab"
+    },
+    {
+      "path": "output/verification/T058/reader-mobile.png",
+      "sha256": "2168f9a18484f01cc7d8a7a6734bf3e8e098fac99f2240151edd0ab4f49563dc"
+    },
+    {
+      "path": "output/verification/T058/reference-desktop.png",
+      "sha256": "4610e7efc0e4b55287a208d02dd6f05d48ab84ebcccaa0a556239d0f3e1666fe"
+    },
+    {
+      "path": "output/verification/T058/reference-mobile.png",
+      "sha256": "b8123f48d5654d666cce9bc38f639042dae0df5b07bd1251326b6d55eddf3f33"
+    },
+    {
+      "path": "output/verification/T058/upload-memory-1.json",
+      "sha256": "c831ac8b4ff31d4e64df8219f6163c2bd2bd6c52072249a6b4e7923d370465eb"
+    },
+    {
+      "path": "output/verification/T058/upload-memory-2.json",
+      "sha256": "b6766360fedc1a65e535db095e62515bd15e5bf0cff5df1301e840e965a12cb0"
+    },
+    {
+      "path": "output/verification/T058/upload.json",
+      "sha256": "259d2ca136d8a6240257cceb30ff440fde396938da07a386ab134a0939ab5bda"
+    },
+    {
+      "path": "output/verification/T058-before/upload-memory-1.json",
+      "sha256": "e31d45926dc14ca1c457150a087522c0ec5d974381f2a35beb16610911e86b17"
+    },
+    {
+      "path": "output/verification/T058-before/upload-memory-2.json",
+      "sha256": "52ebcebfb8a485d79aeafd9f480be186a3f54725ebd28311a130847ec1a57094"
+    },
+    {
+      "path": "output/pdf/T058-large-content.pdf",
+      "sha256": "dadd633ff1bdf749269e284e619fe348e4602ae1d57d030f61ffd4faea85f849"
+    }
+  ]
+}

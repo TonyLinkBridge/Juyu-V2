@@ -1,0 +1,389 @@
+[WebServer] (node:77088) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 64 tests using 1 worker
+
+(node:77089) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search secondary UI audit (1.0s)
+  ✓   2 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search-empty secondary UI audit (595ms)
+  ✓   3 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search-error secondary UI audit (580ms)
+  ✓   4 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › pdf secondary UI audit (599ms)
+  ✓   5 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › rich-blocks secondary UI audit (665ms)
+  ✓   6 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › fields secondary UI audit (595ms)
+  ✓   7 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › fields-empty secondary UI audit (410ms)
+  ✓   8 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › fields-error secondary UI audit (380ms)
+  ✓   9 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › categories secondary UI audit (586ms)
+  ✓  10 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › categories-error secondary UI audit (376ms)
+  ✓  11 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-settings secondary UI audit (634ms)
+  ✓  12 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-settings-error secondary UI audit (394ms)
+  ✓  13 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-fill secondary UI audit (478ms)
+  ✓  14 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-record secondary UI audit (432ms)
+  ✓  15 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › forms-empty secondary UI audit (343ms)
+  ✓  16 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › forms-error secondary UI audit (399ms)
+  ✓  17 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › navigation-settings secondary UI audit (552ms)
+  ✓  18 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › setting-history secondary UI audit (647ms)
+  ✓  19 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › setting-history-error secondary UI audit (410ms)
+  ✓  20 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › members secondary UI audit (416ms)
+  ✓  21 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › history secondary UI audit (648ms)
+  ✓  22 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › history-version secondary UI audit (565ms)
+  ✓  23 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › publication secondary UI audit (663ms)
+  ✓  24 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › availability secondary UI audit (462ms)
+  ✓  25 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › trash secondary UI audit (464ms)
+  ✓  26 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › reference secondary UI audit (533ms)
+  ✘  27 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › qa secondary UI audit (529ms)
+(node:77157) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  28 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › favorites secondary UI audit (606ms)
+  ✓  29 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › recent secondary UI audit (496ms)
+  ✓  30 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › announcements secondary UI audit (601ms)
+  ✘  31 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics secondary UI audit (634ms)
+(node:77166) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  32 [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics-error secondary UI audit (590ms)
+(node:77171) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  33 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search secondary UI audit (1.0s)
+  ✓  34 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search-empty secondary UI audit (597ms)
+  ✓  35 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › search-error secondary UI audit (597ms)
+  ✓  36 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › pdf secondary UI audit (597ms)
+  ✓  37 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › rich-blocks secondary UI audit (666ms)
+  ✓  38 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › fields secondary UI audit (593ms)
+  ✓  39 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › fields-empty secondary UI audit (380ms)
+  ✓  40 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › fields-error secondary UI audit (362ms)
+  ✓  41 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › categories secondary UI audit (583ms)
+  ✓  42 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › categories-error secondary UI audit (380ms)
+  ✓  43 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-settings secondary UI audit (597ms)
+  ✓  44 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-settings-error secondary UI audit (380ms)
+  ✓  45 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-fill secondary UI audit (482ms)
+  ✓  46 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › form-record secondary UI audit (447ms)
+  ✓  47 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › forms-empty secondary UI audit (361ms)
+  ✓  48 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › forms-error secondary UI audit (330ms)
+  ✓  49 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › navigation-settings secondary UI audit (533ms)
+  ✓  50 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › setting-history secondary UI audit (614ms)
+  ✓  51 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › setting-history-error secondary UI audit (413ms)
+  ✓  52 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › members secondary UI audit (481ms)
+  ✓  53 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › history secondary UI audit (630ms)
+  ✓  54 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › history-version secondary UI audit (547ms)
+  ✓  55 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › publication secondary UI audit (631ms)
+  ✓  56 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › availability secondary UI audit (447ms)
+  ✓  57 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › trash secondary UI audit (480ms)
+  ✓  58 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › reference secondary UI audit (529ms)
+  ✘  59 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › qa secondary UI audit (533ms)
+(node:77222) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  60 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › favorites secondary UI audit (596ms)
+  ✓  61 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › recent secondary UI audit (479ms)
+  ✓  62 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › announcements secondary UI audit (582ms)
+  ✘  63 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics secondary UI audit (618ms)
+(node:77231) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  64 [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics-error secondary UI audit (597ms)
+
+
+  1) [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › qa secondary UI audit ────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 16
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "target-size",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Target has insufficient size (57.1px by 23.1px, should be at least 24px by 24px)
+    +   Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 23px instead of at least 24px.",
+    +         "target": Array [
+    +           "a[aria-label=\"查看分类：账户操作\"]",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      15 |   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}.png`,fullPage:true,animations:'disabled'});
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+    > 17 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      18 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      19 |  }
+      20 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:17:137
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 16
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "target-size",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Target has insufficient size (57.1px by 23.1px, should be at least 24px by 24px)
+    +   Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 23px instead of at least 24px.",
+    +         "target": Array [
+    +           "a[aria-label=\"查看分类：账户操作\"]",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      15 |   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}.png`,fullPage:true,animations:'disabled'});
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+    > 17 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      18 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      19 |  }
+      20 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:17:137
+
+    Error Context: test-results/accessibility-secondary-qa-secondary-UI-audit-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-secondary-qa-secondary-UI-audit-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-secondary-qa-secondary-UI-audit-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics secondary UI audit ─────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 15
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "definition-list",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix all of the following:
+    +   dl element has direct children that are not allowed: div > p",
+    +         "target": Array [
+    +           "dl",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      15 |   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}.png`,fullPage:true,animations:'disabled'});
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+    > 17 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      18 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      19 |  }
+      20 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:17:137
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 15
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "definition-list",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix all of the following:
+    +   dl element has direct children that are not allowed: div > p",
+    +         "target": Array [
+    +           "dl",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      15 |   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}.png`,fullPage:true,animations:'disabled'});
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+    > 17 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      18 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      19 |  }
+      20 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:17:137
+
+    Error Context: test-results/accessibility-secondary-analytics-secondary-UI-audit-desktop/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-secondary-analytics-secondary-UI-audit-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-secondary-analytics-secondary-UI-audit-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › qa secondary UI audit ─────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 16
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "target-size",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Target has insufficient size (57.1px by 23.1px, should be at least 24px by 24px)
+    +   Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 23px instead of at least 24px.",
+    +         "target": Array [
+    +           "a[aria-label=\"查看分类：账户操作\"]",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      15 |   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}.png`,fullPage:true,animations:'disabled'});
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+    > 17 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      18 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      19 |  }
+      20 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:17:137
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 16
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "target-size",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix any of the following:
+    +   Target has insufficient size (57.1px by 23.1px, should be at least 24px by 24px)
+    +   Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 23px instead of at least 24px.",
+    +         "target": Array [
+    +           "a[aria-label=\"查看分类：账户操作\"]",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      15 |   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}.png`,fullPage:true,animations:'disabled'});
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+    > 17 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      18 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      19 |  }
+      20 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:17:137
+
+    Error Context: test-results/accessibility-secondary-qa-secondary-UI-audit-mobile/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-secondary-qa-secondary-UI-audit-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-secondary-qa-secondary-UI-audit-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics secondary UI audit ──────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 15
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "definition-list",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix all of the following:
+    +   dl element has direct children that are not allowed: div > p",
+    +         "target": Array [
+    +           "dl",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      15 |   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}.png`,fullPage:true,animations:'disabled'});
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+    > 17 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      18 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      19 |  }
+      20 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:17:137
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 15
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "definition-list",
+    +     "impact": "serious",
+    +     "nodes": Array [
+    +       Object {
+    +         "summary": "Fix all of the following:
+    +   dl element has direct children that are not allowed: div > p",
+    +         "target": Array [
+    +           "dl",
+    +         ],
+    +       },
+    +     ],
+    +   },
+    + ]
+
+      15 |   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}.png`,fullPage:true,animations:'disabled'});
+      16 |   await page.screenshot({path:`${dir}/${surface.name}-${theme}-${info.project.name}-viewport.png`,animations:'disabled'});
+    > 17 |   expect.soft(result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);
+         |                                                                                                                                         ^
+      18 |   expect.soft(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'page has no horizontal overflow').toBe(true);
+      19 |  }
+      20 | });
+        at /Users/tony/Documents/ChatGPT/Juyu V2/tests/e2e/accessibility-secondary.spec.ts:17:137
+
+    Error Context: test-results/accessibility-secondary-analytics-secondary-UI-audit-mobile/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/accessibility-secondary-analytics-secondary-UI-audit-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/accessibility-secondary-analytics-secondary-UI-audit-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › qa secondary UI audit ─────────────
+    [desktop] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics secondary UI audit ──────
+    [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › qa secondary UI audit ──────────────
+    [mobile] › tests/e2e/accessibility-secondary.spec.ts:5:40 › analytics secondary UI audit ───────
+  60 passed (37.6s)
