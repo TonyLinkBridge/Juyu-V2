@@ -30,6 +30,21 @@ async function confirmsObjectAbsence(response:Response):Promise<boolean>{
   finally{await reader.cancel().catch(()=>{});}
 }
 
+/** Supabase may wrap NoSuchBucket/404 in HTTP 400. Never infer absence from message text. */
+async function isWrappedMissingBucket(response:Response):Promise<boolean>{
+  if(response.status!==400||!response.body)return false;
+  const reader=response.body.getReader();
+  try{
+    const chunks:Uint8Array[]=[];let size=0;
+    while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>4096)return false;chunks.push(value);}
+    const detail:unknown=JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    if(!detail||typeof detail!=='object'||Array.isArray(detail))return false;
+    const error=detail as Record<string,unknown>;
+    return error.code==='NoSuchBucket'&&(error.statusCode===404||error.statusCode==='404');
+  }catch{return false;}
+  finally{await reader.cancel().catch(()=>{});reader.releaseLock();}
+}
+
 /** Server-only Storage credential. Never return this adapter or a signed Storage URL to a browser. */
 export class SupabasePrivateStorage implements PrivateStorage {
   private origin: string;
@@ -72,7 +87,7 @@ export class SupabasePrivateStorage implements PrivateStorage {
   // Explicit operator action, never called automatically by a website request.
   async provisionPrivateBucket() {
     const current = await this.request('/bucket/juyu-private');
-    if (current.status === 404) {
+    if (current.status === 404 || await isWrappedMissingBucket(current)) {
       await current.body?.cancel();
       const created = await this.request('/bucket', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: 'juyu-private', name: 'juyu-private', public: false }) });
       if (!created.ok) { await created.body?.cancel(); throw new Error('PRIVATE_BUCKET_CREATE_FAILED'); }

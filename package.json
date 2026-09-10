@@ -17,7 +17,8 @@
     "test:db": "node --experimental-strip-types --test --test-concurrency=1 tests/database/*.test.ts",
     "test:pdf": "node --experimental-strip-types --test --test-concurrency=1 tests/pdf/*.test.ts",
     "test:scale": "node --experimental-strip-types --test --test-concurrency=1 tests/performance/*.test.ts",
-    "check:config": "node --experimental-strip-types scripts/check-test-environment.ts"
+    "check:config": "node --experimental-strip-types scripts/check-test-environment.ts",
+    "test:recovery": "node --experimental-strip-types --test --test-concurrency=1 tests/recovery/*.test.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",

@@ -127,3 +127,17 @@ test('takedown or identity change while storage responds prevents releasing full
   }
  }finally{await t.fixture.close();}
 });
+
+
+test('private bucket creation accepts cloud NoSuchBucket inside HTTP 400 but not other failures',async()=>{
+ const f=await storageFixture();const store=new SupabasePrivateStorage(f.url,'test-only-key',{allowLoopback:true});
+ try {
+  f.setExists(false);f.setMissingBucketResponse(400,JSON.stringify({code:'NoSuchBucket',statusCode:'404',error:'Bucket not found'}));
+  await store.provisionPrivateBucket();
+  await store.put(randomUUID(),new Blob(['new private bucket']).stream(),'text/plain');
+  for(const error of [{code:'AccessDenied',statusCode:'403'},{code:'NoSuchBucket',statusCode:'403'},{message:'Bucket not found'}]){
+   f.setExists(false);f.setMissingBucketResponse(400,JSON.stringify(error));
+   await assert.rejects(store.provisionPrivateBucket(),/PRIVATE_BUCKET_UNAVAILABLE/);
+  }
+ }finally{await f.close();}
+});

@@ -8,6 +8,7 @@ export async function storageFixture() {
   let isPublic=false, reads=0, tailDelay=0, exists=true;
   let deleteStatus=200, verificationStatus=0, retainDeleted=false;
   let verificationBody="";
+  let missingBucketStatus=404, missingBucketBody="";
   const server=createServer(async(req,res)=>{
     try {
       if(req.headers.authorization!=='Bearer test-only-key'){res.writeHead(401).end();return;}
@@ -17,7 +18,7 @@ export async function storageFixture() {
         if(bucket.id!=='juyu-private'||bucket.public!==false||exists){res.writeHead(400).end();return;}
         exists=true;isPublic=false;res.end('{}');return;
       }
-      if(req.url==='/storage/v1/bucket/juyu-private' && !exists){res.writeHead(404).end();return;}
+      if(req.url==='/storage/v1/bucket/juyu-private' && !exists){res.writeHead(missingBucketStatus).end(missingBucketBody);return;}
       if(req.url==='/storage/v1/bucket/juyu-private'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({id:'juyu-private',public:isPublic}));return;}
       if(req.url==='/storage/v1/object/juyu-private' && req.method==='DELETE'){
         if(deleteStatus!==200){res.writeHead(deleteStatus).end();return;}
@@ -45,5 +46,5 @@ export async function storageFixture() {
   });
   await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));
   const address=server.address();if(!address||typeof address==='string')throw new Error('No port');
-  return {url:`http://127.0.0.1:${address.port}`,directory,get reads(){return reads;},setDeleteStatus(value:number){deleteStatus=value;},setVerificationStatus(value:number){verificationStatus=value;verificationBody="";},setVerificationResponse(status:number,body:string){verificationStatus=status;verificationBody=body;},setRetainDeleted(value:boolean){retainDeleted=value;},setExists(value:boolean){exists=value;},setPublic(value:boolean){isPublic=value;},setTailDelay(value:number){tailDelay=value;},async close(){await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));await rm(directory,{recursive:true,force:true});}};
+  return {setMissingBucketResponse(status:number,body:string){missingBucketStatus=status;missingBucketBody=body;},url:`http://127.0.0.1:${address.port}`,directory,get reads(){return reads;},setDeleteStatus(value:number){deleteStatus=value;},setVerificationStatus(value:number){verificationStatus=value;verificationBody="";},setVerificationResponse(status:number,body:string){verificationStatus=status;verificationBody=body;},setRetainDeleted(value:boolean){retainDeleted=value;},setExists(value:boolean){exists=value;},setPublic(value:boolean){isPublic=value;},setTailDelay(value:number){tailDelay=value;},async close(){await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));await rm(directory,{recursive:true,force:true});}};
 }
