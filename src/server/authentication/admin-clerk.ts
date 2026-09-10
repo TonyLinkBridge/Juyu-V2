@@ -1,11 +1,11 @@
 import 'server-only';
-import { clerkClient } from '@clerk/nextjs/server';
+import {readClerkUser} from './user-read.ts';
 import { resolveAdminAccess, type AdminAccess } from './admin.ts';
 import type { CompanyAccess } from './company.ts';
 import { databaseConfiguration } from '../../config/database.ts';
 /** Only pass company evidence obtained in this server request, never a browser payload. */
 export async function adminForCompany(company: CompanyAccess):Promise<AdminAccess> {
- const access=await resolveAdminAccess(company,async id=>(await clerkClient()).users.getUser(id));
+ const access=await resolveAdminAccess(company,readClerkUser);
  if(access.status!=='admin')return access;
  const config=databaseConfiguration(process.env);
  // With no database yet, retain the honest setup page; member/business services remain closed.

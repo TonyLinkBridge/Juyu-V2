@@ -1,6 +1,8 @@
-import {statuses,type WorkspaceData} from '../../workspace/model';
-import {TaskCard} from './TaskCard';
-// JUYU addition: the same server page in a responsive list, including the current workflow state.
+import Link from 'next/link';
+import {statuses,kinds,type WorkspaceData} from '../../workspace/model';
 export function TasksList({data}:{data:WorkspaceData}){
- return <ol className="tasks-list" aria-label="内容列表">{data.items.map(task=><li key={task.id}><span className={`task-state state-${task.status}`}>{statuses.find(s=>s.id===task.status)!.name}</span><TaskCard task={task}/></li>)}</ol>;
+ return <div className="workspace-table-wrap"><table className="workspace-table"><caption className="sr-only">内容列表</caption><thead><tr><th>标题</th><th>状态</th><th>提交人</th><th>二审人</th><th>更新时间</th><th>操作</th></tr></thead><tbody>{data.items.map(task=>{
+ const href=`/admin/${task.status==='in_review'?'review':task.status==='approved'||task.status==='queued'?'review/publish':'editor'}?article=${encodeURIComponent(task.id)}`;
+ return <tr key={task.id}><td data-label="标题"><Link prefetch={false} href={href}><strong>{task.title}</strong></Link><small>{kinds[task.kind]} · 工作版 {task.revision}</small></td><td data-label="状态"><span className={`task-state state-${task.status}`}>{statuses.find(s=>s.id===task.status)!.name}</span>{task.publishedRevision!==null&&task.status!=='published'&&<small>旧正式版继续可读</small>}</td><td data-label="提交人">{task.submitter??'尚未提交'}</td><td data-label="二审人">{task.reviewer??'尚未指定'}</td><td data-label="更新时间"><time dateTime={task.updatedAt}>{new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Kuala_Lumpur',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(task.updatedAt))}</time></td><td data-label="操作"><Link prefetch={false} className={task.status==='in_review'?'task-review-action':'secondary-link'} href={href}>{task.status==='in_review'?(task.canReview||data.query.scope==='review'?'处理审核':'查看审核'):task.status==='approved'||task.status==='queued'?'安排发布':'编辑文章'}</Link></td></tr>;
+ })}</tbody></table></div>;
 }

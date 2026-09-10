@@ -2,6 +2,7 @@ import { randomBytes, createHash } from 'node:crypto';
 import type { Pool, PoolClient } from 'pg';
 import { parseRole } from '../../domain/access.ts';
 import type { Viewer } from '../../domain/model.ts';
+import {measured} from '../performance.ts';
 
 export interface Transactions {
   run<T>(viewer: Viewer | null, work: (client: PoolClient) => Promise<T>, readOnly?: boolean): Promise<T>;
@@ -26,6 +27,9 @@ export class ScopedDatabase implements Transactions {
   constructor(runtime: Pool, issuer: Pool) { this.runtime = runtime; this.issuer = issuer; }
 
   async run<T>(viewer: Viewer | null, work: (client: PoolClient) => Promise<T>, readOnly = false): Promise<T> {
+    return measured('database.scope',()=>this.execute(viewer,work,readOnly));
+  }
+  private async execute<T>(viewer: Viewer | null, work: (client: PoolClient) => Promise<T>, readOnly: boolean): Promise<T> {
     if (!viewer || typeof viewer.id !== 'string' || !viewer.id.trim() || viewer.companyVerified !== true || !parseRole(viewer.role)) {
       throw new Error('FORBIDDEN: 未通过身份验证');
     }
@@ -45,10 +49,11 @@ export class ScopedDatabase implements Transactions {
       if ((await client.query('SELECT pg_backend_pid() AS pid')).rows[0].pid !== pid) {
         throw new Error('UNSUPPORTED_POOL_MODE: requires a direct or session-pooled connection');
       }
-      await client.query("SET LOCAL lock_timeout='5s'");
-      await client.query("SET LOCAL statement_timeout='15s'");
-      await client.query("SET LOCAL idle_in_transaction_session_timeout='20s'");
-      await client.query("SELECT set_config('juyu.token',$1,true)", [token]);
+      // Same transaction-local limits and proof, sent in one round trip.
+      await client.query(`SELECT set_config('lock_timeout','5s',true),
+        set_config('statement_timeout','15s',true),
+        set_config('idle_in_transaction_session_timeout','20s',true),
+        set_config('juyu.token',$1,true)`, [token]);
       const value = await work(client);
       await client.query('COMMIT');
       transaction = false;

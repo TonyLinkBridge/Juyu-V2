@@ -62,6 +62,17 @@ export class AuthorizationService {
   async settingHistoryDetail(input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>readHistoryDetail(c,input),true);}
   async restoreSetting(input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>restoreSetting(c,input));}
   async features(){const v=await this.viewer();return this.database.run(v,c=>readFeatureFlags(c),true);}
+  async home(){
+    const v=await this.viewer();
+    return this.database.run(v,async c=>{
+      const features=await readFeatureFlags(c);
+      const pages=await readNavigationTree(c);
+      const menu=await readReaderMenu(c);
+      const rows=(await c.query<{id:string;title:string;updated:Date}>(`SELECT document_id AS id,title,created_at AS updated FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id) ORDER BY created_at DESC,document_id COLLATE "C" LIMIT 5`)).rows;
+      const recent=features.recent?(await readRecent(c)).items.slice(0,4):[];
+      return {features,pages,menu,latest:rows.map(r=>({...r,updated:r.updated.toISOString()})),recent};
+    },true);
+  }
   async featureConfig(){const v=await this.viewer(true);return this.database.run(v,c=>readFeatureConfig(c),true);}
   async saveFeatureConfig(input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>writeFeatureConfig(c,input));}
   async navigationSettings(){const v=await this.viewer(true);return this.database.run(v,c=>readNavigationSettings(c),true);}

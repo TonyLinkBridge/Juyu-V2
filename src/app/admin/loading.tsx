@@ -1,1 +1,1 @@
-export default function AdminLoading(){return <main id="main-content" className="tasks-workspace" aria-busy="true"><p role="status">正在读取内容工作台…</p></main>;}
+export default function AdminLoading(){return <main id="main-content" className="workspace-loading" aria-busy="true"><p role="status">正在更新内容…</p><div className="loading-heading"/><div className="loading-toolbar"/>{[0,1,2,3].map(n=><div className="loading-row" key={n}><span/><span/><span/></div>)}</main>;}

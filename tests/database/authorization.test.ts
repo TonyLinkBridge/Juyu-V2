@@ -19,6 +19,13 @@ let runtime: Pool, issuer: Pool, db: ScopedDatabase, owner: DocumentRepository;
 const a: Viewer = { id:'a', role:'admin', companyVerified:true }, b: Viewer = {...a,id:'b'};
 const support: Viewer = { id:'support',role:'support',companyVerified:true };
 const ops: Viewer = { id:'ops',role:'ops',companyVerified:true };
+test('home snapshot includes only published content allowed to this reader',async()=>{
+ const home=await new AuthorizationService(db,async()=>support).home();
+ assert.ok(home.latest.some(item=>item.id==='regular'));
+ assert.ok(home.latest.every(item=>item.id!=='internal'&&item.id!=='draft'));
+ assert.ok(home.menu.every(item=>!item.href.includes('/ops')));
+ await assert.rejects(new AuthorizationService(db,async()=>null).home(),/FORBIDDEN/);
+});
 let regular: string, internal: string, draftId: string;
 async function published(id: string, kind: 'article'|'ops'='article') {
   let doc=await owner.create({id,kind,title:`title-${id}`,body:`body-${id}`,audience:kind==='ops'?'ops':'staff'},a);
@@ -85,7 +92,8 @@ test('disabled membership and newly downgraded role are enforced on the next req
 });
 
 test('context is removed on success/failure and pooled connections cannot retain another identity',async()=>{
-  await db.run(a,client=>client.query('SELECT 1'));
+  const limits=await db.run(a,client=>client.query("SELECT current_setting('lock_timeout') AS lock, current_setting('statement_timeout') AS statement, current_setting('idle_in_transaction_session_timeout') AS idle"));
+  assert.deepEqual(limits.rows[0],{lock:'5s',statement:'15s',idle:'20s'});
   await assert.rejects(db.run(a,()=>{throw new Error('injected');}),/injected/);
   assert.equal((await fixture.pool.query('SELECT count(*)::int AS n FROM juyu.request_contexts')).rows[0].n,0);
   assert.equal((await runtime.query('SELECT count(*)::int AS n FROM juyu.revisions')).rows[0].n,0);
@@ -552,6 +560,8 @@ test('T030 workspace counts current workflow, filters assignments and preserves 
  assert.equal((await service.workspace({q:'%_'})).total,1);
  assert.equal((await service.workspace({q:'看板核对',scope:'review'})).total,0);
  assert.equal((await new AuthorizationService(db,async()=>b).workspace({q:'看板核对',scope:'review'})).total,1);
+ assert.equal(view.items[0].canReview,false);
+ assert.equal((await new AuthorizationService(db,async()=>b).workspace({q:'看板核对'})).items[0].canReview,true);
  assert.equal((await service.workspace({q:'看板核对',scope:'submitted'})).total,1);
  doc=await owner.execute(doc.id,{type:'reject',reason:'补充说明'},b,{expectedSequence:doc.sequence});
  assert.equal((await service.workspace({q:'看板核对',scope:'returned'})).total,1);

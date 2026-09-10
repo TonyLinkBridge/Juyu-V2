@@ -1,6 +1,7 @@
 // Adapted from GitBook ToggleableLinkItem.tsx (GPL-3.0).
 // Retains the leaf LinkItem and exact active-path comparison. Descendants are T018.
-// Vendor Link is replaced with a same-origin anchor: every click rechecks the server.
+// No eager prefetch of private content; the destination keeps its server authorization.
+import Link from 'next/link';
 import type {ReactNode} from 'react';
 import {ToCLinkItemStyles,ToCLinkItemActiveStyles} from './styles';
 
@@ -11,8 +12,8 @@ export function ToggleableLinkItem(props:{href:string;pathnames:string[];current
 }
 function LinkItem(props:{href:string;isActive:boolean;children:ReactNode}) {
  const {isActive,href,children}=props;
- return <a data-active={isActive} href={href} aria-current={isActive?'page':undefined}
+ return <Link prefetch={false} data-active={isActive} href={href} aria-current={isActive?'page':undefined}
    className={['ToCLinkItemStyles',...ToCLinkItemStyles.flat(),...(isActive?['ToCLinkItemActiveStyles',...ToCLinkItemActiveStyles]:[])].join(' ')}>
    {children}
- </a>;
+ </Link>;
 }

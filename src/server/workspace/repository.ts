@@ -19,7 +19,7 @@ export async function readWorkspace(c:PoolClient,actorId:string,input:QueryInput
  const pages=Math.max(1,Math.ceil(total/30)),page=Math.min(query.page,pages);
  const result=await c.query<WorkspaceItem>(`SELECT d.id,r.title,d.kind,d.workflow_state AS status,
  r.revision_id AS revision,d.published_revision_id AS "publishedRevision",d.updated_at AS "updatedAt",
- a.display_name AS author,e.display_name AS editor,s.display_name AS submitter,v.display_name AS reviewer
+ a.display_name AS author,e.display_name AS editor,s.display_name AS submitter,v.display_name AS reviewer,(d.workflow_state='in_review' AND d.reviewer_id=$4) AS "canReview"
  ${from} JOIN juyu.members a ON a.clerk_user_id=r.author_id JOIN juyu.members e ON e.clerk_user_id=r.editor_id
  LEFT JOIN juyu.members s ON s.clerk_user_id=d.submitted_by LEFT JOIN juyu.members v ON v.clerk_user_id=d.reviewer_id
  ${where} AND ($5='all' OR d.workflow_state=$5)

@@ -5,6 +5,10 @@ import { zhCN } from '@clerk/localizations';
 import { clerkConfiguration } from '../config/clerk';
 import {THEME_BOOTSTRAP} from '../reader/theme';
 import './globals.css';
+import './product-shell.css';
+import './review-layout.css';
+// Supabase session pools are in ap-southeast-1; avoid trans-Pacific SQL round trips.
+export const preferredRegion = 'sin1';
 
 export const metadata: Metadata = {
   title: { default: 'JUYU Help Centre', template: '%s · JUYU Help Centre' },

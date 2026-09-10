@@ -1,0 +1,2 @@
+import {Brand} from '../../components/shell/AdminFrame';
+export default function ReaderLoading(){return <div className="entry-frame"><header className="site-header"><Brand/><span className="internal-label">内部资料库</span></header><main id="main-content" className="reader-loading" aria-busy="true"><p role="status">正在更新资料…</p><div className="loading-heading"/><div className="loading-toolbar"/>{[0,1,2].map(n=><div className="loading-row" key={n}><span/><span/><span/></div>)}</main></div>;}

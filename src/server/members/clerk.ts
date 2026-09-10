@@ -6,6 +6,7 @@ import { enrollmentCandidate } from '../enrollment/candidate.ts';
 import { verifiedMember } from '../authentication/member.ts';
 import { slackUserInfo } from '../authentication/slack.ts';
 import type { MemberProvider } from './service.ts';
+import {readClerkUser} from '../authentication/user-read.ts';
 export const clerkMembers:MemberProvider={
  user:async id=>(await clerkClient()).users.getUser(id),
  async verified(id){
@@ -24,7 +25,7 @@ export async function currentEnrollmentCandidate(){
  if(company.status==='unconfigured')throw new Error('AUTH_NOT_CONFIGURED');
  if(company.status==='unavailable')throw new Error('SERVICE_UNAVAILABLE');
  if(company.status!=='verified')return null;
- return enrollmentCandidate(company,await clerkMembers.user(company.userId));
+ return enrollmentCandidate(company,await readClerkUser(company.userId));
 }
 
 export async function currentVerifiedMember(){
