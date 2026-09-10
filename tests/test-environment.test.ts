@@ -92,9 +92,14 @@ test('explicit Clerk Production check permits paired live keys without claiming 
   assert.equal(report.clerkInstance, 'production');
   assert.equal(report.liveChecks, 'not_run');
 });
-test('Clerk Production check requires live keys and a custom HTTPS application origin', () => {
+test('Clerk Production check permits a Vercel HTTPS origin with SDK auto-proxy', () => {
+  const report = testEnvironmentReport({ ...productionFixture(), APP_ORIGIN: 'https://juyu-helpcentre.vercel.app' }, 'production');
+  assert.equal(report.status, 'ready_for_connection_checks');
+  assert.equal(report.liveChecks, 'not_run');
+});
+test('Clerk Production check requires live keys and a valid HTTPS application origin', () => {
   assert.equal(testEnvironmentReport({ ...fixture(), APP_ORIGIN: 'https://help.example.com' }, 'production').status, 'blocked');
-  for (const origin of ['http://127.0.0.1:3211', 'https://localhost', 'https://127.0.0.1', 'https://juyu.vercel.app', 'http://help.example.com']) {
+  for (const origin of ['http://127.0.0.1:3211', 'https://localhost', 'https://127.0.0.1', 'https://vercel.app', 'http://help.example.com']) {
     const report = testEnvironmentReport({ ...productionFixture(), APP_ORIGIN: origin }, 'production');
     assert.equal(report.status, 'blocked');
     assert.ok(report.issues.includes('CLERK_PRODUCTION_ORIGIN_REQUIRED'));

@@ -31,7 +31,9 @@ export function testEnvironmentReport(env: Environment, clerkInstance: 'test' | 
     try {
       const url = new URL(env.APP_ORIGIN);
       const domain = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i.test(url.hostname);
-      if (url.protocol !== 'https:' || !domain || url.hostname === 'vercel.app' || url.hostname.endsWith('.vercel.app')
+      // Clerk's installed SDK supports production *.vercel.app origins through /__clerk.
+      // This is a format check; proxy verification is a separate live deployment check.
+      if (url.protocol !== 'https:' || !domain || url.hostname === 'vercel.app'
         || url.hostname.endsWith('.localhost') || url.username || url.password || url.pathname !== '/' || url.search || url.hash) throw new Error();
     } catch {
       invalidate('APP_ORIGIN');
