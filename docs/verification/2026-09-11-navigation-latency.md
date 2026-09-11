@@ -22,3 +22,21 @@ Official regional configuration reference: https://vercel.com/docs/functions/con
 
 ## Acceptance
 352 unit tests and 385 isolated database tests passed. Lint, TypeScript, production build and compiled CSS guard passed. Production post-deploy samples pending.
+
+## Production verification completed
+
+Code commit 9a7fc2bc96e62a94baf242856c9af06dabfcdb0d deployed successfully as dpl_7X7wxc8WWfuxmWKPV9rDDGnKNyiM. Vercel Ready at approximately 15:57 GMT+8. Runtime logs now show Singapore ingress without the prior routing to iad1. Fixed-stage timing logs are present.
+
+| Navigation | Before response / function | After response / function | Request |
+| --- | --- | --- | --- |
+| OPS | 13.0s / 12.73s | 1.5s / 1.39s | fvhjk-1789113474539-2fe632656d86, 15:57:54.539 |
+| Admin | 11.4s / 11.26s | 1.5s / 1.43s | s9ph7-1789113537457-01db639d03dc, 15:58:57.457 |
+| OPS repeat | n/a | 1.3s / 1.29s | vn4pg-1789113596798-4737ff268a59, 15:59:56.798 |
+
+Actual non-prefetch navigation requests, status 200. Browser rendered expected OPS read-only empty state and admin content list. No content mutations performed by this verification.
+
+OPS first sample: Clerk session 344ms, Clerk user 289ms, OAuth-token read 295ms, Slack userInfo 269ms; member bind 22ms; OPS business query work 13ms; scoped transaction 56ms. Page-function 1318ms excludes descendant shell queries. OPS repeat: session 309ms, user 289ms, token read 273ms, Slack 248ms; business query work 12ms; scope 48ms.
+
+Admin: session 279ms, user 283ms, token read 293ms, Slack 329ms; member bind 18ms, business query work 46ms, scope 101ms. Enrollment 1225ms includes nested provider verification: do not sum with the provider timings.
+
+Conclusion: the current samples strongly support regional/round-trip overhead as a major previous bottleneck. Residual time is dominated by unchanged real-time provider verification. These samples are not p50/p95, browser click-to-paint timings, or guarantees under load. Baseline admin used a different browser session for the same account; content count also changed through user activity. No identity TTL introduced. Production identity, API, attachment and PDF authorization remain in place; full real Support/Ops account acceptance was not rerun here.

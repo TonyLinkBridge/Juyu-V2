@@ -79,3 +79,9 @@
 [data-theme=dark] .account-controls .theme-toggler-compact{background:var(--surface);border-color:var(--line)}
 @media(max-width:1000px){.account-identity{display:none}.account-controls .admin-console-button{padding:0 10px}.account-controls .admin-console-button>span{display:none}}
 @media(max-width:760px){.account-controls{gap:4px}.account-controls .account-menu summary{gap:2px;padding:4px}.account-controls .admin-console-button{padding:0 8px}.account-controls .admin-console-button b{display:none}.account-controls .theme-toggler-compact{gap:0;padding:2px}.theme-toggler-compact label>span{width:26px;height:30px}}
+
+/* Clerk's last-used badge sits above the provider button; keep it within the login width. */
+.login-auth .cl-socialButtonsBlockButton .cl-lastAuthenticationStrategyBadge{inset-inline-end:10px;top:0;transform:translateY(-50%);max-width:calc(100% - 20px);height:auto;min-height:18px;line-height:1.4;padding:2px 7px;white-space:normal;text-align:center}
+.login-auth .cl-socialButtonsBlockButtonText{white-space:normal;overflow-wrap:anywhere;line-height:1.4}
+.login-auth .cl-socialButtonsBlockButton{padding-inline:18px}
+.login-auth .cl-alertText,.login-auth .cl-formFieldErrorText{overflow-wrap:anywhere}
