@@ -44,7 +44,7 @@ async function requireReadyAssets(c:PoolClient,d:Document){
  if(assets.length!==ids.length||assets.some(a=>a.document_id!==d.id||a.status!=='ready'))throw new Error('INVALID_MEDIA');
  if(revision.cover&&(!associations.some(a=>a.asset_id===revision.cover!.assetId&&a.usage==='cover')||!COVER_MIME_TYPES.some(m=>m===assets.find(a=>a.id===revision.cover!.assetId)!.mime_type)))throw new Error('INVALID_MEDIA');
  for(const b of revision.blocks??[]){if(!('assetId' in b))continue;const asset=assets.find(a=>a.id===b.assetId)!;
-  if(!associations.some(a=>a.asset_id===b.assetId&&a.usage==='inline')||(b.type==='image'&&!COVER_MIME_TYPES.some(m=>m===asset.mime_type))||(b.type==='video'&&!['video/mp4','video/webm'].includes(asset.mime_type)))throw new Error('INVALID_MEDIA');
+  if(!associations.some(a=>a.asset_id===b.assetId&&a.usage==='inline')||(b.type==='image'&&!COVER_MIME_TYPES.some(m=>m===asset.mime_type))||(b.type==='video'&&!['video/mp4','video/webm'].includes(asset.mime_type))||(b.type==='audio'&&!['audio/mpeg','audio/ogg'].includes(asset.mime_type)))throw new Error('INVALID_MEDIA');
  }
 }
 export async function readPublicationDetail(c:PoolClient,id:string,actor:Viewer):Promise<PublicationDetail>{

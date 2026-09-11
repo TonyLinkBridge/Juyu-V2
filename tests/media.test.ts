@@ -29,3 +29,9 @@ test('upload readback confirms bytes before ready; failed or forbidden uploads n
  corrupt=true;await assert.rejects(uploadFile(request(),'a',deps));assert.equal(ready,false);
  await assert.rejects(uploadFile(request(),'a',{...deps,authorize:async()=>{throw new Error('FORBIDDEN');}}));assert.equal(writes,2);
 });
+
+test('native audio uploads keep extension signature and size validation',()=>{
+ assert.equal(uploadMetadata('voice.mp3',Buffer.from('ID3sample')).mime,'audio/mpeg');assert.equal(uploadMetadata('voice.ogg',Buffer.from('OggSsample')).mime,'audio/ogg');
+ assert.throws(()=>uploadMetadata('voice.mp3',Buffer.from('<script>not audio</script>')));assert.throws(()=>uploadMetadata('voice.ogg',Buffer.from('ID3wrong type')));
+ assert.throws(()=>uploadMetadata('voice.mp3',Buffer.alloc(21*1024*1024)),/UPLOAD_TOO_LARGE/);
+});

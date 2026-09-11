@@ -1,7 +1,9 @@
+import {fixtureAssets} from '../helpers/fixture-assets';
 import type {NavigationNode} from '../../src/reader/tree';
 import {test,expect} from '@playwright/test';
 import {navigationBrowserBundle} from '../helpers/navigation-browser';
 let bundle:Awaited<ReturnType<typeof navigationBrowserBundle>>;
+test.beforeEach(async({page})=>{await fixtureAssets(page,'navigation');});
 test.beforeAll(async()=>{bundle=await navigationBrowserBundle();});
 const pages=Array.from({length:35},(_,i)=>({type:'document' as const,id:`page-${i}`,title:i===0?'开始使用资料库':i===1?'域名转出操作说明':i===2?'费用与退款规则':i===3?'这是一个很长的目录文章标题，用来确认小屏幕和大字号下文字不会被截断或撑破页面':`业务操作说明 ${i+1}`,href:`/help-centre?article=page-${i}`}));
 async function fixture(page:import('@playwright/test').Page,items:NavigationNode[]=pages,error=false,body='这是目录交互测试正文。'){

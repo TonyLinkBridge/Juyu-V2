@@ -1,7 +1,9 @@
+import {fixtureAssets} from '../helpers/fixture-assets';
 import {test,expect,type Page} from '@playwright/test';
 import {publicationBrowserBundle,publicationFixture as fixture} from '../helpers/publication-browser';
 import type {PublicationDetail} from '../../src/review/publication';
 let bundle:Awaited<ReturnType<typeof publicationBrowserBundle>>;
+test.beforeEach(async({page})=>{await fixtureAssets(page,'publication');});
 test.beforeAll(async()=>{bundle=await publicationBrowserBundle();});
 async function mount(page:Page,initial=fixture){await page.route('**/__publication_fixture',r=>r.fulfill({contentType:'text/html',body:`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${bundle.css}</style></head><body><main class="editor-main"><h1>文章发布 · 本地样例</h1><script type="application/json" id="data">${JSON.stringify(initial).replace(/</g,'\\u003c')}</script><div id="review"></div></main><script>${bundle.script.replace(/<\/script/gi,'<\\/script')}</script></body></html>`}));await page.goto('/__publication_fixture');await expect(page.getByRole('region',{name:'文章发布管理'})).toBeVisible();}
 const ack=(action:'queue'|'publish')=>({documentId:fixture.article.documentId,sequence:action==='queue'?6:7,revision:2,action,status:action==='queue'?'queued':'published',publishedRevision:action==='queue'?1:2,approvedBy:'admin-b'});

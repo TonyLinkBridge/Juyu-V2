@@ -66,7 +66,7 @@ async function insertRevision(client: PoolClient, id: string, revision: Revision
   for(const block of revision.blocks??[]){
     if(!('assetId' in block))continue;
     const asset=(await client.query("SELECT mime_type FROM juyu.assets WHERE id=$1 AND document_id=$2 AND status='ready' FOR SHARE",[block.assetId,id])).rows[0];
-    if(!asset||(block.type==='image'&&!COVER_MIME_TYPES.includes(asset.mime_type))||(block.type==='video'&&!['video/mp4','video/webm'].includes(asset.mime_type)))throw new Error('INVALID_MEDIA: 文件不可用或不属于本篇文章');
+    if(!asset||(block.type==='image'&&!COVER_MIME_TYPES.includes(asset.mime_type))||(block.type==='video'&&!['video/mp4','video/webm'].includes(asset.mime_type))||(block.type==='audio'&&!['audio/mpeg','audio/ogg'].includes(asset.mime_type)))throw new Error('INVALID_MEDIA: 文件不可用或不属于本篇文章');
   }
   await client.query(`INSERT INTO juyu.revisions(document_id,revision_id,title,body,audience,author_id,editor_id,created_at,tags,cover_alt,cover_position,content_blocks,qa_category,qa_position,custom_fields,category_ids)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`, [id, revision.id, revision.title, revision.body, revision.audience, revision.authorId, revision.editorId, revision.createdAt,revision.tags??[],revision.cover?.alt??'',revision.cover?.position??50,JSON.stringify(revision.blocks??[]),revision.qa?.category??'',revision.qa?.position??0,JSON.stringify(revision.customFields),normalizeCategoryIds(revision.categoryIds)]);

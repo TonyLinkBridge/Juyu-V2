@@ -1,9 +1,11 @@
+import {readFile} from 'node:fs/promises';
 import {test,expect,type Page} from '@playwright/test';
 import {editorBrowserBundle,editorFixture} from '../helpers/editor-browser';
 import type {EditorData} from '../../src/editor/contract';
 let bundle:Awaited<ReturnType<typeof editorBrowserBundle>>;
 test.beforeAll(async()=>{bundle=await editorBrowserBundle();});
 async function mount(page:Page,initial:()=>EditorData|null,newReference:boolean|'qa'=false){
+ await page.route('**/__editor_assets/*.js',async route=>{const file=new URL(route.request().url()).pathname.split('/').pop()!;if(!/^[a-zA-Z0-9_.-]+\.js$/.test(file))return route.abort();return route.fulfill({contentType:'application/javascript',body:await readFile('output/verification/editor-fixture/'+file,'utf8')});});
  await page.route(url=>url.pathname==='/__editor_fixture'||url.pathname==='/admin/editor',route=>route.fulfill({contentType:'text/html',body:`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${bundle.css}</style></head><body><main class="editor-main"><h1>文章编辑 · 本地样例</h1><script type="application/json" id="data">${JSON.stringify(initial()).replace(/</g,'\\u003c')}</script><div id="editor"></div><a href="/leaving">离开编辑页</a></main><script>${bundle.script.replace(/<\/script/gi,'<\\/script')}</script></body></html>`}));
  await page.goto('/__editor_fixture'+(newReference==='qa'?'?kind=qa':newReference?'?kind=reference':''));await expect(page.locator('.bn-editor')).toBeVisible();
 }
@@ -37,16 +39,16 @@ test('new document uses stable id and frozen review document cannot be edited',a
  saved={...saved!,status:'in_review'};await page.reload();await expect(page.getByLabel('文章标题',{exact:true})).toBeDisabled();await expect(page.locator('.bn-editor')).toHaveAttribute('contenteditable','false');await expect(page.getByRole('button',{name:'立即保存'})).toBeDisabled();
 });
 test('conflict does not overwrite typed input and plain URL text does not embed remote media',async({page})=>{
- await page.route('**/api/admin/editor/*',route=>route.fulfill({status:409,json:{error:'CONFLICT'}}));await mount(page,()=>editorFixture);await typeText(page,' https://company.test/image.png ');await expect(page.getByRole('status')).toContainText('不会覆盖服务器版本',{timeout:8000});await expect(page.locator('.bn-editor')).toContainText('https://company.test/image.png');await expect(page.locator('.bn-editor img')).toHaveCount(0);await expect(page.locator('.bn-editor a[href]')).toHaveCount(0);
+ await page.route('**/api/admin/editor/*',route=>route.fulfill({status:409,json:{error:'CONFLICT'}}));await mount(page,()=>editorFixture);await typeText(page,' https://company.test/image.png ');await expect(page.getByRole('status')).toContainText('不会覆盖服务器版本',{timeout:8000});await expect(page.locator('.bn-editor')).toContainText('https://company.test/image.png');await expect(page.locator('.bn-editor img')).toHaveCount(0);await expect(page.locator('.bn-editor a[href="https://company.test/image.png"]')).toHaveCount(1);
 });
 test('real editor pages and GET PUT reject unconfigured forged identity',async({request,page})=>{
  for(const method of ['get','put'] as const){const r=await request[method]('/api/admin/editor/00000000-0000-4000-8000-000000000031',{headers:{'x-role':'admin','x-user-id':'admin'},...(method==='put'?{data:{expectedSequence:null,title:'forged'}}:{})});expect(r.status()).toBe(503);expect(r.headers()['cache-control']).toBe('private, no-store');}
  await page.goto('/admin/editor');await expect(page.locator('.bn-editor')).toHaveCount(0);
 });
-test('invalid custom field stays editable and can be corrected without losing its text',async({page})=>{
+test('native code block edits directly and keeps its text through save and reload',async({page})=>{
  let saved=structuredClone(editorFixture);
  await page.route('**/api/admin/editor/*',async route=>{saved={...saved,...route.request().postDataJSON(),sequence:saved.sequence+1};await route.fulfill({json:saved});});
- await mount(page,()=>saved);await page.getByRole('button',{name:'代码框',exact:true}).click();const block=page.locator('.editor-embedded');await block.getByText('编辑此内容块',{exact:true}).click();await block.getByRole('textbox',{name:'代码内容',exact:true}).fill('print("保留代码")');await block.getByRole('textbox',{name:'代码语言',exact:true}).fill('python 3');await expect(block.getByRole('alert')).toBeVisible();await expect(block.getByRole('textbox',{name:'代码内容',exact:true})).toHaveValue('print("保留代码")');await expect(page.getByRole('button',{name:'立即保存'})).toBeDisabled();await block.getByRole('textbox',{name:'代码语言',exact:true}).fill('python');await expect(page.getByRole('status')).toContainText('所有修改已保存',{timeout:8000});await page.reload();await page.locator('.editor-embedded').getByText('编辑此内容块',{exact:true}).click();await expect(page.getByRole('textbox',{name:'代码内容',exact:true})).toHaveValue('print("保留代码")');
+ await mount(page,()=>saved);await page.getByRole('button',{name:'代码框',exact:true}).click();await page.locator('[data-content-type="codeBlock"] select').selectOption('python');await page.locator('[data-content-type="codeBlock"] pre').click();await page.keyboard.insertText('print("保留代码")');await expect(page.locator('[data-content-type="codeBlock"] code [style*="--shiki"]')).not.toHaveCount(0);await expect(page.getByRole('status')).toContainText('所有修改已保存',{timeout:8000});await page.reload();await expect(page.locator('[data-content-type="codeBlock"] code')).toHaveText('print("保留代码")');
 });
 test('recovery compares server content preserves local input and adopts the server sequence explicitly',async({page},info)=>{
  let server={...editorFixture,title:'服务器最新标题',body:'另一位管理员的正文',sequence:4};let writes=0;
@@ -134,4 +136,80 @@ test('Q&A mismatched save metadata is not acknowledged and exact retry preserves
  const initial:EditorData={...editorFixture,kind:'qa',qa:{category:'原分类',position:1}};const writes:Record<string,unknown>[]=[];
  await page.route('**/api/admin/editor/*',r=>{const v=r.request().postDataJSON();writes.push(v);return r.fulfill({json:{...initial,...v,sequence:4,qa:writes.length===1?{category:'错误回执',position:99}:v.qa}});});await mount(page,()=>initial);
  await page.getByLabel('问答分类',{exact:true}).fill('新的分类');await expect(page.getByRole('status')).toContainText('保存尚未确认',{timeout:8000});expect(writes).toHaveLength(1);await expect(page.getByLabel('问答分类',{exact:true})).toHaveValue('新的分类');await page.getByRole('button',{name:'重试保存',exact:true}).click();await expect(page.getByRole('status')).toContainText('所有修改已保存');expect(writes).toHaveLength(2);expect(writes[1]).toEqual(writes[0]);expect(writes[1].qa).toEqual({category:'新的分类',position:1});
+});
+
+test('native editor preserves rich paste, links, formatting and native table through save and reopen',async({page},info)=>{
+ let saved=structuredClone(editorFixture);
+ await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);
+ await page.locator('.bn-editor').click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');
+ await page.locator('.bn-editor').evaluate(el=>{const clipboardData=new DataTransfer();clipboardData.setData('text/html','<p><strong>加粗保留</strong> <a href="https://example.com/docs">链接保留</a> <span style="color:rgb(224,62,62);background-color:rgb(251,243,219)">颜色保留</span></p><ul><li>粘贴列表</li></ul><table><tr><th>项目</th><th>说明</th></tr><tr><td>续费</td><td>表格保留</td></tr></table>');clipboardData.setData('text/plain','加粗保留 链接保留 颜色保留 粘贴列表 项目 说明 续费 表格保留');el.dispatchEvent(new ClipboardEvent('paste',{clipboardData,bubbles:true,cancelable:true}));});
+ await expect(page.locator('.bn-editor strong')).toContainText('加粗保留');await expect(page.locator('.bn-editor [data-style-type="textColor"]')).toHaveCSS('color','rgb(224, 62, 62)');await expect(page.locator('.bn-editor a[href="https://example.com/docs"]')).toHaveText('链接保留');await expect(page.locator('.bn-editor table')).toContainText('表格保留');
+ await expect(page.getByRole('status')).toContainText('所有修改已保存',{timeout:8000});expect(saved.body).toContain('"type":"table"');expect(saved.body).toContain('"type":"link"');expect(saved.body).toContain('rgb(');
+ await page.reload();await expect(page.locator('.bn-editor table')).toContainText('表格保留');await expect(page.locator('.bn-editor a[href="https://example.com/docs"]')).toBeVisible();
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();await expect(page.locator('.editor-preview table')).toContainText('表格保留');await expect(page.locator('.editor-preview a[href="https://example.com/docs"]')).toHaveText('链接保留');
+ await page.locator('.editor-canvas').scrollIntoViewIfNeeded();await page.screenshot({path:`output/verification/native-editor-${info.project.name}.png`,fullPage:true});
+});
+
+test('native slash menu and selection toolbar expose original block and formatting controls',async({page})=>{
+ await page.route('**/api/admin/editor/*',route=>route.fulfill({json:{...editorFixture,...route.request().postDataJSON(),sequence:4}}));
+ await mount(page,()=>editorFixture);const editor=page.locator('.bn-editor');await editor.click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');await page.keyboard.type('/');
+ const menu=page.locator('.bn-suggestion-menu');await expect(menu).toBeVisible();await expect(menu).toContainText('检查清单');await expect(menu).toContainText('引用');await expect(menu).toContainText('音频');await expect(menu).toContainText('表格');
+ await page.keyboard.press('Escape');await page.keyboard.press('Backspace');await page.keyboard.insertText('选择文字显示完整工具栏');await page.keyboard.press('Shift+Home');
+ await expect(page.locator('.bn-formatting-toolbar')).toBeVisible();await expect(page.locator('.bn-formatting-toolbar button')).not.toHaveCount(6);
+ await editor.locator('[data-content-type="paragraph"]').first().hover();await expect(page.locator('.bn-side-menu')).toBeVisible();
+});
+
+test('native checklist toggle heading divider code and merged table keep values after editing and reopening',async({page})=>{
+ const txt=(text:string)=>[{type:'text',text,styles:{}}];
+ let saved={...structuredClone(editorFixture),body:'JUYU_BLOCKNOTE_V1\n'+JSON.stringify([
+  {id:'native-heading',type:'heading',props:{level:6,isToggleable:true},content:txt('六级标题'),children:[{id:'folded',type:'paragraph',content:txt('折叠内容')} ]},
+  {id:'native-check',type:'checkListItem',props:{checked:false},content:txt('核对完成')},
+  {id:'native-toggle',type:'toggleListItem',content:txt('折叠列表'),children:[{id:'quote-child',type:'quote',content:txt('原生引用')}]},
+  {id:'native-divider',type:'divider'},
+  {id:'native-code',type:'codeBlock',props:{language:'javascript'},content:txt('const answer = 42;')},
+  {id:'native-table',type:'table',content:{type:'tableContent',columnWidths:[120,220],headerRows:1,rows:[{cells:[{type:'tableCell',props:{colspan:2,rowspan:1,textColor:'default',backgroundColor:'blue',textAlignment:'center'},content:txt('合并表头')}]},{cells:[txt('A'),txt('B')]}]}},
+ ])};
+ await page.route('**/api/admin/editor/*',route=>{saved={...saved,...route.request().postDataJSON(),sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);await page.locator('[data-content-type="checkListItem"] input[type="checkbox"]').check();await expect(page.getByRole('status')).toContainText('所有修改已保存',{timeout:8000});
+ expect(saved.body).toContain('"checked":true');expect(saved.body).toContain('"colspan":2');expect(saved.body).toContain('"isToggleable":true');expect(saved.body).toContain('const answer = 42;');
+ await page.reload();await expect(page.locator('[data-content-type="checkListItem"] input[type="checkbox"]')).toBeChecked();await expect(page.locator('.bn-editor th[colspan="2"]')).toContainText('合并表头');
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();await expect(page.locator('.editor-preview [role="checkbox"]')).toHaveAttribute('aria-checked','true');await expect(page.locator('.editor-preview th[colspan="2"]')).toContainText('合并表头');
+});
+
+test('native image upload panel saves private identity and renders through the administrator asset endpoint',async({page})=>{
+ const asset='12345678-1234-1234-1234-123456789abc';
+ let saved={...structuredClone(editorFixture),body:'JUYU_BLOCKNOTE_V1\n'+JSON.stringify([{id:'native-image',type:'image',props:{url:'',name:''}}])};
+ await page.route('**/api/admin/editor/*',route=>{saved={...saved,...route.request().postDataJSON(),sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await page.route('**/api/admin/media/*/upload',route=>route.fulfill({json:{id:asset,filename:'article-cover.png',mime:'image/png',size:'100',status:'ready'}}));
+ await page.route('**/api/admin/assets/*',route=>route.fulfill({path:'tests/fixtures/article-cover.png',contentType:'image/png'}));
+ await mount(page,()=>saved);await page.getByText('添加图片',{exact:true}).click();const chooser=page.waitForEvent('filechooser');await page.getByRole('button',{name:'上传图片',exact:true}).click();await (await chooser).setFiles('tests/fixtures/article-cover.png');
+ await expect(page.locator('.bn-editor img')).toHaveAttribute('src','/api/admin/assets/'+asset);await expect(page.getByRole('status')).toContainText('所有修改已保存',{timeout:8000});expect(saved.body).toContain('/api/assets/'+asset);expect(saved.body).not.toContain('/api/admin/assets/');await page.reload();await expect(page.locator('.bn-editor img')).toHaveAttribute('src','/api/admin/assets/'+asset);
+});
+
+test('native drag handle changes paragraph order and native menu deletion can be undone',async({page},info)=>{
+ let saved={...structuredClone(editorFixture),body:'JUYU_BLOCKNOTE_V1\n'+JSON.stringify(['第一段','第二段','第三段'].map((text,i)=>({id:'drag-'+i,type:'paragraph',content:[{type:'text',text,styles:{}}]})))};
+ await page.route('**/api/admin/editor/*',route=>{saved={...saved,...route.request().postDataJSON(),sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);const first=page.locator('.bn-editor [data-content-type="paragraph"]').filter({hasText:'第一段'}),last=page.locator('.bn-editor [data-content-type="paragraph"]').filter({hasText:'第三段'});
+ await first.hover();const handle=page.locator('.bn-side-menu [draggable="true"]');await expect(handle).toBeVisible();const bounds=await last.boundingBox(),origin=await handle.boundingBox();await page.mouse.move(origin!.x+origin!.width/2,origin!.y+origin!.height/2);await page.mouse.down();await page.mouse.move(origin!.x+origin!.width/2+12,origin!.y+origin!.height/2,{steps:3});await page.mouse.move(bounds!.x+80,bounds!.y+bounds!.height+8,{steps:12});await page.mouse.move(bounds!.x+82,bounds!.y+bounds!.height+9,{steps:3});await page.mouse.up();
+ await expect.poll(()=>saved.body.indexOf('第一段')>saved.body.indexOf('第二段'),{timeout:8000}).toBe(true);
+ await page.reload();await expect(page.locator('.bn-editor [data-content-type="paragraph"]').first()).toContainText('第二段');
+ await page.locator('.bn-editor [data-content-type="paragraph"]').first().hover();await page.locator('.bn-side-menu [draggable="true"]').click();await page.getByRole('menuitem',{name:'删除',exact:true}).click();
+ await expect.poll(()=>saved.body.includes('第二段')).toBe(false);await page.locator('.bn-editor').click();await page.keyboard.press('ControlOrMeta+z');await expect.poll(()=>saved.body.includes('第二段')).toBe(true);
+ const nodes=JSON.parse(saved.body.split('\n').slice(1).join('\n'));expect(new Set(nodes.map((b:{id:string})=>b.id)).size).toBe(nodes.length);
+ await page.locator('.editor-canvas').scrollIntoViewIfNeeded();await page.screenshot({path:`output/verification/native-controls-${info.project.name}.png`,fullPage:false});
+});
+
+test('native image caption rename and resize persist through reopening',async({page})=>{
+ const asset='12345678-1234-1234-1234-123456789abc';
+ let saved={...structuredClone(editorFixture),body:'JUYU_BLOCKNOTE_V1\n'+JSON.stringify([{id:'native-image',type:'image',props:{url:'/api/assets/'+asset,name:'原图',previewWidth:200}}])};
+ await page.route('**/api/admin/editor/*',route=>{saved={...saved,...route.request().postDataJSON(),sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await page.route('**/api/admin/assets/*',route=>route.fulfill({path:'tests/fixtures/article-cover.png',contentType:'image/png'}));
+ await mount(page,()=>saved);
+ const img=page.locator('.bn-editor img');await img.click();await page.getByRole('button',{name:'重命名图片',exact:true}).click();await page.getByPlaceholder('重命名图片',{exact:true}).fill('更新图片名称');await page.getByPlaceholder('重命名图片',{exact:true}).press('Enter');
+ await img.click();await page.getByRole('button',{name:'编辑标题',exact:true}).click();await page.getByPlaceholder('编辑标题',{exact:true}).fill('图片说明保留');await page.getByPlaceholder('编辑标题',{exact:true}).press('Enter');
+ await img.hover();const handle=page.locator('.bn-editor .bn-resize-handle').last();await expect(handle).toBeVisible();const point=await handle.boundingBox();await page.mouse.move(point!.x+point!.width/2,point!.y+point!.height/2);await page.mouse.down();await page.mouse.move(point!.x+point!.width/2-40,point!.y+point!.height/2,{steps:8});await page.mouse.up();
+ await expect.poll(()=>{const block=JSON.parse(saved.body.slice(saved.body.indexOf('\n')+1))[0];return block.props.name==='更新图片名称'&&block.props.caption==='图片说明保留'&&block.props.previewWidth<200;},{timeout:8000}).toBe(true);
+ const width=JSON.parse(saved.body.slice(saved.body.indexOf('\n')+1))[0].props.previewWidth;
+ await page.reload();await expect(page.locator('.bn-editor .bn-file-caption')).toHaveText('图片说明保留');await expect(page.locator('.bn-editor img')).toHaveAttribute('alt','更新图片名称');expect(JSON.parse(saved.body.slice(saved.body.indexOf('\n')+1))[0].props.previewWidth).toBe(width);
 });

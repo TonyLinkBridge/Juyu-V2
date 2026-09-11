@@ -1,3 +1,4 @@
+import {fixtureAssets} from '../helpers/fixture-assets';
 import {test,expect,type Page} from '@playwright/test';
 import {navigationBrowserBundle} from '../helpers/navigation-browser';
 import type {MediaEditorData} from '../../src/media/editor';
@@ -6,6 +7,7 @@ let bundle:Awaited<ReturnType<typeof navigationBrowserBundle>>;
 const code='<script>window.richInjected=true</script>\n  const 中文 = "保留缩进";\n\t下一行\n';
 const blocks:MediaBlock[]=[{id:'hint',type:'hint',style:'warning',title:'执行前核对',body:'先确认身份\n再检查费用。'},{id:'code',type:'code',language:'html',code},{id:'tabs',type:'tabs',tabs:[{id:'one',title:'注册',body:'注册操作内容'},{id:'two',title:'转入',body:'转入操作内容'},{id:'three',title:'异常',body:'异常升级内容'}]}];
 const initial:MediaEditorData={documentId:'rich-test',title:'内容块 · 本地示例',body:'基础正文',sequence:0,status:'draft',lifecycle:'active',blocks:[],cover:null,tags:[],assets:[]};
+test.beforeEach(async({page})=>{await fixtureAssets(page,'navigation');});
 test.beforeAll(async()=>{bundle=await navigationBrowserBundle();});
 function html(data:unknown){return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${bundle.css}</style></head><body><div id="presentation"></div><script id="data" type="application/json">${JSON.stringify(data).replace(/</g,'\\u003c')}</script><script>${bundle.script}</script></body></html>`;}
 async function editor(page:Page){let state=structuredClone(initial);const bodies:Record<string,unknown>[]=[];

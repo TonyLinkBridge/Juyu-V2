@@ -4,6 +4,7 @@ import {normalizeFieldSnapshots} from '../fields/model.ts';
 import {fieldValueText} from '../fields/editor.ts';
 import {normalizeQa} from '../qa/metadata.ts';
 import type {EditorData} from './contract.ts';
+import {inlineText,isFileBlock} from './document.ts';
 import {editorInitialContent} from './legacy.ts';
 import {normalizePresentation} from '../domain/presentation.ts';
 import {statuses,kinds} from '../workspace/model.ts';
@@ -26,14 +27,14 @@ export function recoveryReadable(data:EditorData):string {
  const categoryLines=normalizeCategoryIds(data.categoryIds).map(id=>{const state=categoryState(data.categoryOptions??[],id);return `目录分类：${state.path}（${state.enabled?{staff:'全体员工',ops:'运营和管理员',admin:'仅管理员'}[state.audience]:'已停用或暂不可用'}）`;});
  const lines:string[]=categoryLines.concat(normalizeFieldSnapshots(data.customFields).map(f=>`${f.name}：${fieldValueText(f.value)}`));
  const walk=(nodes:ReturnType<typeof editorInitialContent>)=>{for(const node of nodes){
-  if(node.type!=='juyu'){lines.push(node.content.map(i=>i.text).join(''));walk(node.children);continue;}
+  if(node.type!=='juyu'){if(node.type==='table')lines.push(...node.content.rows.map(r=>r.cells.map(c=>inlineText(c.content)).join(' | ')));else if(isFileBlock(node))lines.push(node.props.name,node.props.caption);else if('content' in node)lines.push(inlineText(node.content));walk(node.children);continue;}
   const b=JSON.parse(node.props.payload);
   if(b.type==='table')lines.push(b.headers.join(' | '),...b.rows.map((r:string[])=>r.join(' | ')));
   else if(b.type==='hint')lines.push(b.title,b.body);
   else if(b.type==='code')lines.push(b.language,b.code);
   else if(b.type==='tabs')for(const tab of b.tabs)lines.push(tab.title,tab.body);
   else if(b.type==='math'||b.type==='diagram')lines.push(b.caption,b.source);
-  else lines.push(`[${b.type==='image'?'图片':b.type==='video'?'影片':'文件'}]`,b.caption,b.alt);
+  else lines.push(`[${b.type==='image'?'图片':b.type==='video'?'影片':'文件'}]`,b.caption,b.alt);walk(node.children);
  }};
  walk(editorInitialContent(data.body,data.blocks));return lines.join('\n');
 }

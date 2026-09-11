@@ -1,7 +1,9 @@
+import {fixtureAssets} from '../helpers/fixture-assets';
 import {test,expect,type Page} from '@playwright/test';
 import {historyBrowserBundle,historyVersionFixture as fixture,historyPageFixture,historyAssetId} from '../helpers/history-browser';
 import type {HistoryPage,HistoryVersion,DeletedHistoryPage} from '../../src/history/model';
 let bundle:Awaited<ReturnType<typeof historyBrowserBundle>>;
+test.beforeEach(async({page})=>{await fixtureAssets(page,'history');});
 test.beforeAll(async()=>{bundle=await historyBrowserBundle();});
 const endpoint='**/api/admin/history/history-local/versions/1';
 const ack={documentId:'history-local',sequence:10,revision:4,sourceRevision:1,status:'draft',publishedRevision:2};

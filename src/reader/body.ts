@@ -1,9 +1,9 @@
 import type {FieldSnapshot} from '../fields/model.ts';
-import {decodeEditorBody,type EditorBlock} from '../editor/document.ts';
+import {decodeEditorBody,inlineText,type EditorBlock} from '../editor/document.ts';
 import {inlineTokens} from './inline.ts';
 import type {ArticlePresentation} from '../domain/presentation.ts';
 export interface Publication extends ArticlePresentation {customFields?:FieldSnapshot[];id:string;title:string;revision:number;body:string}
-export interface DocumentSection {id:string;title:string;depth:1|2|3}
+export interface DocumentSection {id:string;title:string;depth:1|2|3|4|5|6}
 export type ReaderBlock={type:'table';headers:string[];rows:string[][]}|{type:'heading';id:string;text:string;depth:1|2|3}|{type:'paragraph';text:string}|{type:'list';ordered:boolean;start:number;items:string[]};
 export interface ReaderDocument {blocks:ReaderBlock[];sections:DocumentSection[];editorBlocks?:EditorBlock[]}
 
@@ -11,7 +11,7 @@ export interface ReaderDocument {blocks:ReaderBlock[];sections:DocumentSection[]
  * Supports a bounded pipe-table subset for shared reader/PDF output. Richer blocks remain separate tasks. */
 export function parseReaderBody(body:string):ReaderDocument {
  const editorBlocks=decodeEditorBody(body);
- if(editorBlocks!==null){const sections:DocumentSection[]=[];const visit=(nodes:EditorBlock[])=>{for(const block of nodes){if(block.type==='heading')sections.push({id:block.id,title:block.content.map(inline=>inline.text).join(''),depth:block.props.level??1});visit(block.children);}};visit(editorBlocks);return {blocks:[],sections,editorBlocks};}
+ if(editorBlocks!==null){const sections:DocumentSection[]=[];const visit=(nodes:EditorBlock[])=>{for(const block of nodes){if(block.type==='heading')sections.push({id:block.id,title:inlineText(block.content),depth:block.props.level??1});visit(block.children);}};visit(editorBlocks);return {blocks:[],sections,editorBlocks};}
  const blocks:ReaderBlock[]=[];const sections:DocumentSection[]=[];
  let paragraph:string[]=[];
  const flush=()=>{if(paragraph.length){blocks.push({type:'paragraph',text:paragraph.join('\n')});paragraph=[];}};

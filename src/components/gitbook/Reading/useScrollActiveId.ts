@@ -25,7 +25,7 @@ export function useScrollActiveId(ids:string[]):string|undefined {
    const restoreHash=()=>{
      const id=window.location.hash.slice(1);
      if(ids.includes(id)) {
-       document.getElementById(id)?.scrollIntoView({block:'start',behavior:'auto'});
+       const target=document.getElementById(id);for(let parent=target?.parentElement;parent;parent=parent.parentElement)if(parent instanceof HTMLDetailsElement)parent.open=true;target?.scrollIntoView({block:'start',behavior:'auto'});
        pinned={id,y:window.scrollY};setActiveId(id);
      }else{pinned=null;schedule();}
    };

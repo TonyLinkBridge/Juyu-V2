@@ -96,7 +96,7 @@ test('existing revisions are backfilled on upgrade including rich text and malfo
   }
   // Historical import with an unsupported body format must not index its raw JSON.
   await old.pool.query("BEGIN; INSERT INTO juyu.documents(id,kind,sequence,workflow_revision_id,workflow_state) VALUES('malformed','article',0,1,'draft'); INSERT INTO juyu.revisions(document_id,revision_id,title,body,audience,author_id,editor_id,created_at) VALUES('malformed',1,'坏格式',E'JUYU_BLOCKNOTE_V1\\n{privateMalformed','staff','a','a',now()); INSERT INTO juyu.audit_log(document_id,sequence,action,actor_id,revision_id,at) VALUES('malformed',0,'create','a',1,now()); COMMIT;");
-  assert.deepEqual(await migrate(old.pool),['0014_publication_search','0015_reference', '0016_qa', '0017_favorites', '0018_recent_views', '0019_analytics', '0020_custom_fields', '0021_categories', '0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements']);
+  assert.deepEqual(await migrate(old.pool),['0014_publication_search','0015_reference', '0016_qa', '0017_favorites', '0018_recent_views', '0019_analytics', '0020_custom_fields', '0021_categories', '0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements', '0027_native_editor']);
   const rows=(await old.pool.query('SELECT document_id,search_text FROM juyu.revision_search ORDER BY document_id')).rows;
   assert.deepEqual(rows,[{document_id:'malformed',search_text:'坏格式\n\n'},{document_id:'old-plain',search_text:'旧纯文\n\nExistingBody'},{document_id:'old-rich',search_text:'旧资料\n旧标签\n\n回填续费'}]);
   assert.deepEqual(await migrate(old.pool),[]);assert.equal((await old.pool.query('SELECT count(*)::int n FROM juyu.revision_search')).rows[0].n,3);
@@ -133,4 +133,24 @@ test('legacy SQL projection agrees with the existing reader token and block adap
  for(const value of examples){const text=(await fixture.pool.query('SELECT juyu.search_inline_text($1) text',[value])).rows[0].text;assert.equal(text,inlineTokens(value).map(x=>x.text).join(''),value);}
  const bodies=['# Heading **joined**\n\nParagraph _joined_\nline\n\n2. second **item**\n3. next','  ```lang\n**raw**\n  ```\n\n# After','| **head** | B |\n| :--- | ---: |\n| _raw_ | cell |\n\nText','~~~~\n# raw\n**raw**\n~~~~','    ```literal\n**kept**\n\n**next**'];
  for(const body of bodies){const rendered=parseReaderBody(body).blocks.flatMap(block=>block.type==='table'?[...block.headers,...block.rows.flat()]:block.type==='list'?block.items.map(text=>inlineTokens(text).map(x=>x.text).join('')):[inlineTokens(block.text).map(x=>x.text).join('')]).join('\n');const text=(await fixture.pool.query('SELECT juyu.search_legacy_text($1) text',[body])).rows[0].text;assert.equal(text,rendered,body);}
+});
+
+test('native blocks and table link labels are indexed but destinations stay private and OPS permissions apply',async()=>{
+ const link={type:'link',href:'https://example.com/secret-url-token',content:[{type:'text',text:'原生链接名称',styles:{textColor:'red'}}]};
+ const body=encodeEditorBody([{id:'todo',type:'checkListItem',props:{checked:true},content:[link]}, {id:'table',type:'table',content:{type:'tableContent',rows:[{cells:[[{type:'text',text:'原生表格费用',styles:{}}]]}]}}]);
+ const d=await draft(body,'ops');assert.equal((await service(ops).search('原生链接名称')).search.total,0);
+ await publish(d);for(const text of ['原生链接名称','原生表格费用']){assert.equal((await service(ops).search(text)).search.total,1);assert.equal((await service(support).search(text)).search.total,0);}
+ assert.equal((await service(ops).search('secret-url-token')).search.total,0);
+});
+test('native audio reservation is administrator scoped and still refuses unsupported MIME',async()=>{
+ const d=await draft();await db.run(admin,c=>c.query('SELECT juyu.reserve_upload($1,$2,$3,$4,$5)',[randomUUID(),d.id,'sample.mp3','audio/mpeg',123]));
+ await assert.rejects(db.run(support,c=>c.query('SELECT juyu.reserve_upload($1,$2,$3,$4,$5)',[randomUUID(),d.id,'sample.mp3','audio/mpeg',123])),/FORBIDDEN/);
+ await assert.rejects(db.run(admin,c=>c.query('SELECT juyu.reserve_upload($1,$2,$3,$4,$5)',[randomUUID(),d.id,'sample.html','text/html',123])),/INVALID_UPLOAD/);
+});
+
+test('native file references cannot attach another document asset or mislabel audio as an image',async()=>{
+ const d=await draft(),other=await draft(),id=randomUUID();await db.run(admin,async c=>{await c.query('SELECT juyu.reserve_upload($1,$2,$3,$4,$5)',[id,d.id,'sample.mp3','audio/mpeg',123]);await c.query('SELECT juyu.finish_upload($1,true)',[id]);});
+ const content=(type:string)=>encodeEditorBody([{id:'file',type,props:{url:'/api/assets/'+id,name:'Sample',caption:'Audio'}}]);
+ for(const [target,type] of [[other,'audio'],[d,'image']] as const){const body=content(type);await assert.rejects(repo.execute(target.id,{type:'edit',title:target.revisions[0].title,body,audience:'staff',blocks:editorMedia(decodeEditorBody(body)!)},admin,{expectedSequence:target.sequence}),/INVALID_MEDIA/);}
+ const body=content('audio');const updated=await repo.execute(d.id,{type:'edit',title:'Audio',body,audience:'staff',blocks:editorMedia(decodeEditorBody(body)!)},admin,{expectedSequence:d.sequence});await publish(updated);assert.equal((await service(support).article(d.id))?.title,'Audio');
 });

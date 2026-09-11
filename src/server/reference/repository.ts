@@ -3,7 +3,8 @@ import type {ReferenceItem,ReferencePage,ReferenceDetail,ReferenceTableData} fro
 import {positiveInteger} from '../../feedback/model.ts';
 import {reviewId} from '../../review/model.ts';
 import {parseReaderBody} from '../../reader/body.ts';
-import {editorMedia} from '../../editor/document.ts';
+import type {EditorBlock} from '../../editor/document.ts';
+import {tableTextGrid} from '../../editor/table.ts';
 import {normalizeBlocks} from '../../media/model.ts';
 import {readReaderSections} from '../ops/repository.ts';
 
@@ -27,7 +28,11 @@ export async function readReferenceDetail(client:PoolClient,id:string):Promise<R
  // its JSON is never interpreted as legacy prose or returned to the client.
  const parsed=parseReaderBody(publication.body);const tables:ReferenceTableData[]=[];
  if(parsed.editorBlocks){
-  for(const block of editorMedia(parsed.editorBlocks))if(block.type==='table')tables.push({id:block.id,headers:block.headers,rows:block.rows});
+  const native=(nodes:EditorBlock[])=>{for(const b of nodes){
+   if(b.type==='table'){const grid=tableTextGrid(b.content),n=b.content.headerRows??0;const headers=n?b.content.columnWidths.map((_,i)=>grid.slice(0,n).map(row=>row[i]).filter(Boolean).join(' / ')):b.content.columnWidths.map((_,i)=>`列 ${i+1}`);tables.push({id:b.id,headers,rows:grid.slice(n)});}
+   else if(b.type==='juyu'){const legacy=normalizeBlocks([JSON.parse(b.props.payload)])[0];if(legacy.type==='table')tables.push({id:b.id,headers:legacy.headers,rows:legacy.rows});}
+   native(b.children);
+  }};native(parsed.editorBlocks);
  }else{
   for(const block of parsed.blocks)if(block.type==='table')tables.push({id:`legacy:${tables.length+1}`,headers:block.headers,rows:block.rows});
   const blocks=(await client.query('SELECT juyu.read_publication_blocks($1) AS blocks',[id])).rows[0]?.blocks;

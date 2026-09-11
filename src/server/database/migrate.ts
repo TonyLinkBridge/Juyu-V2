@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import type { Pool } from 'pg';
 
-const migrations = ['0001_core', '0002_supporting_data', '0003_authorization', '0004_members', '0005_enrollment', '0006_article_presentation', '0007_feedback', '0008_media', '0009_document_lifecycle', '0010_review_submission', '0011_document_availability', '0012_version_history', '0013_ops_collection', '0014_publication_search', '0015_reference', '0016_qa', '0017_favorites', '0018_recent_views', '0019_analytics', '0020_custom_fields', '0021_categories', '0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements'] as const;
+const migrations = ['0001_core', '0002_supporting_data', '0003_authorization', '0004_members', '0005_enrollment', '0006_article_presentation', '0007_feedback', '0008_media', '0009_document_lifecycle', '0010_review_submission', '0011_document_availability', '0012_version_history', '0013_ops_collection', '0014_publication_search', '0015_reference', '0016_qa', '0017_favorites', '0018_recent_views', '0019_analytics', '0020_custom_fields', '0021_categories', '0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements', '0027_native_editor'] as const;
 
 // Explicit operator entry point. Never invoked by page rendering or startup.
 export async function migrate(pool: Pool): Promise<string[]> {

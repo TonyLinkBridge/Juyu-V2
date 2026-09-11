@@ -30,3 +30,18 @@ test('T031 real PDF exports interleaved text, private image, nested list, table 
  const bytes=Buffer.from(await response.arrayBuffer());assert.equal(bytes.subarray(0,5).toString(),'%PDF-');
  await mkdir('output/pdf',{recursive:true});await writeFile('output/pdf/T031-editor-verification.pdf',bytes);
 });
+
+test('native reader features print linked text, colors, merged table, folded children and resized private image',async()=>{
+ const text=(text:string)=>[{type:'text',text,styles:{}}];
+ const body=encodeEditorBody([
+  {id:'heading',type:'heading',props:{level:6,isToggleable:true},content:text('原生六级标题'),children:[{id:'inside',type:'paragraph',content:text('折叠内容也要完整打印')} ]},
+  {id:'todo',type:'checkListItem',props:{checked:true},content:[{type:'text',text:'已经核对',styles:{textColor:'red',backgroundColor:'yellow'}},{type:'link',href:'https://example.com/docs',content:text('参考链接')}]},
+  {id:'native-table',type:'table',content:{type:'tableContent',columnWidths:[120,180],headerRows:1,rows:[{cells:[{type:'tableCell',props:{colspan:2},content:text('合并表头')}]},{cells:[text('费用'),text('保留表格内容')]}]}},
+  {id:'picture',type:'image',props:{url:'/api/assets/'+assetId,name:'Image',caption:'私有图片',previewWidth:180}},
+  {id:'code',type:'codeBlock',props:{language:'html'},content:text('<script>literal only</script>')},
+ ]);
+ const article={id:'native-pdf',title:'原生编辑器 PDF 验证',revision:1,body,blocks:editorMedia(decodeEditorBody(body)!)};
+ const image=await readFile('tests/fixtures/article-cover.png');
+ const response=await exportPDF(new Request('http://local?download=1'),article.id,1,{snapshot:async()=>({article,files:[]}),asset:async()=>({id:assetId,document_id:article.id,filename:'fixture.png',mime_type:'image/png',byte_size:image.length,bucket:'juyu-private',object_key:assetId}),storage:()=>({read:async()=>new Response(image,{headers:{'content-length':String(image.length)}}),put:async()=>{throw new Error('NO_WRITES');}}),render:async html=>{assert.match(html,/折叠内容也要完整打印/);assert.match(html,/colspan="2"/);assert.match(html,/width:180px/);assert.match(html,/href="https:\/\/example.com\/docs"/);assert.doesNotMatch(html,/<script>/);return renderPDF(html);}});
+ assert.equal(response.status,200);await mkdir('output/pdf',{recursive:true});await writeFile('output/pdf/native-editor-verification.pdf',Buffer.from(await response.arrayBuffer()));
+});

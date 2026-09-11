@@ -20,12 +20,11 @@ test('invalid reserved documents, executable URLs, unknown styles and duplicate 
  assert.equal(decodeEditorBody('plain legacy'),null);
  for(const body of ['JUYU_BLOCKNOTE_V1','JUYU_BLOCKNOTE_V1\ninvalid','JUYU_BLOCKNOTE_V1\n{}'])assert.throws(()=>decodeEditorBody(body));
  const invalid=[
- [{...text('a','text'),content:[{type:'link',href:'https://outside.invalid',content:[]}]}],
- [{...text('a','text'),props:{textColor:'red'}}],
+ [{...text('a','text'),content:[{type:'link',href:'javascript:alert(1)',content:[]}]}],
+ [{...text('a','text'),props:{textColor:'red;url(x)'}}],
  [{...text('a','text'),content:[{type:'text',text:'text',styles:{url:'javascript:alert(1)'}}]}],
  [text('a','text','paragraph',[text('a','duplicate')])],
  [{...custom,id:'different'}],
- [{...custom,children:[text('child','invalid')]}],
  [{...text('a','text'),unexpected:'html'}],
  [{...text('a','text'),type:'image',props:{url:'https://outside.invalid'}}],
  ];
@@ -68,7 +67,7 @@ test('legacy conversion keeps tables readable when all forty custom slots alread
 test('null property defaults are rejected and legacy zero-based numbering is preserved literally',()=>{
  for(const props of [{textColor:null},{backgroundColor:null},{textAlignment:null},{level:null}])assert.throws(()=>normalizeEditorBlocks([{...text('a','heading','heading'),props}]));
  const result=editorInitialContent('0. Old zero item\n1. Old next item',[]);
- assert.equal(result[0].type,'paragraph');if(result[0].type==='paragraph')assert.equal(result[0].content[0].text,'0. Old zero item\n1. Old next item');
+ assert.equal(result[0].type,'paragraph');if(result[0].type==='paragraph')assert.equal((result[0].content[0] as {text:string}).text,'0. Old zero item\n1. Old next item');
 });
 test('legacy heading anchors survive conversion and later structured saves',()=>{
  const body='Opening\n\n# Repeated\nFirst\n\n## Repeated\nSecond\n\n### Last';

@@ -1,5 +1,5 @@
 import {fieldValueText} from '../fields/editor.ts';
-import type {EditorBlock,EditorInline} from '../editor/document.ts';
+import {printEditor} from '../editor/print.ts';
 import {mathMarkup} from '../science/model.ts';
 import {inlineHTML} from '../reader/inline.ts';
 import {normalizeBlocks,hintLabels,type MediaBlock} from '../media/model.ts';
@@ -35,19 +35,10 @@ export function pdfContent(article:Publication,coverSource?:string,images?:Recor
   if(b.type==='tabs')return `<section class="pdf-tabs">${b.tabs.map((t,i)=>`<h3>${e(t.title||`标签 ${i+1}`)}</h3><p>${e(t.body)}</p>`).join('')}</section>`;
   if(b.type==='table')return `<table><thead><tr>${b.headers.map(t=>`<th scope="col">${e(t)}</th>`).join('')}</tr></thead><tbody>${b.rows.map(r=>`<tr>${r.map(t=>`<td>${e(t)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   if(b.type==='image'){const src=images?images[b.assetId]:`/api/assets/${b.assetId}`;if(!src||!/^\/api\/assets\/[0-9a-f-]{36}$|^data:image\/(png|jpeg|webp|gif);base64,[a-z0-9+/=]+$/i.test(src))throw new Error('INVALID_IMAGE');return `<figure style="margin:6mm 0;break-inside:avoid"><img src="${e(src)}" alt="${e(b.alt)}" style="max-height:180mm;object-fit:contain"><figcaption>${e(b.caption)}</figcaption></figure>`;}
-  return `<p>${b.type==='video'?'影片':'文件'}：${e(b.caption||b.alt||'附件')}（请返回资料库打开，PDF 不包含可播放影片或附件字节。）</p>`;
- };
- const marks=(content:EditorInline[])=>content.map(inline=>{let html=e(inline.text);for(const [mark,tag] of [['code','code'],['bold','strong'],['italic','em'],['underline','u'],['strike','s']] as const)if(inline.styles[mark])html=`<${tag}>${html}</${tag}>`;return html;}).join('');
- const structured=(nodes:EditorBlock[]):string=>{
-  let html='';for(let i=0;i<nodes.length;i++){const block=nodes[i];
-   if(block.type==='juyu'){html+=renderMedia(JSON.parse(block.props.payload) as MediaBlock);continue;}
-   if(block.type==='bulletListItem'||block.type==='numberedListItem'){const type=block.type,tag=type==='numberedListItem'?'ol':'ul';html+=`<${tag}${tag==='ol'?` start="${block.props.start??1}"`:''}>`;
-    while(i<nodes.length&&nodes[i].type===type){const item=nodes[i];if(item.type==='juyu')break;html+=`<li${tag==='ol'&&item.props.start!==undefined?` value="${item.props.start}"`:''} style="text-align:${item.props.textAlignment}">${marks(item.content)}${structured(item.children)}</li>`;i++;}i--;html+=`</${tag}>`;continue;}
-   const tag=block.type==='heading'?`h${(block.props.level??1)+1}`:'p';html+=`<${tag}${block.type==='heading'?` id="${block.id}"`:''} style="text-align:${block.props.textAlignment}">${marks(block.content)}</${tag}>${block.children.length?`<div style="padding-left:6mm">${structured(block.children)}</div>`:''}`;
-  }return html;
+  return `<p>${b.type==='video'?'影片':b.type==='audio'?'音频':'文件'}：${e(b.caption||b.alt||'附件')}（请返回资料库打开，PDF 不包含可播放影片或附件字节。）</p>`;
  };
  const fields=article.customFields?.length?`<section><h2>自定义资料</h2><table><tbody>${article.customFields.map(f=>`<tr><th scope="row">${e(f.name)}</th><td>${e(fieldValueText(f.value))}</td></tr>`).join('')}</tbody></table></section>`:'';
- const blocks=document.editorBlocks?structured(document.editorBlocks):legacy;
+ const blocks=document.editorBlocks?printEditor(document.editorBlocks,renderMedia):legacy;
  const media=document.editorBlocks?'':normalizeBlocks(article.blocks).map(renderMedia).join('');
  return `${coverSource?`<img class="pdf-cover" src="${e(coverSource)}" alt="${e(article.cover?.alt??'')}" style="object-position:center ${article.cover?.position??50}%">`:''}<h1>${e(article.title)}</h1><p class="pdf-meta">JUYU 内部资料库 · 正式版本 ${article.revision}${article.tags?.length?` · ${article.tags.map(e).join(' / ')}`:''}</p>${fields}${blocks||(!media?'<p>这篇文章暂时没有正文。</p>':'')}${media}`;
 }
