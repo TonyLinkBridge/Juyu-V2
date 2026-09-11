@@ -34,14 +34,14 @@ function setMode(mode: ThemeMode) {
   try { localStorage.setItem(THEME_STORAGE_KEY, mode); } catch { /* Still usable for this page. */ }
   window.dispatchEvent(new Event(eventName));
 }
-export function ThemeToggler() {
+export function ThemeToggler({compact=false}:{compact?:boolean}={}) {
   const selected = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
   const name = useId();
-  return <fieldset className="theme-toggler"><legend>外观主题</legend>
+  return <fieldset className={`theme-toggler ${compact?'theme-toggler-compact':''}`}><legend>外观主题</legend>
     {([['light','浅色'],['system','跟随系统'],['dark','深色']] as const).map(([mode,label]) =>
       <label key={mode} title={label}>
-        <input type="radio" name={name} value={mode} checked={selected === mode} onChange={() => setMode(mode)}/>
-        <span><ThemeIcon mode={mode}/>{label}</span>
+        <input aria-label={label} type="radio" name={name} value={mode} checked={selected === mode} onChange={() => setMode(mode)}/>
+        <span><ThemeIcon mode={mode}/>{compact?<span className="theme-choice-label">{label}</span>:label}</span>
       </label>)}
   </fieldset>;
 }
