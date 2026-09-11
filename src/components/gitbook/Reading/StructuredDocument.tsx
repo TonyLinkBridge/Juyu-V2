@@ -40,9 +40,9 @@ export function StructuredDocument({blocks,documentId,revision,admin=false}:{blo
    if(b.type==='codeBlock'){result.push(<Fragment key={b.id}><CodeBlock block={{id:b.id,type:'code',language:b.props.language??'text',code:inlineText(b.content)}}/>{children}</Fragment>);continue;}
    const Tag=b.type==='heading'?({1:'h2',2:'h3',3:'h4',4:'h5',5:'h6',6:'h6'} as const)[b.props.level??1]:b.type==='quote'?'blockquote':'p';
    const content=<StructuredInline content={b.content}/>;
-   const heading=<Tag id={b.type==='heading'?b.id:undefined} tabIndex={b.type==='heading'?-1:undefined} className={b.type==='heading'?'heading font-heading block gitbook-heading':undefined} style={style(b.props)}>{content}{b.type==='heading'&&<a href={`#${b.id}`} className="heading-hash" aria-label={`定位到：${inlineText(b.content)}`}>#</a>}</Tag>;
+   const heading=<Tag data-native-level={b.type==='heading'?b.props.level??1:undefined} id={b.type==='heading'?b.id:undefined} tabIndex={b.type==='heading'?-1:undefined} className={b.type==='heading'?'heading font-heading block gitbook-heading':undefined} style={style(b.props)}>{content}{b.type==='heading'&&<a href={`#${b.id}`} className="heading-hash" aria-label={`定位到：${inlineText(b.content)}`}>#</a>}</Tag>;
    if(b.type==='toggleListItem'||(b.type==='heading'&&b.props.isToggleable))result.push(<details key={b.id} className="native-toggle"><summary>{b.type==='heading'?heading:content}</summary>{children}</details>);
-   else if(b.type==='checkListItem')result.push(<div key={b.id} className="native-check" style={style(b.props)}><span role="checkbox" aria-checked={b.props.checked} aria-readonly="true" aria-label={inlineText(b.content)}>{b.props.checked?'☑':'☐'}</span><div>{content}{children}</div></div>);
+   else if(b.type==='checkListItem')result.push(<div key={b.id} className="native-check" style={style(b.props)}><input type="checkbox" checked={b.props.checked} disabled aria-label={inlineText(b.content)}/><div><span className={b.props.checked?"native-completed":undefined}>{content}</span>{children}</div></div>);
    else result.push(<Fragment key={b.id}>{heading}{b.children.length>0&&<div className="native-children">{children}</div>}</Fragment>);
   }return result;
  };

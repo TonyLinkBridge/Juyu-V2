@@ -174,7 +174,7 @@ test('native checklist toggle heading divider code and merged table keep values 
  await mount(page,()=>saved);await page.locator('[data-content-type="checkListItem"] input[type="checkbox"]').check();await expect(page.getByRole('status')).toContainText('所有修改已保存',{timeout:8000});
  expect(saved.body).toContain('"checked":true');expect(saved.body).toContain('"colspan":2');expect(saved.body).toContain('"isToggleable":true');expect(saved.body).toContain('const answer = 42;');
  await page.reload();await expect(page.locator('[data-content-type="checkListItem"] input[type="checkbox"]')).toBeChecked();await expect(page.locator('.bn-editor th[colspan="2"]')).toContainText('合并表头');
- await page.getByRole('button',{name:'预览草稿',exact:true}).click();await expect(page.locator('.editor-preview [role="checkbox"]')).toHaveAttribute('aria-checked','true');await expect(page.locator('.editor-preview th[colspan="2"]')).toContainText('合并表头');
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();await expect(page.locator('.editor-preview input[type="checkbox"]')).toBeChecked();await expect(page.locator('.editor-preview th[colspan="2"]')).toContainText('合并表头');
 });
 
 test('native image upload panel saves private identity and renders through the administrator asset endpoint',async({page})=>{

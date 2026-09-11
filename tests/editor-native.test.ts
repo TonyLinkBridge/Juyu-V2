@@ -50,3 +50,13 @@ test('native numbered lists retain zero and negative starting numbers from paste
   assert.match(pdfHTML({id:'doc',title:'Numbering',revision:1,body}),new RegExp('start="'+start+'"'));
  }
 });
+
+test('saved reader content preserves all palette colors and combined inline formatting',()=>{
+ const colors=['gray','brown','red','orange','yellow','green','blue','purple','pink','#12ab34','rgb(12, 34, 56)'];
+ const original=normalizeEditorBlocks(colors.map((textColor,index)=>p('color-'+index,'paragraph',{textAlignment:'center',backgroundColor:'blue'},[{type:'text',text:'样例 '+index,styles:{textColor,backgroundColor:'yellow',bold:true,italic:true,underline:true,strike:true}}])));
+ const saved=encodeEditorBody(original);
+ const read=parseReaderBody(saved).editorBlocks;
+ assert.deepEqual(read,original);
+ assert.deepEqual(nativeEditorContent(read!,[]),original);
+ assert.equal(encodeEditorBody(nativeEditorContent(read!,[])),saved);
+});
