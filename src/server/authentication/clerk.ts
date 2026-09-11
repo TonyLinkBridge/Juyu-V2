@@ -1,4 +1,5 @@
 import 'server-only';
+import {measured} from '../performance.ts';
 import {cache} from 'react';
 import { auth, clerkClient } from '@clerk/nextjs/server';
 import { clerkConfiguration } from '../../config/clerk.ts';
@@ -11,6 +12,6 @@ export const employeeSession = cache(async function employeeSession() {
       return { userId: identity.userId, sessionId: identity.sessionId };
     },
     // Each render/request checks the provider; a JWT alone never proves an active session.
-    session: async (id) => (await clerkClient()).sessions.getSession(id),
+    session: async (id) => measured('clerk.session',async()=>(await clerkClient()).sessions.getSession(id)),
   });
 });

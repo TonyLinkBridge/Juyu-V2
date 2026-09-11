@@ -1,3 +1,4 @@
+import {measured} from '../performance.ts';
 import type {PoolClient} from 'pg';
 import type {Role} from '../../domain/model.ts';
 import {MemberStore} from '../members/store.ts';
@@ -23,7 +24,7 @@ export class EnrollmentService{
   return {candidate,member,initial,intent};
  }
  async inspect():Promise<EnrollmentResult>{
-  return this.store.locked(async c=>{
+  return measured('enrollment.inspect',()=>this.store.locked(async c=>{
    const {candidate,member,initial,intent}=await this.context(c);
    if(initial.state==='pending'&&initial.owner_id!==candidate.id)return {status:'waiting'};
    if(intent?.state==='pending')return {status:'pending'};
@@ -31,7 +32,7 @@ export class EnrollmentService{
    if(initial.state==='empty'||!member)return {status:'required'};
    if(!candidate.role)throw new Error('FORBIDDEN: missing role');
    return {status:'ready',role:candidate.role,initialAdmin:initial.mode==='automatic'&&initial.owner_id===candidate.id&&candidate.role==='admin'};
-  },true);
+  },true));
  }
  async run():Promise<EnrollmentResult>{
   return this.store.locked(async c=>{
