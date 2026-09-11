@@ -24,10 +24,12 @@ export class MemberStore {
  }
  async available(id:string,client?:PoolClient):Promise<void>{
   const check=async(c:PoolClient)=>{
-   const result=await c.query('SELECT disabled_at FROM juyu.members WHERE clerk_user_id=$1',[id]);
-   if(result.rows[0]?.disabled_at)throw new Error('FORBIDDEN: member disabled');
-   if((await c.query("SELECT 1 FROM juyu.member_operations WHERE target_id=$1 AND status='pending'",[id])).rowCount)throw new Error('MEMBER_PENDING');
-   if((await c.query("SELECT 1 FROM juyu.role_enrollments WHERE member_id=$1 AND state='pending'",[id])).rowCount)throw new Error('MEMBER_PENDING');
+   const row=(await c.query(`SELECT
+    (SELECT disabled_at FROM juyu.members WHERE clerk_user_id=$1) AS disabled_at,
+    EXISTS(SELECT 1 FROM juyu.member_operations WHERE target_id=$1 AND status='pending') AS operation_pending,
+    EXISTS(SELECT 1 FROM juyu.role_enrollments WHERE member_id=$1 AND state='pending') AS enrollment_pending`,[id])).rows[0];
+   if(row.disabled_at)throw new Error('FORBIDDEN: member disabled');
+   if(row.operation_pending||row.enrollment_pending)throw new Error('MEMBER_PENDING');
   };
   return client?check(client):this.read(check);
  }

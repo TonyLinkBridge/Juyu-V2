@@ -1,5 +1,4 @@
 import {NewAnnouncements} from '../../components/announcements/NewAnnouncements';
-import {closedFeatureFlags} from '../../features/model';
 import {applicationAuthorization} from '../../server/authorization/application';
 import {TasksWorkspace} from '../../components/tasks/TasksWorkspace';
 import type {QueryInput,WorkspaceData} from '../../workspace/model';
@@ -18,6 +17,5 @@ export default async function AdminWorkspace({searchParams}:{searchParams:Promis
   if (access.status !== 'admin') redirect(adminDestination(access));
   const params=await searchParams;let data:WorkspaceData|undefined,error:string|undefined;
   try{data=await (await applicationAuthorization()).workspace({...params,view:params.view??'list'});}catch(e){error=e instanceof Error&&e.message==='INVALID_QUERY'?'筛选条件无效，请重新读取内容后设置。':'请稍后重试，或检查服务连接。';}
-  let features=closedFeatureFlags;try{features=await(await applicationAuthorization()).features();}catch{}
-  return <EntryShell><NewAnnouncements/><TasksWorkspace features={features} data={data} error={error} account={<EmployeeSignOut audience="admin"/>}/></EntryShell>;
+  return <EntryShell><NewAnnouncements/><TasksWorkspace data={data} error={error} account={<EmployeeSignOut audience="admin"/>}/></EntryShell>;
 }

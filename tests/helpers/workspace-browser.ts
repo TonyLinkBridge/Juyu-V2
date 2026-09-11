@@ -9,7 +9,7 @@ let component:typeof import('../../src/components/tasks/TasksWorkspace').TasksWo
 async function workspaceComponent(){
  if(component)return component;
  const directory=resolve('output/verification/workspace-fixture');await mkdir(directory,{recursive:true});await writeFile(resolve(directory,'package.json'),'{"type":"commonjs"}');
- for(const name of ['src/workspace/model.ts',...['TaskCard','TaskColumn','TasksBoard','TasksFilters','TasksList','TasksWorkspace'].map(n=>`src/components/tasks/${n}.tsx`)]){
+ for(const name of ['src/components/shell/NavigationLink.tsx','src/workspace/model.ts',...['TaskCard','TaskColumn','TasksBoard','TasksFilters','TasksList','TasksWorkspace'].map(n=>`src/components/tasks/${n}.tsx`)]){
   const destination=resolve(directory,name.replace(/\.tsx?$/,'.js'));await mkdir(dirname(destination),{recursive:true});
   const compiled=ts.transpileModule(await readFile(name,'utf8'),{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText.replace(/require\("([^"\n]+)\.ts"\)/g,'require("$1.js")');
   await writeFile(destination,compiled);

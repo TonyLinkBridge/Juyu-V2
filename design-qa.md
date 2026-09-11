@@ -65,3 +65,9 @@ The earlier pass missed editor/reader typography drift. This follow-up supersede
 - Added roundtrip test for all nine palette colors plus HEX/RGB, combined inline formats and block alignment/background. 351 unit tests pass.
 Evidence: output/verification/focused-editor/format-consistency.png.
 Remaining scope: authenticated publication on Vercel has not been performed; this is not a claim of real-account release acceptance. All native media/table variants have not been exhaustively visually compared in this follow-up. Existing tests cover serialization but do not prove pixel equality for every block or browser.
+
+## 2026-09-11 — Focused article settings and typed trash confirmation
+
+Implemented dedicated settings panels with a short overview, category empty-state guidance and a new-tab category management link, Chinese upload control, a local neutral title hint, clearer metadata actions, and removal of duplicate saved-draft notices. Native editor and server authorization contracts remain unchanged.
+
+Browser checked in an isolated in-memory fixture: category opens only the category panel; navigation back to settings and files works; title input autosaves; trash modal traps focus and accepts cancellation; blank/wrong title disables the destructive action and exact title enables it. No production deletion was performed. Actual trash request success and real Storage uploads were not re-tested in this pass. Existing unit suite passed 351/351; lint and production build passed before final duplicate-notice cleanup; final build recorded separately in /tmp/juyu-settings-build.log. Full legacy e2e suite remains unrun.

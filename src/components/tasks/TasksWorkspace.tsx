@@ -1,5 +1,5 @@
 import type {FeatureFlags} from '../../features/model';
-import Link from 'next/link';
+import {NavigationLink as Link} from '../shell/NavigationLink';
 import type {ReactNode} from 'react';
 import {statuses,workspaceHref,type WorkspaceData} from '../../workspace/model';
 import {TasksBoard} from './TasksBoard';

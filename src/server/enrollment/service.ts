@@ -10,12 +10,16 @@ export class EnrollmentService{
  constructor(store:MemberStore,authenticate:()=>Promise<EnrollmentCandidate|null>,provider:{setRole(id:string,role:Role):Promise<void>}){this.store=store;this.authenticate=authenticate;this.provider=provider;}
  private async context(c:PoolClient){
   const candidate=await this.authenticate();if(!candidate)throw new Error('FORBIDDEN: company verification');
-  const member=(await c.query('SELECT disabled_at FROM juyu.members WHERE clerk_user_id=$1',[candidate.id])).rows[0];
+  const row=(await c.query(`SELECT
+    (SELECT row_to_json(m) FROM (SELECT disabled_at FROM juyu.members WHERE clerk_user_id=$1) m) AS member,
+    EXISTS(SELECT 1 FROM juyu.member_operations WHERE target_id=$1 AND status='pending') AS pending,
+    (SELECT row_to_json(i) FROM juyu.initialization i) AS initial,
+    (SELECT row_to_json(r) FROM juyu.role_enrollments r WHERE member_id=$1) AS intent`,[candidate.id])).rows[0];
+  const member=row.member;
   if(member?.disabled_at)throw new Error('FORBIDDEN: member disabled');
-  if((await c.query("SELECT 1 FROM juyu.member_operations WHERE target_id=$1 AND status='pending'",[candidate.id])).rowCount)throw new Error('MEMBER_PENDING');
-  const initial=(await c.query('SELECT * FROM juyu.initialization')).rows[0] as Initial|undefined;
-  if(!initial)throw new Error('AUTH_NOT_CONFIGURED');
-  const intent=(await c.query('SELECT * FROM juyu.role_enrollments WHERE member_id=$1',[candidate.id])).rows[0] as Intent|undefined;
+  if(row.pending)throw new Error('MEMBER_PENDING');
+  const initial=row.initial as Initial|undefined;if(!initial)throw new Error('AUTH_NOT_CONFIGURED');
+  const intent=row.intent as Intent|undefined;
   return {candidate,member,initial,intent};
  }
  async inspect():Promise<EnrollmentResult>{

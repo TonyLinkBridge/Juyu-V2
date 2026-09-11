@@ -1,6 +1,8 @@
 import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Avoid restored compiler CSS artifacts disagreeing with the deployed component version.
+  experimental: { turbopackFileSystemCacheForBuild: false },
   // Private media is delivered by authorized, no-store routes; never by the shared image optimizer.
   images: { localPatterns: [], remotePatterns: [] },
   serverExternalPackages: ['playwright-core', 'mermaid'],
