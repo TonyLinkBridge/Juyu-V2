@@ -260,12 +260,13 @@ async function readNavigationTree(client:PoolClient,repeatMemberships=false):Pro
       return buildNavigationTree(pages.rows,categories.rows,memberships.rows,{repeatMemberships});
 }
 
-async function readPresentation(client:PoolClient,id:string):Promise<ArticlePresentation&{customFields?:FieldSnapshot[]}> {
+async function readPresentation(client:PoolClient,id:string):Promise<ArticlePresentation&{publicationNumber?:number|null;customFields?:FieldSnapshot[]}> {
  const row=(await client.query<{tags:string[];cover_asset_id:string|null;cover_alt:string;cover_position:number}>('SELECT * FROM juyu.read_publication_presentation($1)',[id])).rows[0];
  if(!row)return {};
- const blocks=(await client.query('SELECT juyu.read_publication_blocks($1) AS blocks',[id])).rows[0]?.blocks;
+ const presentation=(await client.query('SELECT juyu.read_publication_blocks($1) AS blocks,juyu.publication_number($1) AS publication_number',[id])).rows[0];
+ const blocks=presentation?.blocks;
  const customFields=normalizeFieldSnapshots((await client.query('SELECT juyu.read_publication_fields($1) AS fields',[id])).rows[0]?.fields);
- return {...(customFields.length?{customFields}:{}),...(blocks?.length?{blocks:normalizeBlocks(blocks)}:{}),...(row.tags.length?{tags:row.tags}:{}),...(row.cover_asset_id?{cover:{assetId:row.cover_asset_id,alt:row.cover_alt,position:row.cover_position}}:{})};
+ return {publicationNumber:presentation?.publication_number??null,...(customFields.length?{customFields}:{}),...(blocks?.length?{blocks:normalizeBlocks(blocks)}:{}),...(row.tags.length?{tags:row.tags}:{}),...(row.cover_asset_id?{cover:{assetId:row.cover_asset_id,alt:row.cover_alt,position:row.cover_position}}:{})};
 }
 
 function treeIds(nodes:NavigationNode[]):string[]{return nodes.flatMap(n=>n.type==='group'?treeIds(n.descendants):[n.id]);}

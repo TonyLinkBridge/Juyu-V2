@@ -4,7 +4,7 @@
 import {useCallback,useEffect,useId,useRef,useState} from 'react';
 import {ThumbsUp,ThumbsDown} from '@phosphor-icons/react';
 import type {SavedFeedback} from '../../../feedback/model';
-export function PageFeedbackForm({documentId,revision,initial}:{documentId:string;revision:number;initial?:SavedFeedback|null}){
+export function PageFeedbackForm({documentId,revision,initial,publicationNumber}:{publicationNumber?:number|null;documentId:string;revision:number;initial?:SavedFeedback|null}){
  const id=useId();
  const commentRef=useRef<HTMLTextAreaElement>(null);
  const request=useRef<AbortController|null>(null);
@@ -54,7 +54,7 @@ export function PageFeedbackForm({documentId,revision,initial}:{documentId:strin
    <div className="feedback-rating"><p id={`${id}-question`}>这篇文章有帮助吗？</p><div role="group" aria-labelledby={`${id}-question`}>
     {([true,false] as const).map(value=><button key={String(value)} type="button" aria-pressed={helpful===value} disabled={!loaded||busy||blocked} onClick={()=>{setHelpful(value);edited();requestAnimationFrame(()=>commentRef.current?.focus());}}>{value?<ThumbsUp size={17} aria-hidden="true"/>:<ThumbsDown size={17} aria-hidden="true"/>}{value?'有帮助':'没有帮助'}</button>)}
    </div></div>
-   <p className="feedback-privacy">反馈对应正式版本 {revision}，管理员可查看你的选择和说明。</p>
+   <p className="feedback-privacy">反馈对应{publicationNumber?`正式版本 ${publicationNumber}`:'当前已发布内容'}，管理员可查看你的选择和说明。</p>
    {helpful!==null&&<div className="feedback-comment"><label htmlFor={`${id}-comment`}>补充说明（选填）</label><textarea ref={commentRef} id={`${id}-comment`} rows={3} maxLength={1000} value={comment} disabled={busy||blocked} onChange={e=>{setComment(e.target.value);edited();}}/>
     <div className="feedback-submit"><span>{comment.length}/1000</span><button className="secondary-link" type="submit" disabled={busy||blocked||!loaded}>{busy?'正在保存…':saved?'更新反馈':'提交反馈'}</button></div>
    </div>}

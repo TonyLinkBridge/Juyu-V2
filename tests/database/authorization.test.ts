@@ -309,7 +309,7 @@ test('reader snapshot joins authorized directory with only the current formal bo
  await owner.execute(id,{type:'edit',title:'private future heading',body:'# private future body',audience:'ops'},a,{expectedSequence:original.sequence});
  for(const viewer of [support,a]){
    const snapshot=await new AuthorizationService(db,async()=>viewer).reader(id);
-   assert.deepEqual(snapshot.article,{id,title:'title-reader-snapshot',revision:1,body:'body-reader-snapshot',feedback:{memberId:viewer.id,value:null}});
+   assert.deepEqual(snapshot.article,{id,title:'title-reader-snapshot',revision:1,publicationNumber:1,body:'body-reader-snapshot',feedback:{memberId:viewer.id,value:null}});
    assert.doesNotMatch(JSON.stringify(snapshot),/private future/);
  }
  const service=new AuthorizationService(db,async()=>support);
@@ -705,4 +705,18 @@ test('R22 editor reads bounded history, keeps old publication and preserves all 
  const full=(await owner.getForManagement(id,a))!;assert.equal(full.revisions.length,37);assert.equal(full.audit.length,41);assert.equal(full.publishedRevisionId,1);assert.equal(full.workflow.revisionId,37);assert.equal(full.revisions[1].title,'R22 0');
  assert.equal((await new AuthorizationService(db,async()=>support).article(id))?.body,'body-'+id);
  await assert.rejects(repo.getEditor(id,support),/FORBIDDEN/);
+});
+
+
+test('publication numbers ignore drafts and preserve internal IDs across subsequent releases',async()=>{
+ const id='publication-number-check';let d=await owner.create({id,kind:'article',title:'Version',body:'v1',audience:'staff'},a);
+ for(let i=0;i<5;i++)d=await owner.execute(id,{type:'edit',title:'Version',body:'v1',audience:'staff'},a,{expectedSequence:d.sequence});
+ const number=()=>db.run(support,async c=>(await c.query('SELECT juyu.publication_number($1) AS n',[id])).rows[0].n,true);
+ assert.equal(await number(),null);
+ for(const type of ['submit','approve','queue','publish'] as const)d=await owner.execute(id,{type},type==='approve'?b:a,{expectedSequence:d.sequence,reviewer:b});
+ assert.equal(d.publishedRevisionId,6);assert.equal(await number(),1);assert.equal((await new AuthorizationService(db,async()=>support).reader(id)).article?.publicationNumber,1);
+ d=await owner.execute(id,{type:'edit',title:'Version',body:'v2',audience:'staff'},a,{expectedSequence:d.sequence});assert.equal(await number(),1);
+ for(const type of ['submit','approve','queue','publish'] as const)d=await owner.execute(id,{type},type==='approve'?b:a,{expectedSequence:d.sequence,reviewer:b});
+ assert.equal(d.publishedRevisionId,7);assert.equal(await number(),2);assert.equal((await new AuthorizationService(db,async()=>support).pdf(id,7)).article.publicationNumber,2);
+ assert.equal(await db.run(support,async c=>(await c.query('SELECT juyu.publication_number($1) AS n',['internal'])).rows[0].n,true),null);
 });

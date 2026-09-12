@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {pdfHTML} from '../src/pdf/render.ts';
 import {exportPDF} from '../src/server/pdf/export.ts';
-const article={id:'a',title:'中文 <script>标题</script>',revision:1,body:'# 步骤\n正文\n\n| 项目 | 说明 |\n| --- | --- |\n| 注册 | 核实身份 |'};
+const article={id:'a',title:'中文 <script>标题</script>',revision:1,publicationNumber:1,body:'# 步骤\n正文\n\n| 项目 | 说明 |\n| --- | --- |\n| 注册 | 核实身份 |'};
 test('PDF markup escapes content, preserves tables and rejects external image sources',()=>{
- const html=pdfHTML(article);assert.match(html,/&lt;script&gt;标题/);assert.doesNotMatch(html,/<script>/);assert.match(html,/<thead>/);assert.match(html,/正式版本 1/);
+ const html=pdfHTML({...article,revision:22});assert.match(html,/&lt;script&gt;标题/);assert.doesNotMatch(html,/<script>/);assert.match(html,/<thead>/);assert.match(html,/正式版本 1/);
  assert.throws(()=>pdfHTML(article,'https://outside.example/image'),/INVALID_IMAGE/);
 });
 test('PDF export rechecks access and current version after rendering before releasing bytes',async()=>{

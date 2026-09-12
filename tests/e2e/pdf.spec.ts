@@ -21,7 +21,7 @@ test('PDF download waits for success, keeps errors honest, and can retry',async(
  await fixture(page);let succeed=false;
  await page.route('**/api/articles/pdf-test/pdf?**',async route=>route.fulfill(succeed?{contentType:'application/pdf',body:await readFile('output/pdf/T026-local-verification.pdf')}:{status:409,json:{error:'VERSION_CHANGED'}}));
  await page.getByRole('button',{name:'下载 PDF',exact:true}).click();await expect(page.getByRole('status')).toContainText('文章已更新');await expect(page.getByText('PDF 已生成',{exact:false})).toHaveCount(0);
- succeed=true;const pending=page.waitForEvent('download');await page.getByRole('button',{name:'下载 PDF',exact:true}).click();const download=await pending;expect(download.suggestedFilename()).toBe('article-v1.pdf');await expect(page.getByRole('status')).toContainText('已交给浏览器下载');
+ succeed=true;const pending=page.waitForEvent('download');await page.getByRole('button',{name:'下载 PDF',exact:true}).click();const download=await pending;expect(download.suggestedFilename()).toBe('article.pdf');await expect(page.getByRole('status')).toContainText('已交给浏览器下载');
 });
 test('print action rechecks current permission and revision before opening browser print',async({page})=>{
  await fixture(page);await page.evaluate(()=>{window.print=()=>{document.body.dataset.printed='yes';};});let allowed=false;

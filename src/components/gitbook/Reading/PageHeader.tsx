@@ -13,7 +13,7 @@ export function PageHeader({section,article,navigation}:{section?:'ops';article:
    </ol></nav>
    <p className="reader-eyebrow article-publication-status"><span aria-hidden="true"/> 已发布 · 正式资料</p>
    <PageTags tags={article.tags}/>
-   <h1 id="reader-page-title" tabIndex={-1}>{article.title}</h1><p className="reader-version">正式版本 {article.revision}</p>
+   <h1 id="reader-page-title" tabIndex={-1}>{article.title}</h1><p className="reader-version">{article.publicationNumber?`正式版本 ${article.publicationNumber}`:'已发布'}</p>
  </header>;
 }
 function BreadcrumbSeparator(){return <span className="breadcrumb-separator" aria-hidden="true">›</span>;}
