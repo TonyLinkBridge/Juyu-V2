@@ -6,7 +6,9 @@ import {Pool} from 'pg';
 import {migrate} from '../src/server/database/migrate.ts';
 const env=parseEnv(await readFile('.env.local','utf8'));
 const ref='zscxaqjqjoouiolkoxbi';
-assert.equal(new URL(env.NEXT_PUBLIC_SUPABASE_URL).hostname,ref+'.supabase.co');
+const origin=env.NEXT_PUBLIC_SUPABASE_URL;
+assert.ok(origin,'MISSING_CONFIGURATION');
+assert.equal(new URL(origin).hostname,ref+'.supabase.co');
 assert.ok(env.JUYU_DATABASE_ADMIN_PASSWORD&&env.JUYU_DATABASE_CA_CERT,'MISSING_CONFIGURATION');
 const pool=new Pool({host:'aws-0-ap-southeast-1.pooler.supabase.com',port:5432,user:'postgres.'+ref,password:env.JUYU_DATABASE_ADMIN_PASSWORD,database:'postgres',ssl:{rejectUnauthorized:true,ca:env.JUYU_DATABASE_CA_CERT},max:1,connectionTimeoutMillis:10000,statement_timeout:20000});
 try{
