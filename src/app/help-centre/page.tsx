@@ -8,7 +8,6 @@ import {ReaderMenu} from '../../components/navigation-settings/ReaderMenu';
 import {readerAnnouncement} from '../../config/reader-presentation';
 import {SearchInput} from '../../components/gitbook/Search/SearchInput';
 import {SearchResults} from '../../components/gitbook/Search/SearchResults';
-import {TableOfContents} from '../../components/gitbook/TableOfContents/TableOfContents';
 import {parseSearchQuery,searchTitles,searchHref} from '../../reader/search';
 import type {Publication} from '../../reader/body';
 import {ReaderNavigation} from '../../components/reader-navigation';
@@ -65,19 +64,14 @@ export default async function HelpCentre({searchParams,library=false}:{library?:
     if(params.q!==undefined){
       let search=searchTitles([],params.q,params.page);
       try {({pages,search}=await (await applicationAuthorization()).search(params.q,params.page));}catch{failed=true;}
-      return <EntryShell navigation={<ReaderMenu currentHref="/help-centre"/>} search={input} announcement={failed ? undefined : readerAnnouncement}><div className="reader-layout">
-        <TableOfContents pages={failed?[]:pages} currentPagePath="" failed={failed}/>
-        <SearchAnalytics search={search} enabled={!failed&&features.analytics}><SearchResults search={search} failed={failed} retryHref={searchHref(query,search.page)}>
-          {enrollment.initialAdmin&&<p className="connection-notice">请再安排另一位 Admin，才能进行内容二审。</p>}
-          <div className="reader-actions">{!failed&&admin.status==='admin'&&<Link className="secondary-link" href="/admin">进入管理后台</Link>}<EmployeeSignOut/></div>
-        </SearchResults></SearchAnalytics>
+      return <EntryShell navigation={<ReaderMenu currentHref="/help-centre"/>} search={input} announcement={failed ? undefined : readerAnnouncement}><div className="reader-search-layout">
+        <SearchAnalytics search={search} enabled={!failed&&features.analytics}><SearchResults search={search} failed={failed} retryHref={searchHref(query,search.page)}/></SearchAnalytics>
       </div></EntryShell>;
     }
     let favorite:import('../../favorites/model').FavoriteState|undefined;
-    let destination:string|undefined;try {({pages,article,destination,favorite}=await (await applicationAuthorization()).reader(requested));} catch {failed=true;}
+    let section:'ops'|undefined;let destination:string|undefined;try {({pages,article,destination,favorite,section}=await (await applicationAuthorization()).reader(requested));} catch {failed=true;}
     if(destination)redirect(destination);
-    return <EntryShell account search={input} announcement={failed ? undefined : readerAnnouncement}><ReaderNavigation features={features} pages={pages} requested={requested} failed={failed} article={article} articleActions={!failed&&article?<>{features.favorites&&<FavoriteButton documentId={article.id} revision={article.revision} initial={favorite}/>}{features.recent&&<RecentRecorder documentId={article.id} revision={article.revision}/>}{features.analytics&&<ArticleAnalytics documentId={article.id} revision={article.revision}/>}</>:undefined}
-      initialAdmin={false}/></EntryShell>;
+    return <EntryShell account search={input} announcement={failed ? undefined : readerAnnouncement}><ReaderNavigation section={section} features={features} pages={pages} requested={requested} failed={failed} article={article} articleActions={!failed&&article?<>{features.favorites&&<FavoriteButton documentId={article.id} revision={article.revision} initial={favorite}/>}{features.recent&&<RecentRecorder documentId={article.id} revision={article.revision}/>}{features.analytics&&<ArticleAnalytics documentId={article.id} revision={article.revision}/>}</>:undefined}/></EntryShell>;
   }
   const opening=enrollment&&enrollment.status!=='ready';
   const denied = access.status === 'denied';
@@ -91,7 +85,6 @@ export default async function HelpCentre({searchParams,library=false}:{library?:
     <div className="entry-icon"><ShieldIcon /></div><p className="card-kicker">TEAM KNOWLEDGE</p>
     <h1>{title}</h1><p className="access-description">{description}</p>
     {opening&&<EnrollmentPanel initial={enrollment!}/>}
-    {enrollment?.status==='ready'&&enrollment.initialAdmin&&<p className="connection-notice">你已成为首次开通的管理员。请再安排另一位 Admin，才能进行内容二审。</p>}
     {!opening && !memberBlocked && admin.status === 'admin' && <Link className="secondary-link" href="/admin">进入管理后台</Link>}
     <EmployeeSignOut />
   </section></main></EntryShell>;

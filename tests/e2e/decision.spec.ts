@@ -23,7 +23,7 @@ test('unknown and wrong acknowledgements lock the action and retry the identical
  const writes:unknown[]=[];await page.route('**/api/admin/review/*/decision',r=>{writes.push(r.request().postDataJSON());return r.fulfill({json:writes.length===1?{...ack('reject','原退回原因'),action:'approve'}:ack('reject','原退回原因')});});await mount(page);await page.getByRole('button',{name:'退回修改',exact:true}).click();await page.getByLabel('退回原因',{exact:true}).fill('原退回原因');await page.getByRole('button',{name:'确认退回',exact:true}).click();await expect(page.getByRole('alert')).toContainText('尚未确认');await expect(page.getByLabel('退回原因',{exact:true})).toHaveValue('原退回原因');await expect(page.getByLabel('退回原因',{exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'取消决定'})).toBeDisabled();await expect(page.getByRole('button',{name:'重新读取二审状态'})).toBeDisabled();await expect(page.getByRole('link',{name:'编辑文章'})).toHaveCount(0);await page.getByRole('button',{name:'重试原决定'}).click();await expect(page.getByRole('status')).toContainText('需要修改');expect(writes).toEqual([{expectedSequence:4,action:'reject',reason:'原退回原因'},{expectedSequence:4,action:'reject',reason:'原退回原因'}]);
 });
 test('CAS rejection preserves input and explicit refresh keeps returned revision reason after edits',async({page})=>{
- await page.route('**/api/admin/review/*/decision',r=>r.request().method()==='POST'?r.fulfill({status:409,json:{error:'CONFLICT'}}):r.fulfill({json:{...decisionFixture,article:{...decisionFixture.article,sequence:6,status:'draft',title:'退回后已修改的内容'},review:{...decisionFixture.review!,status:'rejected',reason:'已记录的退回原因',decidedAt:'2026-09-09T02:00:00Z'},canDecide:false}}));await mount(page);await page.getByRole('button',{name:'退回修改',exact:true}).click();await page.getByLabel('退回原因',{exact:true}).fill('未提交的说明');await page.getByRole('button',{name:'确认退回',exact:true}).click();await expect(page.getByRole('alert')).toContainText('版本已改变');await expect(page.getByLabel('退回原因',{exact:true})).toHaveValue('未提交的说明');await expect(page.getByRole('button',{name:'确认退回',exact:true})).toBeDisabled();await page.getByRole('button',{name:'重新读取二审状态'}).click();await expect(page.getByRole('heading',{name:'退回后已修改的内容'})).toBeVisible();await expect(page.getByRole('region',{name:'二审详情'})).toContainText('版本 2 的退回原因');await expect(page.getByRole('region',{name:'二审详情'})).toContainText('已记录的退回原因');await expect(page.getByRole('button',{name:'批准本次版本',exact:true})).toHaveCount(0);
+ await page.route('**/api/admin/review/*/decision',r=>r.request().method()==='POST'?r.fulfill({status:409,json:{error:'CONFLICT'}}):r.fulfill({json:{...decisionFixture,article:{...decisionFixture.article,sequence:6,status:'draft',title:'退回后已修改的内容'},review:{...decisionFixture.review!,status:'rejected',reason:'已记录的退回原因',decidedAt:'2026-09-09T02:00:00Z'},canDecide:false}}));await mount(page);await page.getByRole('button',{name:'退回修改',exact:true}).click();await page.getByLabel('退回原因',{exact:true}).fill('未提交的说明');await page.getByRole('button',{name:'确认退回',exact:true}).click();await expect(page.getByRole('alert')).toContainText('版本已改变');await expect(page.getByLabel('退回原因',{exact:true})).toHaveValue('未提交的说明');await expect(page.getByRole('button',{name:'确认退回',exact:true})).toBeDisabled();await page.getByRole('button',{name:'重新读取二审状态'}).click();await page.getByRole('button',{name:'确认继续',exact:true}).click();await expect(page.getByRole('heading',{name:'退回后已修改的内容'})).toBeVisible();await expect(page.getByRole('region',{name:'二审详情'})).toContainText('版本 2 的退回原因');await expect(page.getByRole('region',{name:'二审详情'})).toContainText('已记录的退回原因');await expect(page.getByRole('button',{name:'批准本次版本',exact:true})).toHaveCount(0);
 });
 test('refresh blocks decisions while reading and refuses an older snapshot',async({page})=>{
  let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve;});await page.route('**/api/admin/review/*/decision',async r=>{await held;await r.fulfill({json:{...decisionFixture,article:{...decisionFixture.article,sequence:3}}});});await mount(page);await page.getByRole('button',{name:'重新读取二审状态'}).click();await expect(page.getByRole('button',{name:'批准本次版本',exact:true})).toBeDisabled();release();await expect(page.getByRole('alert')).toContainText('读取');await expect(page.getByRole('button',{name:'批准本次版本',exact:true})).toBeDisabled();
@@ -45,3 +45,29 @@ test('uncertain transport result remains locked even when its retry is rejected'
 });
 
 test('Q&A category and ordering are visible when reviewing the saved version',async({page})=>{await mount(page,{...decisionFixture,article:{...decisionFixture.article,kind:'qa',qa:{category:'待核对分类',position:17}}});await page.getByText('资料信息',{exact:true}).click();await expect(page.getByText('待核对分类',{exact:true})).toBeVisible();await expect(page.getByText('17',{exact:true})).toBeVisible();});
+
+test('R18 unfinished rejection is protected from global sidebar and refresh',async({page})=>{
+ await page.route('**/__leave_target',r=>r.fulfill({contentType:'text/html',body:'离开目标 · 本地样例'}));
+ await mount(page);
+ await page.evaluate(()=>{const link=document.createElement('a');link.href='/__leave_target';link.textContent='全局侧栏测试';document.body.prepend(link);});
+ await page.getByRole('button',{name:'退回修改',exact:true}).click();await page.getByRole('textbox',{name:'退回原因'}).fill('请补齐核对步骤');
+ await page.getByRole('link',{name:'全局侧栏测试'}).click();
+ await expect(page.getByRole('dialog')).toBeVisible({timeout:2000});
+ await page.getByRole('dialog').getByRole('button',{name:'取消',exact:true}).click();
+ await expect(page.getByRole('textbox',{name:'退回原因'})).toHaveValue('请补齐核对步骤');
+ await page.getByRole('button',{name:'重新读取二审状态'}).click();
+ await expect(page.getByRole('dialog')).toBeVisible();await page.getByRole('dialog').getByRole('button',{name:'取消',exact:true}).click();
+ await expect(page.getByRole('textbox',{name:'退回原因'})).toHaveValue('请补齐核对步骤');
+ await page.getByRole('link',{name:'全局侧栏测试'}).click();await page.getByRole('dialog').getByRole('button',{name:'确认继续'}).click();await expect(page).toHaveURL(/__leave_target$/);
+});
+
+test('R18 browser back and native unload protect a typed reason while hash links remain usable',async({page},info)=>{
+ await mount(page);await page.evaluate(()=>history.pushState({},'',location.href));
+ await page.getByRole('button',{name:'退回修改',exact:true}).click();await page.getByLabel('退回原因',{exact:true}).fill('保留这段审核意见');
+ await page.evaluate(()=>history.back());await expect(page.getByRole('dialog')).toBeVisible();
+ await page.screenshot({path:`output/verification/R18-leave-${info.project.name}.png`,fullPage:true});
+ await page.getByRole('button',{name:'取消',exact:true}).click();await expect(page.getByLabel('退回原因',{exact:true})).toHaveValue('保留这段审核意见');
+ expect(await page.evaluate(()=>{const event=new Event('beforeunload',{cancelable:true});dispatchEvent(event);return event.defaultPrevented;})).toBe(true);
+ await page.evaluate(()=>{const a=document.createElement('a');a.href='#review-notes';a.textContent='页内位置';document.body.prepend(a);});
+ await page.getByRole('link',{name:'页内位置'}).click();await expect(page).toHaveURL(/#review-notes$/);await expect(page.getByRole('dialog')).toHaveCount(0);
+});

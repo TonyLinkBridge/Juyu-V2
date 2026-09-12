@@ -7,14 +7,12 @@ async function fixture(page:import('@playwright/test').Page,options:{empty?:bool
 test('workspace renders real-count contract and responsive list with safe titles',async({page},info)=>{
  await fixture(page);await expect(page.getByRole('heading',{name:'内容管理',exact:true})).toBeVisible();
  await expect(page.getByRole('status')).toContainText('共 36 篇');
- await page.locator('.tasks-tools-disclosure summary').click();
- await expect(page.getByRole('link',{name:'使用分析',exact:true})).toHaveAttribute('href','/admin/analytics');
- await page.locator('.tasks-tools-disclosure summary').click();
+ await expect(page.getByRole('navigation',{name:'内容模块'}).getByRole('link')).toHaveCount(4);
  await expect(page.getByRole('navigation',{name:'按状态查看'}).getByRole('link')).toHaveCount(6);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  const visible=info.project.name==='mobile'?page.locator('.tasks-mobile-list'):page.locator('.tasks-desktop-board');
  await expect(visible.getByRole('link',{name:'中文标题 <script> 不执行',exact:true})).toBeVisible();
- await expect(visible.getByText('旧正式版 1 仍可阅读').first()).toBeVisible();
+ await expect(visible.getByText(info.project.name==='mobile'?'旧正式版继续可读':'旧正式版 1 仍可阅读').first()).toBeVisible();
  if(info.project.name==='mobile')await expect(page.getByText('手机列表',{exact:true})).toBeVisible();
  else{await page.getByRole('link',{name:'列表',exact:true}).click();await expect(page.locator('.tasks-all-list')).toBeVisible();await page.reload();await expect(page.locator('.tasks-all-list')).toBeVisible();await page.getByRole('link',{name:'看板',exact:true}).click();}
  await page.screenshot({path:`output/verification/workspace-${info.project.name}.png`,fullPage:false});
@@ -29,10 +27,10 @@ test('workspace renders real-count contract and responsive list with safe titles
 });
 test('workspace filters by personal scope, kind and status and resets page via keyboard',async({page})=>{
  await fixture(page);await page.getByRole('link',{name:'下一页',exact:true}).click();await expect(page.getByRole('status')).toContainText('第 2 / 2 页');
- await page.getByLabel('与我有关').selectOption('returned');await page.getByRole('button',{name:'应用筛选'}).focus();await page.keyboard.press('Enter');
- await expect(page.getByRole('status')).toContainText('共 6 篇 · 第 1 / 1 页');await expect(page.getByLabel('与我有关')).toHaveValue('returned');
- await page.reload();await expect(page.getByLabel('与我有关')).toHaveValue('returned');
- await page.getByLabel('与我有关').selectOption('review');await page.getByRole('button',{name:'应用筛选'}).click();await expect(page.getByRole('heading',{name:'没有符合条件的内容'})).toBeVisible();
+ await page.getByRole('link',{name:'退回给我的',exact:true}).focus();await page.keyboard.press('Enter');
+ await expect(page.getByRole('status')).toContainText('共 6 篇 · 第 1 / 1 页');await expect(page.getByRole('link',{name:'退回给我的',exact:true})).toHaveAttribute('aria-current','page');
+ await page.reload();await expect(page.getByRole('link',{name:'退回给我的',exact:true})).toHaveAttribute('aria-current','page');
+ await page.getByRole('link',{name:'待我审核',exact:true}).click();await expect(page.getByRole('heading',{name:'没有符合条件的内容'})).toBeVisible();
  await page.getByRole('link',{name:'清除筛选'}).click();await page.getByLabel('资料类型').selectOption('ops');await page.getByRole('button',{name:'应用筛选'}).click();await expect(page.getByRole('status')).toContainText('共 12 篇');
  await page.getByRole('navigation',{name:'按状态查看'}).getByRole('link',{name:/^草稿\s*6$/}).click();await expect(page.getByRole('status')).toContainText('共 6 篇');
  await page.getByLabel('搜索标题').fill('no-match');await page.getByRole('button',{name:'应用筛选'}).click();await expect(page.getByRole('heading',{name:'没有符合条件的内容'})).toBeVisible();
@@ -46,4 +44,8 @@ test('real workspace endpoint and admin page reject missing or forged identities
  const r=await request.get('/api/admin/workspace?scope=review&role=admin&actorId=a',{headers:{'x-role':'admin','x-user-id':'a'}});expect(r.status()).toBe(503);expect(r.headers()['cache-control']).toBe('private, no-store');expect(await r.text()).not.toContain('items');
  const post=await request.post('/api/admin/workspace',{data:{status:'published'}});expect(post.status()).toBe(405);
  await page.goto('/admin?scope=review');await expect(page.getByRole('heading',{name:'内容管理',exact:true})).toHaveCount(0);
+});
+
+test('R08 Reference workspace exposes the matching title and editor type',async({page})=>{
+ await fixture(page);await page.goto('/admin?kind=reference&view=list');await expect(page.getByRole('heading',{name:'Reference 管理',exact:true})).toBeVisible();await expect(page.getByRole('link',{name:'＋ 新建速查资料',exact:true})).toHaveAttribute('href','/admin/editor?kind=reference');
 });

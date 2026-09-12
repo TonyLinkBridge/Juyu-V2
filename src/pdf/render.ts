@@ -9,14 +9,14 @@ export function escapeHTML(value:string):string{return value.replace(/[&<>"']/g,
 // heading break protection and isolated print-only content; no vendor links.
 export const pdfCSS=`
 @page{size:A4;margin:18mm 16mm 20mm}
-.pdf-paper{color:#222;background:#fff;font-family:Arial,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;font-size:11pt;line-height:1.7;overflow-wrap:anywhere;max-width:210mm;margin:auto;padding:18mm 16mm;box-sizing:border-box;min-width:0}
+.pdf-paper{color:#222;background:#fff;font-family:Arial,"PingFang SC","Microsoft YaHei","Noto Sans SC","Noto Sans CJK SC",sans-serif;font-size:11pt;line-height:1.7;overflow-wrap:anywhere;max-width:210mm;margin:auto;padding:18mm 16mm;box-sizing:border-box;min-width:0}
 .pdf-paper h1{font-size:24pt;line-height:1.3;margin:0 0 8mm}.pdf-paper h2{font-size:17pt}.pdf-paper h3{font-size:14pt}.pdf-paper h4{font-size:12pt}
 .pdf-paper h1,.pdf-paper h2,.pdf-paper h3,.pdf-paper h4{break-inside:avoid;break-after:avoid}.pdf-paper p{white-space:pre-wrap;orphans:3;widows:3;margin:4mm 0}
 .pdf-meta{color:#555;font-size:9pt;border-bottom:1px solid #ccc;padding-bottom:5mm}.pdf-cover{width:100%;height:48mm;object-fit:cover;break-inside:avoid;margin-bottom:6mm}
 .pdf-paper ul{list-style:disc;padding-left:6mm}.pdf-paper ol{list-style:decimal;padding-left:6mm}
 .pdf-paper table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:9pt;margin:5mm 0}.pdf-paper th,.pdf-paper td{border:1px solid #999;padding:2mm;white-space:pre-wrap;vertical-align:top;overflow-wrap:anywhere}.pdf-paper th{background:#eee}.pdf-paper thead{display:table-header-group}.pdf-paper tr{break-inside:avoid}.pdf-paper li{white-space:pre-wrap}.pdf-paper img{max-width:100%}
 .pdf-hint{border:1px solid #999;border-left:4px solid #777;padding:4mm;margin:5mm 0}.pdf-code{border:1px solid #bbb;padding:4mm;margin:5mm 0}.pdf-code pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:9pt;font-family:monospace;tab-size:4}.pdf-tabs{border-left:2px solid #aaa;padding-left:4mm;margin:5mm 0}
-@media print{body{margin:0;background:white}.pdf-controls,.site-header,.site-footer,.skip-link{display:none!important}.pdf-paper{padding:0;max-width:none;box-shadow:none} .pdf-shell{padding:0!important;margin:0!important}}
+@media print{body{margin:0;background:white}.pdf-controls,.reader-chrome,.site-header,.site-footer,.skip-link,.knowledge-sidebar,.feature-announcements,.reader-announcement{display:none!important}.entry-frame,.knowledge-body,.knowledge-content{display:block!important;min-height:0!important;width:auto!important;max-width:none!important;margin:0!important;padding:0!important}.pdf-paper{padding:0;max-width:none;box-shadow:none} .pdf-shell{padding:0!important;margin:0!important}}
 @media screen and (max-width:600px){.pdf-paper{padding:24px 18px}}
 `;
 export function pdfContent(article:Publication,coverSource?:string,images?:Record<string,string>):string {

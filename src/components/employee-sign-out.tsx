@@ -1,4 +1,7 @@
 "use client";
+import {notify} from './feedback/feedback';
+import {clearDeviceRecovery} from '../editor/local-recovery';
+import {requestReviewLeave,resetReviewLeave} from '../review/leave';
 import { useState } from 'react';
 import type { LoginAudience } from '../authentication/login-flow';
 import { ClerkFailed, ClerkLoading, useClerk, useSession } from '@clerk/nextjs';
@@ -12,8 +15,9 @@ export function EmployeeSignOut({ audience = 'employee' }: { audience?: LoginAud
   async function exit() {
     if (!session || pending) return;
     setPending(true); setFailed(false);
-    try { await signOutCurrentSession(options => clerk.signOut(options), session.id, audience); }
-    catch { setFailed(true); setPending(false); }
+    if (!(await requestReviewLeave('signout'))) {setPending(false); return;}
+    try {try{clearDeviceRecovery(localStorage);}catch{notify('本机副本未能清除，请在浏览器设置中清除本站数据。','error');} dispatchEvent(new Event('juyu-clear-recovery')); await signOutCurrentSession(options => clerk.signOut(options), session.id, audience); }
+    catch { resetReviewLeave(); setFailed(true); setPending(false); }
   }
   return <div className="session-exit">
     <ClerkLoading><p role="status">正在确认登录状态…</p></ClerkLoading>

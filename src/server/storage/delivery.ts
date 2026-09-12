@@ -1,3 +1,4 @@
+import {measured,measuredRequest} from '../performance.ts';
 import type { AssetFile, ByteRange, PrivateStorage } from './contract.ts';
 import { validateAsset } from './contract.ts';
 
@@ -16,16 +17,19 @@ function rangeFor(value: string | null, size: number): ByteRange | undefined {
   return { start, end };
 }
 export async function deliverAsset(request: Request, id: string, authorize: (id: string) => Promise<AssetFile | null>, store: PrivateStorage): Promise<Response> {
+  return measuredRequest('asset',()=>deliverAuthorizedAsset(request,id,authorize,store));
+}
+async function deliverAuthorizedAsset(request:Request,id:string,authorize:(id:string)=>Promise<AssetFile|null>,store:PrivateStorage):Promise<Response>{
   let size: number | undefined;
   let upstream: Response | undefined;
   try {
-    const asset = await authorize(id);
+    const asset = await measured('asset.authorize',()=>authorize(id));
     if (!asset) return Response.json({ error: 'NOT_FOUND' }, { status: 404, headers: baseHeaders });
     size = validateAsset(asset);
     if (asset.id !== id) throw new Error('INVALID_ASSET');
     const range = rangeFor(request.headers.get('Range'), size);
     const filename = encodeURIComponent(asset.filename.replace(/[\x00-\x1f\x7f]/g, '')).replace(/['()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
-    upstream = await store.read(asset.object_key, range, request.signal);
+    upstream = await measured('storage.headers',()=>store.read(asset.object_key, range, request.signal));
     const expectedLength = range ? range.end - range.start + 1 : size;
     const contentRange = range ? `bytes ${range.start}-${range.end}/${size}` : null;
     if (upstream.status !== (range ? 206 : 200)
@@ -35,7 +39,7 @@ export async function deliverAsset(request: Request, id: string, authorize: (id:
     }
     // Storage may respond after a takedown or role change. Recheck before releasing bytes.
     request.signal.throwIfAborted();
-    const current = await authorize(id);
+    const current = await measured('asset.recheck',()=>authorize(id));
     if (!current) {
       await upstream.body.cancel();
       return Response.json({ error: 'NOT_FOUND' }, { status: 404, headers: baseHeaders });

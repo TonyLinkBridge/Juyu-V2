@@ -1,3 +1,4 @@
+import {HeaderSearch} from './shell/HeaderSearch';
 import {Suspense} from 'react';
 import {NewAnnouncements} from './announcements/NewAnnouncements';
 import {Footer} from './gitbook/Footer/Footer';
@@ -11,7 +12,7 @@ import {ShellSlot,Brand,AccountMenu} from './shell/AdminFrame';
 export function EntryShell({ children, search, announcement, navigation, account=false }: { children: ReactNode; search?:ReactNode; announcement?:ReaderAnnouncement; navigation?:ReactNode; account?:boolean }) {
   return <ShellSlot navigation={navigation} footer={<Footer/>} chrome={<ReaderChrome><header className={search?"site-header has-search":"site-header"}>
       <Brand/>
-      {search??<span className="internal-label">内部资料库</span>}
+      {search?<HeaderSearch>{search}</HeaderSearch>:<span className="internal-label">内部资料库</span>}
       {(search||account)&&<AccountMenu enabled={clerkConfiguration(process.env)==='configured'}/>}
     </header></ReaderChrome>}>{announcement && announcement.id!=='internal-materials' && <AnnouncementBanner announcement={announcement}/>} {navigation&&<Suspense fallback={null}><NewAnnouncements/></Suspense>}{children}</ShellSlot>;
 }

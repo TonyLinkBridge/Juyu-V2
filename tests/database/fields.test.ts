@@ -73,7 +73,7 @@ test('normal save rechecks definitions after a concurrent settings write commits
  const acquired=new Promise<void>(r=>{locked=r;}),release=new Promise<void>(r=>{unlock=r;});
  const change=db.run(admin,async c=>{const result=await writeFieldDefinition(c,field.id,{...config,expectedVersion:1,name:'改变'});locked();await release;return result;});
  await acquired;const saving=repo.saveEditor(id,{...input,customFields:snapshots},admin).then(value=>({value,error:null}),error=>({value:null,error}));
- try{await waitForLock('SELECT pg_advisory_xact_lock(84620948)%');}finally{unlock();}await change;
+ try{await waitForLock('SELECT pg_advisory_xact_lock_shared(84620948)%');}finally{unlock();}await change;
  assert.match((await saving).error?.message??'unexpected success',/INVALID_INPUT|FIELD_CONFLICT/);assert.equal(await repo.getForManagement(id,admin),null);
 });
 test('configuration SQL rejects malformed data and raw mutations preserve generic settings',async()=>{

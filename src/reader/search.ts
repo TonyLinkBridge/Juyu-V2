@@ -53,3 +53,8 @@ export function searchSnippet(text:string,query:string):string {
  if(end<plain.length&&/[\uDC00-\uDFFF]/.test(plain[end]))end--;
  return (start?'…':'')+plain.slice(start,end)+(end<plain.length?'…':'');
 }
+
+/** Called after server authorization; Q&A opens its independent answer page directly. */
+export function searchResultHref(kind:ContentKind,id:string,articleHref:string):string {
+ return kind==='qa'?`/help-centre/qa?question=${encodeURIComponent(id)}#qa-${encodeURIComponent(id)}`:articleHref;
+}

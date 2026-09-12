@@ -597,3 +597,13 @@ button, input, select { color: inherit; }
 .editor-focused .editor-preview>h2,.entry-frame .gitbook-page-header.gitbook-page-header h1{font-size:var(--document-title);font-weight:700;line-height:1.4;letter-spacing:-.7px}
 @media(max-width:640px){:root{--document-title:29px}}
 .editor-canvas .bn-editor,.gitbook-document.native-document{color:var(--ink)}
+
+/* Reference reuses article inline marks; keep links discoverable in dense tables. */
+.reference-rich-table a{text-decoration:underline;text-underline-offset:2px}
+
+/* Search has the persistent business sidebar; only its result column belongs here. */
+.reader-search-layout { width: min(100% - 64px, 1040px); margin-inline: auto; min-width: 0; }
+.reader-search-layout .search-main { width: 100%; margin-inline: auto; }
+@media (max-width: 700px) {
+ .reader-search-layout { width: calc(100% - 32px); }
+}

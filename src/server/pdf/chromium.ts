@@ -1,3 +1,4 @@
+import {browserLaunchOptions} from '../browser/runtime.ts';
 import {chromium} from 'playwright-core';
 // One job per process; no remote browser service, shared context or cached private output.
 let active=false;
@@ -5,7 +6,7 @@ export async function renderPDF(html:string):Promise<Buffer>{
  if(active)throw new Error('PDF_BUSY');active=true;
  let browser:Awaited<ReturnType<typeof chromium.launch>>|undefined,timer:ReturnType<typeof setTimeout>|undefined;
  try{
-  browser=await chromium.launch({headless:true,timeout:10000,...(process.env.PDF_CHROMIUM_EXECUTABLE?{executablePath:process.env.PDF_CHROMIUM_EXECUTABLE}:{})});
+  browser=await chromium.launch(await browserLaunchOptions());
   timer=setTimeout(()=>{void browser?.close();},25000);
   const context=await browser.newContext({javaScriptEnabled:false,serviceWorkers:'block',offline:true});
   await context.route('**/*',route=>route.abort());

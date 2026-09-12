@@ -51,3 +51,13 @@
 .trash-document-name{font-weight:600;overflow-wrap:anywhere}.trash-dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px}
 .editor-delete-trigger{color:#b3263b!important;border:1px solid #e5bac1!important;background:rgba(180,40,55,.04)!important}
 .editor-delete-trigger:disabled{opacity:.4;cursor:not-allowed}
+
+.juyu-confirm{max-height:calc(100dvh - 32px);overflow:auto}
+
+.editor-outline-help{margin:0 0 16px;color:var(--muted);font-size:13px;line-height:1.7}
+.editor-outline-help summary{cursor:pointer;width:fit-content;padding:6px 0}
+.editor-outline-help>div{margin-top:8px;padding:12px 16px;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.editor-outline-help p{margin:0 0 8px}.editor-outline-help p:last-child{margin-bottom:0}
+.editor-outline-help code{color:var(--ink)}
+.editor-outline-help{margin-inline:54px}
+@media(max-width:760px){.editor-outline-help{margin-inline:24px}}

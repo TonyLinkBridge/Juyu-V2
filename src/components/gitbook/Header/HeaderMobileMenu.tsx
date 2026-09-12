@@ -11,7 +11,7 @@ function positionCurrent(root:HTMLElement|null) {
  const scroller=active?.closest<HTMLElement>('[data-testid="toc-scroll-container"]');
  if(active&&scroller&&scroller.clientHeight>0&&active.getClientRects().length)scroller.scrollTop+=active.getBoundingClientRect().top-scroller.getBoundingClientRect().top-scroller.clientHeight/2+active.offsetHeight/2;
 }
-export function HeaderMobileMenu({children,currentPagePath}:{children:ReactNode;currentPagePath:string}) {
+export function HeaderMobileMenu({children,currentPagePath,title='文章目录菜单'}:{children:ReactNode;currentPagePath:string;title?:string}) {
  const enhanced=useSyncExternalStore(subscribe,dialogSupported,serverSnapshot);
  const id=useId();const titleId=useId();
  const trigger=useRef<HTMLButtonElement>(null);const dialog=useRef<HTMLDialogElement>(null);
@@ -68,7 +68,7 @@ export function HeaderMobileMenu({children,currentPagePath}:{children:ReactNode;
        if(outsideDown.current&&event.target===event.currentTarget&&outside(event)){dialog.current?.close?.();outsideDown.current=false;return;}
        if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey&&!event.defaultPrevented&&(event.target as Element).closest('a[href]'))dialog.current?.close?.();
      }}>
-     <div className="mobile-toc-header"><h2 id={titleId}>文章目录菜单</h2><button ref={closeButton} type="button" aria-label="关闭文章目录" onClick={()=>dialog.current?.close?.()}>×</button></div>
+     <div className="mobile-toc-header"><h2 id={titleId}>{title}</h2><button ref={closeButton} type="button" aria-label="关闭文章目录" onClick={()=>dialog.current?.close?.()}>×</button></div>
      {children}
    </dialog>
  </div>;

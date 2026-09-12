@@ -1,4 +1,6 @@
 'use client';
+import {useReviewLeaveGuard} from './useReviewLeaveGuard';
+import {requestReviewLeave} from '../../review/leave';
 import {ArticleCategories} from '../categories/ArticleCategories';
 import {FieldValues} from '../fields/FieldValues';
 /* eslint-disable @next/next/no-img-element -- cover URLs require the current administrator session. */
@@ -19,7 +21,8 @@ export function PublicationPanel({initial}:{initial:PublicationDetail}){
  const {article,approval,revision}=detail;const locked=Boolean(busy)||uncertain;
  const canQueue=detail.canQueue&&article.status==='approved'&&article.lifecycle==='active'&&approval?.revision===revision;
  const canPublish=detail.canPublish&&article.status==='queued'&&article.lifecycle==='active'&&approval?.revision===revision;
- async function reload(){if(operation.current||uncertain)return;operation.current=true;setBusy('read');setError('');setBlocked(true);
+ useReviewLeaveGuard({dirty:confirm!==null&&!blocked,busy:Boolean(busy),uncertain});
+ async function reload(){if(operation.current||uncertain)return;if(!(await requestReviewLeave('discard'))||operation.current||uncertain)return;operation.current=true;setBusy('read');setError('');setBlocked(true);
   try{const next=await readPublication(article.documentId,minimumSequence.current);setDetail(next);minimumSequence.current=next.article.sequence;setConfirm(null);setBlocked(false);setConfirmedUnread(false);setCoverFailed(false);}catch(e){setError(publicationError(e,true));}finally{operation.current=false;setBusy('');}
  }
  async function change(){if(operation.current||!uncertain&&(blocked||!confirm||!(confirm==='queue'?canQueue:canPublish)))return;

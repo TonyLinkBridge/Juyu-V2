@@ -4,7 +4,7 @@ import {positiveInteger} from '../../feedback/model.ts';
 import {reviewId} from '../../review/model.ts';
 import {parseReaderBody} from '../../reader/body.ts';
 import type {EditorBlock} from '../../editor/document.ts';
-import {tableTextGrid} from '../../editor/table.ts';
+import {nativeReferenceTable} from '../../reference/native.ts';
 import {normalizeBlocks} from '../../media/model.ts';
 import {readReaderSections} from '../ops/repository.ts';
 
@@ -29,7 +29,7 @@ export async function readReferenceDetail(client:PoolClient,id:string):Promise<R
  const parsed=parseReaderBody(publication.body);const tables:ReferenceTableData[]=[];
  if(parsed.editorBlocks){
   const native=(nodes:EditorBlock[])=>{for(const b of nodes){
-   if(b.type==='table'){const grid=tableTextGrid(b.content),n=b.content.headerRows??0;const headers=n?b.content.columnWidths.map((_,i)=>grid.slice(0,n).map(row=>row[i]).filter(Boolean).join(' / ')):b.content.columnWidths.map((_,i)=>`列 ${i+1}`);tables.push({id:b.id,headers,rows:grid.slice(n)});}
+   if(b.type==='table')tables.push(nativeReferenceTable(b));
    else if(b.type==='juyu'){const legacy=normalizeBlocks([JSON.parse(b.props.payload)])[0];if(legacy.type==='table')tables.push({id:b.id,headers:legacy.headers,rows:legacy.rows});}
    native(b.children);
   }};native(parsed.editorBlocks);

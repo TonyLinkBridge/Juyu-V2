@@ -1,4 +1,5 @@
 'use client';
+import {confirmAction} from '../feedback/feedback';
 
 import {useEffect, useRef, useState, type FormEvent} from 'react';
 import {FieldWriteRejected, readFields, saveField} from '../../fields/client';
@@ -44,16 +45,16 @@ export function FieldSettings({initial = [], state = 'ready'}: {initial?:FieldDe
     return ()=>window.removeEventListener('beforeunload',warnBeforeLeaving);
   },[navigationLocked,dirty]);
 
-  function canDiscard() {
-    return !dirty || window.confirm('有尚未保存的字段修改。确定放弃这些修改吗？');
+  async function canDiscard() {
+    return !dirty || await confirmAction('有尚未保存的字段修改。确定放弃这些修改吗？');
   }
-  function closeEditor() {
-    if(lock.current || frozen || !canDiscard())return;
+  async function closeEditor() {
+    if(lock.current || frozen || !await canDiscard())return;
     setDraft(null);setConflict(false);setNotice(null);
   }
 
-  function select(field?:FieldDefinition) {
-    if (lock.current || frozen || (field && draft?.id===field.id) || !canDiscard()) return;
+  async function select(field?:FieldDefinition) {
+    if (lock.current || frozen || (field && draft?.id===field.id) || !await canDiscard()) return;
     setDraft(field ? fromDefinition(field) : {id:crypto.randomUUID(),expectedVersion:null,name:'',type:'text',required:false,optionsText:'',enabled:true});
     setConflict(false);setNotice(null);
   }

@@ -5,6 +5,8 @@ import {renderPDF} from '../../../../../server/pdf/chromium';
 import {SupabasePrivateStorage} from '../../../../../server/storage/supabase';
 export const dynamic='force-dynamic';
 export const runtime='nodejs';
+// Allow a cold browser extraction plus rendering and the final authorization recheck.
+export const maxDuration=60;
 export async function GET(request:Request,context:{params:Promise<{id:string}>}){
  try{const service=await applicationAuthorization();return exportPDF(request,(await context.params).id,Number(new URL(request.url).searchParams.get('revision')),{
   snapshot:(id,revision)=>service.pdf(id,revision),asset:id=>service.asset(id),render:renderPDF,

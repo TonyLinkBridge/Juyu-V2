@@ -31,3 +31,10 @@ test('actual menu APIs reject forged role and reader/admin destinations require 
 });
 
 test('disabled article feedback and PDF controls are absent while the same article remains readable',async({page})=>{await mount(page,{requested:id(10),article:{id:id(10),title:'提交审核',revision:1,body:'仍可阅读的正式内容'},features:{search:false,pdfExport:false,favorites:false,recent:false,feedback:false,analytics:false,forms:false}});await expect(page.getByRole('heading',{name:'提交审核',exact:true})).toBeVisible();await expect(page.getByRole('link',{name:'PDF 阅读／导出'})).toHaveCount(0);await expect(page.locator('.reader-feedback')).toHaveCount(0);await expect(page.getByText('仍可阅读的正式内容')).toBeVisible();});
+
+test('R06 OPS reading uses its own tree and OPS breadcrumb',async({page},info)=>{
+ await mount(page,{section:'ops',requested:id(10),article:{id:id(10),title:'提交审核',revision:1,body:'运营流程正文'},quickLinks:undefined});
+ await expect(page.getByRole('heading',{name:'提交审核',exact:true})).toBeVisible();await expect(page.getByRole('navigation',{name:'面包屑'}).getByRole('link',{name:'OPS Internal'})).toHaveAttribute('href','/help-centre/ops');
+ if(info.project.name==='mobile')await page.getByRole('button',{name:/文章目录/}).click();
+ await expect(page.getByRole('heading',{name:'OPS Internal · 文章目录'})).toBeVisible();await expect(page.locator('nav[data-gb-table-of-contents]:visible')).toHaveCount(1);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});

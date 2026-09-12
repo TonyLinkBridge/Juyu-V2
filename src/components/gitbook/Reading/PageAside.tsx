@@ -14,6 +14,6 @@ export function PageAside({sections,article,articleActions,features}:{sections:D
     {articleActions}
     {features?.pdfExport!==false&&<a className="reader-pdf-link" href={`/help-centre/pdf?article=${encodeURIComponent(article.id)}&revision=${article.revision}`}><FilePdf size={20} aria-hidden="true"/> PDF 阅读／导出</a>}
    </div>}
-   {features?.feedback!==false&&<PageFeedbackForm key={`${article.id}:${article.revision}`} documentId={article.id} revision={article.revision}/>}
+   {features?.feedback!==false&&<PageFeedbackForm key={`${article.id}:${article.revision}:${article.feedback?.memberId??'current'}`} documentId={article.id} revision={article.revision} initial={article.feedback?.value}/>}
  </aside>;
 }

@@ -1,3 +1,4 @@
+import {browserLaunchOptions} from '../browser/runtime.ts';
 import {chromium} from 'playwright-core';
 import {createRequire} from 'node:module';
 import {dirname,join} from 'node:path';
@@ -10,7 +11,7 @@ export async function diagramSVG(source:string):Promise<string>{
  validateDiagram(source);await acquire();
  let browser:Awaited<ReturnType<typeof chromium.launch>>|undefined,timer:ReturnType<typeof setTimeout>|undefined;
  try{
-  browser=await chromium.launch({headless:true,timeout:8000,...(process.env.PDF_CHROMIUM_EXECUTABLE?{executablePath:process.env.PDF_CHROMIUM_EXECUTABLE}:{})});timer=setTimeout(()=>{void browser?.close();},10000);
+  browser=await chromium.launch(await browserLaunchOptions());timer=setTimeout(()=>{void browser?.close();},10000);
   const context=await browser.newContext({offline:true,serviceWorkers:'block'});await context.route('**/*',route=>route.abort());const page=await context.newPage();await page.setContent('<!doctype html><html><head><meta charset="utf-8"></head><body></body></html>');
   await page.addScriptTag({path:join(dirname(require.resolve('mermaid/package.json')),'dist/mermaid.min.js')});
   const svg=await page.evaluate(async text=>{

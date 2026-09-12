@@ -2,8 +2,8 @@ import {test,expect} from '@playwright/test';
 import {navigationBrowserBundle} from '../helpers/navigation-browser';
 let bundle:Awaited<ReturnType<typeof navigationBrowserBundle>>;
 test.beforeAll(async()=>{bundle=await navigationBrowserBundle();});
-async function fixture(page:import('@playwright/test').Page,options:{putError?:number;getError?:boolean;delay?:()=>Promise<void>}={}){
- let saved:{helpful:boolean;comment:string|null;version:number;updatedAt:string}|null=null;const bodies:unknown[]=[];
+async function fixture(page:import('@playwright/test').Page,options:{putError?:number;getError?:boolean;delay?:()=>Promise<void>;initial?:{helpful:boolean;comment:string|null;version:number;updatedAt:string}|null}={}){
+ let saved:{helpful:boolean;comment:string|null;version:number;updatedAt:string}|null=options.initial??null;const bodies:unknown[]=[];
  await page.route('**/api/articles/feedback-page/feedback?**',async route=>{
   if(route.request().method()==='GET')return route.fulfill({status:options.getError?503:200,json:options.getError?{error:'SERVICE_UNAVAILABLE'}:{feedback:saved}});
   const input=route.request().postDataJSON();bodies.push(input);await options.delay?.();
@@ -11,7 +11,7 @@ async function fixture(page:import('@playwright/test').Page,options:{putError?:n
   saved={helpful:input.helpful,comment:input.comment||null,version:(saved?.version??0)+1,updatedAt:'2026-09-08T10:00:00.000Z'};return route.fulfill({json:{feedback:saved}});
  });
  await page.route(url=>url.pathname==='/help-centre',route=>{
- const data=JSON.stringify({pages:[{type:'document',id:'feedback-page',title:'文章反馈 · 本地示例',href:'/help-centre?article=feedback-page'}],requested:'feedback-page',article:{id:'feedback-page',title:'文章反馈 · 本地示例',revision:1,body:'这是一篇用于反馈交互验收的本地示例文章。'},announcement:{id:'feedback',revision:'1',message:'本地验收 · 示例内容'}});
+ const data=JSON.stringify({pages:[{type:'document',id:'feedback-page',title:'文章反馈 · 本地示例',href:'/help-centre?article=feedback-page'}],requested:'feedback-page',article:{id:'feedback-page',title:'文章反馈 · 本地示例',revision:1,body:'这是一篇用于反馈交互验收的本地示例文章。',...(Object.hasOwn(options,'initial')?{feedback:{memberId:'member-local',value:options.initial}}:{})},announcement:{id:'feedback',revision:'1',message:'本地验收 · 示例内容'}});
  return route.fulfill({contentType:'text/html',body:`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${bundle.css}</style></head><body><div id="presentation"></div><script id="data" type="application/json">${data}</script><script>${bundle.script}</script></body></html>`});
  });return bodies;
 }
@@ -57,4 +57,11 @@ test('admin feedback displays versioned counts, safe comments and pagination in 
 test('empty admin feedback shows a truthful empty state',async({page})=>{
  await dashboardFixture(page,{overview:{items:[],total:0,page:1,pages:1}});
  await expect(page.getByRole('heading',{name:'暂时没有反馈'})).toBeVisible();await expect(page.getByRole('navigation',{name:'反馈分页'})).toHaveCount(0);
+});
+
+test('R14 supplied feedback including confirmed empty state avoids the initial GET and saves with its version',async({page})=>{
+ let reads=0;page.on('request',r=>{if(r.url().includes('/feedback?')&&r.method()==='GET')reads++;});
+ const bodies=await fixture(page,{initial:{helpful:false,comment:'此前的意见',version:4,updatedAt:'2026-09-08T10:00:00.000Z'}});await page.goto('/help-centre?article=feedback-page');
+ await expect(page.getByRole('textbox',{name:'补充说明（选填）'})).toHaveValue('此前的意见');await page.getByRole('textbox',{name:'补充说明（选填）'}).fill('新的意见');await page.getByRole('button',{name:'更新反馈',exact:true}).click();await expect(page.getByText('反馈已保存，谢谢。你可以继续修改。')).toBeVisible();expect((bodies[0] as {expectedVersion:number}).expectedVersion).toBe(4);expect(reads).toBe(0);
+ await page.unrouteAll();await fixture(page,{initial:null});await page.goto('/help-centre?article=feedback-page');await expect(page.getByRole('button',{name:'有帮助',exact:true})).toBeEnabled();await expect(page.getByRole('textbox',{name:'补充说明（选填）'})).toHaveCount(0);expect(reads).toBe(0);
 });

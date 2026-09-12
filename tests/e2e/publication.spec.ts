@@ -20,3 +20,13 @@ test('history explains its bounded scope and missing files produce a recoverable
 test('real unconfigured publication endpoints cannot be opened using forged administrator headers',async({page,request})=>{for(const method of ['get','post'] as const){const r=await request[method]('/api/admin/review/00000000-0000-4000-8000-000000000037/publication',{headers:{'x-role':'admin','x-user-id':'admin-a'},...(method==='post'?{data:{action:'publish',expectedSequence:6}}:{})});expect(r.status()).toBe(503);expect(r.headers()['cache-control']).toBe('private, no-store');}await page.goto('/admin/review/publish?article=00000000-0000-4000-8000-000000000037');await expect(page.getByRole('region',{name:'文章发布管理'})).toHaveCount(0);});
 
 test('Q&A category and ordering are visible when reviewing the saved version',async({page})=>{await mount(page,{...fixture,article:{...fixture.article,kind:'qa',qa:{category:'待核对分类',position:17}}});await expect(page.getByText('待核对分类',{exact:true})).toBeVisible();await expect(page.getByText('17',{exact:true})).toBeVisible();});
+
+test('R18 global navigation stays blocked through uncertain publication and clears after acknowledgement',async({page})=>{
+ let calls=0;await page.route('**/api/admin/review/*/publication',r=>r.fulfill({json:r.request().method()==='GET'?changed('publish'):++calls===1?{...ack('publish'),publishedRevision:1}:ack('publish')}));
+ await page.route('**/__leave_target',r=>r.fulfill({body:'left safely'}));await mount(page,changed('queue'));
+ await page.evaluate(()=>{const a=document.createElement('a');a.href='/__leave_target';a.textContent='全局侧栏测试';document.body.prepend(a);});
+ await page.getByRole('button',{name:'正式发布此版本',exact:true}).click();await page.getByRole('button',{name:'确认正式发布',exact:true}).click();
+ await page.getByRole('link',{name:'全局侧栏测试'}).click();await expect(page).toHaveURL(/__publication_fixture/);await expect(page.getByRole('dialog')).toHaveCount(0);
+ await page.getByRole('button',{name:'重试原操作'}).click();await expect(page.getByRole('status')).toContainText('已正式发布');
+ await page.getByRole('link',{name:'全局侧栏测试'}).click();await expect(page).toHaveURL(/__leave_target/);expect(calls).toBe(2);
+});

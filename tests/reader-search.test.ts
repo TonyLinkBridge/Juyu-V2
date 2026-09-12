@@ -30,3 +30,9 @@ test('bounded pages preserve total and make invalid/out of range pages recoverab
  assert.equal(searchTitles(items,'域名','1e9').status,'invalid');
  const url=new URL(searchHref('域名 & # /',2),'http://local');assert.equal(url.searchParams.get('q'),'域名 & # /');assert.equal(url.searchParams.get('page'),'2');
 });
+
+ test('Q&A search links bypass the article redirect and encode the authorized id',async()=>{
+ const {searchResultHref}=await import('../src/reader/search.ts');
+ assert.equal(searchResultHref('qa','q & 1','/help-centre?article=old'),'/help-centre/qa?question=q%20%26%201#qa-q%20%26%201');
+ assert.equal(searchResultHref('article','one','/help-centre?article=one'),'/help-centre?article=one');
+ });

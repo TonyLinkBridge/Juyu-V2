@@ -1,4 +1,5 @@
 'use client';
+import {confirmAction} from '../feedback/feedback';
 
 import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {FormWriteRejected,readFormSettings,saveForm} from '../../forms/settings-client';
@@ -44,24 +45,25 @@ export function FormSettings({initial=[],definitions=[],state='ready'}:{initial?
   navigationConfirmed.current=false;
   if(!navigationLocked&&!dirty)return;
   function warnBeforeLeaving(event:BeforeUnloadEvent){if(navigationConfirmed.current)return;event.preventDefault();event.returnValue='';}
-  function guardNavigation(event:MouseEvent){
+  async function guardNavigation(event:MouseEvent){
    const target=event.target instanceof Element?event.target.closest('a[href]'):null;
    if(!target||event.defaultPrevented||target.getAttribute('target')==='_blank'||event.ctrlKey||event.metaKey||event.shiftKey||target.hasAttribute('download'))return;
    const destination=new URL(target.getAttribute('href')!,window.location.href);
    if(destination.origin===window.location.origin&&destination.pathname===window.location.pathname&&destination.search===window.location.search&&destination.hash)return;
-   if(navigationLocked||!window.confirm('有尚未保存的表单修改。确定放弃这些修改并离开吗？')){event.preventDefault();event.stopPropagation();}
-   else navigationConfirmed.current=true;
+   event.preventDefault();event.stopPropagation();
+   if(navigationLocked||!await confirmAction('有尚未保存的表单修改。确定放弃这些修改并离开吗？')){event.preventDefault();event.stopPropagation();}
+   else {navigationConfirmed.current=true;window.location.assign(destination.href);}
   }
   window.addEventListener('beforeunload',warnBeforeLeaving);document.addEventListener('click',guardNavigation,true);
   return ()=>{window.removeEventListener('beforeunload',warnBeforeLeaving);document.removeEventListener('click',guardNavigation,true);};
  },[navigationLocked,dirty]);
 
- function canDiscard(){return !dirty||window.confirm('有尚未保存的表单修改。确定放弃这些修改吗？');}
- function select(form?:FormDefinition){
-  if(lock.current||frozen||(form&&draft?.id===form.id)||!canDiscard())return;
+ async function canDiscard(){return !dirty||await confirmAction('有尚未保存的表单修改。确定放弃这些修改吗？');}
+ async function select(form?:FormDefinition){
+  if(lock.current||frozen||(form&&draft?.id===form.id)||!await canDiscard())return;
   setDraft(form?fromDefinition(form):emptyDraft(crypto.randomUUID()));setSelectedField('');setConflict(false);setNotice(null);
  }
- function closeEditor(){if(lock.current||frozen||!canDiscard())return;setDraft(null);setSelectedField('');setConflict(false);setNotice(null);}
+ async function closeEditor(){if(lock.current||frozen||!await canDiscard())return;setDraft(null);setSelectedField('');setConflict(false);setNotice(null);}
  function patch(value:Partial<Draft>){if(!lock.current&&!frozen)setDraft(current=>current?{...current,...value}:current);}
  function changeField(index:number,value:Partial<Pick<FormField,'required'|'width'>>){if(draft)patch({fields:draft.fields.map((item,i)=>i===index?{...item,...value}:item)});}
  function moveField(index:number,direction:-1|1){
@@ -85,7 +87,7 @@ export function FormSettings({initial=[],definitions=[],state='ready'}:{initial?
   if(!operation){
    try{operation={id:draft.id,write:parseFormWrite({expectedVersion:draft.expectedVersion,title:draft.title,description:draft.description,audience:draft.audience,enabled:draft.enabled,fields:draft.fields.map(item=>({id:item.field.id,version:item.field.version,required:item.required,width:item.width}))}),fields:draft.fields.map(item=>({...item.field,options:[...item.field.options]}))};}
    catch{setNotice({kind:'error',text:'请填写 1–120 字的标题，说明不超过 2000 字，并选择 1–20 个不重复的字段。'});return;}
-   if(policyChanged&&!window.confirm(`保存后，“${draft.title}”的设置会立即生效：${draft.enabled?`向${audiences[draft.audience]}开放填写`:"停止开放填写"}。表单不经过文章审核，已有提交记录会保留。确定保存吗？`))return;
+   if(policyChanged&&!await confirmAction(`保存后，“${draft.title}”的设置会立即生效：${draft.enabled?`向${audiences[draft.audience]}开放填写`:"停止开放填写"}。表单不经过文章审核，已有提交记录会保留。确定保存吗？`))return;
   }
   lock.current=true;setBusy(true);setPending(operation);setNotice(null);
   try{
@@ -106,7 +108,7 @@ export function FormSettings({initial=[],definitions=[],state='ready'}:{initial?
  }
  async function reload(){
   if(lock.current)return;
-  if((pending||dirty)&&!window.confirm(pending?'原提交可能已经保存。载入将用服务器当前表单和字段设置替换本页输入，不会撤销此前的保存。确定载入吗？':'载入将放弃当前输入，并使用服务器最新表单和字段设置。确定载入吗？'))return;
+  if((pending||dirty)&&!await confirmAction(pending?'原提交可能已经保存。载入将用服务器当前表单和字段设置替换本页输入，不会撤销此前的保存。确定载入吗？':'载入将放弃当前输入，并使用服务器最新表单和字段设置。确定载入吗？'))return;
   lock.current=true;setBusy(true);setNotice(null);
   try{
    const latest=await readFormSettings();setForms(latest.forms);setFields(latest.definitions);setAvailability('ready');

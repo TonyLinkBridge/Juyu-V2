@@ -1,0 +1,21 @@
+'use client';
+import {useEffect,useRef,useState} from 'react';
+import {confirmAction} from '../feedback/feedback';
+import {pruneDeviceRecovery,clearDeviceRecovery,enableRecovery,readLocalCopy,recoveryEnabled,removeLocalCopy,writeLocalCopy,type LocalCopy} from '../../editor/local-recovery';
+export function LocalRecovery({owner,id,sequence,text,dirty,blocked,onRestore}:{owner:string;id:string;sequence:number|null;text:string;dirty:boolean;blocked:boolean;onRestore:(text:string)=>void}){
+ const [enabled,setEnabled]=useState(false),[candidate,setCandidate]=useState<LocalCopy|null>(null),[message,setMessage]=useState(''),[checking,setChecking]=useState(false);
+ const [ready,setReady]=useState(false);const lastWritten=useRef<string|null>(null);
+ useEffect(()=>{let cancelled=false;queueMicrotask(()=>{if(cancelled)return;try{pruneDeviceRecovery(localStorage);setEnabled(recoveryEnabled(localStorage,owner));setCandidate(readLocalCopy(localStorage,owner,id));}catch{setMessage('浏览器无法使用本机恢复，请保留页面并复制输入。');}setReady(true);});return()=>{cancelled=true;};},[owner,id]);
+ useEffect(()=>{const reset=()=>{setEnabled(false);setCandidate(null);};const storage=(e:StorageEvent)=>{if(e.key===null||e.key?.startsWith('juyu:editor-recovery:')){try{if(!recoveryEnabled(localStorage,owner))reset();}catch{reset();}}};addEventListener('storage',storage);addEventListener('juyu-clear-recovery',reset);return()=>{removeEventListener('storage',storage);removeEventListener('juyu-clear-recovery',reset);};},[owner]);
+ useEffect(()=>{if(!ready||!enabled||candidate||!owner)return;let cancelled=false;queueMicrotask(()=>{if(cancelled)return;try{if(!recoveryEnabled(localStorage,owner))return;if(dirty){const other=readLocalCopy(localStorage,owner,id);if(other&&other.text!==lastWritten.current&&other.text!==text){setCandidate(other);setMessage('另一页面有本机副本，已停止覆盖。请先核对两份输入。');return;}writeLocalCopy(localStorage,{owner,id,sequence,text,at:Date.now()});lastWritten.current=text;setMessage('未保存输入已备份到本机。');}else if(!blocked){removeLocalCopy(localStorage,owner,id);setMessage('服务器已保存，无需本机副本。');}}catch{setMessage('本机备份失败，可能空间不足；请保留页面并复制输入。');}});return()=>{cancelled=true;};},[ready,enabled,candidate,owner,id,sequence,text,dirty,blocked]);
+ if(!owner)return null;
+ return <details className="editor-input-backup" open={candidate?true:undefined}><summary>本机草稿恢复{enabled?' · 已开启':''}</summary><p>仅在自己的设备开启。副本未加密，24 小时内可恢复，过期后再次打开编辑器时清理；退出时清除。恢复不会直接发布。</p>
+ {!enabled?<button type="button" onClick={()=>{try{enableRecovery(localStorage,owner);setEnabled(true);}catch{setMessage('无法开启本机恢复，请复制输入保管。');}}}>在此设备开启恢复</button>:<button type="button" onClick={async()=>{if(!await confirmAction('关闭并删除此浏览器的本机恢复副本？服务器草稿不受影响。'))return;try{clearDeviceRecovery(localStorage);dispatchEvent(new Event('juyu-clear-recovery'));setMessage('本机副本已清除。');}catch{setMessage('本机副本未能清除，请在浏览器设置清除网站数据。');}}}>关闭并清除本机副本</button>}
+ {candidate&&<section aria-label="可恢复输入"><p>发现 {new Date(candidate.at).toLocaleString('zh-CN')} 的未保存输入。恢复前会核对服务器版本。</p><details><summary>查看副本以便手动复制</summary><textarea aria-label="本机恢复副本" readOnly value={candidate.text} rows={6}/></details><button type="button" disabled={blocked||checking} onClick={async()=>{if(!await confirmAction('用本机副本替换当前编辑区输入？恢复后仍需检查并保存。','恢复草稿？'))return;setChecking(true);try{
+ const response=await fetch(`/api/admin/editor/${encodeURIComponent(id)}`,{cache:'no-store'});
+ if(sequence===null){if(response.status!==404)throw Error('SERVER_CHANGED');}
+ else{if(!response.ok)throw Error('SERVER_CHANGED');const latest=await response.json();if(latest.documentId!==id||latest.sequence!==sequence||candidate.sequence!==sequence||latest.lifecycle!=='active'||latest.status==='in_review')throw Error('SERVER_CHANGED');}
+ onRestore(candidate.text);lastWritten.current=candidate.text;setCandidate(null);setMessage('已恢复到编辑区，请核对内容。');
+ }catch{setMessage('无法安全恢复：服务器版本或权限可能已变化。副本仍保留，请复制后与最新文章对照。');}finally{setChecking(false);}}}>恢复到编辑区</button><button type="button" disabled={checking} onClick={async()=>{if(await confirmAction('删除这份本机副本？此操作不会删除服务器文章。')){try{removeLocalCopy(localStorage,owner,id);setCandidate(null);}catch{setMessage('副本未能删除。');}}}}>放弃此副本</button></section>}
+ {message&&<p role="status">{message}</p>}</details>;
+}

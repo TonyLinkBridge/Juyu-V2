@@ -309,7 +309,7 @@ test('reader snapshot joins authorized directory with only the current formal bo
  await owner.execute(id,{type:'edit',title:'private future heading',body:'# private future body',audience:'ops'},a,{expectedSequence:original.sequence});
  for(const viewer of [support,a]){
    const snapshot=await new AuthorizationService(db,async()=>viewer).reader(id);
-   assert.deepEqual(snapshot.article,{id,title:'title-reader-snapshot',revision:1,body:'body-reader-snapshot'});
+   assert.deepEqual(snapshot.article,{id,title:'title-reader-snapshot',revision:1,body:'body-reader-snapshot',feedback:{memberId:viewer.id,value:null}});
    assert.doesNotMatch(JSON.stringify(snapshot),/private future/);
  }
  const service=new AuthorizationService(db,async()=>support);
@@ -671,4 +671,38 @@ test('T031 simultaneous duplicate creates are one revision and title/body limits
  const [first,retry]=await Promise.all([service.saveDraft(id,input),service.saveDraft(id,input)]);assert.deepEqual(first,retry);
  for(const invalid of [{title:'x'.repeat(201)},{tags:undefined},{body:'JUYU_BLOCKNOTE_V2\n[]'},{body:'JUYU_BLOCKNOTE_V1\n{'},{kind:'ops',audience:'staff'},{extra:true}])await assert.rejects(service.saveDraft(id,{...input,expectedSequence:0,...invalid}),/INVALID_INPUT/);
  assert.equal((await service.editor(id)).sequence,0);
+});
+
+test('R14 reader feedback belongs to the current member and published revision',async()=>{
+ const id=await published('feedback-snapshot-r14');
+ const staff=new AuthorizationService(db,async()=>support),operations=new AuthorizationService(db,async()=>ops);
+ await staff.saveFeedback(id,{revision:1,helpful:false,comment:'Support private feedback',expectedVersion:0});
+ await operations.saveFeedback(id,{revision:1,helpful:true,comment:'Ops private feedback',expectedVersion:0});
+ assert.equal((await staff.reader(id)).article?.feedback?.value?.comment,'Support private feedback');
+ assert.equal((await operations.reader(id)).article?.feedback?.value?.comment,'Ops private feedback');
+ assert.equal((await new AuthorizationService(db,async()=>a).reader(id)).article?.feedback?.value,null);
+ let doc=(await owner.getForManagement(id,a))!;doc=await owner.execute(id,{type:'edit',title:'New formal',body:'New body',audience:'staff'},a,{expectedSequence:doc.sequence});
+ for(const type of ['submit','approve','queue','publish'] as const)doc=await owner.execute(id,{type},type==='approve'?b:a,{expectedSequence:doc.sequence,reviewer:b});
+ assert.equal((await staff.reader(id)).article?.revision,2);assert.equal((await staff.reader(id)).article?.feedback?.value,null);
+});
+
+
+test('R22 editor reads bounded history, keeps old publication and preserves all versions on save/retry',async()=>{
+ const {encodeEditorBody}=await import('../../src/editor/document.ts');
+ const input=await editorDraft('R22 当前草稿');
+ const id='r22-history';await published(id);
+ // Build genuine immutable history through the existing workflow boundary.
+ let doc=(await owner.getForManagement(id,a))!;
+ for(let i=0;i<35;i++)doc=await owner.execute(id,{type:'edit',title:'R22 '+i,body:encodeEditorBody([{id:'p',type:'paragraph',props:{},content:[{type:'text',text:'历史正文'.repeat(1000),styles:{}}],children:[]}]),audience:'staff' },a,{expectedSequence:doc.sequence});
+ const reads:{sql:string;count:number}[]=[];
+ const measured:import('../../src/server/database/scoped.ts').Transactions={run(viewer,work,readOnly){return db.run(viewer,c=>work(new Proxy(c,{get(target,key){if(key!=='query')return Reflect.get(target,key);return async(...args:unknown[])=>{const result=await Reflect.apply(target.query,target,args);if(typeof args[0]==='string'&&args[0].startsWith('SELECT'))reads.push({sql:args[0],count:result.rows.length});return result;};}})),readOnly);}};
+ const repo=new DocumentRepository(measured);
+ const bounded=()=>{const versions=reads.filter(r=>r.sql.includes('r.body')&&r.sql.includes('FROM juyu.revisions r'));assert.ok(versions.length);assert.ok(versions.every(r=>r.count<=3));const audits=reads.filter(r=>r.sql.includes('FROM juyu.audit_log'));assert.ok(audits.length);assert.ok(audits.every(r=>r.count<=1));reads.length=0;};
+ const current=await repo.getEditor(id,a);assert.equal(current.title,'R22 34');bounded();
+ const save={...input,expectedSequence:current.sequence};const saved=await repo.saveEditor(id,save,a);bounded();
+ const retry=await repo.saveEditor(id,save,a);bounded();assert.equal(retry.sequence,saved.sequence);
+ await assert.rejects(repo.saveEditor(id,{...save,title:'冲突'},a),/CONFLICT/);
+ const full=(await owner.getForManagement(id,a))!;assert.equal(full.revisions.length,37);assert.equal(full.audit.length,41);assert.equal(full.publishedRevisionId,1);assert.equal(full.workflow.revisionId,37);assert.equal(full.revisions[1].title,'R22 0');
+ assert.equal((await new AuthorizationService(db,async()=>support).article(id))?.body,'body-'+id);
+ await assert.rejects(repo.getEditor(id,support),/FORBIDDEN/);
 });

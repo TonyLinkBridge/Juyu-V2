@@ -8,8 +8,8 @@ import {selectTreePage,type NavigationNode} from '../reader/tree';
 import type {ReactNode} from 'react';
 
 /** Pages and publication are one server-authorized snapshot. */
-export function ReaderNavigation({pages,requested,failed=false,actions,articleActions,initialAdmin=false,article=null,features}:{
- features?:FeatureFlags;pages:NavigationNode[];requested?:string|string[];failed?:boolean;actions?:ReactNode;articleActions?:ReactNode;initialAdmin?:boolean;article?:Publication|null;
+export function ReaderNavigation({section,pages,requested,failed=false,actions,articleActions,article=null,features}:{
+ section?:'ops';features?:FeatureFlags;pages:NavigationNode[];requested?:string|string[];failed?:boolean;actions?:ReactNode;articleActions?:ReactNode;article?:Publication|null;
 }) {
  const selected=failed?null:selectTreePage(pages,requested);
  const publication=selected&&article?.id===selected.id&&!failed?article:null;
@@ -17,14 +17,13 @@ export function ReaderNavigation({pages,requested,failed=false,actions,articleAc
  const document=publication?parseReaderBody(publication.body):null;
  const unavailable=!failed&&requested!==undefined&&!publication;
  const accountActions=<>
-   {initialAdmin&&<p className="connection-notice">你已成为首次开通的管理员。请再安排另一位 Admin，才能进行内容二审。</p>}
    {actions&&<div className="reader-actions">{actions}</div>}
  </>;
  return <div className="reader-layout">
-   <TableOfContents pages={failed?[]:pages} currentPagePath={selected?.href??''} failed={failed}/>
+   <TableOfContents section={section} pages={failed?[]:pages} currentPagePath={selected?.href??''} failed={failed}/>
    {publication&&document&&navigation?<div className="reader-content has-outline">
      <PageAside key={`${publication.id}:${publication.revision}`} sections={document.sections} article={publication} articleActions={articleActions} features={features}/>
-     <PageBody article={publication} document={document} navigation={navigation}>{accountActions}</PageBody>
+     <PageBody section={section} article={publication} document={document} navigation={navigation}>{accountActions}</PageBody>
    </div>:<main id="main-content" className="reader-main">
      <p className="reader-eyebrow">员工资料库</p>
      <h1>{failed?'目录暂时无法加载':unavailable?'文章暂不可用':'欢迎使用资料库'}</h1>

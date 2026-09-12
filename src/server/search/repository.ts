@@ -1,6 +1,6 @@
 import {requireFeature} from '../features/repository.ts';
 import type {PoolClient} from 'pg';
-import {parseSearchQuery,searchSnippet,type TitleSearch,type SearchResult} from '../../reader/search.ts';
+import {parseSearchQuery,searchSnippet,searchResultHref,type TitleSearch,type SearchResult} from '../../reader/search.ts';
 import type {NavigationNode} from '../../reader/tree.ts';
 import type {ContentKind} from '../../domain/model.ts';
 
@@ -26,7 +26,7 @@ export async function searchPublications(client:PoolClient,nodes:NavigationNode[
   // A projection/tree inconsistency is an unavailable result, never a leaked item
   // or a fabricated zero count. Both are read in the same authorized snapshot.
   if(!path)throw new Error('SEARCH_UNAVAILABLE');
-  return {id:row.id!,title:row.title,...path,kind:row.kind,revision:row.revision,tags:row.tags,snippet:searchSnippet(row.search_text,parsed.query)};
+  return {id:row.id!,title:row.title,...path,href:searchResultHref(row.kind,row.id!,path.href),kind:row.kind,revision:row.revision,tags:row.tags,snippet:searchSnippet(row.search_text,parsed.query)};
  });
  return {...state,total,pages:Math.ceil(total/20),results};
 }

@@ -1,4 +1,5 @@
 'use client';
+import {confirmAction} from '../feedback/feedback';
 import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {NavigationWriteRejected,readNavigationSettings,saveNavigationSettings} from '../../navigation-settings/client';
 import {navigationPages,parseNavigationWrite,type NavigationConfig,type NavigationEntry,type NavigationWrite,type NavigationPage} from '../../navigation-settings/model';
@@ -38,13 +39,13 @@ export function NavigationSettings({initial,categories:initialCategories=[],stat
  useEffect(()=>{
   navigationConfirmed.current=false;if(!hasRetainedInput&&!locked)return;
   function beforeUnload(event:BeforeUnloadEvent){if(navigationConfirmed.current)return;event.preventDefault();event.returnValue='';}
-  function navigate(event:MouseEvent){
+  async function navigate(event:MouseEvent){
    const anchor=event.target instanceof Element?event.target.closest('a[href]'):null;
    if(!anchor||event.defaultPrevented||event.ctrlKey||event.metaKey||event.shiftKey||anchor.getAttribute('target')==='_blank'||anchor.hasAttribute('download'))return;
    const target=new URL(anchor.getAttribute('href')!,window.location.href);
    if(target.origin===window.location.origin&&target.pathname===window.location.pathname&&target.search===window.location.search&&target.hash)return;
    event.preventDefault();event.stopPropagation();
-   if(locked||!window.confirm('本页有未保存的导航修改或保留的配置备份，离开后会丢失。确定离开吗？'))return;
+   if(locked||!await confirmAction('本页有未保存的导航修改或保留的配置备份，离开后会丢失。确定离开吗？'))return;
    navigationConfirmed.current=true;window.location.assign(target.href);
   }
   window.addEventListener('beforeunload',beforeUnload);document.addEventListener('click',navigate,true);
@@ -88,7 +89,7 @@ export function NavigationSettings({initial,categories:initialCategories=[],stat
  }
  async function reload(){
   if(lock.current)return;
-  if((dirty||pending)&&!window.confirm('将保留当前输入备份，再载入服务器最新导航和分类设置。此操作不会撤销可能已保存的配置。确定继续吗？'))return;
+  if((dirty||pending)&&!await confirmAction('将保留当前输入备份，再载入服务器最新导航和分类设置。此操作不会撤销可能已保存的配置。确定继续吗？'))return;
   const retained=draft?cloneWrite(draft):null;const uncertain=pending?cloneWrite(pending):null;const keep=dirty||pending!==null||conflict;
   lock.current=true;setBusy(true);setNotice(null);
   try{

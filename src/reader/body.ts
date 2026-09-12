@@ -1,8 +1,9 @@
+import type {SavedFeedback} from '../feedback/model.ts';
 import type {FieldSnapshot} from '../fields/model.ts';
 import {decodeEditorBody,inlineText,type EditorBlock} from '../editor/document.ts';
 import {inlineTokens} from './inline.ts';
 import type {ArticlePresentation} from '../domain/presentation.ts';
-export interface Publication extends ArticlePresentation {customFields?:FieldSnapshot[];id:string;title:string;revision:number;body:string}
+export interface Publication extends ArticlePresentation {feedback?:{memberId:string;value:SavedFeedback|null};customFields?:FieldSnapshot[];id:string;title:string;revision:number;body:string}
 export interface DocumentSection {id:string;title:string;depth:1|2|3|4|5|6}
 export type ReaderBlock={type:'table';headers:string[];rows:string[][]}|{type:'heading';id:string;text:string;depth:1|2|3}|{type:'paragraph';text:string}|{type:'list';ordered:boolean;start:number;items:string[]};
 export interface ReaderDocument {blocks:ReaderBlock[];sections:DocumentSection[];editorBlocks?:EditorBlock[]}

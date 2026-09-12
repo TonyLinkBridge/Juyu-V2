@@ -4,15 +4,15 @@
 import {useCallback,useEffect,useId,useRef,useState} from 'react';
 import {ThumbsUp,ThumbsDown} from '@phosphor-icons/react';
 import type {SavedFeedback} from '../../../feedback/model';
-export function PageFeedbackForm({documentId,revision}:{documentId:string;revision:number}){
+export function PageFeedbackForm({documentId,revision,initial}:{documentId:string;revision:number;initial?:SavedFeedback|null}){
  const id=useId();
  const commentRef=useRef<HTMLTextAreaElement>(null);
  const request=useRef<AbortController|null>(null);
- const [saved,setSaved]=useState<SavedFeedback|null>(null);
- const [helpful,setHelpful]=useState<boolean|null>(null);
- const [comment,setComment]=useState('');
- const [loaded,setLoaded]=useState(false);
- const [busy,setBusy]=useState(true);
+ const [saved,setSaved]=useState<SavedFeedback|null>(initial??null);
+ const [helpful,setHelpful]=useState<boolean|null>(initial?.helpful??null);
+ const [comment,setComment]=useState(initial?.comment??'');
+ const [loaded,setLoaded]=useState(initial!==undefined);
+ const [busy,setBusy]=useState(initial===undefined);
  const [error,setError]=useState('');
  const [blocked,setBlocked]=useState(false);
  const [success,setSuccess]=useState(false);
@@ -30,7 +30,8 @@ export function PageFeedbackForm({documentId,revision}:{documentId:string;revisi
    .catch(()=>{if(request.current===controller)failLoad();})
    .finally(()=>clearTimeout(timer));
  },[endpoint,completeLoad,failLoad]);
- useEffect(()=>{load();return()=>{const current=request.current;request.current=null;current?.abort();};},[load]);
+ const hasInitial=initial!==undefined;
+ useEffect(()=>{if(!hasInitial)load();return()=>{const current=request.current;request.current=null;current?.abort();};},[load,hasInitial]);
  async function submit(event:React.FormEvent){
   event.preventDefault();if(busy||blocked||!loaded||helpful===null)return;
   setBusy(true);setError('');setSuccess(false);

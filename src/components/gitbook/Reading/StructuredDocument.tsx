@@ -1,19 +1,11 @@
-import {Fragment,type ReactNode,type CSSProperties} from 'react';
-import {inlineText,isFileBlock,privateAssetId,type EditorBlock,type EditorInline} from '../../../editor/document';
-import {displayColor} from '../../../editor/inline';
+import {Fragment,type ReactNode} from 'react';
+import {inlineText,isFileBlock,privateAssetId,type EditorBlock} from '../../../editor/document';
+import {StructuredInline,structuredStyle as style} from './StructuredInline';
+export {StructuredInline} from './StructuredInline';
 import {mediaAssetUrl} from '../../../history/paths';
 import {CodeBlock} from '../RichBlocks/CodeBlock';
 import {MediaBlocks} from '../Media/MediaBlocks';
 /* eslint-disable @next/next/no-img-element -- private assets require session-aware delivery. */
-const style=(p:{textColor?:string;backgroundColor?:string;textAlignment?:CSSProperties['textAlign']}):CSSProperties=>({color:displayColor(p.textColor),backgroundColor:displayColor(p.backgroundColor,true),textAlign:p.textAlignment});
-export function StructuredInline({content}:{content:EditorInline[]}){
- return content.map((inline,index)=>{
-  if(inline.type==='link')return <a key={index} href={inline.href} rel="noopener noreferrer"><StructuredInline content={inline.content}/></a>;
-  let node:ReactNode=inline.text;
-  if(inline.styles.code)node=<code>{node}</code>;if(inline.styles.bold)node=<strong>{node}</strong>;if(inline.styles.italic)node=<em>{node}</em>;if(inline.styles.underline)node=<u>{node}</u>;if(inline.styles.strike)node=<s>{node}</s>;
-  return <span key={index} style={style(inline.styles)}>{node}</span>;
- });
-}
 export function StructuredDocument({blocks,documentId,revision,admin=false}:{blocks:EditorBlock[];documentId?:string;revision?:number;admin?:boolean}){
  const render=(nodes:EditorBlock[]):ReactNode[]=>{
   const result:ReactNode[]=[];

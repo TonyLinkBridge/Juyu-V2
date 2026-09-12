@@ -31,7 +31,10 @@ async function requireActiveMembers(client: PoolClient, ids: string[], lock = tr
 }
 
 // All calls use the same transaction snapshot (and writers first lock the document).
-async function load(client: PoolClient, id: string): Promise<Document | null> {
+// Editor-only projection: retain current/published/max revision for edit numbering,
+// and the last event for replay detection. Never use it for review/audit decisions.
+// Full history remains immutable in storage and available through history endpoints.
+async function load(client: PoolClient, id: string, scope: 'full' | 'editor' = 'full'): Promise<Document | null> {
   const result = await client.query('SELECT * FROM juyu.documents WHERE id=$1', [id]);
   const row = result.rows[0];
   if (!row) return null;
@@ -39,8 +42,8 @@ async function load(client: PoolClient, id: string): Promise<Document | null> {
     CASE WHEN ra.asset_id IS NULL THEN NULL ELSE json_build_object('assetId',ra.asset_id,'alt',r.cover_alt,'position',r.cover_position) END AS cover,
     r.author_id AS "authorId",r.editor_id AS "editorId",r.created_at AS "createdAt"
     FROM juyu.revisions r LEFT JOIN juyu.revision_assets ra ON ra.document_id=r.document_id AND ra.revision_id=r.revision_id AND ra.usage='cover'
-    WHERE r.document_id=$1 ORDER BY r.revision_id`, [id]);
-  const history = await client.query('SELECT sequence,action,actor_id AS "actorId",revision_id AS "revisionId",at,reviewer_id AS "reviewerId",previous_reviewer_id AS "previousReviewerId",reason FROM juyu.audit_log WHERE document_id=$1 ORDER BY sequence', [id]);
+    WHERE r.document_id=$1 ${scope==='editor'?'AND r.revision_id IN ($2,$3,(SELECT max(revision_id) FROM juyu.revisions WHERE document_id=$1))':''} ORDER BY r.revision_id`, scope==='editor'?[id,row.workflow_revision_id,row.published_revision_id]:[id]);
+  const history = await client.query('SELECT sequence,action,actor_id AS "actorId",revision_id AS "revisionId",at,reviewer_id AS "reviewerId",previous_reviewer_id AS "previousReviewerId",reason FROM juyu.audit_log WHERE document_id=$1 ORDER BY sequence'+(scope==='editor'?' DESC LIMIT 1':''), [id]);
   return {
     id: row.id, kind: row.kind, sequence: row.sequence, lifecycle: row.lifecycle,
     publishedRevisionId: row.published_revision_id,
@@ -51,8 +54,8 @@ async function load(client: PoolClient, id: string): Promise<Document | null> {
 }
 
 async function insertRevision(client: PoolClient, id: string, revision: Revision, previous: Revision | undefined = undefined) {
-  await client.query('SELECT pg_advisory_xact_lock(84620949)');
-  await client.query('SELECT pg_advisory_xact_lock(84620948)');
+  await client.query('SELECT pg_advisory_xact_lock_shared(84620949)');
+  await client.query('SELECT pg_advisory_xact_lock_shared(84620948)');
   const definitions=normalizeFieldDefinitions((await client.query(`SELECT v.config || jsonb_build_object('id',s.id,'version',s.current_version) AS definition FROM juyu.settings s JOIN juyu.setting_versions v ON v.setting_id=s.id AND v.version=s.current_version WHERE s.kind='field' ORDER BY s.id`)).rows.map(r=>r.definition));
   if((definitions.length||(revision.customFields?.length??0))&&!(await client.query('SELECT juyu.is_admin() AND juyu.actor_id()=$1 AND juyu.review_admin_eligible($1) AS ok',[revision.editorId])).rows[0]?.ok)throw new Error('FORBIDDEN');
   revision.customFields=validateFieldSnapshots(definitions,revision.customFields,previous?.customFields);
@@ -125,7 +128,7 @@ export class DocumentRepository {
     requireAdmin(actor);
     return this.database.run(actor,async client=>{
       await requireActiveMembers(client,[actor.id],false);
-      const doc=await load(client,id);if(!doc)throw new Error('NOT_FOUND');
+      const doc=await load(client,id,'editor');if(!doc)throw new Error('NOT_FOUND');
       return editorSnapshot(client,doc);
     },true);
   }
@@ -141,7 +144,7 @@ export class DocumentRepository {
       await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[`editor:${id}`]);
       await client.query('SELECT id FROM juyu.documents WHERE id=$1 FOR UPDATE',[id]);
       await requireActiveMembers(client,[actor.id]);
-      const document=await load(client,id);const now=new Date().toISOString();
+      const document=await load(client,id,'editor');const now=new Date().toISOString();
       if(!document){
         if(input.expectedSequence!==null)throw new Error('NOT_FOUND');
         const created=createDocument({...input,id,blocks},actor,now);

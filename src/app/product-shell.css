@@ -160,3 +160,22 @@
 .entry-frame .gitbook-page-aside .feedback-rating button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--brand);color:var(--brand)}
 
 .article-side-actions .favorite-control>button.secondary-link{justify-content:flex-start;gap:10px}.article-side-actions .favorite-control>button>svg{flex-shrink:0}
+
+/* R05: desktop controls stay in place; mobile exposes search and account only. */
+.header-search{flex:1;min-width:0}.header-search-panel{width:100%}.header-search-toggle,.mobile-account-appearance,.mobile-account-shortcut{display:none}
+@media(max-width:760px){
+ .entry-frame .site-header{position:relative}.header-search{flex:0 0 44px;margin-left:auto}.header-search-toggle{display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink)}
+ .header-search-panel{display:none;position:absolute;top:100%;left:0;right:0;width:auto;padding:12px 15px;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:0 8px 16px #0000000a;z-index:50}.header-search.is-open .header-search-panel{display:block}
+ .entry-frame .site-header.has-search .header-search-panel .gitbook-search-form{width:100%}
+ .account-controls>.theme-toggler-compact,.account-controls>.admin-console-button{display:none}
+ .mobile-account-appearance,.mobile-account-shortcut{display:block;margin-bottom:14px}.mobile-account-shortcut .admin-console-button>span{display:inline}.mobile-account-shortcut .admin-console-button{width:100%;justify-content:center}
+ .account-controls .account-menu summary{min-width:44px;min-height:44px;justify-content:center}.account-chevron{display:none}
+ .app-topbar .app-badge{display:none}.app-topbar .account-controls{margin-left:auto}
+ .account-menu>div{max-height:calc(100dvh - 90px);overflow-y:auto}
+}
+
+/* R07 compact reference selection keeps tables near the top. */
+.reference-selector{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 24px}.reference-selector>a{display:block;max-width:100%;overflow-wrap:anywhere;padding:10px 14px;border:1px solid var(--line);border-radius:8px;color:var(--ink);text-decoration:none;background:var(--panel)}.reference-selector>a[aria-current=page]{border-color:var(--accent);background:var(--hover);font-weight:650}.reference-more{margin:12px 0}.reference-more>summary{cursor:pointer;width:fit-content;color:var(--muted);padding:8px 0}.reference-more .reader-actions{flex-wrap:wrap}
+
+.account-menu .session-exit .secondary-link{width:100%;text-align:left;background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+.account-menu .session-exit .secondary-link:hover:not(:disabled){background:var(--hover)}

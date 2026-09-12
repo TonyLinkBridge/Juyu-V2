@@ -16,6 +16,7 @@ export function confirmAction(message:string,title='确认此操作'):Promise<bo
   const finish=(value:boolean)=>{dialog.close();dialog.remove();active=null;previous?.focus();resolve(value);};
   cancel.onclick=()=>finish(false);accept.onclick=()=>finish(true);
   dialog.oncancel=e=>{e.preventDefault();finish(false);};
+  dialog.onkeydown=e=>{if(e.key!=='Tab')return;if(e.shiftKey&&document.activeElement===cancel){e.preventDefault();accept.focus();}else if(!e.shiftKey&&document.activeElement===accept){e.preventDefault();cancel.focus();}};
   dialog.showModal();
  });return active;
 }

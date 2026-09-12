@@ -1,3 +1,4 @@
+import {measured} from '../performance.ts';
 import {readAnnouncements,writeAnnouncement,recordReceipt as recordAnnouncementReceipt} from '../announcements/repository.ts';
 import {readHistory as readSettingHistory,readHistoryDetail,restoreSetting} from '../setting-history/repository.ts';
 import {readFeatureConfig,writeFeatureConfig,readFeatureFlags,requireFeature} from '../features/repository.ts';
@@ -51,7 +52,7 @@ export class AuthorizationService {
   private authenticate:Authenticate;
   constructor(database:Transactions,authenticate:Authenticate){this.database=database;this.authenticate=authenticate;}
   private async viewer(admin=false) {
-    const viewer=await this.authenticate();
+    const viewer=await measured('identity.verify',()=>this.authenticate());
     if(!viewer || typeof viewer.id!=='string' || !viewer.id.trim() || viewer.companyVerified!==true || !parseRole(viewer.role) || (admin&&!canManage(viewer))) throw new Error('FORBIDDEN: 没有访问权限');
     return viewer;
   }
@@ -154,7 +155,7 @@ export class AuthorizationService {
       return readNavigationTree(client);
     },true);
   }
-  async reader(requested:string|string[]|undefined):Promise<{pages:NavigationNode[];article:Publication|null;favorite?:import('../../favorites/model.ts').FavoriteState;destination?:string}> {
+  async reader(requested:string|string[]|undefined):Promise<{section?:'ops';pages:NavigationNode[];article:Publication|null;favorite?:import('../../favorites/model.ts').FavoriteState;destination?:string}> {
     const viewer=await this.viewer();
     return this.database.run(viewer,async client=>{
       const kinds=await readContentKinds(client);
@@ -166,8 +167,10 @@ export class AuthorizationService {
       const result=await client.query<{document_id:string;title:string;revision_id:number;body:string}>(
         'SELECT document_id,title,revision_id,body FROM juyu.read_publication($1)',[selected.id]);
       const row=result.rows[0];
-      const favorite=row&&(await readFeatureFlags(client)).favorites?await readFavorite(client,row.document_id,row.revision_id):undefined;
-      return {pages,favorite,article:row?{id:row.document_id,title:row.title,revision:row.revision_id,body:row.body,...await readPresentation(client,selected.id)}:null};
+      const flags=await readFeatureFlags(client);
+      const feedback=row&&flags.feedback?{memberId:viewer.id,value:await readFeedback(client,row.document_id,row.revision_id)}:undefined;
+      const favorite=row&&flags.favorites?await readFavorite(client,row.document_id,row.revision_id):undefined;
+      return {pages,favorite,section:kind==='ops'?'ops':undefined,article:row?{id:row.document_id,title:row.title,revision:row.revision_id,body:row.body,feedback,...await readPresentation(client,selected.id)}:null};
     },true);
   }
   async search(query:string|string[]|undefined,page?:string|string[]):Promise<{pages:NavigationNode[];search:TitleSearch}> {

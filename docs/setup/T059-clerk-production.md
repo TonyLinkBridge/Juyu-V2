@@ -106,3 +106,15 @@ npm run check:config -- --clerk-production
 - User completed Slack login manually. Live `/help-centre` loaded authenticated reader navigation, administrator entry and logout control; no published article available.
 - Re-login positive check passed. Continued-session reliability remains observational, not a long-term guarantee.
 - Production PDF success remains pending both a legitimately published article and verification of an executable Chromium runtime. Including Playwright library resources fixes module loading only; it does not install the browser binary.
+
+
+## 2026-09-12 T063-R16 更新（本地完成，未部署）
+
+此前“没有提供 Vercel 可执行 Chromium”的缺口已在本地代码补齐：
+Vercel Linux 自动使用 @sparticuz/chromium 153.0.0，PDF/流程图函数包含浏览器压缩资源及 fonts/NotoSansSC.ttf。
+PDF_CHROMIUM_EXECUTABLE 只用于本机或非 Vercel 环境；Vercel 无需填写本机路径。
+构建新增浏览器与字体追踪检查，导出接口 maxDuration 为 60 秒。
+
+15 项相关规则、10 项实际本地 PDF/流程图、lint 和生产构建通过。
+尚未验证 Vercel Linux 上固定浏览器与 Playwright 1.62.1 的组合、中文显示及下载。
+本节不代表正式 PDF 下载问题已关闭。跟进见 docs/plans/2026-09-12-t063-remediation.md。

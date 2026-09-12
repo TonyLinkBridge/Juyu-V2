@@ -10,7 +10,6 @@ import {opsQuery} from '../../../server/ops/http';
 import type {OpsPage} from '../../../ops/model';
 import {EntryShell} from '../../../components/entry-shell';
 import {OpsCollection} from '../../../components/ops/OpsCollection';
-import {EmployeeSignOut} from '../../../components/employee-sign-out';
 import {FeatureSearch} from '../../../components/features/FeatureSearch';
 export const dynamic='force-dynamic';
 export default async function OpsCollectionPage({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){
@@ -21,6 +20,7 @@ export default async function OpsCollectionPage({searchParams}:{searchParams:Pro
  let data:OpsPage|undefined,state:'ready'|'denied'|'unavailable'='unavailable';
  try{const params=await searchParams,url=new URL('http://local/');for(const [key,value] of Object.entries(params)){if(typeof value!=='string')throw new Error('INVALID_INPUT');url.searchParams.set(key,value);}data=await(await applicationAuthorization()).ops(opsQuery(url));state='ready';}
  catch(error){if(error instanceof Error&&error.message.split(':')[0]==='FORBIDDEN')state='denied';}
- return <EntryShell navigation={<ReaderMenu currentHref="/help-centre/ops"/>} search={<FeatureSearch query=""/>}><main id="main-content" className="editor-main search-main"><OpsCollection data={data} state={state}/><div className="reader-actions"><EmployeeSignOut/></div></main></EntryShell>;
+ if(state==='ready'&&data?.items[0])redirect('/help-centre?article='+encodeURIComponent(data.items[0].id));
+ return <EntryShell account navigation={<ReaderMenu currentHref="/help-centre/ops"/>} search={<FeatureSearch query=""/>}><main id="main-content" className="editor-main search-main"><OpsCollection data={data} state={state}/></main></EntryShell>;
  });
 }

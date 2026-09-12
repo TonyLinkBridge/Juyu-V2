@@ -1,4 +1,6 @@
 'use client';
+import {useReviewLeaveGuard} from './useReviewLeaveGuard';
+import {requestReviewLeave} from '../../review/leave';
 import {useRef,useState} from 'react';
 import type {ControlDetail,ControlInput} from '../../review/control';
 import {ControlRejected,controlError,readControl,sendControl} from '../../review/control-client';
@@ -10,7 +12,8 @@ export function ReviewControl({initial}:{initial:ControlDetail}){
  const [busy,setBusy]=useState<'read'|'more'|'write'|''>('');const [uncertain,setUncertain]=useState(false);const [blocked,setBlocked]=useState(false);const [error,setError]=useState('');const [notice,setNotice]=useState('');const [confirmedUnread,setConfirmedUnread]=useState(false);
  const operation=useRef(false);const pending=useRef<Pending|null>(null);const minimumSequence=useRef(initial.sequence);
  const eligible=detail.canManageReview&&detail.lifecycle==='active'&&detail.status==='in_review'&&Boolean(detail.reviewerId);const locked=Boolean(busy)||uncertain;const chosen=detail.reviewers.find(x=>x.id===target);const canConfirm=action==='withdraw'||Boolean(chosen);
- async function reload(more=false){if(operation.current||uncertain||more&&(!detail.nextCursor||blocked))return;operation.current=true;setBusy(more?'more':'read');setError('');setBlocked(true);
+ useReviewLeaveGuard({dirty:target.length>0||action!==null&&!blocked,busy:Boolean(busy),uncertain});
+ async function reload(more=false){if(operation.current||uncertain||more&&(!detail.nextCursor||blocked))return;if(!more&&!(await requestReviewLeave('discard'))||operation.current||uncertain)return;operation.current=true;setBusy(more?'more':'read');setError('');setBlocked(true);
   try{const next=await readControl(detail.documentId,minimumSequence.current,more?detail.nextCursor!:'');if(more&&(next.sequence!==detail.sequence||next.revision!==detail.revision||next.reviewerId!==detail.reviewerId||next.status!==detail.status||next.lifecycle!==detail.lifecycle))throw new Error('READ_FAILED');
    if(more){const merged=new Map(detail.reviewers.map(x=>[x.id,x]));for(const person of next.reviewers)merged.set(person.id,person);setDetail({...next,reviewers:[...merged.values()]});}else{setDetail(next);setAction(null);setTarget('');setConfirmedUnread(false);}
    minimumSequence.current=next.sequence;setBlocked(false);

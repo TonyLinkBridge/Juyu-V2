@@ -87,7 +87,7 @@ test('pending member changes and enrollment block category access; demotion is r
 test('concurrent disable is rechecked when saving a newly selected category',async()=>{
  const category=await write(randomUUID());let unlock!:()=>void,locked!:()=>void;const acquired=new Promise<void>(r=>{locked=r;}),release=new Promise<void>(r=>{unlock=r;});
  const changing=db.run(admin,async c=>{await writeCategoryDefinition(c,category.id,{...config,expectedVersion:1,enabled:false});locked();await release;});await acquired;
- const id=randomUUID(),saving=repo.saveEditor(id,{...input,categoryIds:[category.id]},admin).then(()=>null,error=>error);try{await waitForLock('SELECT pg_advisory_xact_lock(84620949)%');}finally{unlock();}await changing;assert.match((await saving)?.message??'unexpected success',/INVALID_INPUT/);assert.equal(await repo.getForManagement(id,admin),null);
+ const id=randomUUID(),saving=repo.saveEditor(id,{...input,categoryIds:[category.id]},admin).then(()=>null,error=>error);try{await waitForLock('SELECT pg_advisory_xact_lock_shared(84620949)%');}finally{unlock();}await changing;assert.match((await saving)?.message??'unexpected success',/INVALID_INPUT/);assert.equal(await repo.getForManagement(id,admin),null);
 });
 test('moving a selected child under restrictive parent immediately changes all current readers',async()=>{
  const parent=await write(randomUUID(),{...config,audience:'admin'}),child=await write(randomUUID());const id=randomUUID();await repo.saveEditor(id,{...input,categoryIds:[child.id]},admin);await publish((await repo.getForManagement(id,admin))!);assert.ok(await service(support).article(id));
@@ -101,6 +101,23 @@ test('migration upgrades existing category identities memberships and historical
  for(const {version} of versions){const sql=await readFile(new URL(`../../src/server/database/migrations/${version}.sql`,import.meta.url),'utf8');await old.pool.query(sql);await old.pool.query('INSERT INTO juyu.schema_migrations(version,checksum) VALUES($1,$2)',[version,createHash('sha256').update(sql).digest('hex')]);}
  const category=randomUUID();await old.pool.query("INSERT INTO juyu.members(clerk_user_id,display_name) VALUES('seed','Seed'); INSERT INTO juyu.categories(id,name) VALUES('"+category+"','Existing')");
  const c=await old.pool.connect();try{await c.query('BEGIN');await c.query("INSERT INTO juyu.documents(id,kind,sequence,lifecycle,workflow_revision_id,workflow_state) VALUES('legacy','article',0,'active',1,'draft')");await c.query("INSERT INTO juyu.revisions(document_id,revision_id,title,body,audience,author_id,editor_id,created_at) VALUES('legacy',1,'Legacy','Existing body','staff','seed','seed',now())");await c.query("INSERT INTO juyu.revision_categories VALUES('legacy',1,$1)",[category]);await c.query("INSERT INTO juyu.audit_log(document_id,sequence,action,actor_id,revision_id,at) VALUES('legacy',0,'create','seed',1,now())");await c.query('COMMIT');}finally{c.release();}
- assert.deepEqual(await migrate(old.pool),['0021_categories', '0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements', '0027_native_editor', '0028_qa_search']);assert.deepEqual(await migrate(old.pool),[]);assert.deepEqual((await old.pool.query("SELECT category_ids FROM juyu.revisions WHERE document_id='legacy'")).rows[0].category_ids,[category]);assert.equal((await old.pool.query('SELECT category_id FROM juyu.category_versions')).rows[0].category_id,category);assert.equal((await old.pool.query("SELECT body FROM juyu.revisions WHERE document_id='legacy'")).rows[0].body,'Existing body');
+ assert.deepEqual(await migrate(old.pool),['0021_categories', '0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements', '0027_native_editor', '0028_qa_search', '0029_shared_revision_config_locks']);assert.deepEqual(await migrate(old.pool),[]);assert.deepEqual((await old.pool.query("SELECT category_ids FROM juyu.revisions WHERE document_id='legacy'")).rows[0].category_ids,[category]);assert.equal((await old.pool.query('SELECT category_id FROM juyu.category_versions')).rows[0].category_id,category);assert.equal((await old.pool.query("SELECT body FROM juyu.revisions WHERE document_id='legacy'")).rows[0].body,'Existing body');
  }finally{await old.close();}
+});
+
+
+test('R23 different document saves share config locks while settings writers still wait',async()=>{
+ const category=await write(randomUUID());const first=randomUUID(),second=randomUUID();
+ let unlock!:()=>void,locked!:()=>void;const acquired=new Promise<void>(r=>{locked=r;}),release=new Promise<void>(r=>{unlock=r;});
+ const holding=new DocumentRepository({run(v,work,ro){return db.run(v,async c=>{const result=await work(c);locked();await release;return result;},ro);}});
+ const saving=holding.saveEditor(first,{...input,categoryIds:[category.id]},admin);await acquired;
+ const bounded=new DocumentRepository({run(v,work,ro){return db.run(v,async c=>{await c.query("SET LOCAL statement_timeout='1500ms'");return work(c);},ro);}});
+ try{
+  const saved=await bounded.saveEditor(second,{...input,categoryIds:[category.id]},reviewer);assert.equal(saved.sequence,0);
+  // Configuration changes must still wait for the active save transaction.
+  await assert.rejects(db.run(reviewer,async c=>{await c.query("SET LOCAL statement_timeout='150ms'");return writeCategoryDefinition(c,category.id,{...config,expectedVersion:1,enabled:false});}),/statement timeout/);
+ }finally{unlock();await saving;}
+ await write(category.id,{...config,expectedVersion:1,enabled:false});
+ await assert.rejects(repo.saveEditor(randomUUID(),{...input,categoryIds:[category.id]},admin),/INVALID_INPUT/);
+ assert.equal((await repo.getEditor(first,admin)).sequence,0);assert.equal((await repo.getEditor(second,reviewer)).sequence,0);
 });
