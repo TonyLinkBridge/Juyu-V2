@@ -1,4 +1,5 @@
 'use client';
+import {BookmarkSimple} from '@phosphor-icons/react';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import type {FavoriteState} from '../../favorites/model';
 import {readFavoriteState,setFavoriteState,FavoriteRejected} from '../../favorites/client';
@@ -29,5 +30,5 @@ function FavoriteControl({documentId,revision,initial,reloadOnChange=false,label
   catch(e){if(token!==sequence.value)return;const unknown=wasUncertain||!(e instanceof FavoriteRejected);if(!unknown){pendingRequest.current=null;setPending(null);setSaved(null);}setError(unknown?'收藏结果尚未确认，原操作已保留，请重试。':'文章或权限已变化，操作未执行。请重新读取或刷新文章。');}
   finally{if(token===sequence.value){operation.current=false;setBusy('');}}
  }
- return <section className="favorite-control" aria-label={label}><button className="secondary-link" type="button" aria-pressed={saved??false} disabled={Boolean(busy)||(!pending&&saved===null)} onClick={()=>void change()}>{busy==='write'?'正在保存…':busy==='read'?'正在读取收藏…':pending?(pending.saved?'重试收藏':'重试取消收藏'):saved?'取消收藏':'收藏文章'}</button>{notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}{!busy&&!pending&&error&&<div className="favorite-recovery"><button className="secondary-link" type="button" onClick={reload}>重新读取收藏</button><a href={`/help-centre?article=${encodeURIComponent(documentId)}`}>刷新文章</a></div>}</section>;
+ return <section className="favorite-control" aria-label={label}><button className="secondary-link" type="button" aria-pressed={saved??false} disabled={Boolean(busy)||(!pending&&saved===null)} onClick={()=>void change()}><BookmarkSimple size={20} aria-hidden="true"/>{busy==='write'?'正在保存…':busy==='read'?'正在读取收藏…':pending?(pending.saved?'重试收藏':'重试取消收藏'):saved?'取消收藏':'收藏文章'}</button>{notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}{!busy&&!pending&&error&&<div className="favorite-recovery"><button className="secondary-link" type="button" onClick={reload}>重新读取收藏</button><a href={`/help-centre?article=${encodeURIComponent(documentId)}`}>刷新文章</a></div>}</section>;
 }

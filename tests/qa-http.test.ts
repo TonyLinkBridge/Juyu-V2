@@ -6,3 +6,8 @@ test('Q&A query distinguishes all and unclassified and rejects ambiguous inputs'
 test('Q&A errors never expose backend detail and responses cannot be shared',async()=>{
  for(const [error,status] of [['FORBIDDEN',403],['INVALID_INPUT',400],['secret SQL details',503]] as const){const r=await qaResponse(async()=>{throw new Error(error);});assert.equal(r.status,status);assert.equal(r.headers.get('cache-control'),'private, no-store');assert.equal(r.headers.get('vary'),'Cookie, Authorization');if(status===503)assert.deepEqual(await r.json(),{error:'QA_UNAVAILABLE'});}
 });
+
+test('Q&A keyword accepts Chinese and rejects duplicate or oversized input',()=>{
+ assert.deepEqual(qaQuery(new URL('http://local/?q='+encodeURIComponent(' 转入失败 '))),{page:1,q:'转入失败'});
+ for(const query of ['?q=a&q=b','?q=%00','?q='+encodeURIComponent('字'.repeat(121))])assert.throws(()=>qaQuery(new URL('http://local/'+query)),/INVALID_INPUT/);
+});

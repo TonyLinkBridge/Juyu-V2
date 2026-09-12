@@ -22,9 +22,9 @@ export function ReaderNavigation({pages,requested,failed=false,actions,articleAc
  </>;
  return <div className="reader-layout">
    <TableOfContents pages={failed?[]:pages} currentPagePath={selected?.href??''} failed={failed}/>
-   {publication&&document&&navigation?<div className={document.sections.length?'reader-content has-outline':'reader-content'}>
-     <PageAside key={`${publication.id}:${publication.revision}`} sections={document.sections}/>
-     <PageBody features={features} article={publication} document={document} navigation={navigation} articleActions={articleActions}>{accountActions}</PageBody>
+   {publication&&document&&navigation?<div className="reader-content has-outline">
+     <PageAside key={`${publication.id}:${publication.revision}`} sections={document.sections} article={publication} articleActions={articleActions} features={features}/>
+     <PageBody article={publication} document={document} navigation={navigation}>{accountActions}</PageBody>
    </div>:<main id="main-content" className="reader-main">
      <p className="reader-eyebrow">员工资料库</p>
      <h1>{failed?'目录暂时无法加载':unavailable?'文章暂不可用':'欢迎使用资料库'}</h1>

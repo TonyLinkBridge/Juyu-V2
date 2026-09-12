@@ -77,3 +77,20 @@ Browser checked in an isolated in-memory fixture: category opens only the catego
 User screenshot shows the last-used authentication badge clipped at the social-button top-right. Inspected deployed public Clerk UI 1.32.1 assets: lastAuthenticationStrategyBadge overlay uses negative top/translated positioning; cardBox has overflow:hidden and rounded corners. Our zero card padding removed the original safe space. Both employee/admin use EmployeeLogin.
 
 Fix: shared appearance cardBox overflow visible, card padding-top 16px; social-button badge inset within width, long provider text and errors wrap. No change to session, login redirects or provider actions. Production build and CSS guard passed. Isolated style fixture at widths 360,390,1280 in both themes: badge inside card bounds, no badge/label overlap, no document horizontal overflow, 6/6. Screenshot inspected for dark 360. Results: output/verification/login-clipping/. Fixture reproduces Clerk's relevant styles, not the full authenticated SDK; live signed-out login, email verification, MFA and CAPTCHA states remain unverified. Changes not pushed in this pass.
+
+## 2026-09-12 · Focused article reading layout
+
+- Replaced the unbounded reader body override with an 860px maximum including padding, centered within the content area. Responsive outline and left navigation remain intact.
+- Replaced negative-margin floated PDF action with one wrapping utility bar shared with article actions. Publication status, breadcrumbs and version use distinct visual levels. Feedback and previous/next containers use consistent borders and spacing.
+- Native body styles, colors, bold text, authorization, publication data and mutation logic were not changed.
+- Inspected actual Next development previews `/design-preview/article` (with outline) and `/design-preview/article-plain` (without outline). Plain preview includes a red/bold sample and an explicitly disabled illustrative favorite button. 390px viewport showed no horizontal overflow; checked light and dark. Restored browser viewport and light theme.
+- Preview feedback uses nonexistent sample IDs and reports unavailable; this is not a real favorite/feedback acceptance test. No production content modified or deployment performed.
+- Production build and compiled CSS guard passed. Current changes remain local together with Q&A work.
+
+## 2026-09-12 — Selected third reading direction
+
+Implemented the selected soft-sidebar/white-body/right-actions layout in the shared production reader components. Retained the existing global header as agreed and native document typography/formatting. One feedback instance, one favorite control, and one PDF link; mobile uses outline above body and actions/feedback below. No authorization or stored publication changes.
+
+Opened source exec-52a53ad0-c9c2-48f9-b9a2-641dc9b107a3.png and inspected local /design-preview/article-email at 1536x1024, 390x844 and dark mode. Red emphasis visible; narrow layout readable. The local fixture uses a disabled favorite and unavailable feedback endpoint, not real-account acceptance.
+
+Build and built-CSS guard passed; lint passed; 354 unit tests passed. Subsequent fixture/icon changes typechecked. No GitHub push or production deployment. Visual fidelity is a structural adaptation retaining approved header and editor typography, not a pixel-identical reproduction. Full same-frame comparison and real-account action acceptance remain pending.

@@ -2,6 +2,7 @@
 // Adapted from GitBook PageFeedbackForm: rating controls, optional comment,
 // input focus and confirmed success. JUYU stores one editable response/version.
 import {useCallback,useEffect,useId,useRef,useState} from 'react';
+import {ThumbsUp,ThumbsDown} from '@phosphor-icons/react';
 import type {SavedFeedback} from '../../../feedback/model';
 export function PageFeedbackForm({documentId,revision}:{documentId:string;revision:number}){
  const id=useId();
@@ -50,7 +51,7 @@ export function PageFeedbackForm({documentId,revision}:{documentId:string;revisi
  return <section aria-label="文章反馈" className="reader-feedback">
   <form onSubmit={submit}>
    <div className="feedback-rating"><p id={`${id}-question`}>这篇文章有帮助吗？</p><div role="group" aria-labelledby={`${id}-question`}>
-    {([true,false] as const).map(value=><button key={String(value)} type="button" aria-pressed={helpful===value} disabled={!loaded||busy||blocked} onClick={()=>{setHelpful(value);edited();requestAnimationFrame(()=>commentRef.current?.focus());}}><span aria-hidden="true">{value?'✓':'−'}</span>{value?'有帮助':'没有帮助'}</button>)}
+    {([true,false] as const).map(value=><button key={String(value)} type="button" aria-pressed={helpful===value} disabled={!loaded||busy||blocked} onClick={()=>{setHelpful(value);edited();requestAnimationFrame(()=>commentRef.current?.focus());}}>{value?<ThumbsUp size={17} aria-hidden="true"/>:<ThumbsDown size={17} aria-hidden="true"/>}{value?'有帮助':'没有帮助'}</button>)}
    </div></div>
    <p className="feedback-privacy">反馈对应正式版本 {revision}，管理员可查看你的选择和说明。</p>
    {helpful!==null&&<div className="feedback-comment"><label htmlFor={`${id}-comment`}>补充说明（选填）</label><textarea ref={commentRef} id={`${id}-comment`} rows={3} maxLength={1000} value={comment} disabled={busy||blocked} onChange={e=>{setComment(e.target.value);edited();}}/>

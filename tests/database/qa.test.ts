@@ -98,7 +98,7 @@ test('QA migration upgrades existing QA revisions with defaults and is replay sa
    const sql=await readFile(new URL(file,directory),'utf8');await old.pool.query(sql);await old.pool.query('INSERT INTO juyu.schema_migrations(version,checksum) VALUES($1,$2)',[file.slice(0,-4),createHash('sha256').update(sql).digest('hex')]);
   }
   await old.pool.query("BEGIN; INSERT INTO juyu.members(clerk_user_id,display_name) VALUES('a','Admin'); INSERT INTO juyu.documents(id,kind,sequence,workflow_revision_id,workflow_state) VALUES('old-qa','qa',0,1,'draft'); INSERT INTO juyu.revisions(document_id,revision_id,title,body,audience,author_id,editor_id,created_at) VALUES('old-qa',1,'Old question','Old answer','staff','a','a',now()); INSERT INTO juyu.audit_log(document_id,sequence,action,actor_id,revision_id,at) VALUES('old-qa',0,'create','a',1,now()); COMMIT;");
-  assert.deepEqual(await migrate(old.pool),['0016_qa','0017_favorites', '0018_recent_views', '0019_analytics', '0020_custom_fields', '0021_categories', '0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements', '0027_native_editor']);assert.deepEqual((await old.pool.query('SELECT title,body,qa_category,qa_position FROM juyu.revisions')).rows,[{title:'Old question',body:'Old answer',qa_category:'',qa_position:0}]);assert.deepEqual(await migrate(old.pool),[]);
+  assert.deepEqual(await migrate(old.pool),['0016_qa','0017_favorites', '0018_recent_views', '0019_analytics', '0020_custom_fields', '0021_categories', '0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements', '0027_native_editor', '0028_qa_search']);assert.deepEqual((await old.pool.query('SELECT title,body,qa_category,qa_position FROM juyu.revisions')).rows,[{title:'Old question',body:'Old answer',qa_category:'',qa_position:0}]);assert.deepEqual(await migrate(old.pool),[]);
  }finally{await old.close();}
 });
 
@@ -119,4 +119,20 @@ test('QA collection inherits parent category audience and disabled status for ev
  // including Admin, while its linked child remains enabled and staff-visible.
  await fixture.pool.query('UPDATE juyu.categories SET enabled=false WHERE id=$1',[opsParent]);
  for(const viewer of [support,ops,admin]){const page=await collection(viewer);assert.ok(!page.items.some(item=>item.id===opsQa.id));assert.equal(page.total,viewer.role==='admin'?2:1);}
+});
+
+test('Q&A answer search and inline answers use only current authorized publications',async()=>{
+ const id=randomUUID();await service(admin).saveDraft(id,{...input,title:'退款问题',body:answer('OnlyPublishedNeedle')});const d=await publish((await repo.getForManagement(id,admin))!);
+ await service(admin).saveDraft(id,{...input,expectedSequence:d.sequence,title:'退款问题',body:answer('DraftOnlyNeedle')});
+ await publish(await draft('Hidden','qa','admin','OnlyHiddenNeedle'));
+ const article=await publish(await draft('普通文章','article','staff','OnlyPublishedNeedle'));
+ assert.equal((await service().qa(1,undefined,'OnlyPublishedNeedle')).total,1);
+ assert.equal((await service().qa(1,undefined,'DraftOnlyNeedle')).total,0);
+ assert.equal((await service().qa(1,undefined,'OnlyHiddenNeedle')).total,0);
+ const result=await service().qaAnswer(id);assert.ok(result.body.includes('OnlyPublishedNeedle'));assert.equal(result.revision,1);
+ await assert.rejects(service().qaAnswer(article.id),/FORBIDDEN/);
+ const tree=(await service().home()).pages;assert.ok(!JSON.stringify(tree).includes(id));assert.ok(JSON.stringify(tree).includes(article.id));
+ assert.ok((await service().reader(id)).destination?.startsWith('/help-centre/qa?question='));
+ await fixture.pool.query("UPDATE juyu.members SET disabled_at=now() WHERE clerk_user_id='s'");
+ try{await assert.rejects(service().qaAnswer(id),/FORBIDDEN/);}finally{await fixture.pool.query("UPDATE juyu.members SET disabled_at=null WHERE clerk_user_id='s'");}
 });

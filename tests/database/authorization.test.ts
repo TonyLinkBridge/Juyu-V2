@@ -365,7 +365,7 @@ test('page links derive only from the current role publication snapshot and stop
  assert.equal(links.next?.id,last);assert.equal(links.next?.title,'title-t022-2');assert.deepEqual(links.ancestors,[{id:group,title:'正式业务流程'}]);
  assert.doesNotMatch(JSON.stringify(links),/t022-1|未来草稿标题|未公开/);
  assert.equal(pageNavigation(snapshot.pages,privateId),null);
- for(const role of [ops,a]){viewer=role;assert.equal(pageNavigation((await service.reader(first)).pages,first)?.next?.id,privateId);}
+ for(const role of [ops,a]){viewer=role;const reader=await service.reader(first);assert.equal(pageNavigation(reader.pages,first)?.next?.id,last);assert.equal(pageNavigation(reader.pages,privateId),null);assert.equal((await service.reader(privateId)).article?.id,privateId);}
  await fixture.pool.query("UPDATE juyu.documents SET lifecycle='archived' WHERE id=$1",[privateId]);
  assert.equal(pageNavigation((await service.reader(first)).pages,first)?.next?.id,last);
  await fixture.pool.query('UPDATE juyu.categories SET enabled=false WHERE id=$1',[group]);

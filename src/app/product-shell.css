@@ -85,3 +85,76 @@
 .login-auth .cl-socialButtonsBlockButtonText{white-space:normal;overflow-wrap:anywhere;line-height:1.4}
 .login-auth .cl-socialButtonsBlockButton{padding-inline:18px}
 .login-auth .cl-alertText,.login-auth .cl-formFieldErrorText{overflow-wrap:anywhere}
+
+/* Separate question discovery from long-form knowledge reading. */
+.qa-independent,.knowledge-library{max-width:1000px;margin:0 auto;padding:40px 28px 64px}.qa-independent h1,.knowledge-library h1{font-size:32px;margin:8px 0 12px}.qa-search{display:flex;gap:10px;margin:28px 0 20px}.qa-search input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--panel);color:var(--ink);font:inherit}.qa-search button{background:var(--brand);color:white;padding:12px 20px;border-radius:9px;border:0;font:inherit}.qa-categories{display:flex;flex-wrap:wrap;gap:8px}.qa-categories a{padding:7px 14px;border:1px solid var(--line);border-radius:20px;font-size:14px}.qa-categories a[aria-current=page]{background:var(--accent-soft);color:var(--brand);border-color:var(--brand)}.qa-list-heading{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:22px 0 12px;font-size:14px;color:var(--muted)}.qa-question{border:1px solid var(--line);border-radius:12px;background:var(--panel);margin-bottom:12px;scroll-margin-top:100px}.qa-question h2{margin:0;font-size:17px}.qa-question h2 button{display:flex;justify-content:space-between;gap:20px;width:100%;padding:22px;text-align:left;background:none;border:0;color:var(--ink);font:inherit;font-weight:600;cursor:pointer}.qa-question h2 button[aria-expanded=true]{color:var(--brand)}.qa-answer{padding:0 22px 22px;overflow-wrap:anywhere}.qa-answer-meta{color:var(--muted);font-size:12px;margin-top:24px}.qa-answer-actions{display:flex;gap:20px;font-size:13px;color:var(--brand)}.qa-empty{padding:32px;background:var(--surface);border-radius:12px}.knowledge-library ul{list-style:none;padding-left:20px}.knowledge-library>ul{padding:0}.knowledge-library li{margin:8px 0}.knowledge-library summary{font-weight:650;cursor:pointer;padding:12px}.knowledge-library li>a{display:flex;justify-content:space-between;padding:16px;border-bottom:1px solid var(--line)}.home-entries{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}.home-entries>a{position:relative;transition:border-color .15s,background .15s}.home-entries>a:hover{border-color:var(--brand);background:var(--accent-soft)}.home-entries>a:focus-visible{outline:2px solid var(--brand);outline-offset:3px}.qa-editor-category{display:flex;align-items:center;gap:10px;font-size:14px}.qa-editor-category input{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+@media(max-width:760px){.qa-independent,.knowledge-library{padding:24px 16px}.qa-independent h1{font-size:26px}.qa-question h2 button{padding:17px}.qa-answer{padding:0 17px 17px}.qa-search button{padding:10px}.home-entries{grid-template-columns:1fr}}
+
+/* Focused reading: bounded line lengths and one stable utility row. */
+.entry-frame .reader-content{padding:0 40px;min-width:0;justify-items:center}
+.entry-frame .reader-content .gitbook-page-body{width:100%;max-width:860px;margin:0 auto;padding:42px 28px 72px}
+.entry-frame .reader-content.has-outline{grid-template-columns:minmax(0,1fr) 200px;gap:24px}
+.entry-frame .reader-content .gitbook-page-header{border-bottom:0;padding:0;margin:0 0 24px}
+.entry-frame .gitbook-page-header.gitbook-page-header h1{font-size:var(--document-title);line-height:1.4;margin:12px 0 14px}
+.entry-frame .reader-breadcrumbs{font-size:12px;margin-bottom:30px;color:var(--muted);line-height:1.7}
+.article-publication-status{display:flex;align-items:center;gap:7px;font-size:12px;margin:0;color:var(--muted)}
+.article-publication-status>span{width:6px;height:6px;border-radius:50%;background:#33805c}
+.entry-frame .reader-version{font-size:12px;color:var(--muted);margin:0}
+.article-utility-bar{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:30px}
+.article-utility-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;min-width:0}
+.entry-frame .article-utility-bar .reader-pdf-link{float:none;margin:0;display:inline-flex;align-items:center;gap:7px;padding:8px 11px;min-height:36px;font-size:13px;border-radius:7px;white-space:nowrap;background:var(--panel)}
+.article-utility-bar .favorite-control{margin:0}.article-utility-bar button{min-height:36px;border-radius:7px;font-size:13px;padding:7px 11px}.article-utility-bar p{margin:6px 0 0;font-size:12px}
+.entry-frame .gitbook-page-aside{width:200px;min-height:0;margin-top:44px;padding:4px 0 4px 20px;border-left:1px solid var(--line)}
+.entry-frame .outline-disclosure>summary{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.02em;margin-bottom:12px}
+.entry-frame .outline-link{font-size:13px;line-height:1.6}
+.entry-frame .gitbook-toc-frame{background:var(--surface)}
+.entry-frame .gitbook-table-of-contents .toc-group{line-height:1.55}.entry-frame .gitbook-table-of-contents a{border-radius:7px;line-height:1.6}
+.entry-frame .reader-page-navigation{margin-top:38px;gap:16px}.entry-frame .reader-navigation-card{border-radius:10px;padding:18px;transition:border-color .15s,background .15s}.entry-frame .reader-navigation-card:hover{border-color:var(--brand);background:var(--accent-soft)}
+@media(min-width:1600px){.entry-frame .reader-content{padding-left:60px;padding-right:60px}.entry-frame .reader-content.has-outline{gap:36px}}
+@media(max-width:1100px){.entry-frame .reader-content{padding:0 18px}.entry-frame .reader-content .gitbook-page-body{padding-left:20px;padding-right:20px}}
+@media(max-width:1023px){.entry-frame .reader-content.has-outline{grid-template-columns:minmax(0,1fr);gap:0}.entry-frame .gitbook-page-aside{width:100%;max-width:860px;margin:0;padding:18px 20px 0;border:0}.entry-frame .reader-content .gitbook-page-body{padding-top:26px}}
+@media(max-width:760px){.entry-frame .reader-content{padding:0}.entry-frame .reader-content .gitbook-page-body{padding:24px 20px 48px}.entry-frame .reader-breadcrumbs{margin-bottom:22px}.article-utility-bar{margin-bottom:24px;gap:8px}.entry-frame .gitbook-page-aside{padding:14px 20px 0}.entry-frame .reader-page-navigation{gap:10px}.entry-frame .reader-navigation-card{padding:14px}}
+
+.article-utility-bar .secondary-link{box-shadow:none}.article-utility-bar button.secondary-link{background:var(--surface);border-color:transparent}.article-utility-bar button.secondary-link:hover:not(:disabled){border-color:var(--brand);color:var(--brand)}
+.entry-frame .gitbook-page-body .reader-feedback{padding:24px;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-top:40px}.entry-frame .gitbook-page-body .feedback-rating{gap:16px;align-items:center}.entry-frame .gitbook-page-body .feedback-privacy{font-size:12px;line-height:1.6;color:var(--muted)}
+@media(max-width:760px){.entry-frame .gitbook-page-body .reader-feedback{padding:18px}}
+
+/* Selected third reading direction: soft navigation, white page, useful right rail. */
+.entry-frame .reader-content.has-outline{background:var(--panel);grid-template-columns:minmax(0,1fr) 240px;gap:36px;padding:0 32px}
+.entry-frame .reader-content .gitbook-page-body{max-width:800px;padding:40px 12px 64px}
+.entry-frame .gitbook-page-aside{width:240px;min-width:0;min-height:0;margin-top:40px;padding:0 0 24px 24px;align-self:start;max-height:calc(100dvh - 120px);overflow:auto;border-left:1px solid var(--line)}
+.entry-frame .gitbook-toc-frame{background:var(--surface)}
+.entry-frame .gitbook-page-header.gitbook-page-header h1{margin:18px 0 12px;line-height:1.4}
+.entry-frame .reader-breadcrumbs{margin-bottom:24px}
+.entry-frame .reader-content .gitbook-page-header{margin-bottom:32px}
+.article-side-actions{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);margin-top:24px;padding:20px 0}
+.article-side-actions .favorite-control{margin:0}
+.entry-frame .article-side-actions .reader-pdf-link,.article-side-actions button.secondary-link{float:none;margin:0;display:flex;align-items:center;gap:10px;width:100%;padding:10px 8px;border:0;border-radius:6px;box-shadow:none;background:transparent;font-size:14px;text-align:left;min-height:40px}
+.article-side-actions button.secondary-link:hover:not(:disabled),.entry-frame .article-side-actions .reader-pdf-link:hover{background:var(--hover);color:var(--brand)}
+.article-side-actions p{font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.entry-frame .gitbook-page-aside .reader-feedback{border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:16px;margin:8px 0 0;font-size:12px}
+.gitbook-page-aside .feedback-rating{display:flex;flex-direction:column;align-items:stretch;gap:12px}.gitbook-page-aside .feedback-rating p{margin:0;font-size:13px}.gitbook-page-aside .feedback-rating>div{display:flex;gap:8px;flex-wrap:wrap}.gitbook-page-aside .feedback-rating button{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;min-height:38px;font-size:12px;flex:1;white-space:nowrap}
+.gitbook-page-aside .feedback-privacy,.gitbook-page-aside .feedback-status,.gitbook-page-aside .feedback-error{font-size:11px;line-height:1.7;overflow-wrap:anywhere}.gitbook-page-aside .feedback-status:empty{display:none}.gitbook-page-aside textarea{width:100%;box-sizing:border-box}.gitbook-page-aside .feedback-submit{flex-wrap:wrap;gap:8px}
+@media(min-width:1600px){.entry-frame .reader-content.has-outline{padding:0 48px;gap:48px}}
+@media(max-width:1200px) and (min-width:1024px){.entry-frame .reader-content.has-outline{padding:0 20px;gap:20px;grid-template-columns:minmax(0,1fr) 210px}.entry-frame .gitbook-page-aside{width:210px;padding-left:16px}}
+@media(max-width:1023px){.entry-frame .reader-content.has-outline{display:flex;flex-direction:column;padding:0 24px;gap:0;align-items:stretch}.entry-frame .gitbook-page-aside{display:contents}.entry-frame .gitbook-page-aside .outline-disclosure{order:0;padding:18px 12px 0}.entry-frame .reader-content .gitbook-page-body{order:1;padding:28px 12px 24px}.entry-frame .article-side-actions{order:2;margin:0 12px;flex-direction:row;flex-wrap:wrap}.entry-frame .article-side-actions .reader-pdf-link{width:auto}.entry-frame .gitbook-page-aside .reader-feedback{order:3;margin:0 12px 32px;max-width:800px}.gitbook-page-aside .feedback-rating{align-items:flex-start}.gitbook-page-aside .feedback-rating>div{width:auto}}
+@media(max-width:760px){.entry-frame .reader-content.has-outline{padding:0 8px}.entry-frame .reader-content .gitbook-page-body{padding-top:24px}.entry-frame .reader-breadcrumbs{margin-bottom:18px}}
+
+.favorite-control>button{display:inline-flex;align-items:center;gap:8px}
+
+/* Reading target detail pass: navigation hierarchy and understated outline. */
+.entry-frame .gitbook-table-of-contents{gap:18px;padding-top:24px}
+.entry-frame .gitbook-table-of-contents .toc-home-link{display:flex;align-items:center;gap:12px;padding:10px 12px;margin-bottom:10px;font-size:14px;color:var(--ink);text-decoration:none}
+.entry-frame .toc-home-link:hover{background:var(--hover)}
+.entry-frame .gitbook-toc-heading{font-size:12px;font-weight:500;letter-spacing:0;padding:0 12px}
+.entry-frame .gitbook-table-of-contents .toc-group{min-height:40px;padding:9px 12px;font-weight:650;font-size:14px}
+.entry-frame .gitbook-group-heading{margin-top:8px;padding-top:0}
+.entry-frame .gitbook-group-heading.first-group{margin-top:0}
+.entry-frame .gitbook-group-descendants{margin:2px 0 4px 12px;padding-left:8px}
+.entry-frame .gitbook-group-descendants .gitbook-group-heading{margin-top:0}
+.entry-frame .gitbook-table-of-contents .ToCLinkItemStyles{padding:10px 12px;min-height:40px;font-size:14px;line-height:1.6}
+.entry-frame .gitbook-table-of-contents .ToCLinkItemStyles[data-active=true]{background:var(--accent-soft);color:var(--brand);font-weight:650}
+.entry-frame .outline-link{border-radius:0;padding:8px 12px;border-left:2px solid transparent;background:transparent}
+.entry-frame .outline-link.active{border-left-color:var(--brand);color:var(--brand);background:transparent}
+.entry-frame .gitbook-page-aside .feedback-rating button{border-radius:6px;background:var(--surface)}
+.entry-frame .gitbook-page-aside .feedback-rating button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--brand);color:var(--brand)}

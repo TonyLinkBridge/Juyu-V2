@@ -37,7 +37,7 @@ after(async () => { if (fixture) await fixture.close(); });
 test('empty database migration is replayable without losing data', async () => {
   assert.deepEqual(await migrate(fixture.pool), []);
   assert.equal((await fixture.pool.query('SELECT count(*)::int AS n FROM juyu.members')).rows[0].n, 4);
-  assert.equal((await fixture.pool.query('SELECT count(*)::int AS n FROM juyu.schema_migrations')).rows[0].n, 27);
+  assert.equal((await fixture.pool.query('SELECT count(*)::int AS n FROM juyu.schema_migrations')).rows[0].n, 28);
 });
 
 test('complete review/publish cycle persists old publication while new draft waits', async () => {
@@ -171,10 +171,10 @@ test('untrusted SQL role cannot read private data even if table SELECT was accid
 test('migration rollback and reapply is exercised only on a separate disposable cluster', async () => {
   const isolated = await temporaryDatabase();
   try {
-    assert.equal((await migrate(isolated.pool)).length, 27);
+    assert.equal((await migrate(isolated.pool)).length, 28);
     // This pool is created above, never obtained from DATABASE_URL or a real Supabase project.
     await isolated.pool.query('DROP SCHEMA juyu CASCADE');
-    assert.equal((await migrate(isolated.pool)).length, 27);
+    assert.equal((await migrate(isolated.pool)).length, 28);
     assert.equal((await isolated.pool.query('SELECT count(*)::int AS n FROM juyu.documents')).rows[0].n, 0);
   } finally { await isolated.close(); }
 });

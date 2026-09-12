@@ -7,8 +7,10 @@ import {TasksList} from './TasksList';
 import {TasksFilters} from './TasksFilters';
 // TasksMain's vertical filter/board composition; operational links and list are JUYU additions.
 export function TasksWorkspace({data,error}:{data?:WorkspaceData;error?:string;account?:ReactNode;features?:FeatureFlags}){
+ const kind=data?.query.kind;const qa=kind==='qa';const name=qa?'Q&A 管理':kind==='ops'?'OPS 内容管理':kind==='article'?'知识文章管理':'内容管理';
  return <main id="main-content" className="tasks-workspace">
- <div className="tasks-heading"><div><h1>内容管理</h1><p>编辑、审核和发布团队的正式资料。</p></div><Link prefetch={false} className="primary-link" href="/admin/editor">＋ 新建文章</Link></div>
+ <div className="tasks-heading"><div><h1>{name}</h1><p>编辑、审核和发布团队的正式资料。</p></div><Link prefetch={false} className="primary-link" href={qa?'/admin/editor?kind=qa':kind==='ops'?'/admin/editor?kind=ops':kind==='reference'?'/admin/editor?kind=reference':'/admin/editor'}>＋ {qa?'新建问答':kind==='ops'?'新建运营资料':kind==='reference'?'新建速查资料':'新建文章'}</Link></div>
+ <nav className="workspace-tabs" aria-label="内容模块">{[['article','知识文章'],['ops','OPS Internal'],['qa','Q&A 问答'],['reference','Reference 速查']].map(([value,label])=><Link prefetch={false} key={value} href={'/admin?kind='+value+'&view=list'} aria-current={kind===value?'page':undefined}>{label}</Link>)}</nav>
  {data&&<nav className="workspace-tabs" aria-label="内容范围">{[['all','全部内容'],['submitted','我提交的'],['review','待我审核'],['returned','退回给我的']].map(([scope,label])=><Link prefetch={false} key={scope} aria-current={data.query.scope===scope?'page':undefined} href={workspaceHref(data.query,{scope:scope as WorkspaceData['query']['scope'],page:1})}>{label}</Link>)}</nav>}
  {!data?<section className="tasks-error" role="status"><h2>内容暂时无法读取</h2><p>{error??'请稍后重试，或检查服务连接。'}</p><Link prefetch={false} href="/admin">重新读取内容</Link></section>:<>
  <TasksFilters query={data.query}/>

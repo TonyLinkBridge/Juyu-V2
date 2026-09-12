@@ -66,9 +66,10 @@ export class AuthorizationService {
     const v=await this.viewer();
     return this.database.run(v,async c=>{
       const features=await readFeatureFlags(c);
-      const pages=await readNavigationTree(c);
+      const pages=await readKnowledgeTree(c);
       const menu=await readReaderMenu(c);
-      const rows=(await c.query<{id:string;title:string;updated:Date}>(`SELECT document_id AS id,title,created_at AS updated FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id) ORDER BY created_at DESC,document_id COLLATE "C" LIMIT 5`)).rows;
+      const knowledgeIds=treeIds(pages);
+      const rows=(await c.query<{id:string;title:string;updated:Date}>(`SELECT document_id AS id,title,created_at AS updated FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id) AND document_id=ANY($1::text[]) ORDER BY created_at DESC,document_id COLLATE "C" LIMIT 5`,[knowledgeIds])).rows;
       const recent=features.recent?(await readRecent(c)).items.slice(0,4):[];
       return {features,pages,menu,latest:rows.map(r=>({...r,updated:r.updated.toISOString()})),recent};
     },true);
@@ -98,7 +99,11 @@ export class AuthorizationService {
   async favorites(page=1){const v=await this.viewer();return this.database.run(v,c=>readFavorites(c,page),true);}
   async favorite(id:string,revision:number){const v=await this.viewer();return this.database.run(v,c=>readFavorite(c,id,revision),true);}
   async saveFavorite(id:string,input:unknown){const v=await this.viewer();return this.database.run(v,c=>writeFavorite(c,id,input));}
-  async qa(page=1,category?:string){const v=await this.viewer();return this.database.run(v,c=>readQa(c,page,category),true);}
+  async qaAnswer(id:string){const v=await this.viewer();return this.database.run(v,async c=>{
+ const allowed=(await c.query('SELECT id FROM juyu.read_qa_publications() WHERE id=$1',[id])).rows[0];if(!allowed)throw new Error('FORBIDDEN');
+ const row=(await c.query('SELECT document_id,title,revision_id,body FROM juyu.read_publication($1)',[id])).rows[0];if(!row)throw new Error('FORBIDDEN');
+ return {id:row.document_id,title:row.title,revision:row.revision_id,body:row.body,...await readPresentation(c,id)};},true);}
+  async qa(page=1,category?:string,q=''){const v=await this.viewer();return this.database.run(v,c=>readQa(c,page,category,q),true);}
   async reference(page=1){const v=await this.viewer();return this.database.run(v,c=>readReference(c,page),true);}
   async referenceDetail(id:string){const v=await this.viewer();return this.database.run(v,c=>readReferenceDetail(c,id),true);}
   async readerSections(){const v=await this.viewer();return this.database.run(v,c=>readReaderSections(c),true);}
@@ -149,10 +154,13 @@ export class AuthorizationService {
       return readNavigationTree(client);
     },true);
   }
-  async reader(requested:string|string[]|undefined):Promise<{pages:NavigationNode[];article:Publication|null}> {
+  async reader(requested:string|string[]|undefined):Promise<{pages:NavigationNode[];article:Publication|null;destination?:string}> {
     const viewer=await this.viewer();
     return this.database.run(viewer,async client=>{
-      const pages=await readNavigationTree(client);
+      const kinds=await readContentKinds(client);
+      const kind=typeof requested==='string'?(kinds.get(requested)??'article'):'article';
+      if(kind==='qa')return {pages:[],article:null,destination:'/help-centre/qa?question='+encodeURIComponent(requested as string)+'#qa-'+encodeURIComponent(requested as string)};
+      const pages=filterTree(await readNavigationTree(client),id=>(kinds.get(id)??'article')===kind);
       const selected=selectTreePage(pages,requested);
       if(!selected)return {pages,article:null};
       const result=await client.query<{document_id:string;title:string;revision_id:number;body:string}>(
@@ -255,3 +263,12 @@ async function readPresentation(client:PoolClient,id:string):Promise<ArticlePres
  const customFields=normalizeFieldSnapshots((await client.query('SELECT juyu.read_publication_fields($1) AS fields',[id])).rows[0]?.fields);
  return {...(customFields.length?{customFields}:{}),...(blocks?.length?{blocks:normalizeBlocks(blocks)}:{}),...(row.tags.length?{tags:row.tags}:{}),...(row.cover_asset_id?{cover:{assetId:row.cover_asset_id,alt:row.cover_alt,position:row.cover_position}}:{})};
 }
+
+function treeIds(nodes:NavigationNode[]):string[]{return nodes.flatMap(n=>n.type==='group'?treeIds(n.descendants):[n.id]);}
+function filterTree(nodes:NavigationNode[],accept:(id:string)=>boolean):NavigationNode[]{return nodes.flatMap<NavigationNode>(n=>n.type==='document'?(accept(n.id)?[n]:[]):[{...n,descendants:filterTree(n.descendants,accept)}]).filter(n=>n.type==='document'||n.descendants.length>0);}
+async function readContentKinds(c:PoolClient):Promise<Map<string,string>>{
+ const sections=await readReaderSections(c);
+ const rows=(await c.query<{id:string;kind:string}>("SELECT id,'qa' AS kind FROM juyu.read_qa_publications() UNION ALL SELECT id,'reference' AS kind FROM juyu.read_reference_publications()"+(sections.ops?" UNION ALL SELECT id,'ops' AS kind FROM juyu.read_ops_publications()":''))).rows;
+ return new Map(rows.map(n=>[n.id,n.kind]));
+}
+async function readKnowledgeTree(c:PoolClient):Promise<NavigationNode[]>{const kinds=await readContentKinds(c);return filterTree(await readNavigationTree(c),id=>!kinds.has(id));}
