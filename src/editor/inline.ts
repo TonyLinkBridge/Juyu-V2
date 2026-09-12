@@ -34,3 +34,9 @@ export function screenTextColor(value:string|undefined):string|undefined {
  const normalized=resolved?.toLowerCase().replace(/\s/g,'');
  return normalized&&['black','#000','#000000','#000f','#000000ff','rgb(0,0,0)','rgba(0,0,0,1)','rgb(0 0 0)'.replace(/ /g,'')].includes(normalized)?'var(--reader-neutral-ink, var(--ink))':resolved;
 }
+
+export function screenInlineStyle(p:{textColor?:string;backgroundColor?:string}) {
+ const background=displayColor(p.backgroundColor,true);
+ const transparent=!background||background.toLowerCase()==='transparent';
+ return {color:screenTextColor(p.textColor),backgroundColor:background,...(!transparent?{'--reader-neutral-ink':'#000'}:{})};
+}

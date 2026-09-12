@@ -1,6 +1,6 @@
 import type {ReactNode,CSSProperties} from 'react';
-import {displayColor,screenTextColor,type EditorInline} from '../../../editor/inline';
-export const structuredStyle=(p:{textColor?:string;backgroundColor?:string;textAlignment?:CSSProperties['textAlign']}):CSSProperties=>({color:screenTextColor(p.textColor),backgroundColor:displayColor(p.backgroundColor,true),textAlign:p.textAlignment,...(displayColor(p.backgroundColor,true)?{'--reader-neutral-ink':'#000'}:{})} as CSSProperties);
+import {screenInlineStyle,type EditorInline} from '../../../editor/inline';
+export const structuredStyle=(p:{textColor?:string;backgroundColor?:string;textAlignment?:CSSProperties['textAlign']}):CSSProperties=>({...screenInlineStyle(p),textAlign:p.textAlignment} as CSSProperties);
 export function StructuredInline({content}:{content:EditorInline[]}){
  return content.map((inline,index)=>{
   if(inline.type==='link')return <a key={index} href={inline.href} rel="noopener noreferrer"><StructuredInline content={inline.content}/></a>;
