@@ -59,3 +59,13 @@ export function selectTreePage(nodes:NavigationNode[],requested:string|string[]|
  }
  return null;
 }
+
+/** First readable document in the already-authorized visible directory order. */
+export function firstTreePage(nodes:NavigationNode[]):NavigationPage|null {
+ for(const node of nodes){
+  if(node.type==='document')return node;
+  const first=firstTreePage(node.descendants);
+  if(first)return first;
+ }
+ return null;
+}
