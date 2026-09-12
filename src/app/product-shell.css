@@ -158,3 +158,5 @@
 .entry-frame .outline-link.active{border-left-color:var(--brand);color:var(--brand);background:transparent}
 .entry-frame .gitbook-page-aside .feedback-rating button{border-radius:6px;background:var(--surface)}
 .entry-frame .gitbook-page-aside .feedback-rating button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--brand);color:var(--brand)}
+
+.article-side-actions .favorite-control>button.secondary-link{justify-content:flex-start;gap:10px}.article-side-actions .favorite-control>button>svg{flex-shrink:0}

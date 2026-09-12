@@ -18,7 +18,7 @@ function FavoriteControl({documentId,revision,initial,reloadOnChange=false,label
  useEffect(()=>{
   const sequence=generation.current;
   if(!initial)void load();
-  const focus=()=>{if(!reloadOnChange)reload();};window.addEventListener('focus',focus);
+  const focus=()=>{if(!reloadOnChange)void load();};window.addEventListener('focus',focus);
   return()=>{sequence.value++;operation.current=false;window.removeEventListener('focus',focus);};
  },[initial,load,reload,reloadOnChange]);
  async function change(){
@@ -30,5 +30,5 @@ function FavoriteControl({documentId,revision,initial,reloadOnChange=false,label
   catch(e){if(token!==sequence.value)return;const unknown=wasUncertain||!(e instanceof FavoriteRejected);if(!unknown){pendingRequest.current=null;setPending(null);setSaved(null);}setError(unknown?'收藏结果尚未确认，原操作已保留，请重试。':'文章或权限已变化，操作未执行。请重新读取或刷新文章。');}
   finally{if(token===sequence.value){operation.current=false;setBusy('');}}
  }
- return <section className="favorite-control" aria-label={label}><button className="secondary-link" type="button" aria-pressed={saved??false} disabled={Boolean(busy)||(!pending&&saved===null)} onClick={()=>void change()}><BookmarkSimple size={20} aria-hidden="true"/>{busy==='write'?'正在保存…':busy==='read'?'正在读取收藏…':pending?(pending.saved?'重试收藏':'重试取消收藏'):saved?'取消收藏':'收藏文章'}</button>{notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}{!busy&&!pending&&error&&<div className="favorite-recovery"><button className="secondary-link" type="button" onClick={reload}>重新读取收藏</button><a href={`/help-centre?article=${encodeURIComponent(documentId)}`}>刷新文章</a></div>}</section>;
+ return <section className="favorite-control" aria-label={label}><button className="secondary-link" type="button" aria-pressed={saved??false} aria-busy={Boolean(busy)} disabled={Boolean(busy)||(!pending&&saved===null)} onClick={()=>void change()}><BookmarkSimple size={20} aria-hidden="true"/>{busy==='write'?'正在保存…':busy==='read'?'收藏文章':pending?(pending.saved?'重试收藏':'重试取消收藏'):saved?'取消收藏':'收藏文章'}</button>{notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}{!busy&&!pending&&error&&<div className="favorite-recovery"><button className="secondary-link" type="button" onClick={reload}>重新读取收藏</button><a href={`/help-centre?article=${encodeURIComponent(documentId)}`}>刷新文章</a></div>}</section>;
 }

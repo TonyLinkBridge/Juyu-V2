@@ -154,7 +154,7 @@ export class AuthorizationService {
       return readNavigationTree(client);
     },true);
   }
-  async reader(requested:string|string[]|undefined):Promise<{pages:NavigationNode[];article:Publication|null;destination?:string}> {
+  async reader(requested:string|string[]|undefined):Promise<{pages:NavigationNode[];article:Publication|null;favorite?:import('../../favorites/model.ts').FavoriteState;destination?:string}> {
     const viewer=await this.viewer();
     return this.database.run(viewer,async client=>{
       const kinds=await readContentKinds(client);
@@ -166,7 +166,8 @@ export class AuthorizationService {
       const result=await client.query<{document_id:string;title:string;revision_id:number;body:string}>(
         'SELECT document_id,title,revision_id,body FROM juyu.read_publication($1)',[selected.id]);
       const row=result.rows[0];
-      return {pages,article:row?{id:row.document_id,title:row.title,revision:row.revision_id,body:row.body,...await readPresentation(client,selected.id)}:null};
+      const favorite=row&&(await readFeatureFlags(client)).favorites?await readFavorite(client,row.document_id,row.revision_id):undefined;
+      return {pages,favorite,article:row?{id:row.document_id,title:row.title,revision:row.revision_id,body:row.body,...await readPresentation(client,selected.id)}:null};
     },true);
   }
   async search(query:string|string[]|undefined,page?:string|string[]):Promise<{pages:NavigationNode[];search:TitleSearch}> {

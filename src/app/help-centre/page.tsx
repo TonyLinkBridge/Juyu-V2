@@ -68,14 +68,11 @@ export default async function HelpCentre({searchParams,library=false}:{library?:
         </SearchResults></SearchAnalytics>
       </div></EntryShell>;
     }
-    let destination:string|undefined;try {({pages,article,destination}=await (await applicationAuthorization()).reader(requested));} catch {failed=true;}
+    let favorite:import('../../favorites/model').FavoriteState|undefined;
+    let destination:string|undefined;try {({pages,article,destination,favorite}=await (await applicationAuthorization()).reader(requested));} catch {failed=true;}
     if(destination)redirect(destination);
-    return <EntryShell account search={input} announcement={failed ? undefined : readerAnnouncement}><ReaderNavigation features={features} pages={pages} requested={requested} failed={failed} article={article} articleActions={!failed&&article?<>{features.favorites&&<FavoriteButton documentId={article.id} revision={article.revision}/>}{features.recent&&<RecentRecorder documentId={article.id} revision={article.revision}/>}{features.analytics&&<ArticleAnalytics documentId={article.id} revision={article.revision}/>}</>:undefined}
-      initialAdmin={false} actions={<>
-        
-        {!failed&&admin.status==='admin'&&<Link className="secondary-link" href="/admin">进入管理后台</Link>}
-        <EmployeeSignOut/>
-      </>}/></EntryShell>;
+    return <EntryShell account search={input} announcement={failed ? undefined : readerAnnouncement}><ReaderNavigation features={features} pages={pages} requested={requested} failed={failed} article={article} articleActions={!failed&&article?<>{features.favorites&&<FavoriteButton documentId={article.id} revision={article.revision} initial={favorite}/>}{features.recent&&<RecentRecorder documentId={article.id} revision={article.revision}/>}{features.analytics&&<ArticleAnalytics documentId={article.id} revision={article.revision}/>}</>:undefined}
+      initialAdmin={false}/></EntryShell>;
   }
   const opening=enrollment&&enrollment.status!=='ready';
   const denied = access.status === 'denied';
