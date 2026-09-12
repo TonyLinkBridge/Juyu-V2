@@ -1,0 +1,6 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {createVerificationReader} from '../src/server/authentication/verification-reader.ts';
+test('one verification shares a user read while the delivery recheck reads fresh',async()=>{let n=0;const r=createVerificationReader(async(id:string)=>({id,version:++n}));await r.run(async()=>{const [a,b]=await Promise.all([r.read('a'),r.read('a')]);assert.equal(a,b);assert.equal(n,1);});await r.run(async()=>assert.equal((await r.read('a')).version,2));assert.equal(n,2);});
+test('concurrent verification scopes and different users never share evidence',async()=>{let n=0;const r=createVerificationReader(async(id:string)=>({id,version:++n}));const values=await Promise.all([r.run(()=>r.read('a')),r.run(()=>r.read('a'))]);assert.notEqual(values[0],values[1]);await r.run(async()=>{assert.equal((await r.read('a')).id,'a');assert.equal((await r.read('b')).id,'b');});assert.equal(n,4);});
+test('rejected evidence cannot survive into another verification or an unscoped call',async()=>{let n=0;const r=createVerificationReader(async()=>{if(++n===1)throw Error('revoked');return n;});await assert.rejects(r.run(()=>r.read('a')),/revoked/);assert.equal(await r.run(()=>r.read('a')),2);assert.equal(await r.read('a'),3);assert.equal(await r.read('a'),4);});

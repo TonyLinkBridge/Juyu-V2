@@ -1,16 +1,18 @@
 'use client';
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import type {MediaEditorData} from '../media/editor';
 import {normalizeBlocks,type MediaBlock,type ManagedAsset,uploadExtensions} from '../media/model';
+import {confirmAction} from './feedback/feedback';
 import {ScienceFields} from './science-fields';
 import {RichBlockFields} from './rich-block-fields';
 import {MediaBlocks} from './gitbook/Media/MediaBlocks';
 function message(code:string){return code==='CONFLICT'?'资料已在另一页面修改。当前输入已保留，请重新载入后再处理。':code==='INVALID_STATE'?'当前内容正在审核，不能修改。请先撤回审核。':code==='UPLOAD_TOO_LARGE'?'文件超过大小限制，请压缩或选择较小文件。':code==='INVALID_UPLOAD'?'文件格式或实际内容不符合要求，请检查后重试。':'操作未确认完成，当前内容已保留，请稍后重试。';}
 export function MediaEditor({initial}:{initial:MediaEditorData}){
+ const leaving=useRef(false);
  const [data,setData]=useState(initial);const [blocks,setBlocks]=useState(initial.blocks);const [cover,setCover]=useState(initial.cover);const [dirty,setDirty]=useState(false);const [busy,setBusy]=useState(false);const [notice,setNotice]=useState('');const [error,setError]=useState('');const [selected,setSelected]=useState('');
  let previewBlocks:MediaBlock[]|null=null;try{previewBlocks=normalizeBlocks(blocks);}catch{}
  const frozen=data.status==='in_review'||data.lifecycle!=='active';const assets=data.assets.filter(a=>a.status==='ready');
- useEffect(()=>{if(!dirty)return;const warn=(e:BeforeUnloadEvent)=>{e.preventDefault();};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[dirty]);
+ useEffect(()=>{if(!dirty)return;const warn=(e:BeforeUnloadEvent)=>{if(!leaving.current)e.preventDefault();};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[dirty]);
  function edit(next:MediaBlock[]){setBlocks(next);setDirty(true);setNotice('');setError('');}
  function update(id:string,block:MediaBlock){edit(blocks.map(b=>b.id===id?block:b));}
  function add(fileOnly=false){const asset=assets.find(a=>a.id===selected);if(!asset)return;edit([...blocks,{id:crypto.randomUUID(),type:fileOnly?'file':asset.mime.startsWith('image/')?'image':asset.mime.startsWith('video/')?'video':'file',assetId:asset.id,caption:asset.filename,alt:''}]);}
@@ -42,7 +44,7 @@ export function MediaEditor({initial}:{initial:MediaEditorData}){
     <div className="media-toolbar"><button type="button" disabled={index===0} onClick={()=>{const next=[...blocks];[next[index-1],next[index]]=[next[index],next[index-1]];edit(next);}}>上移</button><button type="button" disabled={index===blocks.length-1} onClick={()=>{const next=[...blocks];[next[index+1],next[index]]=[next[index],next[index+1]];edit(next);}}>下移</button><button type="button" onClick={()=>{edit(blocks.filter(v=>v.id!==b.id));setNotice('内容块已从待保存草稿中移除；历史版本及文件仍保留。');}}>删除内容块 {index+1}</button></div>
    </section>)}
   </fieldset>
-  <div className="media-toolbar"><button className="secondary-link" disabled={busy||frozen||!dirty||!previewBlocks} type="button" onClick={()=>void save()}>{busy?'正在处理…':'保存草稿'}</button><button className="secondary-link" disabled={busy} type="button" onClick={()=>{if(!dirty||window.confirm('重新载入会替换未保存的修改，是否继续？')){setDirty(false);window.location.reload();}}}>重新载入</button></div>
+  <div className="media-toolbar"><button className="secondary-link" disabled={busy||frozen||!dirty||!previewBlocks} type="button" onClick={()=>void save()}>{busy?'正在处理…':'保存草稿'}</button><button className="secondary-link" disabled={busy} type="button" onClick={async()=>{if(!dirty||await confirmAction('重新载入会替换未保存的修改，是否继续？')){leaving.current=true;setDirty(false);window.location.reload();}}}>重新载入</button></div>
   <p role="status">{notice}</p>{error&&<p role="alert">{error}</p>}
   {!previewBlocks&&<p role="alert">内容块超出总量限制或格式不完整。输入已保留，请检查代码语言、格式或减少内容后保存。</p>}
   <details><summary>预览内容块（未发布）</summary>{previewBlocks&&<MediaBlocks key={JSON.stringify(previewBlocks)} blocks={previewBlocks} documentId={data.documentId} admin/>}</details>

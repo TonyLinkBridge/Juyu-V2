@@ -1,11 +1,15 @@
 "use client";
-import {useEffect} from 'react';
+import {useEffect,useRef} from 'react';
 import {confirmAction,notify} from '../feedback/feedback';
 import {registerReviewLeaveGuard,type ReviewLeaveIntent} from '../../review/leave';
+
+import {installHistoryGuard} from '../../review/history-guard';
 
 type NavigateEvent=Event&{navigationType:string;destination:{url:string;key:string};hashChange:boolean;downloadRequest:string|null};
 type Navigation=EventTarget&{traverseTo:(key:string)=>{finished:Promise<unknown>}};
 export function useReviewLeaveGuard({dirty,busy,uncertain}:{dirty:boolean;busy:boolean;uncertain:boolean}){
+ const fallback=useRef<null|{check:()=>Promise<boolean>;commit:()=>void}>(null);
+ useEffect(()=>{if(!('navigation' in window)||!window.navigation)return installHistoryGuard(()=>fallback.current?.check??null,()=>fallback.current?.commit());},[]);
  useEffect(()=>{
   if(!dirty&&!busy&&!uncertain)return;
   let leaving=false,disposed=false,asking=false;
@@ -20,6 +24,7 @@ export function useReviewLeaveGuard({dirty,busy,uncertain}:{dirty:boolean;busy:b
     return await confirmAction(message,intent==='signout'?'确认退出登录？':intent==='discard'?'清除未提交的内容？':'离开当前操作页？')&&!disposed;
    }finally{asking=false;}
   };
+  fallback.current={check:()=>check('navigate'),commit:()=>{leaving=true;}};
   const unregister=registerReviewLeaveGuard({check,commit:()=>{leaving=true;},reset:()=>{leaving=false;}});
   const unload=(event:BeforeUnloadEvent)=>{if(!leaving){event.preventDefault();event.returnValue='';}};
   const hashOnly=(url:string)=>{const target=new URL(url,location.href);return target.origin===location.origin&&target.pathname===location.pathname&&target.search===location.search&&target.hash!==location.hash;};
@@ -31,7 +36,7 @@ export function useReviewLeaveGuard({dirty,busy,uncertain}:{dirty:boolean;busy:b
    void check('navigate').then(allowed=>{if(allowed){leaving=true;location.assign(anchor.href);}});
   };
   // Covers browser back/forward, including App Router same-document history entries.
-  // Older browsers still receive click and native document-unload protection.
+  // Older browsers use the capture-phase history guard installed above.
   const navigation=(window as unknown as {navigation?:Navigation}).navigation;
   const navigate=(event:Event)=>{
    const e=event as NavigateEvent;
@@ -40,6 +45,6 @@ export function useReviewLeaveGuard({dirty,busy,uncertain}:{dirty:boolean;busy:b
    void check('navigate').then(allowed=>{if(allowed&&!disposed){leaving=true;void navigation!.traverseTo(e.destination.key).finished.catch(()=>{leaving=false;});}});
   };
   addEventListener('beforeunload',unload);document.addEventListener('click',click,true);navigation?.addEventListener('navigate',navigate);
-  return()=>{disposed=true;unregister();removeEventListener('beforeunload',unload);document.removeEventListener('click',click,true);navigation?.removeEventListener('navigate',navigate);};
+  return()=>{disposed=true;fallback.current=null;unregister();removeEventListener('beforeunload',unload);document.removeEventListener('click',click,true);navigation?.removeEventListener('navigate',navigate);};
  },[dirty,busy,uncertain]);
 }

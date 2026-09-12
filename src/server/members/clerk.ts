@@ -6,7 +6,7 @@ import { enrollmentCandidate } from '../enrollment/candidate.ts';
 import { verifiedMember } from '../authentication/member.ts';
 import { slackUserInfo } from '../authentication/slack.ts';
 import type { MemberProvider } from './service.ts';
-import {readClerkUser} from '../authentication/user-read.ts';
+import {readClerkUser,withFreshUserRead} from '../authentication/user-read.ts';
 export const clerkMembers:MemberProvider={
  user:async id=>(await clerkClient()).users.getUser(id),
  async verified(id){
@@ -29,6 +29,8 @@ export async function currentEnrollmentCandidate(){
 }
 
 export async function currentVerifiedMember(){
- const candidate=await currentEnrollmentCandidate();
- return candidate?.role?{...candidate,role:candidate.role}:null;
+ return withFreshUserRead(async()=>{
+  const candidate=await currentEnrollmentCandidate();
+  return candidate?.role?{...candidate,role:candidate.role}:null;
+ });
 }
