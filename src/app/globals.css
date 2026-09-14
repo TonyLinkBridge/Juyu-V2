@@ -345,9 +345,9 @@ button, input, select { color: inherit; }
 .feedback-comment label { display: block; margin-bottom: 8px; }
 .feedback-comment textarea { display: block; width: 100%; min-height: 96px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); padding: 12px; font: inherit; resize: vertical; }
 .feedback-comment textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-.feedback-submit { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; }
-.feedback-submit > span { color: var(--muted); font-size: 12px; }
-.feedback-submit button { cursor: pointer; }
+.feedback-submit { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+.feedback-submit > span { color: var(--muted); font-size: 12px; flex: 1 1 auto; min-width: 74px; }
+.feedback-submit button { cursor: pointer; flex: 0 1 auto; min-width: 92px; }
 .feedback-error { color: var(--brand); margin-top: 12px; }
 .feedback-overview,.feedback-entries { list-style: none; padding: 0; margin: 24px 0; }
 .feedback-overview > li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 24px; margin-bottom: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
