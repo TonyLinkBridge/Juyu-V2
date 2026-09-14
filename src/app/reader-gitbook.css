@@ -4,6 +4,9 @@
  * 1376 = 288 + 48 + 768 + 16 + 256. Header and reading columns share this grid.
  */
 .entry-frame:has(.reader-layout) { --reading-width:1376px; --reading-gutter:max(32px,calc((100vw - var(--reading-width))/2)); background:var(--panel); }
+/* Keep the header in the space reserved by both sticky reading rails. */
+.entry-frame:has(.reader-layout)>.reader-chrome { position:sticky; top:0; z-index:40; background:var(--panel); }
+.entry-frame:has(.reader-layout) .gitbook-heading,.entry-frame:has(.reader-layout) #reader-page-title,.entry-frame:has(.reader-layout) #main-content { scroll-margin-top:calc(var(--reader-chrome-height,64px) + 24px); }
 .entry-frame:has(.reader-layout) .knowledge-body,.entry-frame:has(.reader-layout) .knowledge-content { background:var(--panel); min-width:0; }
 .entry-frame:has(.reader-layout) .site-header { height:64px; min-height:64px; padding:0 var(--reading-gutter); display:grid; grid-template-columns:288px 48px minmax(0,768px) 16px 256px; gap:0; }
 .entry-frame:has(.reader-layout) .site-header>.juyu-brand { grid-column:1; gap:10px; font-size:16px; }
