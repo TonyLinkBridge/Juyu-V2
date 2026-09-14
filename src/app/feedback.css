@@ -61,3 +61,17 @@
 .editor-outline-help code{color:var(--ink)}
 .editor-outline-help{margin-inline:54px}
 @media(max-width:760px){.editor-outline-help{margin-inline:24px}}
+
+/* Explain missing headings at the point of editing and preview the actual reader outline. */
+.editor-outline-guidance{margin:0 54px 16px;color:var(--muted);font-size:13px;line-height:1.7}
+.editor-outline-guidance .editor-outline-status{margin:0}
+.editor-outline-guidance .editor-outline-help{margin:0}
+.editor-preview-outline{margin:0 0 24px;padding:16px 0;border-block:1px solid var(--line);font-size:13px;line-height:1.6;color:var(--muted)}
+.editor-preview-outline>strong{color:var(--ink);font-weight:600}
+.editor-preview-outline ol{list-style:none;margin:8px 0 0;padding:0}
+.editor-preview-outline li{margin:0}
+.editor-preview-outline button{display:block;text-align:start;width:100%;border:0;background:transparent;color:var(--muted);padding:5px 0;font:inherit;overflow-wrap:anywhere;cursor:pointer}
+.editor-preview-outline button:hover{color:var(--brand)}
+.editor-preview-outline button:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px}
+.editor-preview-outline p{margin:8px 0 0}
+@media(max-width:760px){.editor-outline-guidance{margin-inline:24px}}

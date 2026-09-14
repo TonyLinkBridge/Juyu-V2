@@ -8,6 +8,7 @@ import './globals.css';
 import './product-shell.css';
 import './review-layout.css';
 import './feedback.css';
+import './reader-gitbook.css';
 // Supabase session pools are in ap-southeast-1; avoid trans-Pacific SQL round trips.
 export const preferredRegion = 'sin1';
 

@@ -126,10 +126,10 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--focus); outline
 .gitbook-toc-scroll { min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-gutter: stable; padding: 4px 8px 8px 0; }
 .gitbook-pages-list { display: flex; flex-direction: column; gap: 2px; list-style: none; margin: 0; padding: 0; }
 .page-document-item { display: flex; flex-direction: column; min-width: 0; }
-.gitbook-table-of-contents .ToCLinkItemStyles { position: relative; display: flex; flex-direction: row; justify-content: flex-start; align-items: center; gap: 12px; padding: 8px 12px; min-height: 38px; border-radius: 6px; font-size: 14px; font-weight: 400; line-height: 1.5; color: var(--muted); transition: background-color .15s, color .15s; overflow-wrap: anywhere; }
+.gitbook-table-of-contents .ToCLinkItemStyles { position: relative; display: flex; flex-direction: row; justify-content: flex-start; align-items: center; gap: 12px; padding: 6px 6px 6px 12px; min-height: 32px; border-radius: 6px; font-size: 14px; font-weight: 400; line-height: 1.5; color: var(--muted); transition: background-color .15s, color .15s; overflow-wrap: anywhere; }
 .gitbook-table-of-contents .ToCLinkItemStyles:hover { color: var(--ink); background: var(--hover); }
 .gitbook-table-of-contents .ToCLinkItemStyles:focus-visible { outline-offset: -2px; }
-.gitbook-table-of-contents .ToCLinkItemActiveStyles { font-weight: 600; color: var(--brand); background: var(--accent-soft); }
+.gitbook-table-of-contents .ToCLinkItemActiveStyles { font-weight: 600; color: var(--brand); background: transparent; }
 .gitbook-table-of-contents .ToCLinkItemActiveStyles:hover { color: var(--brand); background: var(--accent-hover); }
 .gitbook-toc-empty { padding: 6px 12px; font-size: 13px; color: var(--muted); }
 .reader-main { min-width: 0; flex: 1; padding: 48px 0 96px; }
@@ -145,19 +145,29 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--focus); outline
  .reader-main { padding-top: 32px; width: 100%; }
 }
 
-/* T018: GitBook group branch with nested indentation and accessible collapse. */
-.page-group-item { display: flex; flex-direction: column; min-width: 0; }
-.gitbook-group-heading { margin-top: 12px; padding-top: 4px; }
-.gitbook-group-heading.first-group { margin-top: 0; }
-.gitbook-table-of-contents .toc-group { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 36px; padding: 8px 12px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); font-size: 12px; font-weight: 650; text-align: left; cursor: pointer; overflow-wrap: anywhere; }
-.gitbook-table-of-contents .toc-group > span { flex: 1; min-width: 0; }
-.gitbook-table-of-contents .toc-group:hover { background: var(--hover); }
-.gitbook-table-of-contents .toc-group:focus-visible { outline-offset: -2px; }
-.toc-group-chevron { flex-shrink: 0; transition: transform .15s; }
-.toc-group-chevron[data-open="true"] { transform: rotate(90deg); }
-.gitbook-group-descendants { margin: 2px 0 4px 12px; border-left: 1px solid var(--line); padding-left: 5px; }
-.gitbook-group-descendants[hidden] { display: none; }
-.gitbook-group-descendants .gitbook-group-heading { margin-top: 4px; }
+/* GitBook TOC: compact section labels and text-only active state (default list).
+   Categories below a section retain JUYU hierarchy, using GitBook's 20px nested inset. */
+.toc-home-link { display:flex; align-items:center; gap:12px; padding:6px 6px 6px 12px; min-height:32px; color:var(--muted); font-size:14px; text-decoration:none; border-radius:6px; }
+.toc-home-link:hover { color:var(--ink); background:var(--hover); }
+.gitbook-toc-heading { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.page-group-item { display:flex; flex-direction:column; min-width:0; }
+.gitbook-group-heading { margin-top:4px; padding-top:10px; }
+.gitbook-group-heading.first-group { margin-top:0; padding-top:0; }
+.gitbook-table-of-contents .toc-group { display:flex; align-items:center; gap:12px; width:100%; min-height:32px; padding:6px 6px 6px 12px; border:0; border-radius:6px; background:transparent; color:var(--ink); font-size:12px; font-weight:600; line-height:20px; letter-spacing:.025em; text-transform:uppercase; text-align:left; cursor:pointer; overflow-wrap:anywhere; }
+.gitbook-table-of-contents .toc-group > span { flex:1; min-width:0; }
+.gitbook-table-of-contents .toc-group:hover { background:var(--hover); }
+.gitbook-table-of-contents .toc-group:focus-visible { outline-offset:-2px; }
+.gitbook-table-of-contents .toc-icon { width:16px; height:16px; flex-shrink:0; }
+.gitbook-table-of-contents .ToCLinkItemStyles > span { min-width:0; }
+.toc-group-chevron { flex-shrink:0; transition:transform .15s,opacity .15s; opacity:.6; }
+.toc-group-chevron[data-open="true"] { transform:rotate(90deg); opacity:0; }
+.toc-group:hover .toc-group-chevron,.toc-group:focus-visible .toc-group-chevron { opacity:1; }
+.gitbook-group-descendants { margin:1px 0 0; padding:0; border:0; }
+.gitbook-group-descendants[hidden] { display:none; }
+.gitbook-group-descendants .gitbook-group-heading { margin:0; padding:0; }
+.gitbook-group-descendants .toc-group { font-size:14px; font-weight:400; letter-spacing:normal; text-transform:none; }
+.gitbook-group-descendants .gitbook-group-descendants { padding-left:20px; }
+@media (hover:none) { .toc-group-chevron[data-open="true"] { opacity:.6; } }
 
 /* T019 GitBook main content and outline, mapped to JUYU layout/theme tokens. */
 .reader-content { display: grid; grid-template-columns: minmax(0, 1fr); flex: 1; min-width: 0; gap: 32px; align-items: start; }

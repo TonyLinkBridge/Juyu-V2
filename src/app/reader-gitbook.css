@@ -1,0 +1,103 @@
+/* GitBook layout-default port, measured against tony-14.gitbook.io/help-center.
+ * Source: TableOfContents, PageAside, PageBody and Header. Vendor identity,
+ * authorization and editing are deliberately not part of this presentation layer.
+ * 1376 = 288 + 48 + 768 + 16 + 256. Header and reading columns share this grid.
+ */
+.entry-frame:has(.reader-layout) { --reading-width:1376px; --reading-gutter:max(32px,calc((100vw - var(--reading-width))/2)); background:var(--panel); }
+.entry-frame:has(.reader-layout) .knowledge-body,.entry-frame:has(.reader-layout) .knowledge-content { background:var(--panel); min-width:0; }
+.entry-frame:has(.reader-layout) .site-header { height:64px; min-height:64px; padding:0 var(--reading-gutter); display:grid; grid-template-columns:288px 48px minmax(0,768px) 16px 256px; gap:0; }
+.entry-frame:has(.reader-layout) .site-header>.juyu-brand { grid-column:1; gap:10px; font-size:16px; }
+.entry-frame:has(.reader-layout) .juyu-brand img { width:94px; height:32px; }
+.entry-frame:has(.reader-layout) .juyu-brand>span { padding-left:10px; }
+.entry-frame:has(.reader-layout) .header-search { grid-column:3; width:100%; max-width:512px; margin:0; }
+.entry-frame:has(.reader-layout) .header-search-panel .gitbook-search-form { width:100%; max-width:none; }
+.entry-frame:has(.reader-layout) .gitbook-search-input { min-height:38px; background:var(--panel); border-radius:12px; }
+.entry-frame:has(.reader-layout) .account-controls { grid-column:5; justify-self:end; gap:0; min-width:0; }
+.entry-frame:has(.reader-layout) .account-controls>.theme-toggler-compact,.entry-frame:has(.reader-layout) .account-controls>.admin-console-button { display:none; }
+.entry-frame:has(.reader-layout) .mobile-account-appearance,.entry-frame:has(.reader-layout) .mobile-account-shortcut { display:block; margin-bottom:14px; }
+.entry-frame:has(.reader-layout) .account-identity>span { display:none; }
+.entry-frame:has(.reader-layout) .account-identity strong { font-size:14px; }
+.entry-frame:has(.reader-layout) .account-menu summary { padding:5px 8px; }
+.entry-frame:has(.reader-layout) .account-avatar { width:28px; height:28px; font-size:11px; }
+.entry-frame:has(.reader-layout) .reader-layout { width:calc(100% - 64px); max-width:var(--reading-width,1376px); margin:0 auto; gap:48px; background:var(--panel); }
+.entry-frame:has(.reader-layout) .reader-navigation-shell { width:288px; flex:0 0 288px; top:var(--reader-chrome-height,64px); }
+.entry-frame:has(.reader-layout) .gitbook-table-of-contents { width:288px; flex-basis:288px; padding:32px 0 16px; gap:16px; background:var(--panel); }
+.entry-frame:has(.reader-layout) .gitbook-toc-frame { border:0; background:var(--panel); }
+.entry-frame:has(.reader-layout) .gitbook-table-of-contents .toc-home-link { padding:6px 12px; line-height:20px; }
+.entry-frame:has(.reader-layout) .gitbook-toc-scroll { margin-left:-12px; padding:0 8px 8px 0; scrollbar-gutter:auto; }
+.entry-frame:has(.reader-layout) .gitbook-table-of-contents>.toc-home-link { margin-left:-12px; margin-right:8px; }
+.entry-frame:has(.reader-layout) .gitbook-group-heading { margin-top:4px; padding-top:10px; }
+.entry-frame:has(.reader-layout) .gitbook-group-heading.first-group { margin-top:0; padding-top:0; }
+.entry-frame:has(.reader-layout) .gitbook-group-descendants .gitbook-group-heading { margin:0; padding:0; }
+.entry-frame:has(.reader-layout) .gitbook-table-of-contents .toc-group { line-height:20px; }
+.entry-frame:has(.reader-layout) .gitbook-table-of-contents .ToCLinkItemStyles { line-height:20px; padding:6px 6px 6px 12px; }
+.entry-frame:has(.reader-layout) .reader-content.has-outline { display:grid; grid-template-columns:minmax(0,768px) 256px; gap:16px; padding:0; background:var(--panel); align-items:start; flex:1; }
+.entry-frame:has(.reader-layout) .reader-content .gitbook-page-body { width:100%; max-width:768px; min-width:0; margin:0; padding:32px 0 64px; }
+.entry-frame:has(.reader-layout) .reader-content .gitbook-page-header { border:0; padding:0; margin:0 0 24px; }
+.entry-frame:has(.reader-layout) .reader-breadcrumbs { color:var(--brand); font-size:12px; line-height:1.625; margin:0 0 12px; }
+.entry-frame:has(.reader-layout) .gitbook-page-header.gitbook-page-header h1 { font-size:36px; line-height:1.25; letter-spacing:-.025em; margin:12px 0; }
+.entry-frame:has(.reader-layout) .gitbook-page-header h1 { display:flex; align-items:flex-start; gap:16px; }
+.entry-frame:has(.reader-layout) .reader-title-icon { flex-shrink:0; margin-top:5px; color:var(--muted); }
+.entry-frame:has(.reader-layout) .gitbook-page-header h1>span { min-width:0; }
+.entry-frame:has(.reader-layout) .article-publication-status { display:none; }
+.entry-frame:has(.reader-layout) .reader-version { font-size:12px; color:var(--muted); margin:0; }
+.entry-frame:has(.reader-layout) .gitbook-page-aside { width:256px; min-width:0; min-height:0; align-self:start; padding:32px 0 24px 32px; margin:0; border:0; position:sticky; top:var(--reader-chrome-height,64px); max-height:calc(100dvh - var(--reader-chrome-height,64px)); overflow:auto; }
+.entry-frame:has(.reader-layout) .outline-disclosure { border:0; background:transparent; padding:0; }
+.entry-frame:has(.reader-layout) .outline-disclosure>summary { font-size:12px; font-weight:500; color:var(--muted); margin-bottom:12px; cursor:pointer; }
+.entry-frame:has(.reader-layout) .outline-link { display:block; font-size:13px; line-height:1.6; padding:6px 0; border:0; border-radius:0; color:var(--muted); background:transparent; }
+.entry-frame:has(.reader-layout) .outline-link.active { color:var(--brand); background:transparent; }
+.entry-frame:has(.reader-layout) .article-side-actions { display:flex; flex-direction:column; gap:6px; margin:20px 0; padding:0; border:0; }
+.entry-frame:has(.reader-layout) .article-side-actions .favorite-control { margin:0; }
+.entry-frame:has(.reader-layout) .article-side-actions .reader-pdf-link,.entry-frame:has(.reader-layout) .article-side-actions button.secondary-link { float:none; margin:0; display:flex; align-items:center; justify-content:flex-start; gap:8px; padding:6px 0; min-height:32px; width:100%; font-size:13px; font-weight:400; text-align:left; border:0; border-radius:6px; background:transparent; color:var(--muted); box-shadow:none; }
+.entry-frame:has(.reader-layout) .article-side-actions button>svg { flex-shrink:0; }
+.entry-frame:has(.reader-layout) .article-side-actions .reader-pdf-link:hover,.entry-frame:has(.reader-layout) .article-side-actions button.secondary-link:hover { color:var(--brand); background:var(--hover); }
+.entry-frame:has(.reader-layout) .gitbook-page-aside .reader-feedback { border:0; padding:0; margin:24px 0 0; background:transparent; }
+.entry-frame:has(.reader-layout) .gitbook-page-aside .feedback-rating { display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+.entry-frame:has(.reader-layout) .gitbook-page-aside .feedback-rating p { font-size:14px; color:var(--muted); margin:0; }
+.entry-frame:has(.reader-layout) .gitbook-page-aside .feedback-rating>div { display:inline-flex; gap:4px; border:1px solid var(--line); border-radius:24px; padding:4px; }
+.entry-frame:has(.reader-layout) .gitbook-page-aside .feedback-rating button { display:flex; align-items:center; justify-content:center; min-height:32px; width:32px; padding:6px; border:0; border-radius:50%; background:transparent; color:var(--muted); }
+.entry-frame:has(.reader-layout) .gitbook-page-aside .feedback-rating button:hover { background:var(--hover); }
+.entry-frame:has(.reader-layout) .gitbook-page-aside .feedback-rating button[aria-pressed=true] { background:var(--accent-soft); color:var(--brand); }
+.entry-frame:has(.reader-layout) .gitbook-page-aside .feedback-label { position:absolute; width:1px; height:1px; clip-path:inset(50%); overflow:hidden; white-space:nowrap; }
+.entry-frame:has(.reader-layout) .gitbook-page-aside .feedback-privacy,.entry-frame:has(.reader-layout) .gitbook-page-aside .feedback-status,.entry-frame:has(.reader-layout) .gitbook-page-aside .feedback-error { font-size:11px; line-height:1.6; color:var(--muted); }
+.entry-frame:has(.reader-layout) .gitbook-page-aside .feedback-privacy { margin-top:12px; }
+.entry-frame:has(.reader-layout) .gitbook-page-aside .feedback-status:empty { display:none; }
+.entry-frame:has(.reader-layout) .gitbook-page-aside textarea { width:100%; }
+.entry-frame:has(.reader-layout) .reader-page-navigation { margin-top:32px; }
+.entry-frame:has(.reader-layout)>footer { max-width:1376px; width:calc(100% - 64px); margin-inline:auto; }
+@media(min-width:1024px) and (max-width:1279px) {
+ .entry-frame:has(.reader-layout) .site-header { grid-template-columns:288px 48px minmax(0,1fr) 16px auto; }
+ .entry-frame:has(.reader-layout) .reader-content.has-outline { display:flex; flex-direction:column; gap:0; }
+ .entry-frame:has(.reader-layout) .gitbook-page-aside { display:contents; position:static; top:auto; max-height:none; overflow:visible; }
+ .entry-frame:has(.reader-layout) .gitbook-page-aside .outline-disclosure { order:0; width:100%; padding-top:24px; }
+ .entry-frame:has(.reader-layout) .reader-content .gitbook-page-body { order:1; }
+ .entry-frame:has(.reader-layout) .article-side-actions { order:2; }
+ .entry-frame:has(.reader-layout) .gitbook-page-aside .reader-feedback { order:3; margin-bottom:32px; }
+}
+@media(max-width:1023px) {
+ .entry-frame:has(.reader-layout) .site-header { display:flex; padding:0 24px; gap:16px; }
+ .entry-frame:has(.reader-layout) .header-search { flex:1; max-width:none; }
+ .entry-frame:has(.reader-layout) .account-controls { margin-left:auto; }
+ .entry-frame:has(.reader-layout) .reader-layout { display:flex; flex-direction:column; width:100%; gap:0; }
+ .entry-frame:has(.reader-layout) .reader-navigation-shell { position:static; flex:none; width:100%; }
+ .entry-frame:has(.reader-layout) .reader-content.has-outline { display:flex; flex-direction:column; width:100%; padding:0 24px; gap:0; align-items:stretch; }
+ .entry-frame:has(.reader-layout) .gitbook-page-aside { display:contents; position:static; top:auto; max-height:none; overflow:visible; }
+ .entry-frame:has(.reader-layout) .gitbook-page-aside .outline-disclosure { order:0; padding-top:20px; }
+ .entry-frame:has(.reader-layout) .reader-content .gitbook-page-body { order:1; padding:24px 0 48px; max-width:none; }
+ .entry-frame:has(.reader-layout) .article-side-actions { order:2; flex-direction:row; flex-wrap:wrap; margin:0 0 20px; }
+ .entry-frame:has(.reader-layout) .article-side-actions .reader-pdf-link { width:auto; }
+ .entry-frame:has(.reader-layout) .gitbook-page-aside .reader-feedback { order:3; margin:0 0 32px; }
+ .entry-frame:has(.reader-layout) .gitbook-page-header.gitbook-page-header h1 { font-size:30px; }
+ .entry-frame:has(.reader-layout) .gitbook-table-of-contents { width:100%; flex:none; padding:16px 0; }
+ .entry-frame:has(.reader-layout) .mobile-toc-dialog { background:var(--panel); }
+}
+@media(max-width:760px) {
+ .entry-frame:has(.reader-layout) .site-header { padding:0 16px; gap:12px; }
+ .entry-frame:has(.reader-layout) .header-search { flex:0 0 40px; margin-left:auto; width:40px; }
+ .entry-frame:has(.reader-layout) .header-search-toggle { width:40px; height:40px; }
+ .entry-frame:has(.reader-layout) .juyu-brand { gap:8px; }
+ .entry-frame:has(.reader-layout) .juyu-brand img { width:72px; height:28px; }
+ .entry-frame:has(.reader-layout) .juyu-brand>span { font-size:12px; padding-left:8px; }
+ .entry-frame:has(.reader-layout) .account-controls { margin:0; }
+ .entry-frame:has(.reader-layout) .account-menu summary { min-width:40px; min-height:40px; padding:4px; }
+}
