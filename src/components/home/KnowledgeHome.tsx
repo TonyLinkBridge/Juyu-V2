@@ -5,10 +5,256 @@ import type {NavigationNode} from '../../reader/tree';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {RecentItem} from '../../recent/model';
 import {SearchInput} from '../gitbook/Search/SearchInput';
-export function KnowledgeHome({pages,menu,latest,recent,search=true,showRecent=true,admin=false}:{pages:NavigationNode[];menu:MenuItem[];latest:{id:string;title:string;updated:string}[];recent:RecentItem[];search?:boolean;showRecent?:boolean;admin?:boolean}){
- const documents:Extract<NavigationNode,{type:'document'}>[]=[];
- function collect(nodes:NavigationNode[]){for(const n of nodes){if(n.type==='group')collect(n.descendants);else if(!documents.some(d=>d.id===n.id))documents.push(n);}}
- collect(pages);
- const entries=menu.filter(item=>!['/help-centre/favorites','/help-centre/recent','/help-centre/forms'].includes(item.href));
- return <main id="main-content" className="knowledge-home"><section className="home-hero"><p className="home-eyebrow">JUYU 内部知识与运营中心</p><h1>今天需要找什么答案？</h1><p className="home-description">从正式知识与业务速查中，找到可靠的处理依据。</p>{search&&<div className="home-search"><SearchInput query=""/></div>}<div className="home-entries">{entries.map(item=>{const Icon=item.href.includes('ops')?Shield:item.href.includes('reference')?LinkSimple:item.href.includes('qa')?Chats:FileText;return <Link prefetch={false} key={item.id} href={item.href==='/help-centre'?'/help-centre/library':item.href}><span className="home-entry-icon"><Icon size={27}/></span><div><h2>{item.label}</h2><p>{item.href.includes('ops')?'查阅内部运营流程、异常与升级处理。':item.href.includes('reference')?'快速查询关键信息，对照业务规则。':item.href.includes('qa')?'查看常见问题与标准解答。':'浏览团队正式资料，了解流程与操作规范。'}</p></div><ArrowRight size={18}/></Link>;})}</div></section><div className="home-content"><div className="home-columns"><section id="knowledge-documents"><div className="home-section-heading"><h2>知识资料</h2><span>按业务查阅团队的正式文档</span></div><ul className="home-document-list">{documents.slice(0,4).map(d=><li key={d.id}><Link prefetch={false} href={d.href}><span className="home-document-icon"><FileText size={24}/></span><div><strong>{d.title}</strong><small>已发布 · 正式资料</small></div><ArrowRight size={16}/></Link></li>)}</ul>{!documents.length&&<div className="home-empty"><h3>正式资料正在准备中</h3><p>审核并发布的文章会显示在这里。</p>{admin&&<Link prefetch={false} href="/admin/editor" className="secondary-link">创建第一篇资料</Link>}</div>}</section><section><div className="home-section-heading"><h2>最近修订</h2><span>当前可阅读的正式版本</span></div><ul className="home-updates">{latest.map(item=><li key={item.id}><Link prefetch={false} href={`/help-centre?article=${encodeURIComponent(item.id)}`}><span className="update-dot"/><strong>{item.title}</strong><time dateTime={item.updated}>{new Intl.DateTimeFormat('zh-CN',{month:'2-digit',day:'2-digit',timeZone:'Asia/Kuala_Lumpur'}).format(new Date(item.updated))}</time></Link></li>)}</ul>{!latest.length&&<p className="home-empty">暂无已发布的修订内容。</p>}</section></div>{showRecent&&<section className="home-recent"><div className="home-section-heading"><h2>最近浏览</h2><span>快速回到你最近查看的内容</span><Link prefetch={false} href="/help-centre/recent">查看全部 <ArrowRight size={16}/></Link></div><div className="home-recent-items">{recent.map(item=><Link prefetch={false} key={item.id} href={contentPath(item.kind,item.id)}><Clock size={22}/><div><strong>{item.title}</strong><small>正式版 {item.revision}</small></div></Link>)}</div>{!recent.length&&<p className="home-empty">阅读资料后，可在这里继续查看。</p>}</section>}{admin&&<Link prefetch={false} href="/admin" className="home-admin-link">进入管理后台 <ArrowRight size={16}/></Link>}</div></main>;
+
+export function KnowledgeHome({
+  pages,
+  menu,
+  latest,
+  recent,
+  search=true,
+  showRecent=true,
+  admin=false
+}:{
+  pages:NavigationNode[];
+  menu:MenuItem[];
+  latest:{id:string;title:string;updated:string}[];
+  recent:RecentItem[];
+  search?:boolean;
+  showRecent?:boolean;
+  admin?:boolean;
+}){
+  const documents:Extract<NavigationNode,{type:'document'}>[]=[];
+
+  function collect(nodes:NavigationNode[]){
+    for(const n of nodes){
+      if(n.type==='group'){
+        collect(n.descendants);
+      }else if(!documents.some(d=>d.id===n.id)){
+        documents.push(n);
+      }
+    }
+  }
+
+  collect(pages);
+
+  const entries=menu.filter(
+    item=>![
+      '/help-centre/favorites',
+      '/help-centre/recent',
+      '/help-centre/forms'
+    ].includes(item.href)
+  );
+
+  return (
+    <main id="main-content" className="knowledge-home">
+      <section className="home-hero">
+        <p className="home-eyebrow">
+          JUYU 内部知识与运营中心
+        </p>
+
+        <h1>今天需要找什么答案？</h1>
+
+        <p className="home-description">
+          从正式知识与业务速查中，找到可靠的处理依据。
+        </p>
+
+        {search&&(
+          <div className="home-search">
+            <SearchInput query=""/>
+          </div>
+        )}
+
+        <div className="home-entries">
+          {entries.map(item=>{
+            const Icon=
+              item.href.includes('ops')
+                ? Shield
+                : item.href.includes('reference')
+                  ? LinkSimple
+                  : item.href.includes('qa')
+                    ? Chats
+                    : FileText;
+
+            return (
+              <Link
+                prefetch={false}
+                prefetchOnIntent
+                key={item.id}
+                href={
+                  item.href==='/help-centre'
+                    ? '/help-centre/library'
+                    : item.href
+                }
+              >
+                <span className="home-entry-icon">
+                  <Icon size={27}/>
+                </span>
+
+                <div>
+                  <h2>{item.label}</h2>
+
+                  <p>
+                    {item.href.includes('ops')
+                      ? '查阅内部运营流程、异常与升级处理。'
+                      : item.href.includes('reference')
+                        ? '快速查询关键信息，对照业务规则。'
+                        : item.href.includes('qa')
+                          ? '查看常见问题与标准解答。'
+                          : '浏览团队正式资料，了解流程与操作规范。'}
+                  </p>
+                </div>
+
+                <ArrowRight size={18}/>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      <div className="home-content">
+        <div className="home-columns">
+          <section id="knowledge-documents">
+            <div className="home-section-heading">
+              <h2>知识资料</h2>
+              <span>按业务查阅团队的正式文档</span>
+            </div>
+
+            <ul className="home-document-list">
+              {documents.slice(0,4).map(d=>(
+                <li key={d.id}>
+                  <Link
+                    prefetch={false}
+                    prefetchOnIntent
+                    href={d.href}
+                  >
+                    <span className="home-document-icon">
+                      <FileText size={24}/>
+                    </span>
+
+                    <div>
+                      <strong>{d.title}</strong>
+                      <small>已发布 · 正式资料</small>
+                    </div>
+
+                    <ArrowRight size={16}/>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            {!documents.length&&(
+              <div className="home-empty">
+                <h3>正式资料正在准备中</h3>
+
+                <p>审核并发布的文章会显示在这里。</p>
+
+                {admin&&(
+                  <Link
+                    prefetch={false}
+                    prefetchOnIntent
+                    href="/admin/editor"
+                    className="secondary-link"
+                  >
+                    创建第一篇资料
+                  </Link>
+                )}
+              </div>
+            )}
+          </section>
+
+          <section>
+            <div className="home-section-heading">
+              <h2>最近修订</h2>
+              <span>当前可阅读的正式版本</span>
+            </div>
+
+            <ul className="home-updates">
+              {latest.map(item=>(
+                <li key={item.id}>
+                  <Link
+                    prefetch={false}
+                    prefetchOnIntent
+                    href={`/help-centre?article=${encodeURIComponent(item.id)}`}
+                  >
+                    <span className="update-dot"/>
+
+                    <strong>{item.title}</strong>
+
+                    <time dateTime={item.updated}>
+                      {new Intl.DateTimeFormat(
+                        'zh-CN',
+                        {
+                          month:'2-digit',
+                          day:'2-digit',
+                          timeZone:'Asia/Kuala_Lumpur'
+                        }
+                      ).format(new Date(item.updated))}
+                    </time>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            {!latest.length&&(
+              <p className="home-empty">
+                暂无已发布的修订内容。
+              </p>
+            )}
+          </section>
+        </div>
+
+        {showRecent&&(
+          <section className="home-recent">
+            <div className="home-section-heading">
+              <h2>最近浏览</h2>
+              <span>快速回到你最近查看的内容</span>
+
+              <Link
+                prefetch={false}
+                prefetchOnIntent
+                href="/help-centre/recent"
+              >
+                查看全部 <ArrowRight size={16}/>
+              </Link>
+            </div>
+
+            <div className="home-recent-items">
+              {recent.map(item=>(
+                <Link
+                  prefetch={false}
+                  prefetchOnIntent
+                  key={item.id}
+                  href={contentPath(item.kind,item.id)}
+                >
+                  <Clock size={22}/>
+
+                  <div>
+                    <strong>{item.title}</strong>
+                    <small>正式版 {item.revision}</small>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {!recent.length&&(
+              <p className="home-empty">
+                阅读资料后，可在这里继续查看。
+              </p>
+            )}
+          </section>
+        )}
+
+        {admin&&(
+          <Link
+            prefetch={false}
+            prefetchOnIntent
+            href="/admin"
+            className="home-admin-link"
+          >
+            进入管理后台 <ArrowRight size={16}/>
+          </Link>
+        )}
+      </div>
+    </main>
+  );
 }

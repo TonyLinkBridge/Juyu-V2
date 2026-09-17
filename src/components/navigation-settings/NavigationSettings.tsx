@@ -1,6 +1,7 @@
 'use client';
 import {confirmAction} from '../feedback/feedback';
 import {useEffect,useRef,useState,type FormEvent} from 'react';
+import {useRouter} from 'next/navigation';
 import {NavigationWriteRejected,readNavigationSettings,saveNavigationSettings} from '../../navigation-settings/client';
 import {navigationPages,parseNavigationWrite,type NavigationConfig,type NavigationEntry,type NavigationWrite,type NavigationPage} from '../../navigation-settings/model';
 import type {CategoryDefinition} from '../../categories/model';
@@ -17,6 +18,7 @@ function categoryPath(category:CategoryDefinition,categories:CategoryDefinition[
 const rejectionText:Record<string,string>={NAVIGATION_CONFLICT:'导航已有新版本。当前输入已保留；请保留备份并载入最新设置，再确认修改。',FORBIDDEN:'当前账号没有管理导航的权限。输入和备份仍保留在本页。',INVALID_INPUT:'导航设置未通过校验。请检查名称、角色和入口目标。'};
 
 export function NavigationSettings({initial,categories:initialCategories=[],state='ready'}:{initial?:NavigationConfig;categories?:CategoryDefinition[];state?:'ready'|'unavailable'|'denied'}){
+ const router=useRouter();
  const [config,setConfig]=useState<NavigationConfig|null>(initial??null);
  const [categories,setCategories]=useState(initialCategories);
  const [availability,setAvailability]=useState(state==='ready'&&!initial?'unavailable':state);
@@ -46,11 +48,12 @@ export function NavigationSettings({initial,categories:initialCategories=[],stat
    if(target.origin===window.location.origin&&target.pathname===window.location.pathname&&target.search===window.location.search&&target.hash)return;
    event.preventDefault();event.stopPropagation();
    if(locked||!await confirmAction('本页有未保存的导航修改或保留的配置备份，离开后会丢失。确定离开吗？'))return;
-   navigationConfirmed.current=true;window.location.assign(target.href);
-  }
+   navigationConfirmed.current=true;
+   if(target.origin===window.location.origin)router.push(target.pathname+target.search+target.hash);
+   else window.location.assign(target.href);}
   window.addEventListener('beforeunload',beforeUnload);document.addEventListener('click',navigate,true);
   return()=>{window.removeEventListener('beforeunload',beforeUnload);document.removeEventListener('click',navigate,true);};
- },[hasRetainedInput,locked]);
+},[hasRetainedInput,locked,router]);
 
  function updateEntries(entries:NavigationEntry[]){if(!lock.current&&!frozen)setDraft(current=>current?{...current,entries}:null);}
  function patchEntry(value:Partial<NavigationEntry>){if(draft&&selected)updateEntries(draft.entries.map(entry=>entry.id===selected.id?{...entry,...value}:entry));}

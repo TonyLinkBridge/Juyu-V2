@@ -2,6 +2,7 @@
 import {confirmAction} from '../feedback/feedback';
 
 import {useEffect, useRef, useState, type ReactNode, type FormEvent} from 'react';
+import {useRouter} from 'next/navigation';
 import {CategoryWriteRejected, readCategories, saveCategory} from '../../categories/client';
 import {parseCategoryWrite, type CategoryDefinition, type CategoryWrite} from '../../categories/model';
 
@@ -57,6 +58,7 @@ const rejectionText:Record<string,string> = {
 };
 
 export function CategorySettings({initial=[],state='ready'}:{initial?:CategoryDefinition[];state?:'ready'|'unavailable'|'denied'}) {
+    const router=useRouter();
   const [categories,setCategories]=useState(initial);
   const [availability,setAvailability]=useState(state);
   const [draft,setDraft]=useState<Draft|null>(null);
@@ -89,12 +91,12 @@ export function CategorySettings({initial=[],state='ready'}:{initial?:CategoryDe
       if(destination.origin===window.location.origin && destination.pathname===window.location.pathname && destination.search===window.location.search && destination.hash)return;
       event.preventDefault();event.stopPropagation();
       if(navigationLocked || !await confirmAction('有尚未保存的分类修改。确定放弃这些修改并离开吗？')){event.preventDefault();event.stopPropagation();}
-      else {navigationConfirmed.current=true;window.location.assign(destination.href);}
+      else {navigationConfirmed.current=true;if(destination.origin===window.location.origin)router.push(destination.pathname+destination.search+destination.hash);else window.location.assign(destination.href);}
     }
     window.addEventListener('beforeunload',warnBeforeLeaving);
     document.addEventListener('click',guardNavigation,true);
     return ()=>{window.removeEventListener('beforeunload',warnBeforeLeaving);document.removeEventListener('click',guardNavigation,true);};
-  },[navigationLocked,dirty]);
+},[navigationLocked,dirty,router]);
 
   async function canDiscard(){return !dirty || await confirmAction('有尚未保存的分类修改。确定放弃这些修改吗？');}
   async function closeEditor(){if(lock.current || frozen || !await canDiscard())return;setDraft(null);setConflict(false);setNotice(null);}

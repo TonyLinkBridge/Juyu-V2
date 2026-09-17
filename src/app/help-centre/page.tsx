@@ -34,13 +34,23 @@ export default async function HelpCentre({searchParams,library=false}:{library?:
   if (access.status === 'unavailable') redirect('/sign-in/error');
   // Missing Clerk configuration must still show the existing employee login entry.
   if (clerkConfiguration(process.env) !== 'configured') redirect('/sign-in');
-  const admin = await adminForCompany(access);
-  let memberBlocked=false;
-  let enrollment:EnrollmentResult|null=null;
-  if(access.status==='verified'){
-    try{enrollment=await (await applicationEnrollment()).inspect();if(enrollment.status==='ready')await bindCurrentMember();}
-    catch(error){const message=error instanceof Error?error.message:'';memberBlocked=message.startsWith('FORBIDDEN')||message==='MEMBER_PENDING';}
+const adminPromise = adminForCompany(access);
+let memberBlocked = false;
+let enrollment: EnrollmentResult | null = null;
+if (access.status === 'verified') {
+  try {
+    enrollment = await (await applicationEnrollment()).inspect();
+    if (enrollment.status === 'ready') {
+      await bindCurrentMember();
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    memberBlocked =
+      message.startsWith('FORBIDDEN') ||
+      message === 'MEMBER_PENDING';
   }
+}
+const admin = await adminPromise;
   if(enrollment?.status==='ready'&&!memberBlocked) {
     const homeParams=await searchParams;
     if(homeParams.article===undefined&&homeParams.q===undefined){
@@ -54,12 +64,21 @@ export default async function HelpCentre({searchParams,library=false}:{library?:
       }
       return <EntryShell account announcement={readerAnnouncement} navigation={<ReaderQuickLinks items={home.menu} currentHref="/help-centre"/>} search={home.features.search?<SearchInput query=""/>:undefined}>{<KnowledgeHome {...home} search={home.features.search} showRecent={home.features.recent} admin={admin.status==='admin'}/>}</EntryShell>;
     }
-    let features=closedFeatureFlags,featuresUnavailable=false;try{features=await(await applicationAuthorization()).features();}catch{featuresUnavailable=true;}
-    let pages:NavigationNode[]=[];let article:Publication|null=null;let failed=false;
-    const params=await searchParams;
-    const requested=params.article;
-    const query=parseSearchQuery(params.q).query;
-    const input=features.search?<SearchInput key={query} query={query}/>:undefined;
+    let features=closedFeatureFlags,featuresUnavailable=false;
+let pages:NavigationNode[]=[];
+let article:Publication|null=null;
+let failed=false;
+const params=await searchParams;
+const requested=params.article;
+const query=parseSearchQuery(params.q).query;
+if(params.q!==undefined){
+  try{
+    features=await(await applicationAuthorization()).features();
+  }catch{
+    featuresUnavailable=true;
+  }
+}
+let input=features.search?<SearchInput key={query} query={query}/>:undefined;
     if(params.q!==undefined&&!features.search)return <EntryShell navigation={<ReaderMenu/>}><FeatureNotice feature="search" unavailable={featuresUnavailable}/></EntryShell>;
     if(params.q!==undefined){
       let search=searchTitles([],params.q,params.page);
@@ -69,7 +88,7 @@ export default async function HelpCentre({searchParams,library=false}:{library?:
       </div></EntryShell>;
     }
     let favorite:import('../../favorites/model').FavoriteState|undefined;
-    let section:'ops'|undefined;let destination:string|undefined;try {({pages,article,destination,favorite,section}=await (await applicationAuthorization()).reader(requested));} catch {failed=true;}
+    let section:'ops'|undefined;let destination:string|undefined;try {({features,pages,article,destination,favorite,section}=await (await applicationAuthorization()).reader(requested));input=features.search?<SearchInput key={query} query={query}/>:undefined;} catch {failed=true;}
     if(destination)redirect(destination);
     return <EntryShell account search={input} announcement={failed ? undefined : readerAnnouncement}><ReaderNavigation section={section} features={features} pages={pages} requested={requested} failed={failed} article={article} articleActions={!failed&&article?<>{features.favorites&&<FavoriteButton documentId={article.id} revision={article.revision} initial={favorite}/>}{features.recent&&<RecentRecorder documentId={article.id} revision={article.revision}/>}{features.analytics&&<ArticleAnalytics documentId={article.id} revision={article.revision}/>}</>:undefined}/></EntryShell>;
   }

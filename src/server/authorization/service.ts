@@ -13,8 +13,8 @@ import {captureAnalytics} from '../analytics/repository.ts';
 import {readRecent,recordRecent} from '../recent/repository.ts';
 import {readFavorites,readFavorite,writeFavorite} from '../favorites/repository.ts';
 import {readQa} from '../qa/repository.ts';
-import {readReference,readReferenceDetail} from '../reference/repository.ts';
-import {readOps,readReaderSections} from '../ops/repository.ts';
+import {readReference,readReferenceDetail,readReferencePage} from '../reference/repository.ts';
+import {readOps,readReaderSections,readFirstOpsId} from '../ops/repository.ts';
 import {readHistory,readHistoryVersion,restoreSavedVersion,readHistoryAsset,readDeletedHistory} from '../history/repository.ts';
 import {readAvailabilityDetail,changeSavedAvailability,readArchives} from '../availability/repository.ts';
 import {readPublicationDetail,changeSavedPublication} from '../review/publication.ts';
@@ -107,8 +107,10 @@ export class AuthorizationService {
   async qa(page=1,category?:string,q=''){const v=await this.viewer();return this.database.run(v,c=>readQa(c,page,category,q),true);}
   async reference(page=1){const v=await this.viewer();return this.database.run(v,c=>readReference(c,page),true);}
   async referenceDetail(id:string){const v=await this.viewer();return this.database.run(v,c=>readReferenceDetail(c,id),true);}
+  async referencePage(page=1,article?:string){const v=await this.viewer();return this.database.run(v,c=>readReferencePage(c,page,article),true);}
   async readerSections(){const v=await this.viewer();return this.database.run(v,c=>readReaderSections(c),true);}
   async ops(page=1){const v=await this.viewer();return this.database.run(v,c=>readOps(c,page),true);}
+  async firstOpsId(){const v=await this.viewer();return this.database.run(v,c=>readFirstOpsId(c),true);}
   async deletedHistory(page=1){const v=await this.viewer(true);return this.database.run(v,c=>readDeletedHistory(c,v,page),true);}
   async history(id:string,eventPage=1,versionPage=1){const v=await this.viewer(true);return this.database.run(v,c=>readHistory(c,id,v,eventPage,versionPage),true);}
   async historyVersion(id:string,revision:number){const v=await this.viewer(true);return this.database.run(v,c=>readHistoryVersion(c,id,revision,v),true);}
@@ -155,24 +157,61 @@ export class AuthorizationService {
       return readNavigationTree(client);
     },true);
   }
-  async reader(requested:string|string[]|undefined):Promise<{section?:'ops';pages:NavigationNode[];article:Publication|null;favorite?:import('../../favorites/model.ts').FavoriteState;destination?:string}> {
-    const viewer=await this.viewer();
-    return this.database.run(viewer,async client=>{
-      const kinds=await readContentKinds(client);
-      const kind=typeof requested==='string'?(kinds.get(requested)??'article'):'article';
-      if(kind==='qa')return {pages:[],article:null,destination:'/help-centre/qa?question='+encodeURIComponent(requested as string)+'#qa-'+encodeURIComponent(requested as string)};
-      const pages=filterTree(await readNavigationTree(client),id=>(kinds.get(id)??'article')===kind);
-      const selected=selectTreePage(pages,requested);
-      if(!selected)return {pages,article:null};
-      const result=await client.query<{document_id:string;title:string;revision_id:number;body:string}>(
-        'SELECT document_id,title,revision_id,body FROM juyu.read_publication($1)',[selected.id]);
-      const row=result.rows[0];
-      const flags=await readFeatureFlags(client);
-      const feedback=row&&flags.feedback?{memberId:viewer.id,value:await readFeedback(client,row.document_id,row.revision_id)}:undefined;
-      const favorite=row&&flags.favorites?await readFavorite(client,row.document_id,row.revision_id):undefined;
-      return {pages,favorite,section:kind==='ops'?'ops':undefined,article:row?{id:row.document_id,title:row.title,revision:row.revision_id,body:row.body,feedback,...await readPresentation(client,selected.id)}:null};
-    },true);
-  }
+async reader(requested:string|string[]|undefined):Promise<{features:Awaited<ReturnType<typeof readFeatureFlags>>;section?:'ops';pages:NavigationNode[];article:Publication|null;favorite?:import('../../favorites/model.ts').FavoriteState;destination?:string}> {
+  const viewer=await this.viewer();
+  return this.database.run(viewer,async client=>{
+    const flags=await readFeatureFlags(client);
+    const kinds=await readContentKinds(client);
+    const kind=typeof requested==='string'?(kinds.get(requested)??'article'):'article';
+    if(kind==='qa'){
+      return {
+        features:flags,
+        pages:[],
+        article:null,
+        destination:'/help-centre/qa?question='+encodeURIComponent(requested as string)+'#qa-'+encodeURIComponent(requested as string)
+      };
+    }
+    const pages=filterTree(
+      await readNavigationTree(client),
+      id=>(kinds.get(id)??'article')===kind
+    );
+    const selected=selectTreePage(pages,requested);
+    if(!selected){
+      return {
+        features:flags,
+        pages,
+        article:null
+      };
+    }
+    const result=await client.query<{document_id:string;title:string;revision_id:number;body:string}>(
+      'SELECT document_id,title,revision_id,body FROM juyu.read_publication($1)',
+      [selected.id]
+    )
+    const row=result.rows[0];
+    const feedback=row&&flags.feedback
+      ? {memberId:viewer.id,value:await readFeedback(client,row.document_id,row.revision_id)}
+      : undefined;
+    const favorite=row&&flags.favorites
+      ? await readFavorite(client,row.document_id,row.revision_id)
+      : undefined;
+    return {
+      features:flags,
+      pages,
+      favorite,
+      section:kind==='ops'?'ops':undefined,
+      article:row
+        ? {
+            id:row.document_id,
+            title:row.title,
+            revision:row.revision_id,
+            body:row.body,
+            feedback,
+            ...await readPresentation(client,selected.id)
+          }
+        : null
+    };
+  },true);
+}
   async search(query:string|string[]|undefined,page?:string|string[]):Promise<{pages:NavigationNode[];search:TitleSearch}> {
     const viewer=await this.viewer();
     return this.database.run(viewer,async client=>{

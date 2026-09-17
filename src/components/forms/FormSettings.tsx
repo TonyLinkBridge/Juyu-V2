@@ -1,7 +1,7 @@
 'use client';
 import {confirmAction} from '../feedback/feedback';
-
 import {useEffect,useRef,useState,type FormEvent} from 'react';
+import {useRouter} from 'next/navigation';
 import {FormWriteRejected,readFormSettings,saveForm} from '../../forms/settings-client';
 import {parseFormWrite,type FormDefinition,type FormWrite,type FormField} from '../../forms/model';
 import type {FieldDefinition} from '../../fields/model';
@@ -23,6 +23,7 @@ const rejectionText:Record<string,string>={
 };
 
 export function FormSettings({initial=[],definitions=[],state='ready'}:{initial?:FormDefinition[];definitions?:FieldDefinition[];state?:'ready'|'unavailable'|'denied'}){
+ const router=useRouter();
  const [forms,setForms]=useState(initial);
  const [fields,setFields]=useState(definitions);
  const [availability,setAvailability]=useState(state);
@@ -52,11 +53,11 @@ export function FormSettings({initial=[],definitions=[],state='ready'}:{initial?
    if(destination.origin===window.location.origin&&destination.pathname===window.location.pathname&&destination.search===window.location.search&&destination.hash)return;
    event.preventDefault();event.stopPropagation();
    if(navigationLocked||!await confirmAction('有尚未保存的表单修改。确定放弃这些修改并离开吗？')){event.preventDefault();event.stopPropagation();}
-   else {navigationConfirmed.current=true;window.location.assign(destination.href);}
+   else {navigationConfirmed.current=true;if(destination.origin===window.location.origin)router.push(destination.pathname+destination.search+destination.hash);else window.location.assign(destination.href);}
   }
   window.addEventListener('beforeunload',warnBeforeLeaving);document.addEventListener('click',guardNavigation,true);
   return ()=>{window.removeEventListener('beforeunload',warnBeforeLeaving);document.removeEventListener('click',guardNavigation,true);};
- },[navigationLocked,dirty]);
+  },[navigationLocked,dirty,router]);
 
  async function canDiscard(){return !dirty||await confirmAction('有尚未保存的表单修改。确定放弃这些修改吗？');}
  async function select(form?:FormDefinition){

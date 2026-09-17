@@ -1,1 +1,0 @@
-export default function ReaderLoading(){return <main id="main-content" className="reader-loading" aria-busy="true"><p role="status">正在读取资料…</p><div className="loading-heading"/><div className="loading-toolbar"/>{[0,1,2].map(n=><div className="loading-row" key={n}><span/><span/><span/></div>)}</main>;}
