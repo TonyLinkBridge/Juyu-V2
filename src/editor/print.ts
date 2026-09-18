@@ -2,7 +2,7 @@ import {inlineText,isFileBlock,privateAssetId,type EditorBlock,type EditorInline
 import {displayColor} from './inline.ts';
 import type {MediaBlock} from '../media/model.ts';
 const e=(value:string)=>value.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
-const css=(p:{textAlignment?:string;textColor?:string;backgroundColor?:string})=>e([p.textAlignment?`text-align:${p.textAlignment}`:'',p.textColor&&p.textColor!=='default'?`color:${displayColor(p.textColor)}`:'',p.backgroundColor&&p.backgroundColor!=='default'?`background-color:${displayColor(p.backgroundColor,true)}`:''].filter(Boolean).join(';'));
+const css=(p:{textAlignment?:string;textColor?:string;backgroundColor?:string})=>e([p.textAlignment?`text-align:${p.textAlignment}`:'',p.backgroundColor==='red'?'color:#fff':p.textColor&&p.textColor!=='default'?`color:${displayColor(p.textColor)}`:'',p.backgroundColor&&p.backgroundColor!=='default'?`background-color:${displayColor(p.backgroundColor,true)}`:''].filter(Boolean).join(';'));
 function marks(content:EditorInline[]):string{return content.map(inline=>{if(inline.type==='link')return `<a href="${e(inline.href)}" rel="noopener noreferrer">${marks(inline.content)}</a>`;let html=e(inline.text);for(const [mark,tag] of [['code','code'],['bold','strong'],['italic','em'],['underline','u'],['strike','s']] as const)if(inline.styles[mark])html=`<${tag}>${html}</${tag}>`;const s=css(inline.styles);return s?`<span style="${s}">${html}</span>`:html;}).join('');}
 /** Print expands all folded children. Media bytes still come only from the existing authorized exporter. */
 export function printEditor(nodes:EditorBlock[],media:(b:MediaBlock)=>string):string{

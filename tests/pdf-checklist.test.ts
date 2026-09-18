@@ -16,3 +16,8 @@ test('R20 unchecked items retain explicit marks without acquiring completion str
  const html=printEditor(blocks,()=>{throw Error('NO_MEDIA');});
  assert.match(html,/☐ 待处理<s>原有删除线<\/s>/);assert.doesNotMatch(html,/text-decoration:line-through/);
 });
+test('strong red background exports with white text for legibility',()=>{
+ const blocks=normalizeEditorBlocks([{id:'alert',type:'paragraph',content:text('不可执行',{backgroundColor:'red'})}]);
+ const html=printEditor(blocks,()=>{throw Error('NO_MEDIA');});
+ assert.match(html,/color:#fff;background-color:#ae2832/);
+});

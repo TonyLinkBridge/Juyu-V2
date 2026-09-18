@@ -558,6 +558,9 @@ button, input, select { color: inherit; }
 
 .editor-canvas .bn-editor a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
 
+/* "红色" background means the brand-red alert fill, consistently with reader and PDF. */
+.editor-canvas .bn-editor [data-background-color="red"]{background-color:#ae2832!important;color:#fff!important}
+
 /* Focused authoring: native BlockNote is the primary surface; settings remain on demand. */
 .admin-frame.is-editor .admin-sidebar{display:none}.admin-frame.is-editor .admin-page-content{margin-left:0;padding:0;grid-column:1/-1}.admin-frame.is-editor{background:var(--panel)}
 .editor-main:has(.editor-focused){width:100%;max-width:none;padding:0}.article-editor.editor-focused{margin:0;background:var(--panel);min-height:calc(100dvh - 76px)}

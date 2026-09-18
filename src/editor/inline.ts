@@ -25,7 +25,7 @@ export function normalizeInline(v:unknown,plain=false):EditorInline[]{
  });
 }
 export const inlineText=(content:EditorInline[]):string=>content.map(c=>c.type==='text'?c.text:c.content.map(t=>t.text).join('')).join('');
-const palette:Record<string,[string,string]>={gray:['#9b9a97','#ebeced'],brown:['#64473a','#e9e5e3'],red:['#e03e3e','#fbe4e4'],orange:['#d9730d','#f6e9d9'],yellow:['#dfab01','#fbf3db'],green:['#4d6461','#ddedea'],blue:['#0b6e99','#ddebf1'],purple:['#6940a5','#eae4f2'],pink:['#ad1a72','#f4dfeb']};
+const palette:Record<string,[string,string]>={gray:['#9b9a97','#ebeced'],brown:['#64473a','#e9e5e3'],red:['#e03e3e','#ae2832'],orange:['#d9730d','#f6e9d9'],yellow:['#dfab01','#fbf3db'],green:['#4d6461','#ddedea'],blue:['#0b6e99','#ddebf1'],purple:['#6940a5','#eae4f2'],pink:['#ad1a72','#f4dfeb']};
 export const displayColor=(v:string|undefined,background=false)=>!v||v==='default'?undefined:palette[v]?.[background?1:0]??v;
 
 /** Screen-only neutral ink. Print keeps the original authored color. */
@@ -38,5 +38,6 @@ export function screenTextColor(value:string|undefined):string|undefined {
 export function screenInlineStyle(p:{textColor?:string;backgroundColor?:string}) {
  const background=displayColor(p.backgroundColor,true);
  const transparent=!background||background.toLowerCase()==='transparent';
- return {color:screenTextColor(p.textColor),backgroundColor:background,...(!transparent?{'--reader-neutral-ink':'#000'}:{})};
+ const strongRed=p.backgroundColor==='red';
+ return {color:strongRed?'#fff':screenTextColor(p.textColor),backgroundColor:background,...(!transparent?{'--reader-neutral-ink':strongRed?'#fff':'#000'}:{})};
 }
