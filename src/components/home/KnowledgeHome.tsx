@@ -91,7 +91,7 @@ export function KnowledgeHome({
                 </span>
 
                 <div>
-                  <h2>{item.label}</h2>
+                  <h2>{item.href==='/help-centre'?'知识文章':item.label}</h2>
 
                   <p>
                     {item.href.includes('ops')
@@ -230,7 +230,7 @@ export function KnowledgeHome({
 
                   <div>
                     <strong>{item.title}</strong>
-                    <small>正式版 {item.revision}</small>
+                    <small>{item.publicationNumber?`正式版本 ${item.publicationNumber}`:'已发布'}</small>
                   </div>
                 </Link>
               ))}
@@ -244,16 +244,7 @@ export function KnowledgeHome({
           </section>
         )}
 
-        {admin&&(
-          <Link
-            prefetch={false}
-            prefetchOnIntent
-            href="/admin"
-            className="home-admin-link"
-          >
-            进入管理后台 <ArrowRight size={16}/>
-          </Link>
-        )}
+
       </div>
     </main>
   );

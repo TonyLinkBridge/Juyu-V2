@@ -10,8 +10,8 @@ test('workspace query rejects ambiguous filters and treats title as literal text
  assert.equal(url.pathname,'/admin');assert.equal(url.searchParams.get('q'),q.q);assert.equal(url.searchParams.get('scope'),'review');assert.equal(url.searchParams.get('page'),'2');
 });
 test('workspace publication text distinguishes current workflow from published reader copy',()=>{
- assert.equal(publicationLabel({revision:3,publishedRevision:2,status:'draft'}),'旧正式版 2 仍可阅读');
- assert.equal(publicationLabel({revision:2,publishedRevision:2,status:'published'}),'正式版 2');
+ assert.equal(publicationLabel({revision:3,publicationNumber:2,publishedRevision:2,status:'draft'}),'旧正式版 2 仍可阅读');
+ assert.equal(publicationLabel({revision:2,publicationNumber:2,publishedRevision:2,status:'published'}),'正式版 2');
  assert.equal(publicationLabel({revision:1,publishedRevision:null,status:'approved'}),'尚未发布');
 });
 test('workspace responses hide service errors and never share private results',async()=>{

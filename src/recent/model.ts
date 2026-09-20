@@ -2,7 +2,7 @@ import type {ContentKind} from '../domain/model.ts';
 import {positiveInteger} from '../feedback/model.ts';
 export interface RecentInput {revision:number}
 export interface RecentReceipt {documentId:string;revision:number;viewedAt:string}
-export interface RecentItem {id:string;title:string;kind:ContentKind;revision:number;tags:string[];viewedRevision:number;viewedAt:string}
+export interface RecentItem {publicationNumber?:number|null;id:string;title:string;kind:ContentKind;revision:number;tags:string[];viewedRevision:number;viewedAt:string}
 export interface RecentPage {items:RecentItem[];total:number;page:number;pages:number}
 export function recentInput(value:unknown):RecentInput {
  if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('INVALID_INPUT');

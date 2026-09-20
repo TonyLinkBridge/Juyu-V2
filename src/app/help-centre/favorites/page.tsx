@@ -20,5 +20,5 @@ export default async function FavoritesCollectionPage({searchParams}:{searchPara
  let data:FavoritesPage|undefined,state:'ready'|'denied'|'unavailable'='unavailable';
  try{const params=await searchParams,url=new URL('http://local/');for(const [key,value] of Object.entries(params)){if(typeof value!=='string')throw new Error('INVALID_INPUT');url.searchParams.set(key,value);}const query=favoritesPage(url),service=await applicationAuthorization();data=await service.favorites(query);state='ready';}
  catch(error){if(error instanceof Error&&error.message.split(':')[0]==='FORBIDDEN')state='denied';}
- return <FeaturePage feature="favorites"><EntryShell navigation={<ReaderMenu currentHref="/help-centre/favorites"/>} search={<FeatureSearch/>}><main id="main-content" className="editor-main search-main"><FavoritesView data={data} state={state}/><div className="reader-actions"><EmployeeSignOut/></div></main></EntryShell></FeaturePage>;
+ return <FeaturePage feature="favorites"><EntryShell navigation={<ReaderMenu currentHref="/help-centre/favorites"/>} search={<FeatureSearch/>}><main id="main-content" className="editor-main search-main"><FavoritesView viewerId={access.userId} data={data} state={state}/><div className="reader-actions"><EmployeeSignOut/></div></main></EntryShell></FeaturePage>;
 }

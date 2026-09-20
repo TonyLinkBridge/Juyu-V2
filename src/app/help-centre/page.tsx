@@ -88,9 +88,10 @@ let input=features.search?<SearchInput key={query} query={query}/>:undefined;
       </div></EntryShell>;
     }
     let favorite:import('../../favorites/model').FavoriteState|undefined;
-    let section:'ops'|undefined;let destination:string|undefined;try {({features,pages,article,destination,favorite,section}=await (await applicationAuthorization()).reader(requested));input=features.search?<SearchInput key={query} query={query}/>:undefined;} catch {failed=true;}
+    let section:'ops'|undefined;let destination:string|undefined;try {({features,pages,article,destination,favorite,section}=await (await applicationAuthorization()).reader(requested));} catch {failed=true;}
+    input=features.search?<SearchInput key={query} query={query}/>:undefined;
     if(destination)redirect(destination);
-    return <EntryShell account search={input} announcement={failed ? undefined : readerAnnouncement}><ReaderNavigation section={section} features={features} pages={pages} requested={requested} failed={failed} article={article} articleActions={!failed&&article?<>{features.favorites&&<FavoriteButton documentId={article.id} revision={article.revision} initial={favorite}/>}{features.recent&&<RecentRecorder documentId={article.id} revision={article.revision}/>}{features.analytics&&<ArticleAnalytics documentId={article.id} revision={article.revision}/>}</>:undefined}/></EntryShell>;
+    return <EntryShell account search={input} announcement={failed ? undefined : readerAnnouncement}><ReaderNavigation section={section} features={features} pages={pages} requested={requested} failed={failed} article={article} articleActions={!failed&&article?<>{features.favorites&&<FavoriteButton viewerId={access.status==='verified'?access.userId:undefined} documentId={article.id} revision={article.revision} initial={favorite}/>}{features.recent&&<RecentRecorder documentId={article.id} revision={article.revision}/>}{features.analytics&&<ArticleAnalytics documentId={article.id} revision={article.revision}/>}</>:undefined}/></EntryShell>;
   }
   const opening=enrollment&&enrollment.status!=='ready';
   const denied = access.status === 'denied';

@@ -1,4 +1,6 @@
 'use client';
+import {useAuth} from '@clerk/nextjs';
+import {createAnswerCache} from '../../qa/answer-cache';
 import {contentPath} from '../../reader/content-path';
 import type {ContentKind} from '../../domain/model';
 import {BookmarkSimple} from '@phosphor-icons/react';
@@ -6,58 +8,63 @@ import {useCallback,useEffect,useRef,useState} from 'react';
 import type {FavoriteState} from '../../favorites/model';
 import {readFavoriteState,setFavoriteState,FavoriteRejected} from '../../favorites/client';
 
-type Props={kind?:ContentKind;documentId:string;revision:number;initial?:FavoriteState;onChange?:(state:FavoriteState)=>void;label?:string};
-type CachedFavorite={state:FavoriteState;updatedAt:number};
-const FAVORITE_CACHE_TTL=30_000;
-const favoriteCache=new Map<string,CachedFavorite>();
-export function FavoriteButton(props:Props){return <FavoriteControl key={`${props.documentId}:${props.revision}`} {...props}/>;}
+type Props={viewerId?:string;kind?:ContentKind;documentId:string;revision:number;initial?:FavoriteState;onChange?:(state:FavoriteState)=>void;label?:string};
+const favoriteCache=createAnswerCache<FavoriteState>(30_000,50);
+// This listener lives as long as the cache, including after all buttons unmount.
+if(typeof window!=='undefined')window.addEventListener('juyu-clear-recovery',()=>favoriteCache.clear());
+export function FavoriteButton(props:Props){
+ const {isLoaded,userId,sessionId}=useAuth();
+ useEffect(()=>{if(!sessionId)favoriteCache.clear();},[sessionId]);
+ if(!isLoaded)return <p role="status">正在确认收藏账号…</p>;
+ if(!userId||!sessionId)return <p role="status">请登录后查看收藏。</p>;
+ const scope=JSON.stringify([userId,sessionId]);
+ return <FavoriteControl key={`${scope}:${props.documentId}:${props.revision}`} {...props} initial={props.viewerId===userId?props.initial:undefined} scope={scope}/>;
+}
 
-function FavoriteControl({kind='article',documentId,revision,initial,onChange,label='文章收藏'}:Props){
- const cacheKey=`${documentId}:${revision}`;
+function FavoriteControl({scope,kind='article',documentId,revision,initial,onChange,label='文章收藏'}:Props&{scope:string}){
  const [saved,setSaved]=useState<boolean|null>(initial?.saved??null),[busy,setBusy]=useState<'read'|'write'|''>(initial?'':'read'),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [pending,setPending]=useState<{saved:boolean}|null>(null);
+ const revoked=useRef(false);
  const operation=useRef(false),generation=useRef({value:0}),pendingRequest=useRef<{saved:boolean}|null>(null);
  const hasInitial=initial!==undefined;
  const load=useCallback((force=false)=>{
-  if(operation.current||pendingRequest.current)return;
-  const cached=favoriteCache.get(cacheKey);
-  if(!force&&cached&&Date.now()-cached.updatedAt<FAVORITE_CACHE_TTL){
-   setSaved(cached.state.saved);setBusy('');
-   return;
-  }
+  if(revoked.current||operation.current||pendingRequest.current)return;
+  const cached=force?undefined:favoriteCache.get(scope,documentId,revision);
 
   operation.current=true;const sequence=generation.current;const token=++sequence.value;
-  return readFavoriteState(documentId,revision).then(result=>{
-   if(token===sequence.value){favoriteCache.set(cacheKey,{state:result,updatedAt:Date.now()});setSaved(result.saved);}
+  return (cached?Promise.resolve(cached):readFavoriteState(documentId,revision)).then(result=>{
+   if(token===sequence.value){favoriteCache.put(scope,documentId,revision,result);setSaved(result.saved);}
   },e=>{
-   if(token===sequence.value)setError(e instanceof Error&&['FORBIDDEN','NOT_FOUND','VERSION_CHANGED'].includes(e.message)?'文章已更新或当前无法访问，请刷新文章后再操作。':'收藏状态暂时无法读取，请重试。');
+   if(token===sequence.value){favoriteCache.clear();setSaved(null);setError(e instanceof Error&&['FORBIDDEN','NOT_FOUND','VERSION_CHANGED'].includes(e.message)?'文章已更新或当前无法访问，请刷新文章后再操作。':'收藏状态暂时无法读取，请重试。');}
   }).finally(()=>{
    if(token===sequence.value){operation.current=false;setBusy('');}
   });
- },[cacheKey,documentId,revision]);
+ },[scope,documentId,revision]);
 
  const reload=useCallback(()=>{
-  if(operation.current||pendingRequest.current)return;
+  if(revoked.current||operation.current||pendingRequest.current)return;
   setBusy('read');setError('');setNotice('');void load(true);
  },[load]);
 
  useEffect(()=>{
   const sequence=generation.current;
 
-  if(initial)favoriteCache.set(cacheKey,{state:initial,updatedAt:Date.now()});
+  if(initial)favoriteCache.put(scope,documentId,revision,initial);
   if(!hasInitial)void load();
 
-  const focus=()=>{if(!onChange)void load();};
+  const focus=()=>{if(!onChange)void load(true);};
+  const clear=()=>{revoked.current=true;sequence.value++;operation.current=false;favoriteCache.clear();pendingRequest.current=null;setPending(null);setSaved(null);setBusy('');setError('登录状态已变化，请刷新页面。');};
+  window.addEventListener('juyu-clear-recovery',clear);
   window.addEventListener('focus',focus);
 
   return()=>{
    sequence.value++;operation.current=false;
-   window.removeEventListener('focus',focus);
+   window.removeEventListener('focus',focus);window.removeEventListener('juyu-clear-recovery',clear);
   };
- },[cacheKey,hasInitial,initial,load,onChange]);
+ },[scope,documentId,revision,hasInitial,initial,load,onChange]);
 
  async function change(){
-  if(operation.current||(!pendingRequest.current&&saved===null))return;
+  if(revoked.current||operation.current||(!pendingRequest.current&&saved===null))return;
   const wasUncertain=pendingRequest.current!==null;const desired=pendingRequest.current??{saved:!saved};
   pendingRequest.current=desired;setPending(desired);operation.current=true;
   const sequence=generation.current;const token=++sequence.value;setBusy('write');setError('');setNotice('');
@@ -66,12 +73,12 @@ function FavoriteControl({kind='article',documentId,revision,initial,onChange,la
    const result=await setFavoriteState(documentId,revision,desired.saved);
    if(token!==sequence.value)return;
    pendingRequest.current=null;setPending(null);
-   favoriteCache.set(cacheKey,{state:result,updatedAt:Date.now()});
+   favoriteCache.put(scope,documentId,revision,result);
    setSaved(result.saved);setNotice(result.saved?'已加入我的收藏。':'已取消收藏。');onChange?.(result);
   }catch(e){
    if(token!==sequence.value)return;
    const unknown=wasUncertain||!(e instanceof FavoriteRejected);
-   if(!unknown){pendingRequest.current=null;setPending(null);favoriteCache.delete(cacheKey);setSaved(null);}
+   if(!unknown){pendingRequest.current=null;setPending(null);favoriteCache.clear();setSaved(null);}
    setError(unknown?'收藏结果尚未确认，原操作已保留，请重试。':'文章或权限已变化，操作未执行。请重新读取或刷新文章。');
   }finally{
    if(token===sequence.value){operation.current=false;setBusy('');}

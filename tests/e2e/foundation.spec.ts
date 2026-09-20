@@ -6,11 +6,11 @@ test('website opens employee login directly without an admin chooser', async ({ 
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
   await expect(page).toHaveURL(/\/sign-in$/);
-  await expect(page.getByRole('heading', { name: '员工登录' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '登录聚域资料库' })).toBeVisible();
   await expect(page.getByRole('status')).toContainText('尚未连接');
-  await expect(page.getByRole('button', { name: '登录暂未开放' })).toBeDisabled();
+  await expect(page.getByRole('status')).toContainText('登录服务尚未连接');await expect(page.getByRole('button',{name:/Slack|登录/})).toHaveCount(0);
   await expect(page.getByRole('link', { name: '进入员工资料库' })).toHaveCount(0);
-  await expect(page.locator('a[href^="/admin"]')).toHaveCount(0);
+  await expect(page.getByRole('link',{name:'管理员登录 ↗'})).toHaveAttribute('href','/admin/sign-in');
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
   await mkdir('output/verification', { recursive: true });
   await page.screenshot({ path: `output/verification/entry-flow-${testInfo.project.name}-login.png`, fullPage: true });
@@ -20,12 +20,12 @@ test('website opens employee login directly without an admin chooser', async ({ 
 test('admin entry and forged role parameters never grant access', async ({ page }, testInfo) => {
   await page.goto('/admin?role=admin&demo=1');
   await expect(page).toHaveURL(/\/admin\/sign-in$/);
-  await expect(page.getByRole('heading', { name: '管理员登录' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '登录暂未开放' })).toBeDisabled();
+  await expect(page.getByRole('heading', { name: '登录内容管理后台' })).toBeVisible();
+  await expect(page.getByRole('status')).toContainText('登录服务尚未连接');await expect(page.getByRole('button',{name:/Slack|登录/})).toHaveCount(0);
   await expect(page.getByText('创建文章', { exact: true })).toHaveCount(0);
   await mkdir('output/verification', { recursive: true });
   await page.screenshot({ path: `output/verification/entry-flow-${testInfo.project.name}-admin.png`, fullPage: true });
-  await page.getByRole('link', { name: '切换到员工登录' }).focus();
+  await page.getByRole('link', { name: '返回员工登录 ↗' }).focus();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/sign-in$/);
 });
@@ -40,15 +40,15 @@ test('unknown routes show a recovery link and remain 404', async ({ page }) => {
 test('health means process alive while readiness stays unavailable and uncached', async ({ request }) => {
   const health = await request.get('/api/health');
   expect(health.status()).toBe(200);
-  expect(await health.json()).toEqual({ status: 'ok', scope: 'web_process_only' });
+  expect(await health.json()).toMatchObject({ status: 'ok', scope: 'web_process_only',release:expect.any(String) });
   const readiness = await request.get('/api/readiness');
   expect(readiness.status()).toBe(503);
   expect(readiness.headers()['cache-control']).toContain('no-store');
   const body = await readiness.json();
   expect(body.status).toBe('not_ready');
-  expect(body.authentication).toBe('not_integrated');
-  expect(body.database).toBe('not_integrated');
-  expect(Object.keys(body).sort()).toEqual(['authentication', 'configuration', 'database', 'status']);
+  expect(body.authentication).toBe('not_checked');
+  expect(body.database).toBe('not_checked');
+  expect(body.checkedAt).toEqual(expect.any(String));expect(body.release).toEqual(expect.any(String));expect(body.loginVerified).toBe(false);
 });
 
 
@@ -65,8 +65,8 @@ test('login recovery is local, accessible and never echoes URL error details', a
 
 test('Clerk catch-all and employee entry remain closed without keys, ignoring forged session and return URLs', async ({ page, request }) => {
   await page.goto('/sign-in/sso-callback?redirect_url=https://example.org&role=admin');
-  await expect(page.getByRole('heading', { name: '员工登录' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '登录暂未开放' })).toBeDisabled();
+  await expect(page.getByRole('heading', { name: '登录聚域资料库' })).toBeVisible();
+  await expect(page.getByRole('status')).toContainText('登录服务尚未连接');await expect(page.getByRole('button',{name:/Slack|登录/})).toHaveCount(0);
   const response = await request.get('/help-centre?returnTo=https://example.org&role=admin', {
     maxRedirects: 0,
     headers: { Cookie: '__session=forged; role=admin', 'X-Clerk-Auth-Status': 'signed-in', 'X-Clerk-Auth-User-Id': 'user_forged' },
@@ -89,8 +89,8 @@ test('company check ignores forged identity and metadata and never grants data a
 
 test('admin callbacks and protected APIs remain closed without real identity configuration', async ({ page, request }) => {
   await page.goto('/admin/sign-in/sso-callback?redirect_url=https://example.org&role=admin');
-  await expect(page.getByRole('heading', { name: '管理员登录' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '登录暂未开放' })).toBeDisabled();
+  await expect(page.getByRole('heading', { name: '登录内容管理后台' })).toBeVisible();
+  await expect(page.getByRole('status')).toContainText('登录服务尚未连接');await expect(page.getByRole('button',{name:/Slack|登录/})).toHaveCount(0);
   for (const path of ['/api/admin/access', '/api/admin/articles/private']) {
     const response = await request.get(path + '?role=admin&companyVerified=true', { headers: { Cookie: '__session=forged; role=admin', Authorization: 'Bearer forged', 'X-Clerk-Auth-User-Id': 'user_admin', 'X-Clerk-Auth-Status': 'signed-in' } });
     expect(response.status()).toBe(503);

@@ -28,7 +28,7 @@ function SignedInAccount({admin}:{admin:boolean}){
  const name=user?.fullName||user?.username||user?.primaryEmailAddress?.emailAddress||'账号';
  const role=user?.publicMetadata.role;
  const roleLabel=role==='admin'?'管理员':role==='ops'?'运营':role==='support'?'客服':'权限待确认';
- return <>{!admin&&isLoaded&&isSignedIn&&role==='admin'&&<AdminShortcut/>}<Popover label={<AccountIdentity name={isLoaded&&isSignedIn?name:'账号'} role={isLoaded&&isSignedIn?(role==='admin'?'Admin':role==='ops'?'Ops':role==='support'?'Support':roleLabel):'未登录'}/>}>
+ return <>{!admin&&isLoaded&&isSignedIn&&role==='admin'&&<AdminShortcut/>}<Popover label={<AccountIdentity name={isLoaded&&isSignedIn?name:'账号'} role={isLoaded&&isSignedIn?(role==='admin'?'Admin':role==='ops'?'Ops':role==='support'?'Support':roleLabel):!isLoaded?'正在确认…':'未登录'}/>}>
   <ClerkFailed><p role="alert">登录服务无法连接，请恢复网络后重试。</p></ClerkFailed>
   {!isLoaded?<p role="status">正在读取账号…</p>:!isSignedIn?<p>当前未登录。</p>:<>{!admin&&role==='admin'&&<div className="mobile-account-shortcut"><AdminShortcut/></div>}<strong>{name}</strong><p className="account-email">{user.primaryEmailAddress?.emailAddress||'未设置邮箱'}</p><p className="account-role">{roleLabel}</p><button className="account-settings-button" onClick={()=>{setFailed(false);try{clerk.openUserProfile();}catch{setFailed(true);}}}>账号设置</button>{failed&&<p role="alert">账号设置暂时无法打开，请重试。</p>}<EmployeeSignOut audience={admin?'admin':'employee'}/></>}
  </Popover></>;

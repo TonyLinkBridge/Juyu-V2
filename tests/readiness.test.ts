@@ -3,6 +3,8 @@ import test from 'node:test';
 import { inspectConfiguration, getReadinessReport } from '../src/config/readiness.ts';
 
 const filled = {
+  JUYU_DATABASE_RUNTIME_URL:'postgres://runtime:fixture@127.0.0.1/test',
+  JUYU_DATABASE_ISSUER_URL:'postgres://issuer:fixture@127.0.0.1/test',
   APP_ORIGIN: 'https://help.example.com',
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'pk_test_unit_fixture',
   CLERK_SECRET_KEY: 'sk_test_unit_fixture',
@@ -23,7 +25,7 @@ test('missing configuration is reported without throwing', () => {
 test('configuration presence does not claim successful service connections', () => {
   assert.equal(inspectConfiguration(filled).state, 'present');
   assert.deepEqual(getReadinessReport(filled), {
-    status: 'not_ready', configuration: 'present', authentication: 'not_integrated', database: 'not_integrated',
+    status: 'not_ready', configuration: 'present', authentication: 'not_checked', database: 'not_checked', release:'unknown',
   });
   assert.equal(getReadinessReport({}).status, 'not_ready');
 });
@@ -62,7 +64,7 @@ test('reports never include configuration values or arbitrary environment values
 test('preview and mock-role environment values cannot enable authentication', () => {
   const report = getReadinessReport({ ...filled, NODE_ENV: 'production', DEMO_MODE: 'true', MOCK_ROLE: 'admin' });
   assert.equal(report.status, 'not_ready');
-  assert.equal(report.authentication, 'not_integrated');
+  assert.equal(report.authentication, 'not_checked');
 });
 
 
@@ -71,4 +73,11 @@ test('readiness includes the canonical application origin required by Clerk', ()
   for (const value of ['https://help.example.com/path', 'http://public.example.com', 'https://user:pass@example.com']) {
     assert.ok(inspectConfiguration({ ...filled, APP_ORIGIN: value }).invalid.includes('APP_ORIGIN'));
   }
+});
+
+test('readiness is ready only after all dependency checks succeed',()=>{
+ assert.equal(getReadinessReport(filled,{authentication:'ok',database:'ok'}).status,'ready');
+ assert.equal(getReadinessReport(filled,{authentication:'failed',database:'ok'}).status,'not_ready');
+ assert.equal(getReadinessReport({...filled,JUYU_DATABASE_RUNTIME_URL:''},{authentication:'ok',database:'ok'}).status,'not_ready');
+ const report=getReadinessReport({...filled,VERCEL_GIT_COMMIT_SHA:'abcdef123'},{authentication:'ok',database:'ok'});assert.equal(report.release,'abcdef123');
 });

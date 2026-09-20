@@ -27,11 +27,11 @@ const record=(id:string,revision=1,v:Viewer|null=support)=>db.run(v,async c=>(aw
 test('actual opens persist across services, duplicate visits update time, and collection reads never write',async()=>{
  const d=await publish(await draft());assert.equal((await collection()).total,0);
  const before=Date.now(),receipt=await record(d.id),after=Date.now();assert.equal(receipt.documentId,d.id);assert.equal(receipt.revision,1);assert.ok(Date.parse(receipt.viewedAt)>=before&&Date.parse(receipt.viewedAt)<=after);
- const first=await collection();assert.equal(first.total,1);assert.equal(first.items[0].viewedRevision,1);assert.equal(first.items[0].viewedAt,receipt.viewedAt);assert.deepEqual(await collection(),first);
+ const first=await collection();assert.equal(first.total,1);assert.equal(first.items[0].publicationNumber,1);assert.equal(first.items[0].viewedRevision,1);assert.equal(first.items[0].viewedAt,receipt.viewedAt);assert.deepEqual(await collection(),first);
  const again=await record(d.id);assert.ok(again.viewedAt>receipt.viewedAt);assert.equal((await collection()).total,1);
  assert.equal((await collection(ops)).total,0);await record(d.id,1,ops);assert.equal((await collection(admin)).total,0);
  const db2=new ScopedDatabase(runtime,issuer);assert.equal((await db2.run(support,async c=>(await import('../../src/server/recent/repository.ts')).readRecent(c),true)).total,1);
- assert.deepEqual(Object.keys((await collection()).items[0]).sort(),['id','kind','revision','tags','title','viewedAt','viewedRevision']);
+ assert.deepEqual(Object.keys((await collection()).items[0]).sort(),['id','kind','publicationNumber','revision','tags','title','viewedAt','viewedRevision']);
 });
 test('current publication metadata replaces historical metadata without pretending the newer revision was viewed',async()=>{
  let d=await publish(await draft('Old formal'));await record(d.id);const first=await collection();

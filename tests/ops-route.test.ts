@@ -11,7 +11,7 @@ async function route(error='',empty=false){
  if(name.endsWith('/enrollment/application'))return {applicationEnrollment:async()=>({inspect:async()=>({status:'ready'})})};
  if(name.endsWith('/members/entry'))return {bindCurrentMember:async()=>{}};
  if(name.endsWith('/ops/http'))return {opsQuery};
- if(name.endsWith('/authorization/application'))return {applicationAuthorization:async()=>({ops:async()=>{if(error)throw new Error(error);return {items:empty?[]:[{id:'ops & one'}],total:empty?0:1,page:1,pages:1};}})};
+ if(name.endsWith('/authorization/application'))return {applicationAuthorization:async()=>({firstOpsId:async()=>{if(error)throw new Error(error);return empty?null:"ops & one";},ops:async()=>{if(error)throw new Error(error);return {items:empty?[]:[{id:'ops & one'}],total:empty?0:1,page:1,pages:1};}})};
  return new Proxy({},{get:(_,key)=>String(key)});
  };
  new Function('require','exports',ts.transpileModule(source,{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.CommonJS}}).outputText)(stub,exports);

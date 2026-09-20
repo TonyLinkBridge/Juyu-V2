@@ -1,3 +1,4 @@
+import {databaseConfiguration} from './database.ts';
 export type Environment = Record<string, string | undefined>;
 export interface ConfigurationReport {
   state: 'missing' | 'invalid' | 'present';
@@ -6,7 +7,7 @@ export interface ConfigurationReport {
 }
 
 const required = [
-  'APP_ORIGIN',
+  'APP_ORIGIN','JUYU_DATABASE_RUNTIME_URL','JUYU_DATABASE_ISSUER_URL',
   'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', 'CLERK_SECRET_KEY',
   'NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY',
   'ALLOWED_EMAIL_DOMAINS', 'ALLOWED_SLACK_TEAM_ID',
@@ -38,15 +39,16 @@ export function inspectConfiguration(env: Environment): ConfigurationReport {
   check('ALLOWED_EMAIL_DOMAINS', (value) => value.split(',').every((domain) =>
     /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i.test(domain.trim())));
   check('ALLOWED_SLACK_TEAM_ID', (value) => /^T[A-Z0-9]{7,63}$/.test(value));
+  if(databaseConfiguration(env).state==='invalid')invalid.push('JUYU_DATABASE_RUNTIME_URL','JUYU_DATABASE_ISSUER_URL');
   return { state: invalid.length ? 'invalid' : missing.length ? 'missing' : 'present', missing, invalid };
 }
 
-// Presence and format checks cannot prove authentication or database connectivity.
-export function getReadinessReport(env: Environment) {
-  return {
-    status: 'not_ready' as const,
-    configuration: inspectConfiguration(env).state,
-    authentication: 'not_integrated' as const,
-    database: 'not_integrated' as const,
-  };
+export type DependencyState='not_checked'|'ok'|'failed';
+export function deploymentRelease(env:Environment){
+ const value=env.VERCEL_GIT_COMMIT_SHA??env.JUYU_BUILD_REVISION;
+ return value&&/^[a-zA-Z0-9._-]{1,100}$/.test(value)?value:'unknown';
+}
+export function getReadinessReport(env:Environment,checks:{authentication:DependencyState;database:DependencyState}={authentication:'not_checked',database:'not_checked'}){
+ const configuration=inspectConfiguration(env).state;
+ return {status:configuration==='present'&&checks.authentication==='ok'&&checks.database==='ok'?'ready':'not_ready',configuration,...checks,release:deploymentRelease(env)};
 }

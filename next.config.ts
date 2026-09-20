@@ -1,5 +1,8 @@
+import {execFileSync} from 'node:child_process';
 import type { NextConfig } from 'next';
+const revision=process.env.VERCEL_GIT_COMMIT_SHA??(()=>{try{return execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim()+(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim()?'-dirty':'');}catch{return 'unknown';}})();
 const nextConfig: NextConfig = {
+  env:{JUYU_BUILD_REVISION:revision},
   poweredByHeader: false,
   // Avoid restored compiler CSS artifacts disagreeing with the deployed component version.
   experimental: { turbopackFileSystemCacheForBuild: false },

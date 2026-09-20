@@ -7,7 +7,7 @@ export const scopes={all:'全部内容',submitted:'我提交的',review:'等我�
 export const kinds={article:'知识文章',ops:'OPS Internal',reference:'Reference',qa:'Q&A'} as const;
 export type QueryInput=Record<string,string|string[]|undefined>;
 export interface WorkspaceQuery {q:string;scope:keyof typeof scopes;kind:ContentKind|'all';status:Status|'all';page:number;view:'board'|'list'}
-export interface WorkspaceItem {id:string;title:string;kind:ContentKind;status:Status;revision:number;publishedRevision:number|null;updatedAt:string;author:string;editor:string;submitter:string|null;reviewer:string|null;canReview?:boolean}
+export interface WorkspaceItem {publicationNumber?:number|null;qaCategory?:string;qaPosition?:number;id:string;title:string;kind:ContentKind;status:Status;revision:number;publishedRevision:number|null;updatedAt:string;author:string;editor:string;submitter:string|null;reviewer:string|null;canReview?:boolean}
 export interface WorkspaceData {query:WorkspaceQuery;items:WorkspaceItem[];counts:Record<Status,number>;total:number;page:number;pages:number}
 export function workspaceQuery(input:QueryInput={}):WorkspaceQuery {
  const read=(key:string,fallback:string)=>{const v=input[key];if(v===undefined)return fallback;if(typeof v!=='string')throw new Error('INVALID_QUERY');return v;};
@@ -20,6 +20,7 @@ export function workspaceHref(query:WorkspaceQuery,patch:Partial<WorkspaceQuery>
  for(const [key,value] of Object.entries(q))params.set(key,String(value));
  return `/admin?${params}`;
 }
-export function publicationLabel(item:Pick<WorkspaceItem,'revision'|'publishedRevision'|'status'>){
- return item.publishedRevision===null?'尚未发布':item.status==='published'?`正式版 ${item.publishedRevision}`:`旧正式版 ${item.publishedRevision} 仍可阅读`;
+export function publicationLabel(item:Pick<WorkspaceItem,'revision'|'publishedRevision'|'status'|'publicationNumber'>){
+ const version=item.publicationNumber?` ${item.publicationNumber}`:'';
+ return item.publishedRevision===null?'尚未发布':item.status==='published'?(version?`正式版${version}`:'已发布'):`旧正式版${version} 仍可阅读`;
 }

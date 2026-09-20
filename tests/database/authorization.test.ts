@@ -571,7 +571,7 @@ test('T030 workspace counts current workflow, filters assignments and preserves 
  const publishedRevision=doc.publishedRevisionId;
  doc=await owner.execute(doc.id,{type:'edit',title:'看板核对第三稿',body:'newer',audience:'staff'},a,{expectedSequence:doc.sequence});
  const edited=await service.workspace({q:'看板核对'});
- assert.equal(edited.items[0].status,'draft');assert.equal(edited.items[0].publishedRevision,publishedRevision);
+ assert.equal(edited.items[0].publicationNumber,1);assert.equal((await service.editor(doc.id)).publicationNumber,1);assert.equal(edited.items[0].status,'draft');assert.equal(edited.items[0].publishedRevision,publishedRevision);
  assert.equal(edited.counts.published,0);assert.equal((await service.workspace({q:'看板核对',status:'published'})).total,0);
  assert.equal((await service.workspace({q:'看板核对',kind:'ops'})).total,0);
  for(const viewer of [support,ops])await assert.rejects(new AuthorizationService(db,async()=>viewer).workspace({}),/FORBIDDEN/);
@@ -595,7 +595,7 @@ test('T030 workspace pagination is bounded, stable and excludes archived documen
 
 test('T031 editor rejects unstructured body without creating a draft',async()=>{
  const service=new AuthorizationService(db,async()=>a);
- await assert.rejects(service.saveDraft('31111111-1111-4111-8111-111111111111',{expectedSequence:null,title:'编辑草稿',body:'plain text',kind:'article',audience:'staff',tags:[],cover:null}),/INVALID_INPUT/);
+ await assert.rejects(service.saveDraft('31111111-1111-4111-8111-111111111111',{expectedSequence:null,title:'编辑草稿',body:'plain text',kind:'article',audience:'staff',tags:[],cover:null}),/INVALID_BODY/);
  assert.equal(await new DocumentRepository(db).getForManagement('31111111-1111-4111-8111-111111111111',a),null);
 });
 
@@ -669,7 +669,7 @@ test('T031 removing inline media retains separately attached copy and stale olde
 test('T031 simultaneous duplicate creates are one revision and title/body limits fail closed',async()=>{
  const service=new AuthorizationService(db,async()=>a),input=await editorDraft(),id='31111111-1111-4111-8111-111111111117';
  const [first,retry]=await Promise.all([service.saveDraft(id,input),service.saveDraft(id,input)]);assert.deepEqual(first,retry);
- for(const invalid of [{title:'x'.repeat(201)},{tags:undefined},{body:'JUYU_BLOCKNOTE_V2\n[]'},{body:'JUYU_BLOCKNOTE_V1\n{'},{kind:'ops',audience:'staff'},{extra:true}])await assert.rejects(service.saveDraft(id,{...input,expectedSequence:0,...invalid}),/INVALID_INPUT/);
+ for(const [invalid,code] of [[{title:'x'.repeat(201)},'INVALID_TITLE'],[{tags:undefined},'INVALID_PRESENTATION'],[{body:'JUYU_BLOCKNOTE_V2\n[]'},'INVALID_BODY'],[{body:'JUYU_BLOCKNOTE_V1\n{'},'INVALID_BODY'],[{kind:'ops',audience:'staff'},'INVALID_INPUT'],[{extra:true},'INVALID_INPUT']] as const)await assert.rejects(service.saveDraft(id,{...input,expectedSequence:0,...invalid}),new RegExp('^Error: '+code+'$'));
  assert.equal((await service.editor(id)).sequence,0);
 });
 

@@ -30,3 +30,9 @@ test('R11 closed expired answers revalidate only when opened and malformed answe
 test('R11 an expired deep link checks the server again rather than showing its retained answer',async({page})=>{
  await page.clock.install();let reads=0;await page.route('**/api/qa/qa-local',r=>{reads++;return reads===1?r.fulfill({json:answer}):r.fulfill({json:{...answer,revision:3,body:'重新核对后的答案'}});});await mount(page);await toggle(page).click();await expect(page.getByText(answer.body,{exact:true})).toBeVisible();await toggle(page).click();await page.clock.runFor(30_001);await page.evaluate(()=>{location.hash='qa-qa-local';});await expect(page.getByText('重新核对后的答案',{exact:true})).toBeVisible();await expect(page.getByText(answer.body,{exact:true})).toHaveCount(0);expect(reads).toBe(2);
 });
+
+test('QA read errors distinguish network, permission and server failures',async({page})=>{
+ await page.route('**/api/qa/qa-local',r=>r.abort('internetdisconnected'));await mount(page);await toggle(page).click();await expect(page.getByRole('alert')).toContainText('网络');
+ await page.unroute('**/api/qa/qa-local');await page.route('**/api/qa/qa-local',r=>r.fulfill({status:403,json:{error:'FORBIDDEN'}}));await page.getByRole('button',{name:'重新读取',exact:true}).click();await expect(page.getByRole('alert')).toContainText('权限');
+ await page.unroute('**/api/qa/qa-local');await page.route('**/api/qa/qa-local',r=>r.fulfill({status:503}));await page.getByRole('button',{name:'重新读取',exact:true}).click();await expect(page.getByRole('alert')).toContainText('服务');
+});

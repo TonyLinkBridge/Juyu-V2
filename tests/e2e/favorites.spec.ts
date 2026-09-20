@@ -50,3 +50,22 @@ test('R13 all four content kinds link directly to their reader modules',async({p
  await mount(page,()=>({state:'ready',data:{items,total:4,page:1,pages:1}}),'list');
  for(const kind of ['article','ops','qa','reference']){const encoded=encodeURIComponent(kind+' &资料');const href=kind==='qa'?'/help-centre/qa?question='+encoded+'#qa-'+encoded:kind==='reference'?'/help-centre/reference?article='+encoded:'/help-centre?article='+encoded;await expect(page.getByRole('link',{name:'阅读收藏：'+kind,exact:true})).toHaveAttribute('href',href);}
 });
+
+test('favorite state is isolated across sessions and logout clears the previous snapshot',async({page})=>{
+ let saved=true,reads=0;await page.route('**/api/favorites/*',r=>{reads++;return r.fulfill({json:{documentId:'favorite-local',revision:1,saved}});});
+ await mount(page);await expect(page.getByRole('button',{name:'取消收藏',exact:true})).toBeEnabled();expect(reads).toBe(1);
+ saved=false;await page.evaluate(()=>(window as unknown as {switchFavoriteSession:(user:string,session:string)=>void}).switchFavoriteSession('second','session-b'));await expect(page.getByRole('button',{name:'收藏文章',exact:true})).toBeEnabled();expect(reads).toBe(2);
+ await page.evaluate(()=>window.dispatchEvent(new Event('juyu-clear-recovery')));await expect(page.getByRole('button',{name:'收藏文章',exact:true})).toBeDisabled();
+});
+
+test('server supplied favorite avoids duplicate reads and focus rechecks revoked access',async({page})=>{
+ let reads=0;await page.route('**/api/favorites/*',r=>{reads++;return r.fulfill({status:403,json:{error:'FORBIDDEN'}});});
+ await mount(page,()=>({documentId:'favorite-local',revision:1,initial:{documentId:'favorite-local',revision:1,saved:true}}));await expect(page.getByRole('button',{name:'取消收藏',exact:true})).toBeEnabled();expect(reads).toBe(0);
+ await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await expect(page.getByRole('alert')).toContainText('当前无法访问');await expect(page.getByRole('button',{name:'收藏文章',exact:true})).toBeDisabled();expect(reads).toBe(1);
+});
+
+test('logout clears favorite cache even after the button has unmounted',async({page})=>{
+ let saved=true,reads=0;await page.route('**/api/favorites/*',r=>{reads++;return r.fulfill({json:{documentId:'favorite-local',revision:1,saved}});});await mount(page);await expect(page.getByRole('button',{name:'取消收藏',exact:true})).toBeEnabled();
+ await page.evaluate(()=>(window as unknown as {unmountFavorite:()=>void}).unmountFavorite());await expect(page.locator('.favorite-control')).toHaveCount(0);saved=false;
+ await page.evaluate(()=>{window.dispatchEvent(new Event('juyu-clear-recovery'));(window as unknown as {switchFavorite:(id:string)=>void}).switchFavorite('favorite-local');});await expect(page.getByRole('button',{name:'收藏文章',exact:true})).toBeEnabled();expect(reads).toBe(2);
+});

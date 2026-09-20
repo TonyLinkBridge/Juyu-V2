@@ -15,6 +15,6 @@ export default defineConfig({
     url: 'http://127.0.0.1:3210',
     reuseExistingServer: false,
     timeout: 60000,
-    env: { NEXT_TELEMETRY_DISABLED: '1' },
+    env: { NEXT_TELEMETRY_DISABLED:'1',NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:'',CLERK_SECRET_KEY:'',JUYU_DATABASE_RUNTIME_URL:'',JUYU_DATABASE_ISSUER_URL:'' },
   },
 });

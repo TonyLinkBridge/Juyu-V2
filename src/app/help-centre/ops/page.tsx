@@ -22,18 +22,18 @@ export default async function OpsCollectionPage(){
 
   let data:OpsPage|undefined,state:'ready'|'denied'|'unavailable'='unavailable';
 
+  let firstId:string|null=null;
   try{
    const service=await applicationAuthorization();
-   const firstId=await service.firstOpsId();
+   firstId=await service.firstOpsId();
 
-   if(firstId)redirect('/help-centre?article='+encodeURIComponent(firstId));
-
-   data=await service.ops(1);
+   if(!firstId)data=await service.ops(1);
    state='ready';
   }catch(error){
    if(error instanceof Error&&error.message.split(':')[0]==='FORBIDDEN')state='denied';
   }
 
+  if(firstId)redirect('/help-centre?article='+encodeURIComponent(firstId));
   return <EntryShell account navigation={<ReaderMenu currentHref="/help-centre/ops"/>} search={<FeatureSearch query=""/>}><main id="main-content" className="editor-main search-main"><OpsCollection data={data} state={state}/></main></EntryShell>;
  });
 }

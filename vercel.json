@@ -1,5 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["sin1"],
-  "env": {"JUYU_PERFORMANCE_LOGGING": "true"}
+  "regions": [
+    "sin1"
+  ],
+  "env": {
+    "JUYU_PERFORMANCE_LOGGING": "true"
+  },
+  "buildCommand": "npm run verify:build"
 }
