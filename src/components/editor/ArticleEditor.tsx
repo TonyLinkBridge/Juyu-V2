@@ -24,6 +24,7 @@ import type {EditorData,SaveDraftInput} from '../../editor/contract';
 import {editorInitialContent} from '../../editor/legacy';
 import {encodeEditorBody,privateAssetId,type EditorBlock} from '../../editor/document';
 import {DraftSaver,DraftSaveRejected} from '../../editor/autosave';
+import {saveError,validationError} from '../../editor/errors';
 import {editorSchema,createEditorSchema,editorSnapshot,EditorContext} from './schema';
 import {normalizePresentation} from '../../domain/presentation';
 import {uploadExtensions,type ManagedAsset,type MediaBlock} from '../../media/model';
@@ -36,7 +37,6 @@ import {DocumentTrashAction} from '../lifecycle/DocumentTrashAction';
 import {EditorRecovery,InputBackup} from './EditorRecovery';
 import {recoveryText} from '../../editor/recovery';
 type Content=Omit<SaveDraftInput,'expectedSequence'>;
-function saveError(code:string){return code==='FIELD_CONFLICT'?'字段设置已更新。输入仍保留，请先复制备份并重新读取最新设置后核对。':code==='CONFLICT'?'另一位管理员或另一个页面已保存修改。你的输入仍保留，可在下方对照最新版本；不会覆盖服务器版本。':code==='INVALID_STATE'||code==='INACTIVE_DOCUMENT'?'当前文章已进入审核或无法编辑。你的输入仍保留，可在下方读取最新状态并保留备份。':code==='FORBIDDEN'?'你的管理权限已改变。输入仍保留，保存已停止。':'保存尚未确认，输入仍保留。请检查内容或网络后重试。';}
 export default function ArticleEditor({initial:provided,recoveryOwner='',newReference=false,newQa=false,newOps=false,fieldDefinitions=[],categoryOptions=[]}:{initial:EditorData|null;recoveryOwner?:string;newReference?:boolean;newQa?:boolean;newOps?:boolean;fieldDefinitions?:FieldDefinition[];categoryOptions?:CategoryDefinition[]}){
  const [active,setActive]=useState({initial:provided,generation:0});const [backups,setBackups]=useState<string[]>([]);const initial=active.initial;
  let nodes:EditorBlock[];try{nodes=nativeEditorContent(editorInitialContent(initial?.body??'',initial?.blocks??[]),initial?.assets??[]);}catch{return <section role="alert"><h2>暂时无法载入编辑内容</h2><p>原文仍保留。请返回列表检查资料，避免覆盖内容。</p><textarea readOnly aria-label="保留的正文" value={initial?.body??''}/></section>;}
@@ -76,15 +76,35 @@ function ReadyEditor({recoveryOwner,initial,newReference,newQa,newOps,fieldDefin
  },[]);
  const initialContent:Content={categoryIds:normalizeCategoryIds(initial?.categoryIds),...(prepared.length?{customFields:prepared}:{}),title:initial?.title??'',body:encodeEditorBody(nodes),kind:initial?.kind??(newQa?'qa':newOps?'ops':newReference?'reference':'article'),audience:initial?.audience??(newOps?'ops':'staff'),tags:initial?.tags??[],cover:initial?.cover??null,...((initial?.kind??(newQa?'qa':newOps?'ops':newReference?'reference':'article'))==='qa'?{qa:normalizeQa(initial?.qa)}:{})};
  const [saver]=useState(()=>new DraftSaver<Content,EditorData>(initialContent,initial?.sequence??null,async(value,sequence)=>{
-  const response=await fetch(`/api/admin/editor/${encodeURIComponent(documentId)}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...value,expectedSequence:sequence}),signal:AbortSignal.timeout(20000)});const result=await response.json();
-  if(!response.ok)throw response.status>=400&&response.status<500?new DraftSaveRejected(result.error??'SAVE_FAILED'):new Error(result.error??'SAVE_FAILED');
+  let response:Response;
+  try{response=await fetch(`/api/admin/editor/${encodeURIComponent(documentId)}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...value,expectedSequence:sequence}),signal:AbortSignal.timeout(20000)});}catch{throw new Error('NETWORK_ERROR');}
+  const result=await response.json().catch(()=>null);
+  if(!response.ok){const code=typeof result?.error==='string'?result.error:'UNRECOGNIZED_RESPONSE';throw response.status>=400&&response.status<500?new DraftSaveRejected(code):new Error(code);}
+  if(!result)throw new Error('INVALID_ACK');
   if(result.documentId!==documentId||result.body!==value.body||result.title!==value.title||JSON.stringify(result.tags)!==JSON.stringify(value.tags))throw new Error('INVALID_ACK');
   if(JSON.stringify(normalizeCategoryIds(result.categoryIds))!==JSON.stringify(normalizeCategoryIds(value.categoryIds)))throw new Error('INVALID_ACK');
   if(value.kind==='qa'&&JSON.stringify(normalizeQa(result.qa))!==JSON.stringify(normalizeQa(value.qa)))throw new Error('INVALID_ACK');
   if(JSON.stringify(normalizeFieldSnapshots(result.customFields))!==JSON.stringify(normalizeFieldSnapshots(value.customFields)))throw new Error('INVALID_ACK');
   return result;
  },()=>redraw(n=>n+1),result=>{setData(result);setNotice('草稿已保存。正式版本仍需审核发布后才会更新。');window.history.replaceState(null,'',`/admin/editor?article=${encodeURIComponent(documentId)}`);}));
- const touch=useEffectEvent(()=>{if(frozen)return;try{const v={title,kind,audience,tags,cover};if(kind==='qa'&&!/^\d{1,6}$/.test(qaPosition))throw new Error('INVALID_INPUT');const presentation=normalizePresentation({tags:v.tags.split(/[,，]/).map(s=>s.trim()).filter(Boolean),cover:v.cover});const content:Content={categoryIds:categorySelection(categoryOptions,categoryIds,initial?.categoryIds),...fieldPayload(),title:v.title.trim(),body:encodeEditorBody(editorSnapshot(editor.document)),kind:v.kind,audience:v.audience,tags:presentation.tags,cover:presentation.cover,...(kind==='qa'?{qa:normalizeQa({category:qaCategory,position:Number(qaPosition)})}:{})};saver.update(content);setValidation(!content.title?'请填写文章标题，才能保存。':'');setNotice('');}catch(error){setValidation(error instanceof Error&&error.message==='PRIVATE_EDITOR_FILE_REQUIRED'?'图片、影片、音频和附件请上传到本资料库；外部网址可以插入为文字链接。当前输入已保留。':'内容格式或长度超出限制，当前输入已保留，请检查后保存。');}});
+ const touch=useEffectEvent(()=>{
+  if(frozen)return;
+  try{
+   if(kind==='qa'&&!/^\d{1,6}$/.test(qaPosition))throw new Error('INVALID_QA');
+   let presentation:ReturnType<typeof normalizePresentation>;
+   try{presentation=normalizePresentation({tags:tags.split(/[,，]/).map(s=>s.trim()).filter(Boolean),cover});}catch{throw new Error('INVALID_PRESENTATION');}
+   let categories:ReturnType<typeof categorySelection>;
+   try{categories=categorySelection(categoryOptions,categoryIds,initial?.categoryIds);}catch{throw new Error('INVALID_CATEGORY');}
+   let fields:ReturnType<typeof fieldPayload>;
+   try{fields=fieldPayload();}catch{throw new Error('INVALID_FIELDS');}
+   let body:string;
+   try{body=encodeEditorBody(editorSnapshot(editor.document));}catch(error){throw error instanceof Error&&error.message==='PRIVATE_EDITOR_FILE_REQUIRED'?error:new Error('INVALID_BODY');}
+   let qa:ReturnType<typeof normalizeQa>|undefined;
+   if(kind==='qa')try{qa=normalizeQa({category:qaCategory,position:Number(qaPosition)});}catch{throw new Error('INVALID_QA');}
+   const content:Content={categoryIds:categories,...fields,title:title.trim(),body,kind,audience,tags:presentation.tags,cover:presentation.cover,...(qa===undefined?{}:{qa})};
+   saver.update(content);setValidation(!content.title?'请填写文章标题，才能保存。':'');setNotice('');
+  }catch(error){setValidation(validationError(error instanceof Error?error.message:'INVALID_INPUT'));}
+ });
  useEffect(()=>editor.onChange(()=>touch()),[editor]);
  const first=useRef(true);useEffect(()=>{if(first.current){first.current=false;return;}touch();},[title,kind,audience,tags,cover,qaCategory,qaPosition,fieldInputs,categoryIds]);
  const leaving=useRef(false);const state=saver.state;const sequence=data?.sequence??state.sequence;const dirty=state.dirty||Boolean(validation);const mustWarn=dirty||hasBackups||reviewLocked;
