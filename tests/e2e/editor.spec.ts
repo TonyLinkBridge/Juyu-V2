@@ -334,7 +334,8 @@ test('native slash menu and selection toolbar expose original block and formatti
  const menu=page.locator('.bn-suggestion-menu');await expect(menu).toBeVisible();await expect(menu).toContainText('检查清单');await expect(menu).toContainText('引用');await expect(menu).toContainText('音频');await expect(menu).toContainText('表格');
  await page.keyboard.press('Escape');await page.keyboard.press('Backspace');await page.keyboard.insertText('选择文字显示完整工具栏');await page.keyboard.press('Shift+Home');
  await expect(page.locator('.bn-formatting-toolbar')).toBeVisible();await expect(page.locator('.bn-formatting-toolbar button')).not.toHaveCount(6);
- await editor.locator('[data-content-type="paragraph"]').first().hover();await expect(page.locator('.bn-side-menu')).toBeVisible();
+ await page.keyboard.press('ArrowRight');await expect(page.locator('.bn-formatting-toolbar')).toBeHidden();
+ await editor.locator('[data-content-type="paragraph"]').last().hover();await expect(page.locator('.bn-side-menu')).toBeVisible();
 });
 
 test('native checklist toggle heading divider code and merged table keep values after editing and reopening',async({page})=>{
