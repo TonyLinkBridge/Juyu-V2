@@ -65,12 +65,12 @@ const admin = await adminPromise;
       return <EntryShell account announcement={readerAnnouncement} navigation={<ReaderQuickLinks items={home.menu} currentHref="/help-centre"/>} search={home.features.search?<SearchInput query=""/>:undefined}>{<KnowledgeHome {...home} search={home.features.search} showRecent={home.features.recent} admin={admin.status==='admin'}/>}</EntryShell>;
     }
     let features=closedFeatureFlags,featuresUnavailable=false;
-let pages:NavigationNode[]=[];
-let article:Publication|null=null;
-let failed=false;
-const params=await searchParams;
-const requested=params.article;
-const query=parseSearchQuery(params.q).query;
+    let pages:NavigationNode[]=[];
+    let article:Publication|null=null;
+    let failed=false;
+    const params=await searchParams;
+    const requested=params.article;
+    const query=parseSearchQuery(params.q).query;
 if(params.q!==undefined){
   try{
     features=await(await applicationAuthorization()).features();
