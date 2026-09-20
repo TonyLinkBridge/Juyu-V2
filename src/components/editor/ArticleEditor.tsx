@@ -35,7 +35,7 @@ import {editorSchema,createEditorSchema,editorSnapshot,EditorContext} from './sc
 import {normalizePresentation} from '../../domain/presentation';
 import {readerIconLabels,type ReaderIconKey} from '../../reader/icon-keys';
 import {uploadExtensions,type ManagedAsset,type MediaBlock} from '../../media/model';
-import {externalEmbedSource} from '../../media/external-embed';
+import {externalEmbedSource,externalLinkSource} from '../../media/external-embed';
 import {kinds,publicationLabel} from '../../workspace/model';
 import type {Audience,ContentKind} from '../../domain/model';
 import {parseReaderBody} from '../../reader/body';
@@ -232,15 +232,15 @@ function ReadyEditor({recoveryOwner,initial,newReference,newQa,newOps,newTransla
  }
  function pasteExternalEmbed(event:ClipboardEvent<HTMLDivElement>){
   if(frozen||event.clipboardData.files.length||!((event.target as HTMLElement).closest('.bn-editor'))||(event.target as HTMLElement).closest('input,textarea'))return;
-  const raw=event.clipboardData.getData('text/plain'),value=raw.trim(),source=externalEmbedSource(value);
-  if(!source||raw!==value)return;
+  const raw=event.clipboardData.getData('text/plain'),value=raw.trim(),link=externalLinkSource(value),source=externalEmbedSource(value);
+  if(!link||raw!==value)return;
   const current=editor.getTextCursorPosition().block;
   if(current.type!=='paragraph'||!Array.isArray(current.content)||current.content.length||current.children.length)return;
   event.preventDefault();event.stopPropagation();
   const id=crypto.randomUUID();
-  editor.insertBlocks([{id,type:'juyu',props:{payload:JSON.stringify({id,type:'externalEmbed',url:source.original,caption:''})}}],current,'after');
+  editor.insertBlocks([{id,type:'juyu',props:{payload:JSON.stringify({id,type:'externalEmbed',url:link.original,caption:''})}}],current,'after');
   editor.removeBlocks([current]);
-  showNotice(`${source.provider} 链接已转成外部内容。员工点击后才会加载。`,'success');
+  showNotice(source?`${source.provider} 链接已转成外部内容。员工点击后才会加载。`:'网址已转成外部链接卡片。员工点击后才会打开网站。','success');
  }
  useEffect(()=>{uploadRef.current=upload;});
  let body='';try{body=encodeEditorBody(editorSnapshot(editor.document));}catch{}

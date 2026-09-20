@@ -45,6 +45,15 @@ test('pasting a supported video URL into an empty paragraph creates a gated embe
  await expect.poll(()=>decodeEditorBody(saved.body)?.some(block=>block.type==='juyu'&&JSON.parse(block.props.payload).url==='https://www.youtube.com/watch?v=dQw4w9WgXcQ'),{timeout:8000}).toBe(true);
  await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
 });
+test('pasting an unfamiliar HTTPS URL creates a safe link card instead of a blank embed',async({page})=>{
+ let saved={...structuredClone(editorFixture),body:encodeEditorBody([{id:'empty',type:'paragraph',props:{textAlignment:'left',textColor:'default',backgroundColor:'default'},content:[],children:[]}])};
+ await page.route('**/api/admin/editor/*',route=>{saved={...saved,...route.request().postDataJSON(),sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);
+ await page.locator('.bn-editor [data-content-type="paragraph"]').first().click();
+ await page.evaluate(()=>{const target=document.activeElement;if(!target)throw Error('NO_EDITOR_FOCUS');const transfer=new DataTransfer();transfer.setData('text/plain','https://example.com/guide');target.dispatchEvent(new ClipboardEvent('paste',{bubbles:true,cancelable:true,clipboardData:transfer}));});
+ await expect(page.locator('[data-juyu-type="externalEmbed"]')).toBeVisible();
+ await expect.poll(()=>decodeEditorBody(saved.body)?.some(block=>block.type==='juyu'&&JSON.parse(block.props.payload).url==='https://example.com/guide'),{timeout:8000}).toBe(true);
+});
 test('admin can save a selected text block as a private fragment and insert a reviewed copy',async({page})=>{
  let saved=structuredClone(editorFixture);
  const fragments:{id:string;familyId:string;version:number;title:string;blocks:unknown[];createdAt:string;sourceDocumentId:null}[]=[];

@@ -7,7 +7,7 @@ test.beforeEach(async({page})=>{await fixtureAssets(page,'navigation');});
 test.beforeAll(async()=>{bundle=await navigationBrowserBundle();});
 const pages=Array.from({length:35},(_,i)=>({type:'document' as const,id:`page-${i}`,title:i===0?'开始使用资料库':i===1?'域名转出操作说明':i===2?'费用与退款规则':i===3?'这是一个很长的目录文章标题，用来确认小屏幕和大字号下文字不会被截断或撑破页面':`业务操作说明 ${i+1}`,href:`/help-centre?article=page-${i}`}));
 async function fixture(page:import('@playwright/test').Page,items:NavigationNode[]=pages,error=false,body='这是目录交互测试正文。'){
- await page.route(url=>url.pathname==='/help-centre',route=>{
+ await page.route(url=>url.pathname==='/help-centre'||url.pathname==='/help-centre/library',route=>{
  const selected=new URL(route.request().url()).searchParams.get('article')??undefined;
  const found=pages.find(item=>item.id===selected);
  const article=found?{id:found.id,title:found.title,revision:1,body}:null;
@@ -48,7 +48,8 @@ test('long directory scrolls to its last link and an unauthorized target never b
 });
 test('empty navigation and connection failure are distinguished without sample content',async({page})=>{
  await fixture(page,[]);await page.goto('/help-centre?fixture=empty');await openDirectory(page);
- await expect(page.getByRole('navigation').getByRole('link')).toHaveCount(0);
+ await expect(page.getByRole('navigation',{name:'文章目录'}).getByRole('link',{name:'帮助中心'})).toHaveCount(1);
+ await expect(page.getByRole('navigation',{name:'文章目录'}).getByRole('link',{name:'开始使用资料库'})).toHaveCount(0);
  await expect(page.locator('#main-content h1')).toHaveText('欢迎使用资料库');
  await expect(page.getByRole('navigation',{name:'文章目录'}).getByText('暂无可阅读的已发布文章')).toBeVisible();
  await page.unrouteAll();await fixture(page,[],true);await page.goto('/help-centre?fixture=error');await openDirectory(page);
@@ -217,23 +218,25 @@ test('mobile-first reader reveals its current deep directory item after switchin
 test('breadcrumb hierarchy and page cards follow the visible directory with native history',async({page},info)=>{
  await fixture(page,nested);await page.goto('/help-centre?article=page-2');
  const crumbs=page.getByRole('navigation',{name:'面包屑'});
- await expect(crumbs.locator('li')).toHaveText(['帮助中心›','客服知识›','域名操作›','域名转出›','费用与退款规则']);
- await expect(crumbs.locator('[aria-current="page"]')).toHaveText('费用与退款规则');
+ await expect(crumbs.getByRole('link',{name:'资料目录'})).toHaveAttribute('href','/help-centre/library');
+ await expect(crumbs.locator('li')).toHaveCount(4);
+ await expect(crumbs.locator('li').last()).toHaveText('域名转出');
+ await expect(crumbs.locator('summary[aria-label="切换分类：客服知识"]')).toBeVisible();
  const cards=page.getByRole('navigation',{name:'文章翻页'});
- await expect(cards.getByRole('link',{name:'上一篇：域名转出操作说明'})).toHaveAttribute('href','/help-centre?article=page-1');
- await expect(cards.getByRole('link',{name:'下一篇：开始使用资料库'})).toHaveAttribute('href','/help-centre?article=page-0');
+ await expect(cards.getByRole('link',{name:'上一篇: 域名转出操作说明'})).toHaveAttribute('href','/help-centre?article=page-1');
+ await expect(cards.getByRole('link',{name:'下一篇: 开始使用资料库'})).toHaveAttribute('href','/help-centre?article=page-0');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth)).toBe(false);
  await page.screenshot({path:`output/verification/page-links-${info.project.name}.png`,fullPage:true});
- await cards.getByRole('link',{name:'下一篇：开始使用资料库'}).focus();await page.keyboard.press('Enter');
+ await cards.getByRole('link',{name:'下一篇: 开始使用资料库'}).focus();await page.keyboard.press('Enter');
  await expect(page.getByRole('heading',{level:1})).toHaveText('开始使用资料库');
- await page.reload();await expect(cards.getByRole('link',{name:'下一篇：业务操作说明 5'})).toBeVisible();
+ await page.reload();await expect(cards.getByRole('link',{name:'下一篇: 业务操作说明 5'})).toBeVisible();
  await page.goBack();await expect(page.getByRole('heading',{level:1})).toHaveText('费用与退款规则');
- await crumbs.getByRole('link',{name:'帮助中心'}).click();await expect(page.getByRole('heading',{level:1})).toHaveText('欢迎使用资料库');await expect(cards).toHaveCount(0);
+ await crumbs.getByRole('link',{name:'资料目录'}).click();await expect(page.getByRole('heading',{level:1})).toHaveText('欢迎使用资料库');await expect(cards).toHaveCount(0);
 });
 
 test('single, first, last and unavailable articles expose only usable page navigation',async({page})=>{
  await fixture(page,[pages[0]]);await page.goto('/help-centre?article=page-0');
- await expect(page.getByRole('navigation',{name:'文章翻页'})).toHaveCount(0);await expect(page.getByRole('navigation',{name:'面包屑'}).locator('li')).toHaveCount(2);
+ await expect(page.getByRole('navigation',{name:'文章翻页'})).toHaveCount(0);await expect(page.getByRole('navigation',{name:'面包屑'}).locator('li')).toHaveCount(1);
  await page.unrouteAll();await fixture(page,[pages[0],pages[1]]);await page.goto('/help-centre?article=page-0');
  const cards=page.getByRole('navigation',{name:'文章翻页'});await expect(cards.getByRole('link')).toHaveCount(1);await expect(cards.getByRole('link')).toHaveAttribute('rel','next');
  await cards.getByRole('link').click();await expect(cards.getByRole('link')).toHaveCount(1);await expect(cards.getByRole('link')).toHaveAttribute('rel','prev');
