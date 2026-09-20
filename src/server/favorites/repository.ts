@@ -22,11 +22,11 @@ export async function writeFavorite(c:PoolClient,id:string,input:unknown):Promis
  documentId(id);const x=favoriteInput(input);
  return (await c.query<FavoriteState>('SELECT document_id AS "documentId",revision,saved FROM juyu.save_favorite($1,$2,$3)',[id,x.revision,x.saved])).rows[0];
 }
-export async function readFavorites(c:PoolClient,page=1):Promise<FavoritesPage>{await requireFeature(c,'favorites');
+export async function readFavorites(c:PoolClient,page=1,locale:'zh-CN'|'en'='zh-CN'):Promise<FavoritesPage>{await requireFeature(c,'favorites');
  positiveInteger(page);await verifiedIdentity(c);
  // The caller uses a repeatable-read transaction, so count and page share access decisions.
- const total=(await c.query<{n:number}>('SELECT count(*)::int AS n FROM juyu.read_favorite_publications()')).rows[0].n;
+ const total=(await c.query<{n:number}>('SELECT count(*)::int AS n FROM juyu.read_favorite_publications() item WHERE EXISTS(SELECT 1 FROM juyu.read_publication_language(item.id) l WHERE l.locale=$1)',[locale])).rows[0].n;
  const pages=Math.max(1,Math.ceil(total/20));page=Math.min(page,pages);
- const rows=(await c.query<Omit<FavoriteItem,'savedAt'>&{savedAt:Date}>('SELECT id,title,kind,revision,tags,saved_at AS "savedAt" FROM juyu.read_favorite_publications() ORDER BY saved_at DESC,id COLLATE "C" LIMIT 20 OFFSET $1',[(page-1)*20])).rows;
+ const rows=(await c.query<Omit<FavoriteItem,'savedAt'>&{savedAt:Date}>('SELECT item.id,item.title,item.kind,item.revision,item.tags,item.saved_at AS "savedAt" FROM juyu.read_favorite_publications() item WHERE EXISTS(SELECT 1 FROM juyu.read_publication_language(item.id) l WHERE l.locale=$1) ORDER BY item.saved_at DESC,item.id COLLATE "C" LIMIT 20 OFFSET $2',[locale,(page-1)*20])).rows;
  return {items:rows.map(row=>({...row,savedAt:row.savedAt.toISOString()})),total,page,pages};
 }

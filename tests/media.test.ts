@@ -1,12 +1,25 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {normalizeBlocks,uploadMetadata} from '../src/media/model.ts';
+import {blockAssetIds,normalizeBlocks,uploadMetadata} from '../src/media/model.ts';
 import {createDocument,transition} from '../src/domain/workflow.ts';
 import {adminA,now} from './fixtures.ts';
 const id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 test('media blocks keep order, text, cells and asset IDs while rejecting remote or malformed data',()=>{
  const blocks=[{id:'image-1',type:'image',assetId:id,caption:'说明',alt:'截图'},{id:'table-1',type:'table',headers:['项目','说明'],rows:[['注册','中文\n两行']]}];
  assert.deepEqual(normalizeBlocks(blocks),blocks);assert.throws(()=>normalizeBlocks([{...blocks[0],assetId:'https://outside.test/image'}]));assert.throws(()=>normalizeBlocks([blocks[0],blocks[0]]));assert.throws(()=>normalizeBlocks([{...blocks[1],rows:[['少一格']]}]));
+});
+test('theme image uses only a distinct local image asset and includes both references',()=>{
+ const dark='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+ const image={id:'theme-image',type:'image',assetId:id,darkAssetId:dark,caption:'主题图',alt:'操作截图'};
+ assert.deepEqual(normalizeBlocks([image]),[image]);
+ assert.deepEqual(blockAssetIds(normalizeBlocks([image])[0]),[id,dark]);
+ for(const darkAssetId of ['https://outside.test/image',id,'not-a-uuid'])assert.throws(()=>normalizeBlocks([{...image,darkAssetId}]),/INVALID_MEDIA/);
+ assert.throws(()=>normalizeBlocks([{...image,type:'file'}]),/INVALID_MEDIA/);
+});
+test('record table presentation options survive validation and malformed options are rejected',()=>{
+ const table={id:'lookup-table',type:'table',headers:['状态','说明'],rows:[['开放','可以申请'],['关闭','暂停申请']],view:'cards',searchable:true,stickyHeader:true,stickyFirstColumn:true};
+ assert.deepEqual(normalizeBlocks([table]),[table]);
+ for(const update of [{view:'unknown'},{searchable:'yes'},{stickyHeader:1},{stickyFirstColumn:'true'}])assert.throws(()=>normalizeBlocks([{...table,...update}]),/INVALID_MEDIA/);
 });
 test('ordinary edits preserve content blocks and explicit changes produce a separate draft',()=>{
  const blocks=[{id:'file-1',type:'file' as const,assetId:id,caption:'附件',alt:''}];

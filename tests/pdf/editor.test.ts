@@ -4,7 +4,16 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {encodeEditorBody,decodeEditorBody,editorMedia} from '../../src/editor/document.ts';
 import {renderPDF} from '../../src/server/pdf/chromium.ts';
 import {exportPDF} from '../../src/server/pdf/export.ts';
+import {inlineEmbedHref} from '../../src/editor/inline-embed.ts';
 const assetId='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+test('inline image is fetched only from the authorized article and embedded in its PDF',async()=>{
+ const image=await readFile('tests/fixtures/article-cover.png');
+ const body=encodeEditorBody([{id:'line',type:'paragraph',props:{},content:[{type:'text',text:'检查图片 ',styles:{}},{type:'link',href:inlineEmbedHref({type:'image',assetId}),content:[{type:'text',text:'截图',styles:{}}]}]}]);
+ const article={id:'inline-pdf',title:'行内图片',revision:1,body,blocks:editorMedia(decodeEditorBody(body)!)};
+ let reads=0;
+ const response=await exportPDF(new Request('http://local'),article.id,1,{snapshot:async()=>({article,files:[]}),asset:async id=>({id,document_id:article.id,filename:'fixture.png',mime_type:'image/png',byte_size:image.length,bucket:'juyu-private',object_key:id}),storage:()=>({read:async()=>{reads++;return new Response(image,{headers:{'content-length':String(image.length)}});},put:async()=>{throw new Error('NO_WRITES');}}),render:async html=>{assert.match(html,/class="pdf-inline-image" src="data:image\/png;base64,/);return renderPDF(html);}});
+ assert.equal(response.status,200,await response.clone().text());assert.equal(reads,1);
+});
 test('T031 real PDF exports interleaved text, private image, nested list, table and marked heading in original order',async()=>{
  const image=await readFile('tests/fixtures/article-cover.png');
  const inline=(text:string,styles={})=>[{type:'text',text,styles}];

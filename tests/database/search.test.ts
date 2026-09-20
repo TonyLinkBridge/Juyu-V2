@@ -25,6 +25,16 @@ test('body and tags search literal Chinese and ASCII partial words across all co
  for(const query of ['续费','transFER','费','专属','域名 domain','域名 标签']){const result=(await service().search(query)).search;assert.equal(result.total,4,query);assert.equal(result.results.length,4);assert.deepEqual(new Set(result.results.map(r=>r.kind)),new Set(['article','ops','reference','qa']));assert.ok(result.results.every(r=>r.revision===1&&r.snippet?.includes('域名')));}
  assert.equal((await service(support).search('续费')).search.total,3);assert.equal((await service().search('续费 absent')).search.total,0);
 });
+test('search scope filters before counting and still enforces reader permissions',async()=>{
+ for(const kind of ['article','ops','reference','qa'] as const)await publish(await draft('范围筛选针尖',kind,`${kind} title`));
+ for(const kind of ['article','ops','reference','qa'] as const){
+  const result=(await service(ops).search('针尖',undefined,kind)).search;
+  assert.equal(result.total,1,kind);assert.equal(result.results[0].kind,kind);
+ }
+ assert.equal((await service(support).search('针尖',undefined,'ops')).search.total,0);
+ assert.equal((await service(support).search('针尖',undefined,'qa')).search.total,1);
+ await assert.rejects(runtime.query('SELECT * FROM juyu.search_publications_scoped($1,1,$2)',[['针尖'],'qa']),/FORBIDDEN/);
+});
 test('rich inline adjacency, nested blocks and display-only media text are searchable without structured IDs',async()=>{
  const body=encodeEditorBody([{id:'private-node-key',type:'paragraph',content:[{type:'text',text:'跨样',styles:{bold:true}},{type:'text',text:'式续费',styles:{}}],children:[{id:'child',type:'paragraph',content:[{type:'text',text:'NestedChild',styles:{}}]}]},
  {id:'table',type:'juyu',props:{payload:JSON.stringify({id:'table',type:'table',headers:['表头'],rows:[['单元格退款']]})}},
@@ -96,7 +106,7 @@ test('existing revisions are backfilled on upgrade including rich text and malfo
   }
   // Historical import with an unsupported body format must not index its raw JSON.
   await old.pool.query("BEGIN; INSERT INTO juyu.documents(id,kind,sequence,workflow_revision_id,workflow_state) VALUES('malformed','article',0,1,'draft'); INSERT INTO juyu.revisions(document_id,revision_id,title,body,audience,author_id,editor_id,created_at) VALUES('malformed',1,'坏格式',E'JUYU_BLOCKNOTE_V1\\n{privateMalformed','staff','a','a',now()); INSERT INTO juyu.audit_log(document_id,sequence,action,actor_id,revision_id,at) VALUES('malformed',0,'create','a',1,now()); COMMIT;");
-  assert.deepEqual(await migrate(old.pool),['0014_publication_search','0015_reference', '0016_qa', '0017_favorites', '0018_recent_views', '0019_analytics', '0020_custom_fields', '0021_categories', '0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements', '0027_native_editor', '0028_qa_search', '0029_shared_revision_config_locks', '0030_publication_number']);
+  assert.deepEqual(await migrate(old.pool),['0014_publication_search','0015_reference', '0016_qa', '0017_favorites', '0018_recent_views', '0019_analytics', '0020_custom_fields', '0021_categories', '0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements', '0027_native_editor', '0028_qa_search', '0029_shared_revision_config_locks', '0030_publication_number', '0031_scoped_search', '0032_category_icons', '0033_publication_icons', '0034_article_description', '0035_publication_timestamp', '0036_reader_changelog', '0037_reusable_fragments', '0038_reusable_fragment_versions', '0039_release_notes', '0040_document_locales']);
   const rows=(await old.pool.query('SELECT document_id,search_text FROM juyu.revision_search ORDER BY document_id')).rows;
   assert.deepEqual(rows,[{document_id:'malformed',search_text:'坏格式\n\n'},{document_id:'old-plain',search_text:'旧纯文\n\nExistingBody'},{document_id:'old-rich',search_text:'旧资料\n旧标签\n\n回填续费'}]);
   assert.deepEqual(await migrate(old.pool),[]);assert.equal((await old.pool.query('SELECT count(*)::int n FROM juyu.revision_search')).rows[0].n,3);

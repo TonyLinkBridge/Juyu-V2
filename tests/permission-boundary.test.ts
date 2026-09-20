@@ -17,7 +17,7 @@ const adminCalls:Record<string,unknown[]>={
  controlReviewDetail:[id],changeReviewControl:[id,forged],reviewDetail:[id],decideReview:[id,forged],reviewers:[id],submitReview:[id,forged],
  trash:[],lifecycle:[id,forged],cleanupJobs:[id],startCleanupAttempt:[id,id],cleanupPending:[id],finishCleanup:[id,id],
  feedbackOverview:[],feedbackDetails:[id,1],workspace:[],mediaDocuments:[],requireEditorAdmin:[],editor:[id],saveDraft:[id,forged],
- media:[id],saveMedia:[id,forged],reserveUpload:[id,id,forged],finishUpload:[id,true],managementAsset:[id],management:[id],
+ media:[id],saveMedia:[id,forged],reserveUpload:[id,id,forged],finishUpload:[id,true],managementAsset:[id],management:[id],reusableFragments:[],createReusableFragment:[forged],updateReusableFragment:[id,1,forged],
 };
 for(const role of ['support','ops'] as const)test(`T055 ${role} cannot invoke any of ${Object.keys(adminCalls).length} administrative operations`,async()=>{
  let transactions=0;
@@ -33,7 +33,7 @@ test('T055 anonymous, unverified and invalid-role identities cannot read even pr
  const identities:unknown[]=[null,{id:'member',role:'admin',companyVerified:false},{id:'member',role:'owner',companyVerified:true},{id:' ',role:'admin',companyVerified:true}];
  for(const viewer of identities){
   const s=new AuthorizationService({async run(){throw new Error('UNEXPECTED_DATABASE_ACCESS');}},async()=>viewer as Viewer|null);
-  for(const [name,args] of Object.entries({reader:[id],article:[id],search:['secret'],asset:[id],pdf:[id,1],favorites:[],recent:[],readerMenu:[],forms:[],announcements:[]}))
+  for(const [name,args] of Object.entries({reader:[id],article:[id],articleVersion:[id],changelog:[1],search:['secret'],asset:[id],pdf:[id,1],favorites:[],recent:[],readerMenu:[],forms:[],announcements:[]}))
    await assert.rejects(Reflect.apply(Reflect.get(s,name),s,args),/FORBIDDEN/,name);
  }
 });

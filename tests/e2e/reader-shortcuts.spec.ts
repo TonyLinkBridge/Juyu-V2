@@ -38,3 +38,15 @@ test('R06 OPS reading uses its own tree and OPS breadcrumb',async({page},info)=>
  if(info.project.name==='mobile')await page.getByRole('button',{name:/文章目录/}).click();
  await expect(page.getByRole('heading',{name:'OPS Internal · 文章目录'})).toBeVisible();await expect(page.locator('nav[data-gb-table-of-contents]:visible')).toHaveCount(1);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
+test('article breadcrumb offers keyboard-accessible authorized sibling shortcuts',async({page})=>{
+ const siblingPages=[
+  {type:'group',id:id(100),title:'账户管理',descendants:[{type:'group',id:id(101),title:'账户安全',descendants:[{type:'document',id:id(10),title:'修改邮箱',href:'/help-centre?article='+id(10)}]},{type:'group',id:id(102),title:'账单',descendants:[{type:'document',id:id(11),title:'查看账单',href:'/help-centre?article='+id(11)}]}]},
+  {type:'group',id:id(103),title:'运营流程',descendants:[{type:'document',id:id(12),title:'交接',href:'/help-centre?article='+id(12)}]}
+ ];
+ await mount(page,{pages:siblingPages,requested:id(10),article:{id:id(10),title:'修改邮箱',revision:1,body:'正式内容'}});
+ const crumbs=page.getByRole('navigation',{name:'面包屑'});
+ await crumbs.getByLabel('切换分类：账户安全').focus();await page.keyboard.press('Enter');
+ await expect(crumbs.getByRole('link',{name:'查看账单'})).toHaveCount(0);
+ await expect(crumbs.getByRole('link',{name:'账单'})).toHaveAttribute('href','/help-centre?article='+id(11));
+ await expect(crumbs.getByRole('link',{name:'账户安全'})).toHaveAttribute('aria-current','page');
+});

@@ -1,8 +1,19 @@
 import {normalizeBlocks,type MediaBlock} from '../media/model.ts';
+import {readerIconKey,type ReaderIconKey} from '../reader/icon-keys.ts';
 export interface ArticleCover {assetId:string;alt:string;position:number}
-export interface ArticlePresentation {tags?:string[];cover?:ArticleCover|null;blocks?:MediaBlock[]}
+export interface ArticlePresentation {description?:string;releaseNote?:string;tags?:string[];cover?:ArticleCover|null;blocks?:MediaBlock[];iconKey?:ReaderIconKey|null}
+export function normalizeDescription(value:unknown):string {
+ if(value===undefined)return '';
+ if(typeof value!=='string'||[...value].length>300||/[\u0000-\u001f\u007f]/.test(value))throw new Error('INVALID_DESCRIPTION');
+ return value.trim();
+}
+export function normalizeReleaseNote(value:unknown):string {
+ if(value===undefined)return '';
+ if(typeof value!=='string'||[...value].length>600||/[\u0000-\u0009\u000b-\u001f\u007f]/.test(value))throw new Error('INVALID_RELEASE_NOTE');
+ return value.trim();
+}
 export const COVER_MIME_TYPES = ['image/png','image/jpeg','image/webp','image/gif'] as const;
-export function normalizePresentation(input:ArticlePresentation):{tags:string[];cover:ArticleCover|null;blocks:MediaBlock[]} {
+export function normalizePresentation(input:ArticlePresentation):{tags:string[];cover:ArticleCover|null;blocks:MediaBlock[];iconKey?:ReaderIconKey|null} {
  const invalid=()=>new Error('INVALID_PRESENTATION: 标签或封面设置不正确');
  const source=input.tags===undefined?[]:input.tags;
  if(!Array.isArray(source)||source.length>12)throw invalid();
@@ -21,5 +32,6 @@ export function normalizePresentation(input:ArticlePresentation):{tags:string[];
      ||!Number.isFinite(raw.position)||raw.position<0||raw.position>100)throw invalid();
    cover={assetId:raw.assetId.toLowerCase(),alt:raw.alt.trim(),position:raw.position};
  }
- return {tags,cover,blocks:normalizeBlocks(input.blocks)};
+ if(input.iconKey!==undefined&&input.iconKey!==null&&readerIconKey(input.iconKey)===null)throw invalid();
+ return {tags,cover,blocks:normalizeBlocks(input.blocks),...(input.iconKey===undefined?{}:{iconKey:input.iconKey})};
 }

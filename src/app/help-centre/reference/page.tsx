@@ -10,6 +10,7 @@ import type {ReferencePage,ReferenceDetail} from '../../../reference/model';
 import {EntryShell} from '../../../components/entry-shell';
 import {ReferenceView} from '../../../components/reference/ReferenceView';
 import {FeatureSearch} from '../../../components/features/FeatureSearch';
+import {SearchInput} from '../../../components/gitbook/Search/SearchInput';
 
 export const dynamic='force-dynamic';
 
@@ -20,13 +21,14 @@ export default async function ReferenceCollectionPage({searchParams}:{searchPara
  if(!ready)redirect('/help-centre');
 
  let data:ReferencePage|undefined,detail:ReferenceDetail|undefined,state:'ready'|'denied'|'unavailable'='unavailable',detailState:'idle'|'ready'|'unavailable'='idle';
+ const params=await searchParams,locale=params.lang==='en'?'en':'zh-CN';
 
  try{
-  const params=await searchParams,url=new URL('http://local/');
-  for(const [key,value] of Object.entries(params)){if(typeof value!=='string')throw new Error('INVALID_INPUT');url.searchParams.set(key,value);}
+  const url=new URL('http://local/');
+  for(const [key,value] of Object.entries(params)){if(key==='lang'&&value==='en')continue;if(typeof value!=='string')throw new Error('INVALID_INPUT');url.searchParams.set(key,value);}
 
   const query=referenceQuery(url);
-  const result=await(await applicationAuthorization()).referencePage(query.page,query.article);
+  const result=await(await applicationAuthorization()).referencePage(query.page,query.article,locale);
 
   data=result.data;
   detail=result.detail;
@@ -36,5 +38,5 @@ export default async function ReferenceCollectionPage({searchParams}:{searchPara
   if(error instanceof Error&&error.message.split(':')[0]==='FORBIDDEN')state='denied';
  }
 
- return <EntryShell account navigation={<ReaderMenu currentHref="/help-centre/reference"/>} search={<FeatureSearch/>}><main id="main-content" className="editor-main search-main"><ReferenceView data={data} detail={detail} state={state} detailState={detailState}/></main></EntryShell>;
+ return <EntryShell account navigation={<ReaderMenu currentHref="/help-centre/reference"/>} search={locale==='en'?<SearchInput locale="en"/>:<FeatureSearch/>}><main id="main-content" className="editor-main search-main"><ReferenceView data={data} detail={detail} state={state} detailState={detailState} locale={locale}/></main></EntryShell>;
 }

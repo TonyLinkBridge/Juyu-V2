@@ -34,3 +34,7 @@ test('category and document identifiers may overlap without losing either node',
  const tree=buildNavigationTree([{id:'same',title:'article'}],[{id:'same',name:'category',parent_id:null,position:0}],[{document_id:'same',category_id:'same'}]);
  assert.equal(selectTreePage(tree,'same')?.title,'article');
 });
+test('English directory links keep the reader in English',()=>{
+ const tree=buildNavigationTree([{id:'guide',title:'Getting started'}],[],[],{locale:'en'});
+ assert.equal(selectTreePage(tree,'guide')?.href,'/help-centre?article=guide&lang=en');
+});

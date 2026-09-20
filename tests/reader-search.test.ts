@@ -34,5 +34,6 @@ test('bounded pages preserve total and make invalid/out of range pages recoverab
  test('Q&A search links bypass the article redirect and encode the authorized id',async()=>{
  const {searchResultHref}=await import('../src/reader/search.ts');
  assert.equal(searchResultHref('qa','q & 1','/help-centre?article=old'),'/help-centre/qa?question=q%20%26%201#qa-q%20%26%201');
+ assert.equal(searchResultHref('qa','q & 1','/help-centre?article=old','en'),'/help-centre/qa?question=q%20%26%201&lang=en#qa-q%20%26%201');
  assert.equal(searchResultHref('article','one','/help-centre?article=one'),'/help-centre?article=one');
  });

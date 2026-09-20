@@ -14,8 +14,8 @@ export async function setFavoriteState(id:string,revision:number,saved:boolean):
 }
 
 /** Refresh the list only after a confirmed mutation; never reload the document. */
-export async function readFavoritesPage(page:number):Promise<FavoritesPage>{
- const response=await fetch(`/api/favorites?page=${page}`,{cache:'no-store',credentials:'same-origin',signal:AbortSignal.timeout(15000)});
+export async function readFavoritesPage(page:number,locale:'zh-CN'|'en'='zh-CN'):Promise<FavoritesPage>{
+ const response=await fetch(`/api/favorites?page=${page}${locale==='en'?'&lang=en':''}`,{cache:'no-store',credentials:'same-origin',signal:AbortSignal.timeout(15000)});
  if(response.status===403)throw new FavoriteRejected('FORBIDDEN');
  if(!response.ok)throw new Error('READ_FAILED');
  const value=await response.json();

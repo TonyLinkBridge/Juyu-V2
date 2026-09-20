@@ -21,7 +21,7 @@ export function ShellSlot({children,chrome,footer,navigation}:{children:ReactNod
  return <div className={navigation?'entry-frame knowledge-shell':'entry-frame'}><a className="skip-link" href="#main-content">跳到主要内容</a>{chrome}{navigation?<div className="knowledge-body"><aside className="knowledge-sidebar">{navigation}</aside><div className="knowledge-content">{children}</div></div>:children}{footer}</div>;
 }
 
-export function Brand(){return <Link href="/help-centre" className="juyu-brand" aria-label="聚域 Help Centre 首页"><img className="logo-light" src="/brand/juyu-logo-color.png" alt="聚域"/><img className="logo-dark" src="/brand/juyu-logo-white.png" alt="聚域"/><span>Help Centre</span></Link>;}
+export function Brand({locale='zh-CN'}:{locale?:'zh-CN'|'en'}){return <Link href={locale==='en'?'/help-centre?lang=en':'/help-centre'} className="juyu-brand" aria-label={locale==='en'?'JUYU Help Centre home':'聚域 Help Centre 首页'}><img className="logo-light" src="/brand/juyu-logo-color.png" alt="聚域"/><img className="logo-dark" src="/brand/juyu-logo-white.png" alt="聚域"/><span>Help Centre</span></Link>;}
 
 const links=[['/admin','知识文章',Files],['/admin?kind=ops&view=list','OPS 内容管理',Files],['/admin?kind=reference&view=list','Reference 管理',Files],['/admin?kind=qa&view=list','Q&A 管理',ChatCircle],['/admin?scope=review&view=list','待我审核',Clock],['/admin/media','媒体文件',ImageSquare],['/admin/members','成员与权限',Users],['/admin/analytics','使用分析',ChartBar],['/admin/feedback','文章反馈',ChatCircle],['/admin/availability','归档资料',Archive],['/admin/trash','回收站',Trash]] as const;
 

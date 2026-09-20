@@ -23,6 +23,18 @@ test('publication boundary exists before releasing approved revisions',async()=>
 async function approved(){const d=await pending();await service(b).decideReview(d.id,{expectedSequence:1,action:'approve'});return (await repo.getForManagement(d.id,a))!;}
 async function publish(id:string,sequence:number){await service().changePublication(id,{expectedSequence:sequence,action:'queue'});return service().changePublication(id,{expectedSequence:sequence+1,action:'publish'});}
 async function asset(id:string,mime='image/png',status='ready'){const aid=randomUUID();await fixture.pool.query("INSERT INTO juyu.assets(id,document_id,uploaded_by,filename,mime_type,byte_size,object_key,status) VALUES($1::uuid,$2,'a','file',$3,4,$1::text,$4)",[aid,id,mime,status]);return aid;}
+test('theme image requires both local ready images and publishes both authorized references',async()=>{
+ const d=await draft(),other=await draft(),light=await asset(d.id),dark=await asset(d.id),foreign=await asset(other.id);
+ const input=(darkAssetId:string)=>({type:'edit' as const,title:'主题图片',body:'正文',audience:'staff' as const,blocks:[{id:'theme',type:'image' as const,assetId:light,darkAssetId,caption:'',alt:'主题截图'}]});
+ await assert.rejects(repo.execute(d.id,input(foreign),a,{expectedSequence:0}),/INVALID_MEDIA/);
+ let edited=await repo.execute(d.id,input(dark),a,{expectedSequence:0});
+ const associations=(await fixture.pool.query("SELECT asset_id FROM juyu.revision_assets WHERE document_id=$1 AND revision_id=$2 AND usage='inline'",[d.id,edited.workflow.revisionId])).rows.map(r=>r.asset_id);
+ assert.deepEqual(new Set(associations),new Set([light,dark]));
+ await service(a).submitReview(d.id,{expectedSequence:edited.sequence,reviewerId:'b'});edited=(await repo.getForManagement(d.id,a))!;
+ await service(b).decideReview(d.id,{expectedSequence:edited.sequence,action:'approve'});edited=(await repo.getForManagement(d.id,a))!;
+ await publish(d.id,edited.sequence);
+ assert.ok(await service(staff).asset(light));assert.ok(await service(staff).asset(dark));
+});
 async function waitForLock(query:string,count=1){const deadline=Date.now()+3000;let n=0;while(Date.now()<deadline){n=(await fixture.pool.query("SELECT count(*)::int AS n FROM pg_stat_activity WHERE wait_event_type='Lock' AND query LIKE $1",[query])).rows[0].n;if(n>=count)break;await new Promise(r=>setTimeout(r,5));}assert.equal(n,count,'independent real DB connections must overlap');}
 test('approved revision queues manually before publication and returns named immutable history',async()=>{
  const d=await approved(),detail=await service().publicationDetail(d.id);assert.equal(detail.revision,1);assert.equal(detail.article.sequence,2);assert.equal(detail.canQueue,true);assert.equal(detail.canPublish,false);assert.equal(detail.approval?.reviewerId,'b');assert.equal(detail.approval?.reviewerName,'B');assert.ok(detail.approval?.approvedAt);assert.deepEqual(detail.history,[]);

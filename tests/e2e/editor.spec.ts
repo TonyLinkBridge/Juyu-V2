@@ -2,6 +2,9 @@ import {readFile} from 'node:fs/promises';
 import {test,expect,type Page} from '@playwright/test';
 import {editorBrowserBundle,editorFixture} from '../helpers/editor-browser';
 import type {EditorData} from '../../src/editor/contract';
+import {decodeEditorBody,encodeEditorBody,editorMedia} from '../../src/editor/document';
+import {annotationText} from '../../src/editor/annotation';
+import {inlineEmbed} from '../../src/editor/inline-embed';
 let bundle:Awaited<ReturnType<typeof editorBrowserBundle>>;
 test.beforeAll(async()=>{bundle=await editorBrowserBundle();});
 async function mount(page:Page,initial:()=>EditorData|null,newReference:boolean|'qa'=false){
@@ -16,6 +19,144 @@ async function settings(page:Page,section='保存与管理'){
 }
 async function closeSettings(page:Page){await page.getByRole('button',{name:'关闭文章设置',exact:true}).click();}
 async function slash(page:Page,name:string){await page.locator('.bn-editor').click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');await page.keyboard.type('/');await page.locator('.bn-suggestion-menu').getByText(name,{exact:true}).click();}
+test('release note autosaves, survives reload, and stays editable only before review',async({page})=>{
+ let saved=structuredClone(editorFixture);
+ await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);
+ await settings(page,'更新说明');
+ await page.getByRole('textbox',{name:'更新说明'}).fill('新增办理步骤\n修正所需资料');
+ await expect.poll(()=>saved.releaseNote,{timeout:8000}).toBe('新增办理步骤\n修正所需资料');
+ await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
+ await page.reload();
+ await settings(page,'更新说明');
+ await expect(page.getByRole('textbox',{name:'更新说明'})).toHaveValue('新增办理步骤\n修正所需资料');
+ saved={...saved,status:'in_review'};
+ await page.reload();
+ await settings(page,'更新说明');
+ await expect(page.getByRole('textbox',{name:'更新说明'})).toBeDisabled();
+});
+test('pasting a supported video URL into an empty paragraph creates a gated embed',async({page})=>{
+ let saved={...structuredClone(editorFixture),body:encodeEditorBody([{id:'empty',type:'paragraph',props:{textAlignment:'left',textColor:'default',backgroundColor:'default'},content:[],children:[]}])};
+ await page.route('**/api/admin/editor/*',route=>{saved={...saved,...route.request().postDataJSON(),sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);
+ await page.locator('.bn-editor [data-content-type="paragraph"]').first().click();
+ await page.evaluate(()=>{const target=document.activeElement;if(!target)throw Error('NO_EDITOR_FOCUS');const transfer=new DataTransfer();transfer.setData('text/plain','https://www.youtube.com/watch?v=dQw4w9WgXcQ');target.dispatchEvent(new ClipboardEvent('paste',{bubbles:true,cancelable:true,clipboardData:transfer}));});
+ await expect(page.locator('[data-juyu-type="externalEmbed"]')).toBeVisible();
+ await expect.poll(()=>decodeEditorBody(saved.body)?.some(block=>block.type==='juyu'&&JSON.parse(block.props.payload).url==='https://www.youtube.com/watch?v=dQw4w9WgXcQ'),{timeout:8000}).toBe(true);
+ await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
+});
+test('admin can save a selected text block as a private fragment and insert a reviewed copy',async({page})=>{
+ let saved=structuredClone(editorFixture);
+ const fragments:{id:string;familyId:string;version:number;title:string;blocks:unknown[];createdAt:string;sourceDocumentId:null}[]=[];
+ await page.route('**/api/admin/fragments',route=>{
+  if(route.request().method()==='GET')return route.fulfill({json:fragments});
+  const input=route.request().postDataJSON();const fragment={...input,familyId:input.id,version:1,sourceDocumentId:null,createdAt:new Date().toISOString()};fragments.push(fragment);return route.fulfill({json:fragment});
+ });
+ await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);
+ await page.locator('.bn-editor').click();
+ await page.getByRole('button',{name:'共用片段'}).click();
+ const dialog=page.getByRole('dialog',{name:'可复用内容片段'});
+ await expect(dialog).toBeVisible();
+ await dialog.getByRole('textbox',{name:'片段名称'}).fill('标准开头');
+ await dialog.getByRole('button',{name:'保存为片段'}).click();
+ await expect(dialog.getByRole('status')).toContainText('已存入片段库');
+ expect(fragments).toHaveLength(1);
+ await dialog.getByRole('button',{name:'插入到文章'}).click();
+ await expect(dialog).not.toBeVisible();
+ await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
+ const blocks=decodeEditorBody(saved.body);assertFragmentCopy(blocks,fragments[0].blocks);
+});
+test('updating a fragment keeps the article on its old version until the editor adopts the new draft',async({page})=>{
+ let saved=structuredClone(editorFixture);
+ const familyId='11111111-1111-4111-8111-111111111111';
+ let latest={id:familyId,familyId,version:1,title:'账户核对',blocks:[{id:'source',type:'paragraph',props:{textAlignment:'left',textColor:'default',backgroundColor:'default'},content:[{type:'text',text:'请先核对账户',styles:{}}],children:[]}],createdAt:new Date().toISOString(),sourceDocumentId:null};
+ await page.route('**/api/admin/fragments',route=>route.fulfill({json:[latest]}));
+ await page.route('**/api/admin/fragments/*',route=>{const value=route.request().postDataJSON();expect(value.expectedVersion).toBe(1);latest={...latest,id:value.id,version:2,blocks:value.blocks};return route.fulfill({json:latest});});
+ await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);
+ await page.locator('.bn-editor').click();await page.getByRole('button',{name:'共用片段'}).click();
+ let dialog=page.getByRole('dialog',{name:'可复用内容片段'});await dialog.getByRole('combobox',{name:'选择片段'}).selectOption(familyId);
+ await dialog.getByRole('button',{name:'插入到文章'}).click();await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
+ let blocks=decodeEditorBody(saved.body)!;let wrapper=blocks.find(block=>block.type==='juyu'&&JSON.parse(block.props.payload).type==='reusableContent');expect(wrapper).toBeTruthy();if(!wrapper||wrapper.type!=='juyu')throw new Error('missing wrapper');expect(JSON.parse(wrapper.props.payload).version).toBe(1);
+ await page.getByRole('button',{name:'共用片段'}).click();dialog=page.getByRole('dialog',{name:'可复用内容片段'});await dialog.getByRole('combobox',{name:'选择片段'}).selectOption(familyId);await dialog.getByRole('button',{name:'用当前选择建立新版本'}).click();await expect(dialog.getByRole('status')).toContainText('第 2 版');
+ blocks=decodeEditorBody(saved.body)!;wrapper=blocks.find(block=>block.type==='juyu'&&JSON.parse(block.props.payload).type==='reusableContent');if(!wrapper||wrapper.type!=='juyu')throw new Error('missing old wrapper');expect(JSON.parse(wrapper.props.payload).version).toBe(1);
+ await dialog.getByRole('button',{name:'在本篇采用最新版'}).click();await page.locator('dialog.juyu-confirm').getByRole('button',{name:'确认继续'}).click();await expect(dialog).not.toBeVisible();await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
+ blocks=decodeEditorBody(saved.body)!;wrapper=blocks.find(block=>block.type==='juyu'&&JSON.parse(block.props.payload).type==='reusableContent');if(!wrapper||wrapper.type!=='juyu')throw new Error('missing new wrapper');expect(JSON.parse(wrapper.props.payload).version).toBe(2);
+});
+test('inserting a media fragment copies the private file into the target article before autosave',async({page})=>{
+ let saved=structuredClone(editorFixture);const sourceId='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',targetId='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',familyId='cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+ const fragment={id:familyId,familyId,version:1,title:'截图说明',blocks:[{id:'source-image',type:'image',props:{backgroundColor:'default',name:'proof.png',url:`/api/assets/${sourceId}`,caption:'原图'},children:[]}],createdAt:new Date().toISOString(),sourceDocumentId:null};
+ const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9jjCcAAAAASUVORK5CYII=','base64');let uploads=0;
+ await page.route('**/api/admin/fragments',route=>route.fulfill({json:[fragment]}));
+ await page.route(`**/api/admin/assets/${sourceId}`,route=>route.fulfill({status:200,body:png,headers:{'Content-Type':'image/png','Content-Length':String(png.length)}}));
+ await page.route('**/api/admin/media/*/upload',route=>{uploads++;return route.fulfill({json:{id:targetId,filename:'copy.png',mime:'image/png',size:String(png.length),status:'ready'}});});
+ await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);await page.locator('.bn-editor').click();await page.getByRole('button',{name:'共用片段'}).click();const dialog=page.getByRole('dialog',{name:'可复用内容片段'});await dialog.getByRole('combobox',{name:'选择片段'}).selectOption(familyId);await dialog.getByRole('button',{name:'插入到文章'}).click();
+ await expect(dialog).not.toBeVisible({timeout:8000});await expect.poll(()=>decodeEditorBody(saved.body)?.some(block=>block.type==='juyu'&&JSON.parse(block.props.payload).type==='reusableContent'),{timeout:8000}).toBe(true);await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});expect(uploads).toBe(1);const blocks=decodeEditorBody(saved.body)!;const wrapper=blocks.find(block=>block.type==='juyu'&&JSON.parse(block.props.payload).type==='reusableContent');expect(wrapper).toBeTruthy();expect(wrapper!.children[0].type).toBe('image');if(wrapper!.children[0].type==='image')expect(wrapper!.children[0].props.url).toBe(`/api/assets/${targetId}`);
+});
+test('unavailable source media leaves the target article untouched',async({page})=>{
+ let saved=structuredClone(editorFixture),uploads=0;const sourceId='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',familyId='cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+ await page.route('**/api/admin/fragments',route=>route.fulfill({json:[{id:familyId,familyId,version:1,title:'失效截图',blocks:[{id:'missing-image',type:'image',props:{backgroundColor:'default',name:'lost.png',url:`/api/assets/${sourceId}`,caption:''},children:[]}],createdAt:new Date().toISOString(),sourceDocumentId:null}]}));
+ await page.route(`**/api/admin/assets/${sourceId}`,route=>route.fulfill({status:404,json:{error:'NOT_FOUND'}}));
+ await page.route('**/api/admin/media/*/upload',route=>{uploads++;return route.fulfill({status:500,json:{error:'UNEXPECTED'}});});
+ await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);await page.locator('.bn-editor').click();await page.getByRole('button',{name:'共用片段'}).click();const dialog=page.getByRole('dialog',{name:'可复用内容片段'});await dialog.getByRole('combobox',{name:'选择片段'}).selectOption(familyId);await dialog.getByRole('button',{name:'插入到文章'}).click();
+ await expect(dialog.getByRole('status')).toContainText('片段未插入');expect(uploads).toBe(0);expect(decodeEditorBody(saved.body)).toBeNull();await expect(page.locator('.editor-embedded[data-juyu-type="reusableContent"]')).toHaveCount(0);
+});
+function assertFragmentCopy(blocks:ReturnType<typeof decodeEditorBody>,source:unknown[]){
+ expect(blocks).not.toBeNull();expect(blocks!.length).toBeGreaterThan(1);
+ const wrapper=blocks!.find(block=>block.type==='juyu'&&JSON.parse(block.props.payload).type==='reusableContent');expect(wrapper).toBeTruthy();expect(wrapper!.children[0].id).not.toBe((source[0] as {id:string}).id);
+}
+test('inline annotation saves selected words and opens as a note in the reader preview',async({page})=>{
+ let saved=structuredClone(editorFixture);
+ await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);
+ await page.locator('.bn-editor').click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');await page.keyboard.insertText('需要说明的词');
+ for(let index=0;index<'需要说明的词'.length;index++)await page.keyboard.press('Shift+ArrowLeft');
+ await page.getByRole('button',{name:'添加行内注释'}).click();
+ const dialog=page.getByRole('dialog',{name:'添加行内注释'});
+ await expect(dialog).toBeVisible();await dialog.getByRole('textbox',{name:'注释内容'}).fill('员工点击后看到的解释');await dialog.getByRole('button',{name:'插入注释'}).click();
+ await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
+ const blocks=decodeEditorBody(saved.body);expect(blocks).not.toBeNull();if(!blocks)throw new Error('saved body is not structured');
+ const link=blocks.flatMap(block=>block.type==='paragraph'?block.content:[]).find(inline=>inline.type==='link'&&inline.content.some(item=>item.text==='需要说明的词'));
+ expect(link?.type).toBe('link');if(link?.type==='link')expect(annotationText(link.href)).toBe('员工点击后看到的解释');
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ const trigger=page.locator('.editor-preview .inline-annotation-trigger');await expect(trigger).toContainText('需要说明的词');await trigger.click();await expect(page.locator('.editor-preview [role="note"]')).toContainText('员工点击后看到的解释');
+ await page.reload();await expect(page.locator('.bn-editor')).toContainText('需要说明的词');
+});
+test('inline icon, formula and image keep their meaning after autosave and preview',async({page})=>{
+ const imageId='00000000-0000-4000-8000-000000000081';
+ let saved={...structuredClone(editorFixture),assets:[{id:imageId,filename:'verification.png',mime:'image/png',size:'100',status:'ready'}]};
+ await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);
+ await page.locator('.bn-editor').click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');
+ for(const kind of ['icon','math','image'] as const){
+  await page.getByRole('button',{name:'插入行内元素'}).click();
+  const dialog=page.getByRole('dialog',{name:'插入行内元素'});await dialog.getByRole('combobox',{name:'行内元素类型'}).selectOption(kind);
+  if(kind==='icon')await dialog.getByRole('combobox',{name:'行内图标'}).selectOption('shield');
+  if(kind==='math')await dialog.getByRole('textbox',{name:'行内公式'}).fill('x^2');
+  if(kind==='image'){await dialog.getByRole('combobox',{name:'行内图片',exact:true}).selectOption(imageId);await dialog.getByRole('textbox',{name:'行内图片说明'}).fill('验证截图');}
+  await dialog.getByRole('button',{name:'插入正文'}).click();
+  await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
+ }
+ const blocks=decodeEditorBody(saved.body);expect(blocks).not.toBeNull();if(!blocks)throw new Error('missing inline body');
+ const embeds=blocks.flatMap(block=>block.type==='paragraph'?block.content:[]).filter(item=>item.type==='link').map(item=>inlineEmbed(item.href)).filter(Boolean);
+ expect(embeds).toEqual([{type:'icon',icon:'shield'},{type:'math',source:'x^2'},{type:'image',assetId:imageId}]);
+ await expect(page.locator('.editor-canvas .inline-reader-icon svg')).toBeVisible();
+ await expect(page.locator('.editor-canvas .inline-reader-math math')).toBeVisible();
+ await expect(page.locator('.editor-canvas .inline-reader-image')).toHaveAttribute('alt','验证截图');
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ await expect(page.locator('.editor-preview .inline-reader-icon')).toBeVisible();
+ await expect(page.locator('.editor-preview .inline-reader-math')).toBeVisible();
+ await expect(page.locator('.editor-preview .inline-reader-image')).toHaveAttribute('alt','验证截图');
+ await page.reload();await expect(page.locator('.editor-canvas .inline-reader-icon svg')).toBeVisible();
+ await expect(page.locator('.editor-canvas .inline-reader-math math')).toBeVisible();
+ await expect(page.locator('.editor-canvas .inline-reader-image')).toHaveAttribute('alt','验证截图');
+ await page.evaluate(()=>document.documentElement.dataset.theme='dark');
+ await expect(page.locator('.editor-canvas .bn-container')).toHaveAttribute('data-color-scheme','dark');
+ await expect(page.locator('.editor-canvas .inline-reader-math math')).toBeVisible();
+});
 test('real BlockNote edits autosave reload and mixed blocks preview in order',async({page},info)=>{
  let saved=structuredClone(editorFixture);let writes=0;
  await page.route('**/api/admin/editor/*',async route=>{const value=route.request().postDataJSON();expect(value.expectedSequence).toBe(saved.sequence);saved={...saved,...value,sequence:saved.sequence+1};writes++;await route.fulfill({json:saved});});
@@ -24,6 +165,23 @@ test('real BlockNote edits autosave reload and mixed blocks preview in order',as
  await page.getByRole('button',{name:'预览草稿',exact:true}).click();await expect(page.locator('.editor-preview')).toContainText('中文更新');await expect(page.locator('.editor-preview')).toContainText('核对二审');
  await page.reload();await expect(page.locator('.bn-editor')).toContainText('中文更新');await expect(page.locator('.editor-embedded')).toHaveCount(1);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`output/verification/editor-${info.project.name}.png`,fullPage:true});await page.evaluate(()=>document.documentElement.dataset.theme='dark');await page.locator('.editor-canvas').scrollIntoViewIfNeeded();await page.screenshot({path:`output/verification/editor-dark-${info.project.name}.png`,fullPage:false});
+});
+test('hint can add a nested editable paragraph that survives autosave and preview',async({page})=>{
+ let saved=structuredClone(editorFixture);
+ await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);
+ await slash(page,'提示框');
+ const hint=page.locator('.editor-embedded').last();
+ await hint.getByText('编辑此内容块',{exact:true}).click();
+ await hint.getByRole('combobox',{name:'提示图标'}).selectOption('shield');
+ await hint.getByRole('button',{name:'在提示框中添加段落'}).click();
+ const nested=hint.locator('xpath=ancestor::div[@data-node-type="blockContainer"][1]').locator('.bn-block-group .bn-inline-content').last();
+ await nested.click();await page.keyboard.insertText('先核实员工身份');
+ await expect.poll(()=>saved.body.startsWith('JUYU_BLOCKNOTE_V1\n')&&JSON.parse(saved.body.split('\n').slice(1).join('\n')).some((block:{type:string;children:{content:{text:string}[]}[]})=>block.type==='juyu'&&block.children.some(child=>child.content.some(text=>text.text==='先核实员工身份'))),{timeout:8000}).toBe(true);
+ expect(JSON.parse(JSON.parse(saved.body.split('\n').slice(1).join('\n')).find((block:{type:string})=>block.type==='juyu').props.payload).iconKey).toBe('shield');
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ await expect(page.locator('.editor-preview .rich-hint')).toContainText('先核实员工身份');
+ await page.screenshot({path:`output/verification/rich-hint-nested-${test.info().project.name}.png`,fullPage:true});
 });
 test('typing during an outstanding save is retained and saved with the acknowledged sequence',async({page})=>{
  let release!:()=>void;const pending=new Promise<void>(r=>release=r);const calls:Record<string,unknown>[]=[];let saved=structuredClone(editorFixture);
@@ -195,6 +353,15 @@ test('native image upload panel saves private identity and renders through the a
  await page.route('**/api/admin/assets/*',route=>route.fulfill({path:'tests/fixtures/article-cover.png',contentType:'image/png'}));
  await mount(page,()=>saved);await page.getByText('添加图片',{exact:true}).click();const chooser=page.waitForEvent('filechooser');await page.getByRole('button',{name:'上传图片',exact:true}).click();await (await chooser).setFiles('tests/fixtures/article-cover.png');
  await expect(page.locator('.bn-editor img')).toHaveAttribute('src','/api/admin/assets/'+asset);await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});expect(saved.body).toContain('/api/assets/'+asset);expect(saved.body).not.toContain('/api/admin/assets/');await page.reload();await expect(page.locator('.bn-editor img')).toHaveAttribute('src','/api/admin/assets/'+asset);
+});
+test('theme image can select a second private image and keeps both references in the draft',async({page})=>{
+ const light='11111111-1111-4111-8111-111111111111',dark='22222222-2222-4222-8222-222222222222';
+ let saved={...structuredClone(editorFixture),assets:[{id:light,filename:'浅色.png',mime:'image/png',size:'100',status:'ready'},{id:dark,filename:'深色.png',mime:'image/png',size:'100',status:'ready'}]};
+ await page.route('**/api/admin/editor/*',route=>{saved={...saved,...route.request().postDataJSON(),sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await page.route('**/api/admin/assets/*',route=>route.fulfill({path:'tests/fixtures/article-cover.png',contentType:'image/png'}));
+ await mount(page,()=>saved);await settings(page,'封面与附件');await page.getByLabel('选择本篇文件').selectOption(light);await page.getByRole('button',{name:'插入主题图片'}).click();await closeSettings(page);
+ const image=page.locator('.editor-embedded[data-juyu-type="image"]');await image.getByText('编辑此内容块',{exact:true}).click();await image.getByLabel('深色主题图片（可选）').selectOption(dark);
+ await expect.poll(()=>saved.body.includes(dark),{timeout:8000}).toBe(true);expect(editorMedia(decodeEditorBody(saved.body)!)).toEqual([expect.objectContaining({type:'image',assetId:light,darkAssetId:dark})]);
 });
 
 test('native drag handle changes paragraph order and native menu deletion can be undone',async({page},info)=>{

@@ -2,13 +2,13 @@ import {normalizeCategoryIds} from '../categories/model.ts';
 import {normalizeFieldSnapshots,type FieldSnapshot} from '../fields/model.ts';
 import {qaForKind} from '../qa/metadata.ts';
 import type {QaMetadata} from '../qa/model.ts';
-import {normalizePresentation,type ArticlePresentation} from './presentation.ts';
+import {normalizeDescription,normalizeReleaseNote,normalizePresentation,type ArticlePresentation} from './presentation.ts';
 import { canManage } from './access.ts';
 import type { Audience, ContentKind, Document, Revision, Status, Viewer, Workflow } from './model.ts';
 
-export interface DraftInput extends ArticlePresentation { categoryIds?:string[]; customFields?:FieldSnapshot[]; qa?:QaMetadata; id: string; title: string; body: string; audience: Audience; kind: ContentKind }
+export interface DraftInput extends ArticlePresentation { categoryIds?:string[]; customFields?:FieldSnapshot[]; qa?:QaMetadata; id: string; title: string; description?:string; body: string; audience: Audience; kind: ContentKind }
 export type Command =
-  | ({ type: 'edit'; categoryIds?:string[]; customFields?:FieldSnapshot[]; qa?:QaMetadata; title: string; body: string; audience: Audience } & ArticlePresentation)
+  | ({ type: 'edit'; categoryIds?:string[]; customFields?:FieldSnapshot[]; qa?:QaMetadata; title: string; description?:string; body: string; audience: Audience } & ArticlePresentation)
   | { type: 'reject'; reason: string }
   | { type: 'submit' | 'withdraw' | 'reassign' | 'approve' | 'queue' | 'publish' };
 export interface CommandContext { expectedSequence: number; now: string; reviewer?: Viewer }
@@ -62,7 +62,7 @@ export function createDocument(input: DraftInput, actor: Viewer | null, now: str
   if (typeof input.id !== 'string' || !input.id.trim()) throw new Error('INVALID_CONTENT: 缺少资料编号');
   return {
     id: input.id, kind: input.kind, sequence: 0, lifecycle: 'active', publishedRevisionId: null,
-    revisions: [{ categoryIds:normalizeCategoryIds(input.categoryIds), customFields:normalizeFieldSnapshots(input.customFields), ...normalizePresentation(input), ...qaForKind(input.kind,input.qa), id: 1, title: input.title.trim(), body: input.body, audience: input.audience, authorId: actor.id, editorId: actor.id, createdAt: now }],
+    revisions: [{ categoryIds:normalizeCategoryIds(input.categoryIds), customFields:normalizeFieldSnapshots(input.customFields), ...normalizePresentation(input), ...qaForKind(input.kind,input.qa), id: 1, title: input.title.trim(), description:normalizeDescription(input.description), releaseNote:normalizeReleaseNote(input.releaseNote), body: input.body, audience: input.audience, authorId: actor.id, editorId: actor.id, createdAt: now }],
     workflow: freshWorkflow(1),
     audit: [{ sequence: 0, action: 'create', actorId: actor.id, revisionId: 1, at: now, reviewerId: null, previousReviewerId: null, reason: null }],
   };
@@ -87,9 +87,9 @@ export function transition(document: Document, command: Command, actor: Viewer |
       validateContent(command, document.kind);
       const revisionId = Math.max(...document.revisions.map((item) => item.id)) + 1;
       const isNewDraft = ['approved', 'queued', 'published'].includes(document.workflow.status);
-      const presentation=normalizePresentation({tags:command.tags===undefined?revision.tags:command.tags,cover:command.cover===undefined?revision.cover:command.cover,blocks:command.blocks===undefined?revision.blocks:command.blocks});
+      const presentation=normalizePresentation({tags:command.tags===undefined?revision.tags:command.tags,cover:command.cover===undefined?revision.cover:command.cover,blocks:command.blocks===undefined?revision.blocks:command.blocks,iconKey:command.iconKey===undefined?revision.iconKey:command.iconKey});
       next.revisions.push({ categoryIds:normalizeCategoryIds(command.categoryIds===undefined?revision.categoryIds:command.categoryIds), customFields:normalizeFieldSnapshots(command.customFields===undefined?revision.customFields:command.customFields), ...presentation, ...qaForKind(document.kind,command.qa===undefined?revision.qa:command.qa),
-        id: revisionId, title: command.title.trim(), body: command.body, audience: command.audience,
+        id: revisionId, title: command.title.trim(), description:normalizeDescription(command.description===undefined?revision.description:command.description), releaseNote:normalizeReleaseNote(command.releaseNote===undefined?revision.releaseNote:command.releaseNote), body: command.body, audience: command.audience,
         authorId: isNewDraft ? actor.id : revision.authorId, editorId: actor.id, createdAt: context.now,
       });
       next.workflow = freshWorkflow(revisionId);

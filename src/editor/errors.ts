@@ -2,6 +2,8 @@
 export function saveError(code:string):string {
  const messages:Record<string,string>={
   INVALID_TITLE:'标题或问题为空、过长或包含不支持的字符。请检查后再保存。',
+  INVALID_DESCRIPTION:'文章简介最多 300 字，不能包含换行或控制字符。请检查后再保存。',
+  INVALID_RELEASE_NOTE:'更新说明最多 600 字，不能包含异常控制字符。请打开文章设置检查。',
   INVALID_BODY:'正文格式或长度不符合要求。请检查最近插入的内容；当前输入仍保留。',
   INVALID_QA:'问答分类或排序不符合要求。分类最多 80 字，排序须为 0 至 999999 的整数。',
   INVALID_CATEGORY:'所选文章分类无效、重复或超过 20 项。请重新选择分类。',
@@ -30,6 +32,8 @@ export function saveError(code:string):string {
 export function validationError(code:string):string {
  const messages:Record<string,string>={
   INVALID_QA:'问答排序须为 0 至 999999 的整数；请检查问答分类与排序。',
+  INVALID_DESCRIPTION:'文章简介最多 300 字，且不能换行。请检查简介。',
+  INVALID_RELEASE_NOTE:'更新说明最多 600 字，不能包含异常控制字符；请打开文章设置检查。',
   INVALID_FIELDS:'自定义字段的必填项、类型或选项不正确；请打开文章设置核对。',
   INVALID_CATEGORY:'文章分类无效或已停用；请重新选择分类。',
   INVALID_PRESENTATION:'标签或封面设置不符合要求；请打开文章设置核对。',

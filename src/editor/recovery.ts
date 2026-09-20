@@ -6,7 +6,7 @@ import {normalizeQa} from '../qa/metadata.ts';
 import type {EditorData} from './contract.ts';
 import {inlineText,isFileBlock} from './document.ts';
 import {editorInitialContent} from './legacy.ts';
-import {normalizePresentation} from '../domain/presentation.ts';
+import {normalizePresentation,normalizeReleaseNote} from '../domain/presentation.ts';
 import {statuses,kinds} from '../workspace/model.ts';
 /** A comparison snapshot must belong to this editor and cannot roll its acknowledged sequence backwards. */
 export function recoverySnapshot(value:unknown,id:string,sequence:number|null):EditorData {
@@ -18,7 +18,7 @@ export function recoverySnapshot(value:unknown,id:string,sequence:number|null):E
  if(v.kind==='qa'||v.qa!==undefined){const qa=normalizeQa(v.qa);if(v.kind!=='qa'&&(qa.category!==''||qa.position!==0))return bad();}
  normalizeFieldSnapshots(v.customFields);
  const categoryIds=normalizeCategoryIds(v.categoryIds);const options=normalizeCategoryDefinitions(v.categoryOptions??[]);if(categoryIds.some(id=>!options.some(c=>c.id===id)))return bad();
- normalizePresentation({tags:v.tags,cover:v.cover,blocks:v.blocks});editorInitialContent(v.body,v.blocks);
+ normalizePresentation({tags:v.tags,cover:v.cover,blocks:v.blocks});normalizeReleaseNote(v.releaseNote);editorInitialContent(v.body,v.blocks);
  return structuredClone(v);
 }
 /** Preserve the exact local input, including fields currently rejected by validation. */
@@ -33,6 +33,8 @@ export function recoveryReadable(data:EditorData):string {
   else if(b.type==='hint')lines.push(b.title,b.body);
   else if(b.type==='code')lines.push(b.language,b.code);
   else if(b.type==='tabs')for(const tab of b.tabs)lines.push(tab.title,tab.body);
+  else if(b.type==='steps')for(const step of b.steps)lines.push(step.title,step.body);
+  else if(b.type==='columns')for(const column of b.columns)lines.push(column.title,column.body);
   else if(b.type==='math'||b.type==='diagram')lines.push(b.caption,b.source);
   else lines.push(`[${b.type==='image'?'图片':b.type==='video'?'影片':'文件'}]`,b.caption,b.alt);walk(node.children);
  }};

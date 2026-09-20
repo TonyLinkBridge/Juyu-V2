@@ -1,3 +1,3 @@
 import HelpCentre from '../page';
 export const dynamic='force-dynamic';
-export default function Library(){return <HelpCentre library searchParams={Promise.resolve({})}/>;}
+export default function Library({searchParams}:{searchParams:Promise<{lang?:string|string[]}>}){return <HelpCentre library searchParams={searchParams}/>;}

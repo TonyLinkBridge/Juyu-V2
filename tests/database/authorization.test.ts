@@ -74,6 +74,75 @@ test('Support and Ops can only read their permitted published versions',async()=
   assert.equal((await db.run(support,client=>client.query('SELECT count(*)::int AS n FROM juyu.documents'))).rows[0].n,0);
 });
 
+test('reader version check and changelog reveal only current authorized publications',async()=>{
+ const staff=new AuthorizationService(db,async()=>support),operations=new AuthorizationService(db,async()=>ops);
+ assert.ok((await staff.articleVersion(regular))?.revision);
+ assert.equal(await staff.articleVersion(internal),null);
+ assert.equal(await staff.articleVersion(draftId),null);
+ const feed=await staff.changelog(1);
+ assert.deepEqual(feed.items.map(item=>item.id),[regular]);
+ assert.equal(feed.items[0].publicationNumber,1);
+ assert.ok(feed.items[0].at);
+ assert.deepEqual(new Set((await operations.changelog(1)).items.map(item=>item.id)),new Set([regular,internal]));
+ await assert.rejects(staff.changelog(101),/INVALID_PAGE/);
+});
+
+test('release notes remain private until the matching revision is approved and published',async()=>{
+ const staff=new AuthorizationService(db,async()=>support);
+ let doc=await owner.create({id:'release-notes',kind:'article',title:'更新说明测试',body:'第一版',audience:'staff',releaseNote:'初版：新增办理步骤'},a);
+ assert.equal((await staff.changelog(1)).items.find(item=>item.id===doc.id),undefined);
+ for(const type of ['submit','approve','queue','publish'] as const)
+  doc=await owner.execute(doc.id,{type},type==='approve'?b:a,{expectedSequence:doc.sequence,reviewer:b});
+ assert.equal((await staff.changelog(1)).items.find(item=>item.id===doc.id)?.releaseNote,'初版：新增办理步骤');
+ doc=await owner.execute(doc.id,{type:'edit',title:'更新说明测试',body:'第二版',audience:'staff',releaseNote:'第二版：补充资料\n并修正流程'},a,{expectedSequence:doc.sequence});
+ assert.equal((await staff.changelog(1)).items.find(item=>item.id===doc.id)?.releaseNote,'初版：新增办理步骤');
+ for(const type of ['submit','approve','queue','publish'] as const)
+  doc=await owner.execute(doc.id,{type},type==='approve'?b:a,{expectedSequence:doc.sequence,reviewer:b});
+ assert.equal((await staff.changelog(1)).items.find(item=>item.id===doc.id)?.releaseNote,'第二版：补充资料\n并修正流程');
+ await assert.rejects(new AuthorizationService(db,async()=>null).changelog(1),/FORBIDDEN/);
+});
+
+test('reusable fragments are admin-only templates and do not alter published articles',async()=>{
+ const administrator=new AuthorizationService(db,async()=>a);
+ const employee=new AuthorizationService(db,async()=>support);
+ const before=(await employee.article(regular))?.body;
+ const id='f1111111-1111-4111-8111-111111111111';
+ const saved=await administrator.createReusableFragment({id,title:'账户核对',blocks:[{id:'source',type:'paragraph',props:{textAlignment:'left',textColor:'default',backgroundColor:'default'},content:[{type:'text',text:'请核对账户',styles:{}}],children:[]}]});
+ assert.equal(saved.id,id);
+ assert.ok((await administrator.reusableFragments()).some(item=>item.id===id));
+ await assert.rejects(employee.reusableFragments(),/FORBIDDEN/);
+ await assert.rejects(employee.createReusableFragment({id,title:'forged',blocks:[]}),/FORBIDDEN/);
+ assert.equal((await db.run(support,client=>client.query('SELECT count(*)::int AS n FROM juyu.reusable_fragments'))).rows[0].n,0);
+ assert.equal((await employee.article(regular))?.body,before);
+});
+test('reusable fragment updates create immutable versions and refuse stale writes',async()=>{
+ const administrator=new AuthorizationService(db,async()=>a);
+ const familyId='f2222222-2222-4222-8222-222222222222';
+ const blocks=[{id:'first',type:'paragraph',props:{textAlignment:'left',textColor:'default',backgroundColor:'default'},content:[{type:'text',text:'第一版',styles:{}}],children:[]}];
+ const first=await administrator.createReusableFragment({id:familyId,title:'操作提示',blocks});
+ assert.equal(first.version,1);
+ assert.equal(first.familyId,familyId);
+ const second=await administrator.updateReusableFragment(familyId,1,{id:'f3333333-3333-4333-8333-333333333333',title:'操作提示',blocks:[{...blocks[0],content:[{type:'text',text:'第二版',styles:{}}]}]});
+ assert.equal(second.version,2);
+ assert.equal(second.familyId,familyId);
+ assert.equal(first.blocks[0].type,'paragraph');
+ assert.equal((first.blocks[0] as {content:{text:string}[]}).content[0].text,'第一版');
+ assert.equal((await administrator.reusableFragments()).find(item=>item.familyId===familyId)?.version,2);
+ await assert.rejects(administrator.updateReusableFragment(familyId,1,{id:'f4444444-4444-4444-8444-444444444444',title:'旧写入',blocks}),/CONFLICT/);
+});
+test('reusable media templates require a ready private asset from an active document',async()=>{
+ const administrator=new AuthorizationService(db,async()=>a);
+ const assetId='f5555555-5555-4555-8555-555555555555';
+ const blocks=[{id:'image-source',type:'image',props:{backgroundColor:'default',name:'proof.png',url:`/api/assets/${assetId}`,caption:''},children:[]}];
+ const input={id:'f6666666-6666-4666-8666-666666666666',title:'验证截图',blocks};
+ await assert.rejects(administrator.createReusableFragment(input),/FRAGMENT_ASSET_UNAVAILABLE/);
+ await administrator.reserveUpload(regular,assetId,{filename:'proof.png',mime:'image/png',size:68});
+ await administrator.finishUpload(assetId,true);
+ const saved=await administrator.createReusableFragment(input);
+ assert.equal(saved.blocks[0].type,'image');
+ assert.equal(saved.familyId,input.id);
+});
+
 test('Admin uses the same restricted connection for the complete secondary review transaction',async()=>{
   const repo=new DocumentRepository(db);
   let doc=await repo.create({id:'runtime-created',kind:'article',title:'runtime',body:'body',audience:'staff'},a);
@@ -229,6 +298,15 @@ test('reader navigation exposes only permitted published titles, including for A
   }
   await assert.rejects(new AuthorizationService(db,async()=>null).navigation(),/FORBIDDEN/);
 });
+test('article reference descriptions are delivered only inside the authorized reader tree',async()=>{
+ const id='restricted-reference-description';
+ let document=await owner.create({id,kind:'ops',title:'受限目标文章',description:'仅 OPS 可读的内部说明',body:'内部步骤',audience:'ops'},a);
+ for(const type of ['submit','approve','queue','publish'] as const)document=await owner.execute(id,{type},type==='approve'?b:a,{expectedSequence:document.sequence,reviewer:b});
+ const staffTree=await new AuthorizationService(db,async()=>support).navigationTree();
+ assert.doesNotMatch(JSON.stringify(staffTree),/仅 OPS 可读的内部说明/);
+ const opsTree=await new AuthorizationService(db,async()=>ops).navigationTree();
+ assert.match(JSON.stringify(opsTree),/仅 OPS 可读的内部说明/);
+});
 
 test('navigation retains the formal title during edits and removes offline documents',async()=>{
   const id=await published('nav-edit');
@@ -309,7 +387,8 @@ test('reader snapshot joins authorized directory with only the current formal bo
  await owner.execute(id,{type:'edit',title:'private future heading',body:'# private future body',audience:'ops'},a,{expectedSequence:original.sequence});
  for(const viewer of [support,a]){
    const snapshot=await new AuthorizationService(db,async()=>viewer).reader(id);
-   assert.deepEqual(snapshot.article,{id,title:'title-reader-snapshot',revision:1,publicationNumber:1,body:'body-reader-snapshot',feedback:{memberId:viewer.id,value:null}});
+   assert.ok(snapshot.article?.publishedAt);assert.match(snapshot.article.publishedAt,/^\d{4}-\d{2}-\d{2}T/);
+   assert.deepEqual(snapshot.article,{id,title:'title-reader-snapshot',revision:1,locale:'zh-CN',sourceId:id,englishId:null,publicationNumber:1,publishedAt:snapshot.article.publishedAt,body:'body-reader-snapshot',feedback:{memberId:viewer.id,value:null}});
    assert.doesNotMatch(JSON.stringify(snapshot),/private future/);
  }
  const service=new AuthorizationService(db,async()=>support);
@@ -362,7 +441,7 @@ test('page links derive only from the current role publication snapshot and stop
  const current=(await owner.getForManagement(last,a))!;
  await owner.execute(last,{type:'edit',title:'未来草稿标题',body:'未公开',audience:'ops'},a,{expectedSequence:current.sequence});
  const snapshot=await service.reader(first);const links=pageNavigation(snapshot.pages,first)!;
- assert.equal(links.next?.id,last);assert.equal(links.next?.title,'title-t022-2');assert.deepEqual(links.ancestors,[{id:group,title:'正式业务流程'}]);
+ assert.equal(links.next?.id,last);assert.equal(links.next?.title,'title-t022-2');assert.equal(links.ancestors[0]?.id,group);assert.equal(links.ancestors[0]?.title,'正式业务流程');
  assert.doesNotMatch(JSON.stringify(links),/t022-1|未来草稿标题|未公开/);
  assert.equal(pageNavigation(snapshot.pages,privateId),null);
  for(const role of [ops,a]){viewer=role;const reader=await service.reader(first);assert.equal(pageNavigation(reader.pages,first)?.next?.id,last);assert.equal(pageNavigation(reader.pages,privateId),null);assert.equal((await service.reader(privateId)).article?.id,privateId);}

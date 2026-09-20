@@ -47,5 +47,5 @@ test('QA route ignores stale search URL when disabled while retaining server fea
   '../../../server/authorization/application':{applicationAuthorization:async()=>({features:async()=>({search:false}),qa:async(...args:unknown[])=>{calls.push(args);return {items:[],total:0,page:1,pages:1};}})},
  });
  const result=await (page as (props:unknown)=>Promise<unknown>)({searchParams:Promise.resolve({q:'旧搜索',category:'账户'})});
- assert.deepEqual(calls,[[1,'账户',undefined]]);assert.match(JSON.stringify(result),/"searchEnabled":false/);
+ assert.deepEqual(calls,[[1,'账户',undefined,'zh-CN']]);assert.match(JSON.stringify(result),/"searchEnabled":false/);
 });

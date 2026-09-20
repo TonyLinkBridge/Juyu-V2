@@ -1,4 +1,5 @@
 /** Shared, environment-independent native inline validation. Never accepts executable CSS/URLs. */
+import {inlineEmbed,reservedInlineEmbed} from './inline-embed.ts';
 export type EditorStyles=Partial<Record<'bold'|'italic'|'underline'|'strike'|'code',boolean>> & {textColor?:string;backgroundColor?:string};
 export interface EditorText {type:'text';text:string;styles:EditorStyles}
 export type EditorInline=EditorText|{type:'link';href:string;content:EditorText[]};
@@ -18,7 +19,7 @@ export function color(v:unknown):string {
 export function normalizeInline(v:unknown,plain=false):EditorInline[]{
  if(!Array.isArray(v)||v.length>10000)return invalid();
  return Array.from(v,item=>{const x=record(item);
-  if(x.type==='link'&&!plain){keys(x,['type','href','content']);if(!safeLink(x.href))return invalid();const content=normalizeInline(x.content);if(content.some(c=>c.type!=='text'))return invalid();return {type:'link',href:x.href,content:content as EditorText[]};}
+  if(x.type==='link'&&!plain){keys(x,['type','href','content']);if(!safeLink(x.href)||reservedInlineEmbed(x.href)&&!inlineEmbed(x.href))return invalid();const content=normalizeInline(x.content);if(content.some(c=>c.type!=='text'))return invalid();return {type:'link',href:x.href,content:content as EditorText[]};}
   keys(x,['type','text','styles']);if(x.type!=='text')return invalid();const s=record(x.styles??{});keys(s,plain?[]:['bold','italic','underline','strike','code','textColor','backgroundColor']);if(x.styles===null)return invalid();const styles:EditorStyles={};
   for(const [key,value] of Object.entries(s)){if(key==='textColor'||key==='backgroundColor')styles[key]=color(value);else{if(typeof value!=='boolean')return invalid();styles[key as 'bold']=value;}}
   return {type:'text',text:boundedText(x.text),styles};

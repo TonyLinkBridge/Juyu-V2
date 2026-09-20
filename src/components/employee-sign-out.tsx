@@ -6,6 +6,7 @@ import { useState } from 'react';
 import type { LoginAudience } from '../authentication/login-flow';
 import { ClerkFailed, ClerkLoading, useClerk, useSession } from '@clerk/nextjs';
 import { signOutCurrentSession } from '../authentication/sign-out';
+import {clearRecentSearch} from '../reader/recent-search';
 
 export function EmployeeSignOut({ audience = 'employee' }: { audience?: LoginAudience }) {
   const clerk = useClerk();
@@ -16,7 +17,7 @@ export function EmployeeSignOut({ audience = 'employee' }: { audience?: LoginAud
     if (!session || pending) return;
     setPending(true); setFailed(false);
     if (!(await requestReviewLeave('signout'))) {setPending(false); return;}
-    try {try{clearDeviceRecovery(localStorage);}catch{notify('本机副本未能清除，请在浏览器设置中清除本站数据。','error');} dispatchEvent(new Event('juyu-clear-recovery')); await signOutCurrentSession(options => clerk.signOut(options), session.id, audience); }
+    try {try{clearDeviceRecovery(localStorage);}catch{notify('本机副本未能清除，请在浏览器设置中清除本站数据。','error');}try{clearRecentSearch(sessionStorage,'zh-CN');clearRecentSearch(sessionStorage,'en');}catch{}dispatchEvent(new Event('juyu-clear-recovery')); await signOutCurrentSession(options => clerk.signOut(options), session.id, audience); }
     catch { resetReviewLeave(); setFailed(true); setPending(false); }
   }
   return <div className="session-exit">

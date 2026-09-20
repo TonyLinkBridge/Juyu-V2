@@ -1,6 +1,7 @@
 import type {PoolClient} from 'pg';
 import type {Document,Viewer} from '../../domain/model.ts';
 import {COVER_MIME_TYPES} from '../../domain/presentation.ts';
+import {blockAssetIds} from '../../media/model.ts';
 import {transition} from '../../domain/workflow.ts';
 import {reviewId} from '../../review/model.ts';
 import {publicationInput,type PublicationAck,type PublicationDetail,type PublicationHistory} from '../../review/publication.ts';
@@ -39,12 +40,13 @@ async function requireReadyAssets(c:PoolClient,d:Document){
  if((await c.query("SELECT 1 FROM juyu.assets WHERE document_id=$1 AND status='pending' LIMIT 1",[d.id])).rowCount)throw new Error('UPLOAD_IN_PROGRESS');
  const revision=d.revisions.find(r=>r.id===d.workflow.revisionId)!;
  const associations=(await c.query<{asset_id:string;usage:string}>('SELECT asset_id,usage FROM juyu.revision_assets WHERE document_id=$1 AND revision_id=$2',[d.id,revision.id])).rows;
- const ids=[...new Set([...associations.map(a=>a.asset_id),...(revision.cover?[revision.cover.assetId]:[]),...(revision.blocks??[]).flatMap(b=>'assetId' in b?[b.assetId]:[])])].sort();
+ const ids=[...new Set([...associations.map(a=>a.asset_id),...(revision.cover?[revision.cover.assetId]:[]),...(revision.blocks??[]).flatMap(blockAssetIds)])].sort();
  const assets=(await c.query<{id:string;document_id:string;status:string;mime_type:string}>('SELECT id,document_id,status,mime_type FROM juyu.assets WHERE id=ANY($1::uuid[]) ORDER BY id FOR SHARE',[ids])).rows;
  if(assets.length!==ids.length||assets.some(a=>a.document_id!==d.id||a.status!=='ready'))throw new Error('INVALID_MEDIA');
  if(revision.cover&&(!associations.some(a=>a.asset_id===revision.cover!.assetId&&a.usage==='cover')||!COVER_MIME_TYPES.some(m=>m===assets.find(a=>a.id===revision.cover!.assetId)!.mime_type)))throw new Error('INVALID_MEDIA');
  for(const b of revision.blocks??[]){if(!('assetId' in b))continue;const asset=assets.find(a=>a.id===b.assetId)!;
   if(!associations.some(a=>a.asset_id===b.assetId&&a.usage==='inline')||(b.type==='image'&&!COVER_MIME_TYPES.some(m=>m===asset.mime_type))||(b.type==='video'&&!['video/mp4','video/webm'].includes(asset.mime_type))||(b.type==='audio'&&!['audio/mpeg','audio/ogg'].includes(asset.mime_type)))throw new Error('INVALID_MEDIA');
+  if(b.type==='image'&&b.darkAssetId){const alternate=assets.find(a=>a.id===b.darkAssetId);if(!alternate||!associations.some(a=>a.asset_id===b.darkAssetId&&a.usage==='inline')||!COVER_MIME_TYPES.some(m=>m===alternate.mime_type))throw new Error('INVALID_MEDIA');}
  }
 }
 export async function readPublicationDetail(c:PoolClient,id:string,actor:Viewer):Promise<PublicationDetail>{

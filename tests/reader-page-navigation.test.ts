@@ -20,3 +20,17 @@ test('duplicate memberships produce one logical step and never turn a page into 
  assert.equal(pageNavigation([...nodes,page('review')],'reference')?.next,null);
  const special=pageNavigation([page('a&role=admin/#中文')],'a&role=admin/#中文');assert.equal(special?.current.href,'/help-centre?article=a%26role%3Dadmin%2F%23%E4%B8%AD%E6%96%87');
 });
+test('breadcrumb shortcuts contain only readable sibling groups and their first readable pages',()=>{
+ const menuNodes:NavigationNode[]=[{type:'group',id:'account',title:'账户管理',descendants:[
+  {type:'group',id:'security',title:'账户安全',descendants:[page('email','修改邮箱')]},
+  {type:'group',id:'billing',title:'账单',descendants:[page('invoice','查看账单')]}
+ ]},{type:'group',id:'ops',title:'运营流程',descendants:[page('handoff','交接')]}];
+ const crumbs=pageNavigation(menuNodes,'email')?.ancestors;
+ assert.deepEqual(crumbs?.[0].siblings?.map(item=>[item.title,item.href]),[['账户管理','/help-centre?article=email'],['运营流程','/help-centre?article=handoff']]);
+ assert.deepEqual(crumbs?.[1].siblings?.map(item=>[item.title,item.href]),[['账户安全','/help-centre?article=email'],['账单','/help-centre?article=invoice']]);
+ assert.equal(JSON.stringify(crumbs).includes('private'),false);
+});
+test('previous and next links preserve the authorized English directory URL',()=>{
+ const english:NavigationNode[]=[{type:'document',id:'first',title:'first',href:'/help-centre?article=first&lang=en'},{type:'document',id:'second',title:'second',href:'/help-centre?article=second&lang=en'}];
+ assert.equal(pageNavigation(english,'first')?.next?.href,'/help-centre?article=second&lang=en');
+});

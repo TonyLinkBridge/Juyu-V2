@@ -26,7 +26,28 @@ test('GitBook reading grid stays aligned with the header and keeps nested naviga
  }
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:`output/verification/gitbook-layout-light-${info.project.name}.png`});
+ if(mobile)await page.keyboard.press('Escape');
+ const appearance=page.getByText('阅读外观',{exact:true});
+ await appearance.click();
+ await page.getByRole('button',{name:'大',exact:true}).click();
+ await page.getByRole('button',{name:'衬线',exact:true}).click();
+ expect(await page.locator('.gitbook-document').evaluate(e=>getComputedStyle(e).fontSize)).toBe('19px');
+ expect(await page.locator('.gitbook-document').evaluate(e=>getComputedStyle(e).fontFamily)).toContain('Georgia');
+ if(!mobile){await page.getByRole('button',{name:'宽',exact:true}).click();expect((await page.locator('#main-content').boundingBox())!.width).toBe(928);}
+ await page.reload();
+ await page.getByText('阅读外观',{exact:true}).click();
+ await expect(page.getByRole('button',{name:'大',exact:true})).toHaveAttribute('aria-pressed','true');
+ expect(await page.locator('.gitbook-document').evaluate(e=>getComputedStyle(e).fontSize)).toBe('19px');
+ await page.getByRole('button',{name:'恢复默认'}).click();
+ expect(await page.locator('.gitbook-document').evaluate(e=>getComputedStyle(e).fontSize)).toBe('16px');
+ await page.route('**/api/articles/email/version',r=>r.fulfill({status:200,json:{revision:23}}));
+ await page.clock.install();
+ await page.clock.fastForward(61_000);
+ await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+ await expect(page.getByRole('status')).toContainText('已发布新版本');
+ await expect(page.getByRole('button',{name:'查看最新版'})).toBeVisible();
  await page.evaluate(()=>document.documentElement.dataset.theme='dark');
+ if(mobile)await page.getByRole('button',{name:'打开文章目录'}).click();
  expect(await nav.locator('[aria-current="page"]').evaluate(e=>getComputedStyle(e).color)).not.toBe('rgb(0, 0, 0)');
  await page.screenshot({path:`output/verification/gitbook-layout-dark-${info.project.name}.png`});
  if(mobile){await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toHaveCount(0);}

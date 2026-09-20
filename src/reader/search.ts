@@ -2,6 +2,13 @@ import type {ContentKind} from '../domain/model.ts';
 import type {NavigationNode} from './tree.ts';
 export const SEARCH_LIMIT=120;
 const PAGE_SIZE=20;
+export type SearchScope='all'|ContentKind;
+export const searchScopeLabels:Record<SearchScope,string>={all:'全部资料',article:'知识文章',ops:'OPS Internal',reference:'Reference 速查',qa:'Q&A 问答'};
+export const englishSearchScopeLabels:Record<SearchScope,string>={all:'All content',article:'Articles',ops:'OPS Internal',reference:'Reference',qa:'Q&A'};
+export function parseSearchScope(value:string|string[]|undefined):SearchScope|null {
+ if(value===undefined)return 'all';
+ return typeof value==='string'&&Object.hasOwn(searchScopeLabels,value)?value as SearchScope:null;
+}
 export type SearchQuery={status:'empty'|'invalid'|'ready';query:string};
 export interface SearchResult {id:string;title:string;href:string;breadcrumbs:string[];snippet?:string;tags?:string[];kind?:ContentKind;revision?:number}
 export interface TitleSearch extends SearchQuery {results:SearchResult[];total:number;page:number;pages:number}
@@ -13,8 +20,8 @@ export function parseSearchQuery(value:string|string[]|undefined):SearchQuery {
  const query=value.trim().replace(/\s+/g,' ');
  return {status:query?'ready':'empty',query};
 }
-export function searchHref(query:string,page=1):string {
- const params=new URLSearchParams({q:query});if(page>1)params.set('page',String(page));
+export function searchHref(query:string,page=1,scope:SearchScope='all',locale:'zh-CN'|'en'='zh-CN'):string {
+ const params=new URLSearchParams({q:query});if(page>1)params.set('page',String(page));if(scope!=='all')params.set('scope',scope);if(locale==='en')params.set('lang','en');
  return `/help-centre?${params}`;
 }
 /** Called only on a server-authorized publication tree. Not an authorization boundary. */
@@ -55,6 +62,6 @@ export function searchSnippet(text:string,query:string):string {
 }
 
 /** Called after server authorization; Q&A opens its independent answer page directly. */
-export function searchResultHref(kind:ContentKind,id:string,articleHref:string):string {
- return kind==='qa'?`/help-centre/qa?question=${encodeURIComponent(id)}#qa-${encodeURIComponent(id)}`:articleHref;
+export function searchResultHref(kind:ContentKind,id:string,articleHref:string,locale:'zh-CN'|'en'='zh-CN'):string {
+ return kind==='qa'?`/help-centre/qa?question=${encodeURIComponent(id)}${locale==='en'?'&lang=en':''}#qa-${encodeURIComponent(id)}`:articleHref;
 }

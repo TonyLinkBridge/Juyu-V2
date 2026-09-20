@@ -37,6 +37,17 @@ test('creates subcategory, edits order, inherits scope and renders both themes w
  await expect.poll(()=>page.locator('html').evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(25, 25, 31)');
  await page.screenshot({path:`output/verification/categories-dark-${info.project.name}.png`,fullPage:true,animations:'disabled'});
 });
+test('selected category icon is included in the saved settings',async({page})=>{
+ const writes:Record<string,unknown>[]=[];
+ await page.route('**/api/admin/categories/*',r=>{const input=r.request().postDataJSON();writes.push(input);return r.fulfill({json:acknowledged(r.request().url(),input)});});
+ await mount(page);
+ await page.getByRole('button',{name:/员工操作/}).click();
+ await page.getByRole('combobox',{name:'目录图标'}).selectOption('shield');
+ await page.getByRole('button',{name:'保存分类',exact:true}).click();
+ await expect(page.getByRole('status')).toContainText('已保存');
+ expect(writes[0].iconKey).toBe('shield');
+ await expect(page.getByRole('combobox',{name:'目录图标'})).toHaveValue('shield');
+});
 
 test('parent picker excludes self and descendants; existing policy edits require immediate-access confirmation',async({page})=>{
  const writes:Record<string,unknown>[]=[];

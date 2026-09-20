@@ -20,6 +20,12 @@ test('editor distinguishes invalid Q&A metadata from body and presentation error
  assert.throws(()=>editorInput({...draft,categoryIds:[id,id]}),/INVALID_CATEGORY/);
 });
 
+test('editor accepts a multiline release note and identifies invalid release note input',()=>{
+ assert.equal(editorInput({...draft,releaseNote:'新增操作步骤\n修正办理资料'}).releaseNote,'新增操作步骤\n修正办理资料');
+ assert.throws(()=>editorInput({...draft,releaseNote:'x'.repeat(601)}),/INVALID_RELEASE_NOTE/);
+ assert.throws(()=>editorInput({...draft,releaseNote:'错误\u0007内容'}),/INVALID_RELEASE_NOTE/);
+});
+
 test('save errors explain the response and safe next action without treating validation as a network failure',async()=>{
  const {saveError}=await import('../src/editor/errors.ts');
  assert.match(saveError('INVALID_TITLE'),/标题/);

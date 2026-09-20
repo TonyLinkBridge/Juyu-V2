@@ -2,7 +2,7 @@
 // Adapted from GitBook PageCoverImage: aspect ratio, crop position and native image.
 import {useRef,useEffect,useState} from 'react';
 import type {ArticleCover} from '../../../domain/presentation';
-export function PageCoverImage({cover}:{cover:ArticleCover}) {
+export function PageCoverImage({cover,locale='zh-CN'}:{cover:ArticleCover;locale?:'zh-CN'|'en'}) {
  const [failed,setFailed]=useState(false);
  const ref=useRef<HTMLImageElement>(null);
  useEffect(()=>{
@@ -10,7 +10,7 @@ export function PageCoverImage({cover}:{cover:ArticleCover}) {
    const image=ref.current;
    if(image?.complete && image.naturalWidth===0)image.dispatchEvent(new Event('error'));
  },[]);
- if(failed)return <div className="reader-cover-unavailable"><span>封面暂时无法加载</span></div>;
+ if(failed)return <div className="reader-cover-unavailable"><span>{locale==='en'?'Cover image unavailable':'封面暂时无法加载'}</span></div>;
  // Native request carries the session to our private endpoint. The Next image
  // optimizer does not forward authentication headers and must not cache this file.
  // eslint-disable-next-line @next/next/no-img-element

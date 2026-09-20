@@ -5,6 +5,7 @@ import {readFeatureConfig,writeFeatureConfig,readFeatureFlags,requireFeature} fr
 import {readNavigationSettings,writeNavigationSettings,readReaderMenu} from '../navigation-settings/repository.ts';
 import {readForms,readForm,writeForm,submitForm,readFormRecords,readFormRecord,processFormRecord} from '../forms/repository.ts';
 import {readCategoryDefinitions,writeCategoryDefinition} from '../categories/repository.ts';
+import {readReusableFragments,createReusableFragment,updateReusableFragment} from '../fragments/repository.ts';
 import {normalizeFieldSnapshots} from '../../fields/model.ts';
 import type {FieldSnapshot} from '../../fields/model.ts';
 import {readFieldDefinitions,writeFieldDefinition} from '../fields/repository.ts';
@@ -63,15 +64,15 @@ export class AuthorizationService {
   async settingHistoryDetail(input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>readHistoryDetail(c,input),true);}
   async restoreSetting(input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>restoreSetting(c,input));}
   async features(){const v=await this.viewer();return this.database.run(v,c=>readFeatureFlags(c),true);}
-  async home(){
+  async home(locale:'zh-CN'|'en'='zh-CN'){
     const v=await this.viewer();
     return this.database.run(v,async c=>{
       const features=await readFeatureFlags(c);
-      const pages=await readKnowledgeTree(c);
+      const pages=await readKnowledgeTree(c,locale);
       const menu=await readReaderMenu(c);
       const knowledgeIds=treeIds(pages);
-      const rows=(await c.query<{id:string;title:string;updated:Date}>(`SELECT document_id AS id,title,created_at AS updated FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id) AND document_id=ANY($1::text[]) ORDER BY created_at DESC,document_id COLLATE "C" LIMIT 5`,[knowledgeIds])).rows;
-      const recent=features.recent?(await readRecent(c)).items.slice(0,4):[];
+      const rows=(await c.query<{id:string;title:string;updated:Date}>(`SELECT r.document_id AS id,r.title,juyu.read_publication_timestamp(r.document_id) AS updated FROM juyu.revisions r WHERE juyu.can_read_revision(r.document_id,r.revision_id) AND r.document_id=ANY($1::text[]) ORDER BY updated DESC,r.document_id COLLATE "C" LIMIT 5`,[knowledgeIds])).rows;
+      const recent=features.recent?(await readRecent(c,1,locale)).items.slice(0,4):[];
       return {features,pages,menu,latest:rows.map(r=>({...r,updated:r.updated.toISOString()})),recent};
     },true);
   }
@@ -95,22 +96,22 @@ export class AuthorizationService {
   async saveField(id:string,input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>writeFieldDefinition(c,id,input));}
   async analyticsDashboard(days:unknown=30){const v=await this.viewer(true);return this.database.run(v,c=>readAnalyticsDashboard(c,days),true);}
   async captureAnalytics(input:unknown){const v=await this.viewer();return this.database.run(v,c=>captureAnalytics(c,input));}
-  async recent(page=1){const v=await this.viewer();return this.database.run(v,c=>readRecent(c,page),true);}
+  async recent(page=1,locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readRecent(c,page,locale),true);}
   async recordRecent(id:string,input:unknown){const v=await this.viewer();return this.database.run(v,c=>recordRecent(c,id,input));}
-  async favorites(page=1){const v=await this.viewer();return this.database.run(v,c=>readFavorites(c,page),true);}
+  async favorites(page=1,locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readFavorites(c,page,locale),true);}
   async favorite(id:string,revision:number){const v=await this.viewer();return this.database.run(v,c=>readFavorite(c,id,revision),true);}
   async saveFavorite(id:string,input:unknown){const v=await this.viewer();return this.database.run(v,c=>writeFavorite(c,id,input));}
-  async qaAnswer(id:string){const v=await this.viewer();return this.database.run(v,async c=>{
- const allowed=(await c.query('SELECT id FROM juyu.read_qa_publications() WHERE id=$1',[id])).rows[0];if(!allowed)throw new Error('FORBIDDEN');
+  async qaAnswer(id:string,locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,async c=>{
+ const allowed=(await c.query('SELECT qa.id FROM juyu.read_qa_publications() qa WHERE qa.id=$1 AND EXISTS(SELECT 1 FROM juyu.read_publication_language(qa.id) l WHERE l.locale=$2)',[id,locale])).rows[0];if(!allowed)throw new Error('FORBIDDEN');
  const row=(await c.query('SELECT document_id,title,revision_id,body FROM juyu.read_publication($1)',[id])).rows[0];if(!row)throw new Error('FORBIDDEN');
  return {id:row.document_id,title:row.title,revision:row.revision_id,body:row.body,...await readPresentation(c,id)};},true);}
-  async qa(page=1,category?:string,q=''){const v=await this.viewer();return this.database.run(v,c=>readQa(c,page,category,q),true);}
-  async reference(page=1){const v=await this.viewer();return this.database.run(v,c=>readReference(c,page),true);}
-  async referenceDetail(id:string){const v=await this.viewer();return this.database.run(v,c=>readReferenceDetail(c,id),true);}
-  async referencePage(page=1,article?:string){const v=await this.viewer();return this.database.run(v,c=>readReferencePage(c,page,article),true);}
+  async qa(page=1,category?:string,q='',locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readQa(c,page,category,q,locale),true);}
+  async reference(page=1,locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readReference(c,page,locale),true);}
+  async referenceDetail(id:string,locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readReferenceDetail(c,id,locale),true);}
+  async referencePage(page=1,article?:string,locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readReferencePage(c,page,article,locale),true);}
   async readerSections(){const v=await this.viewer();return this.database.run(v,c=>readReaderSections(c),true);}
-  async ops(page=1){const v=await this.viewer();return this.database.run(v,c=>readOps(c,page),true);}
-  async firstOpsId(){const v=await this.viewer();return this.database.run(v,c=>readFirstOpsId(c),true);}
+  async ops(page=1,locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readOps(c,page,locale),true);}
+  async firstOpsId(locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readFirstOpsId(c,locale),true);}
   async deletedHistory(page=1){const v=await this.viewer(true);return this.database.run(v,c=>readDeletedHistory(c,v,page),true);}
   async history(id:string,eventPage=1,versionPage=1){const v=await this.viewer(true);return this.database.run(v,c=>readHistory(c,id,v,eventPage,versionPage),true);}
   async historyVersion(id:string,revision:number){const v=await this.viewer(true);return this.database.run(v,c=>readHistoryVersion(c,id,revision,v),true);}
@@ -140,7 +141,7 @@ export class AuthorizationService {
       // Documents are intentionally not directly SELECT-able by ordinary readers.
       const result=await client.query<{id:string;title:string}>(
         'SELECT document_id AS id,title FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id) ORDER BY title COLLATE "C",document_id COLLATE "C"');
-      return result.rows.map(navigationPage);
+      return result.rows.map(row=>navigationPage(row));
     },true);
   }
   async categoryNavigationTree():Promise<NavigationNode[]> {
@@ -157,22 +158,23 @@ export class AuthorizationService {
       return readNavigationTree(client);
     },true);
   }
-async reader(requested:string|string[]|undefined):Promise<{features:Awaited<ReturnType<typeof readFeatureFlags>>;section?:'ops';pages:NavigationNode[];article:Publication|null;favorite?:import('../../favorites/model.ts').FavoriteState;destination?:string}> {
+async reader(requested:string|string[]|undefined):Promise<{features:Awaited<ReturnType<typeof readFeatureFlags>>;section?:'ops';pages:NavigationNode[];article:Publication|null;favorite?:import('../../favorites/model.ts').FavoriteState;destination?:string;referenceAliases?:Record<string,string>}> {
   const viewer=await this.viewer();
   return this.database.run(viewer,async client=>{
     const flags=await readFeatureFlags(client);
     const kinds=await readContentKinds(client);
     const kind=typeof requested==='string'?(kinds.get(requested)??'article'):'article';
+    const requestedLanguage=typeof requested==='string'?(await client.query<{locale:'zh-CN'|'en'}>('SELECT locale FROM juyu.read_publication_language($1)',[requested])).rows[0]?.locale:'zh-CN';
     if(kind==='qa'){
       return {
         features:flags,
         pages:[],
         article:null,
-        destination:'/help-centre/qa?question='+encodeURIComponent(requested as string)+'#qa-'+encodeURIComponent(requested as string)
+        destination:'/help-centre/qa?question='+encodeURIComponent(requested as string)+(requestedLanguage==='en'?'&lang=en':'')+'#qa-'+encodeURIComponent(requested as string)
       };
     }
     const pages=filterTree(
-      await readNavigationTree(client),
+      await readNavigationTree(client,false,requestedLanguage??'zh-CN'),
       id=>(kinds.get(id)??'article')===kind
     );
     const selected=selectTreePage(pages,requested);
@@ -194,10 +196,15 @@ async reader(requested:string|string[]|undefined):Promise<{features:Awaited<Retu
     const favorite=row&&flags.favorites
       ? await readFavorite(client,row.document_id,row.revision_id)
       : undefined;
+    const referenceAliases=requestedLanguage==='en'&&row
+      ? Object.fromEntries((await client.query<{source:string;id:string}>(`SELECT l.source_id AS source,p.id FROM unnest($1::text[]) p(id)
+         CROSS JOIN LATERAL juyu.read_publication_language(p.id) l WHERE l.locale='en'`,[treeIds(pages)])).rows.map(item=>[item.source,item.id]))
+      : undefined;
     return {
       features:flags,
       pages,
       favorite,
+      referenceAliases,
       section:kind==='ops'?'ops':undefined,
       article:row
         ? {
@@ -212,16 +219,32 @@ async reader(requested:string|string[]|undefined):Promise<{features:Awaited<Retu
     };
   },true);
 }
-  async search(query:string|string[]|undefined,page?:string|string[]):Promise<{pages:NavigationNode[];search:TitleSearch}> {
+  async search(query:string|string[]|undefined,page?:string|string[],scope?:import('../../reader/search.ts').SearchScope,locale:'zh-CN'|'en'='zh-CN'):Promise<{pages:NavigationNode[];search:TitleSearch}> {
     const viewer=await this.viewer();
     return this.database.run(viewer,async client=>{
-      const pages=await readNavigationTree(client);
-      return {pages,search:await searchPublications(client,pages,query,page)};
+      const pages=await readNavigationTree(client,false,locale);
+      return {pages,search:await searchPublications(client,pages,query,page,scope,locale)};
     },true);
   }
   async article(id:string) {
     const viewer=await this.viewer();
     return this.database.run(viewer,async client=>{const row=(await client.query('SELECT * FROM juyu.read_publication($1)',[id])).rows[0];return row?{...row,...await readPresentation(client,id)}:null;},true);
+  }
+  async articleVersion(id:string):Promise<{revision:number}|null> {
+    const viewer=await this.viewer();
+    return this.database.run(viewer,async client=>{
+      const row=(await client.query<{revision:number}>('SELECT revision_id AS revision FROM juyu.read_publication($1)',[id])).rows[0];
+      return row?{revision:row.revision}:null;
+    },true);
+  }
+  async changelog(page:number,locale:'zh-CN'|'en'='zh-CN'):Promise<{items:{id:string;kind:import('../../domain/model.ts').ContentKind;title:string;at:string;publicationNumber:number|null;releaseNote:string}[];page:number;hasMore:boolean}> {
+    positiveInteger(page);
+    if(page>100)throw new Error('INVALID_PAGE');
+    const viewer=await this.viewer();
+    return this.database.run(viewer,async client=>{
+      const rows=(await client.query<{id:string;kind:import('../../domain/model.ts').ContentKind;title:string;at:Date;publicationNumber:number|null;releaseNote:string}>('SELECT id,kind,title,published_at AS at,publication_number AS "publicationNumber",release_note AS "releaseNote" FROM juyu.read_changelog_locale($1,$2)',[page,locale])).rows;
+      return {items:rows.slice(0,20).map(row=>({...row,at:row.at.toISOString()})),page,hasMore:rows.length>20};
+    },true);
   }
   async pdf(id:string,revision:number):Promise<PDFSnapshot> {
     positiveInteger(revision);const viewer=await this.viewer();
@@ -248,6 +271,9 @@ async reader(requested:string|string[]|undefined):Promise<{features:Awaited<Retu
     },true);
   }
   async requireEditorAdmin(){await this.viewer(true);}
+  async reusableFragments(){const v=await this.viewer(true);return this.database.run(v,c=>readReusableFragments(c),true);}
+  async createReusableFragment(input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>createReusableFragment(c,input));}
+  async updateReusableFragment(familyId:string,expectedVersion:number,input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>updateReusableFragment(c,familyId,expectedVersion,input));}
   async editor(id:string):Promise<EditorData>{return new DocumentRepository(this.database).getEditor(id,await this.viewer(true));}
   async saveDraft(id:string,input:unknown):Promise<EditorData>{return new DocumentRepository(this.database).saveEditor(id,input,await this.viewer(true));}
   async media(id:string):Promise<MediaEditorData>{
@@ -289,23 +315,26 @@ export async function protectedResponse(action:()=>Promise<unknown>):Promise<Res
   }
 }
 
-async function readNavigationTree(client:PoolClient,repeatMemberships=false):Promise<NavigationNode[]> {
-      const pages=await client.query<{id:string;title:string}>(
-        'SELECT document_id AS id,title FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id)');
+async function readNavigationTree(client:PoolClient,repeatMemberships=false,locale:'zh-CN'|'en'='zh-CN'):Promise<NavigationNode[]> {
+      const pages=await client.query<{id:string;title:string;description?:string;iconKey?:import('../../reader/icon-keys.ts').ReaderIconKey|null}>(
+        'SELECT document_id AS id,title,description,icon_key AS "iconKey" FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id) AND EXISTS(SELECT 1 FROM juyu.read_publication_language(document_id) l WHERE l.locale=$1)',[locale]);
       const memberships=await client.query<NavigationMembership>(
-        'SELECT document_id,category_id FROM juyu.revision_categories WHERE juyu.can_read_revision(document_id,revision_id)');
+        'SELECT document_id,category_id FROM juyu.revision_categories WHERE juyu.can_read_revision(document_id,revision_id) AND EXISTS(SELECT 1 FROM juyu.read_publication_language(document_id) l WHERE l.locale=$1)',[locale]);
       const categories=await client.query<NavigationCategory>(
-        'SELECT id,name,parent_id,position FROM juyu.categories WHERE juyu.category_allowed(id)');
-      return buildNavigationTree(pages.rows,categories.rows,memberships.rows,{repeatMemberships});
+        locale==='en'
+          ? `SELECT c.id,coalesce(n.name,'Other articles') AS name,c.parent_id,c.position,ci.icon_key FROM juyu.categories c LEFT JOIN juyu.category_icons ci ON ci.category_id=c.id LEFT JOIN juyu.read_category_english_names() n ON n.category_id=c.id WHERE juyu.category_allowed(c.id)`
+          : 'SELECT c.id,c.name,c.parent_id,c.position,ci.icon_key FROM juyu.categories c LEFT JOIN juyu.category_icons ci ON ci.category_id=c.id WHERE juyu.category_allowed(c.id)');
+      return buildNavigationTree(pages.rows,categories.rows,memberships.rows,{repeatMemberships,locale});
 }
 
-async function readPresentation(client:PoolClient,id:string):Promise<ArticlePresentation&{publicationNumber?:number|null;customFields?:FieldSnapshot[]}> {
+async function readPresentation(client:PoolClient,id:string):Promise<ArticlePresentation&{locale?:'zh-CN'|'en';sourceId?:string;englishId?:string|null;publicationNumber?:number|null;customFields?:FieldSnapshot[]}> {
  const row=(await client.query<{tags:string[];cover_asset_id:string|null;cover_alt:string;cover_position:number}>('SELECT * FROM juyu.read_publication_presentation($1)',[id])).rows[0];
  if(!row)return {};
- const presentation=(await client.query('SELECT juyu.read_publication_blocks($1) AS blocks,juyu.publication_number($1) AS publication_number',[id])).rows[0];
+ const presentation=(await client.query('SELECT juyu.read_publication_blocks($1) AS blocks,juyu.publication_number($1) AS publication_number,juyu.read_publication_icon($1) AS icon_key,juyu.read_publication_description($1) AS description,juyu.read_publication_timestamp($1) AS published_at',[id])).rows[0];
+ const language=(await client.query<{locale:'zh-CN'|'en';sourceId:string;englishId:string|null}>('SELECT locale,source_id AS "sourceId",english_id AS "englishId" FROM juyu.read_publication_language($1)',[id])).rows[0];
  const blocks=presentation?.blocks;
  const customFields=normalizeFieldSnapshots((await client.query('SELECT juyu.read_publication_fields($1) AS fields',[id])).rows[0]?.fields);
- return {publicationNumber:presentation?.publication_number??null,...(customFields.length?{customFields}:{}),...(blocks?.length?{blocks:normalizeBlocks(blocks)}:{}),...(row.tags.length?{tags:row.tags}:{}),...(row.cover_asset_id?{cover:{assetId:row.cover_asset_id,alt:row.cover_alt,position:row.cover_position}}:{})};
+ return {locale:language?.locale??'zh-CN',sourceId:language?.sourceId??id,englishId:language?.englishId??null,publicationNumber:presentation?.publication_number??null,...(presentation?.published_at?{publishedAt:(presentation.published_at as Date).toISOString()}:{}),...(presentation?.description?{description:presentation.description}:{}),...(presentation?.icon_key?{iconKey:presentation.icon_key}:{}),...(customFields.length?{customFields}:{}),...(blocks?.length?{blocks:normalizeBlocks(blocks)}:{}),...(row.tags.length?{tags:row.tags}:{}),...(row.cover_asset_id?{cover:{assetId:row.cover_asset_id,alt:row.cover_alt,position:row.cover_position}}:{})};
 }
 
 function treeIds(nodes:NavigationNode[]):string[]{return nodes.flatMap(n=>n.type==='group'?treeIds(n.descendants):[n.id]);}
@@ -315,4 +344,4 @@ async function readContentKinds(c:PoolClient):Promise<Map<string,string>>{
  const rows=(await c.query<{id:string;kind:string}>("SELECT id,'qa' AS kind FROM juyu.read_qa_publications() UNION ALL SELECT id,'reference' AS kind FROM juyu.read_reference_publications()"+(sections.ops?" UNION ALL SELECT id,'ops' AS kind FROM juyu.read_ops_publications()":''))).rows;
  return new Map(rows.map(n=>[n.id,n.kind]));
 }
-async function readKnowledgeTree(c:PoolClient):Promise<NavigationNode[]>{const kinds=await readContentKinds(c);return filterTree(await readNavigationTree(c),id=>!kinds.has(id));}
+async function readKnowledgeTree(c:PoolClient,locale:'zh-CN'|'en'='zh-CN'):Promise<NavigationNode[]>{const kinds=await readContentKinds(c);return filterTree(await readNavigationTree(c,false,locale),id=>!kinds.has(id));}

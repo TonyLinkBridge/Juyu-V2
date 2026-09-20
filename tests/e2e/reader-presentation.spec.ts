@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 import {searchTitles} from '../../src/reader/search';
 
 test('theme choices remember explicit preferences and follow system changes',async({page})=>{
- await page.emulateMedia({colorScheme:'light'});await page.goto('/sign-in');
+ await readerFixture(page);await page.emulateMedia({colorScheme:'light'});await page.goto('/help-centre');
  const choices=page.getByRole('group',{name:'外观主题'});
  await expect(choices.getByRole('radio',{name:'跟随系统'})).toBeChecked();
  await choices.getByRole('radio',{name:'深色',exact:true}).check();
@@ -18,13 +18,14 @@ test('theme choices remember explicit preferences and follow system changes',asy
 
 test('blocked storage still allows switching without crashing',async({page})=>{
  await page.addInitScript(()=>{Storage.prototype.getItem=()=>{throw new Error('blocked')};Storage.prototype.setItem=()=>{throw new Error('blocked')};});
- const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));await page.emulateMedia({colorScheme:'dark'});await page.goto('/sign-in');
+ const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));await readerFixture(page);await page.emulateMedia({colorScheme:'dark'});await page.goto('/help-centre');
  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');await page.getByRole('radio',{name:'浅色',exact:true}).check();await expect(page.locator('html')).toHaveAttribute('data-theme','light');expect(errors).toEqual([]);
 });
 
 test('theme syncs between tabs and internal announcements are absent before login',async({page,context})=>{
- await page.goto('/sign-in');const second=await context.newPage();await second.goto('/admin/sign-in');
+ await readerFixture(page);await page.goto('/help-centre');const second=await context.newPage();await readerFixture(second);await second.goto('/help-centre');
  await page.getByRole('radio',{name:'深色',exact:true}).check();await expect(second.locator('html')).toHaveAttribute('data-theme','dark');
+ await page.unrouteAll();await second.unrouteAll();await page.goto('/sign-in');await second.goto('/admin/sign-in');
  await expect(page.getByRole('region',{name:'资料库公告'})).toHaveCount(0);await expect(second.getByRole('region',{name:'资料库公告'})).toHaveCount(0);
  await second.close();
 });
@@ -99,7 +100,7 @@ test('both palettes keep reader, search highlights and entry text at readable co
   await page.getByRole('radio',{name:mode,exact:true}).check();
   await textContrast(page,['.reader-version','.gitbook-document .paragraph','.reader-announcement p','.footer-copy span','.theme-toggler span','.reader-navigation-label']);
  }
- await page.getByRole('textbox',{name:'搜索资料'}).fill('示例');await page.getByRole('button',{name:'搜索',exact:true}).click();
+ await page.getByRole('combobox',{name:'搜索资料'}).fill('示例');await page.getByRole('button',{name:'搜索',exact:true}).click();
  await expect(page.getByRole('list',{name:'搜索结果列表'})).toBeVisible();
  for(const mode of ['浅色','深色']){
   await page.getByRole('radio',{name:mode,exact:true}).check();
@@ -107,9 +108,8 @@ test('both palettes keep reader, search highlights and entry text at readable co
  }
  await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`output/verification/theme-search-dark-${info.project.name}.png`});
  await page.unrouteAll();await page.goto('/sign-in');
- for(const mode of ['浅色','深色']){
-  await page.getByRole('radio',{name:mode,exact:true}).check();
-  await textContrast(page,['.access-description','.connection-notice strong','.connection-notice p','.access-policy']);
- }
+ await textContrast(page,['.login-screen h1','.login-description','.login-policy']);
  await page.screenshot({path:`output/verification/theme-login-dark-${info.project.name}.png`,fullPage:true});
+ await page.goto('/admin/sign-in');
+ await textContrast(page,['.login-screen h1','.login-description','.login-policy']);
 });

@@ -3,7 +3,8 @@ import {useEffect,useRef,useState} from 'react';
 import {PrintButton} from './PrintButton';
 // Adapted from GitBook print controls and image-loading feedback; JUYU adds
 // confirmed server download with explicit failure recovery.
-export function PDFPrintControls({documentId,revision,coverId,publicationNumber}:{publicationNumber?:number|null;documentId:string;revision:number;coverId:string|null}){
+export function PDFPrintControls({documentId,revision,coverId,publicationNumber,locale='zh-CN'}:{publicationNumber?:number|null;documentId:string;revision:number;coverId:string|null;locale?:'zh-CN'|'en'}){
+ const english=locale==='en';
  const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');const [ready,setReady]=useState(false);const [imageError,setImageError]=useState(false);const request=useRef<AbortController|null>(null);
  useEffect(()=>{
   let cancelled=false;
@@ -16,16 +17,16 @@ export function PDFPrintControls({documentId,revision,coverId,publicationNumber}
   if(busy)return;setBusy(true);setMessage('');const controller=new AbortController();request.current=controller;const timer=setTimeout(()=>controller.abort(),45000);
   try{
    const response=await fetch(`/api/articles/${encodeURIComponent(documentId)}/pdf?revision=${revision}&download=1`,{cache:'no-store',signal:controller.signal});
-   if(!response.ok){const data=await response.json();setMessage(data.error==='VERSION_CHANGED'?'文章已更新，请返回文章重新打开 PDF。':data.error==='NOT_FOUND'||data.error==='FORBIDDEN'?'文章已下线或访问权限已变化，请返回资料库。':data.error==='PDF_TOO_LARGE'?'内容超过本次导出范围，请联系管理员拆分文章或压缩封面。':data.error==='PDF_BUSY'?'正在处理另一份 PDF，请稍后重试。':'PDF 暂时无法生成，请稍后重试。');return;}
+   if(!response.ok){const data=await response.json();setMessage(english?data.error==='VERSION_CHANGED'?'This article has changed. Reopen its PDF from the article page.':data.error==='NOT_FOUND'||data.error==='FORBIDDEN'?'This article is unavailable or your access has changed.':data.error==='PDF_TOO_LARGE'?'This article is too large to export. Ask an admin to split it or reduce the cover image.':data.error==='PDF_BUSY'?'Another PDF is being generated. Try again shortly.':'We couldn’t generate the PDF. Please try again.':data.error==='VERSION_CHANGED'?'文章已更新，请返回文章重新打开 PDF。':data.error==='NOT_FOUND'||data.error==='FORBIDDEN'?'文章已下线或访问权限已变化，请返回资料库。':data.error==='PDF_TOO_LARGE'?'内容超过本次导出范围，请联系管理员拆分文章或压缩封面。':data.error==='PDF_BUSY'?'正在处理另一份 PDF，请稍后重试。':'PDF 暂时无法生成，请稍后重试。');return;}
    if(response.headers.get('content-type')!=='application/pdf')throw new Error('INVALID_PDF');
-   const blob=await response.blob();const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='article.pdf';link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);setMessage('PDF 已生成，已交给浏览器下载。');
-  }catch{if(!controller.signal.aborted||request.current===controller)setMessage('PDF 尚未确认生成，请稍后重试。');}
+   const blob=await response.blob();const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='article.pdf';link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);setMessage(english?'Your PDF download is ready.':'PDF 已生成，已交给浏览器下载。');
+  }catch{if(!controller.signal.aborted||request.current===controller)setMessage(english?'We couldn’t confirm the PDF download. Please try again.':'PDF 尚未确认生成，请稍后重试。');}
   finally{clearTimeout(timer);if(request.current===controller)setBusy(false);}
  }
  return <div className="pdf-controls">
-  <div className="pdf-actions"><a className="secondary-link" href={`/help-centre?article=${encodeURIComponent(documentId)}`}>← 返回文章</a><button className="secondary-link" type="button" disabled={busy} onClick={()=>void download()}>{busy?'正在生成 PDF…':'下载 PDF'}</button><PrintButton disabled={!ready||imageError} documentId={documentId} revision={revision} coverId={coverId}/></div>
-  <p>当前为{publicationNumber?`正式版本 ${publicationNumber}`:'已发布内容'}。下载内容以生成时的权限检查为准。</p>
-  {(!ready||imageError)&&<p role="alert">{imageError?'封面未能加载，打印暂不可用。请重新载入页面；下载时服务器也会检查图片。':'正在准备图片，请稍候…'}</p>}
+  <div className="pdf-actions"><a className="secondary-link" href={`/help-centre?article=${encodeURIComponent(documentId)}${english?'&lang=en':''}`}>{english?'← Back to article':'← 返回文章'}</a><button className="secondary-link" type="button" disabled={busy} onClick={()=>void download()}>{english?busy?'Generating PDF…':'Download PDF':busy?'正在生成 PDF…':'下载 PDF'}</button><PrintButton disabled={!ready||imageError} documentId={documentId} revision={revision} coverId={coverId} locale={locale}/></div>
+  <p>{english?`You’re viewing ${publicationNumber?`published version ${publicationNumber}`:'published content'}. Access is checked again when you download.`:`当前为${publicationNumber?`正式版本 ${publicationNumber}`:'已发布内容'}。下载内容以生成时的权限检查为准。`}</p>
+  {(!ready||imageError)&&<p role="alert">{english?imageError?'The cover image didn’t load, so printing is unavailable. Reload this page and try again.':'Preparing images…':imageError?'封面未能加载，打印暂不可用。请重新载入页面；下载时服务器也会检查图片。':'正在准备图片，请稍候…'}</p>}
   <p role="status">{message}</p>
  </div>;
 }

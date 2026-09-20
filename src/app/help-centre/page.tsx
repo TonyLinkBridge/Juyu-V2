@@ -8,7 +8,7 @@ import {ReaderMenu} from '../../components/navigation-settings/ReaderMenu';
 import {readerAnnouncement} from '../../config/reader-presentation';
 import {SearchInput} from '../../components/gitbook/Search/SearchInput';
 import {SearchResults} from '../../components/gitbook/Search/SearchResults';
-import {parseSearchQuery,searchTitles,searchHref} from '../../reader/search';
+import {parseSearchQuery,parseSearchScope,searchTitles,searchHref} from '../../reader/search';
 import type {Publication} from '../../reader/body';
 import {ReaderNavigation} from '../../components/reader-navigation';
 import {applicationAuthorization} from '../../server/authorization/application';
@@ -28,7 +28,7 @@ import {firstTreePage} from '../../reader/tree';
 import {KnowledgeHome} from '../../components/home/KnowledgeHome';
 import {ReaderQuickLinks} from '../../components/navigation-settings/ReaderQuickLinks';
 export const dynamic = 'force-dynamic';
-export default async function HelpCentre({searchParams,library=false}:{library?:boolean;searchParams:Promise<{article?:string|string[];q?:string|string[];page?:string|string[]}>}) {
+export default async function HelpCentre({searchParams,library=false}:{library?:boolean;searchParams:Promise<{article?:string|string[];q?:string|string[];page?:string|string[];scope?:string|string[];lang?:string|string[]}>}) {
   const access = await employeeCompanyAccess();
   if (access.status === 'signed_out') redirect('/sign-in');
   if (access.status === 'unavailable') redirect('/sign-in/error');
@@ -53,16 +53,17 @@ if (access.status === 'verified') {
 const admin = await adminPromise;
   if(enrollment?.status==='ready'&&!memberBlocked) {
     const homeParams=await searchParams;
+    const homeLocale=homeParams.lang==='en'?'en':'zh-CN';
     if(homeParams.article===undefined&&homeParams.q===undefined){
       let home:Awaited<ReturnType<Awaited<ReturnType<typeof applicationAuthorization>>['home']>>|undefined;
-      try{home=await(await applicationAuthorization()).home();}catch{}
+      try{home=await(await applicationAuthorization()).home(homeLocale);}catch{}
       if(!home)return <EntryShell><main id="main-content" className="message-main"><h1>资料库暂时无法读取</h1><p>请稍后重试。读取失败不会被当作没有内容。</p><Link href="/help-centre">重新读取</Link></main></EntryShell>;
       if(library){
         const first=firstTreePage(home.pages);
         if(first)redirect(first.href);
-        return <EntryShell account search={home.features.search?<SearchInput query=""/>:undefined}><ReaderNavigation pages={home.pages} features={home.features}/></EntryShell>;
+        return <EntryShell account search={home.features.search?<SearchInput query="" locale={homeLocale}/>:undefined}><ReaderNavigation pages={home.pages} features={home.features} locale={homeLocale}/></EntryShell>;
       }
-      return <EntryShell account announcement={readerAnnouncement} navigation={<ReaderQuickLinks items={home.menu} currentHref="/help-centre"/>} search={home.features.search?<SearchInput query=""/>:undefined}>{<KnowledgeHome {...home} search={home.features.search} showRecent={home.features.recent} admin={admin.status==='admin'}/>}</EntryShell>;
+      return <EntryShell account announcement={readerAnnouncement} navigation={<ReaderQuickLinks items={home.menu} currentHref="/help-centre" locale={homeLocale}/>} search={home.features.search?<SearchInput query="" locale={homeLocale}/>:undefined}>{<KnowledgeHome {...home} locale={homeLocale} search={home.features.search} showRecent={home.features.recent} admin={admin.status==='admin'}/>}</EntryShell>;
     }
     let features=closedFeatureFlags,featuresUnavailable=false;
     let pages:NavigationNode[]=[];
@@ -71,6 +72,8 @@ const admin = await adminPromise;
     const params=await searchParams;
     const requested=params.article;
     const query=parseSearchQuery(params.q).query;
+    const scope=parseSearchScope(params.scope);
+    const locale=params.lang==='en'?'en':'zh-CN';
 if(params.q!==undefined){
   try{
     features=await(await applicationAuthorization()).features();
@@ -78,20 +81,26 @@ if(params.q!==undefined){
     featuresUnavailable=true;
   }
 }
-let input=features.search?<SearchInput key={query} query={query}/>:undefined;
+let input=features.search?<SearchInput key={`${locale}:${query}`} query={query} scope={scope??'all'} locale={locale}/>:undefined;
     if(params.q!==undefined&&!features.search)return <EntryShell navigation={<ReaderMenu/>}><FeatureNotice feature="search" unavailable={featuresUnavailable}/></EntryShell>;
     if(params.q!==undefined){
       let search=searchTitles([],params.q,params.page);
-      try {({pages,search}=await (await applicationAuthorization()).search(params.q,params.page));}catch{failed=true;}
+      if(scope===null)search={...search,status:'invalid'};
+      else try {({pages,search}=await (await applicationAuthorization()).search(params.q,params.page,scope,locale));}catch{failed=true;}
       return <EntryShell navigation={<ReaderMenu currentHref="/help-centre"/>} search={input} announcement={failed ? undefined : readerAnnouncement}><div className="reader-search-layout">
-        <SearchAnalytics search={search} enabled={!failed&&features.analytics}><SearchResults search={search} failed={failed} retryHref={searchHref(query,search.page)}/></SearchAnalytics>
+        <SearchAnalytics search={search} enabled={!failed&&features.analytics}><SearchResults search={search} scope={scope??'all'} failed={failed} locale={locale} retryHref={searchHref(query,search.page,scope??'all',locale)}/></SearchAnalytics>
       </div></EntryShell>;
     }
     let favorite:import('../../favorites/model').FavoriteState|undefined;
-    let section:'ops'|undefined;let destination:string|undefined;try {({features,pages,article,destination,favorite,section}=await (await applicationAuthorization()).reader(requested));} catch {failed=true;}
-    input=features.search?<SearchInput key={query} query={query}/>:undefined;
+    let section:'ops'|undefined;let destination:string|undefined;let referenceAliases:Record<string,string>|undefined;try {({features,pages,article,destination,favorite,section,referenceAliases}=await (await applicationAuthorization()).reader(requested));} catch {failed=true;}
+    input=features.search?<SearchInput key={`${article?.locale??locale}:${query}`} query={query} scope={scope??'all'} locale={article?.locale??locale}/>:undefined;
     if(destination)redirect(destination);
-    return <EntryShell account search={input} announcement={failed ? undefined : readerAnnouncement}><ReaderNavigation section={section} features={features} pages={pages} requested={requested} failed={failed} article={article} articleActions={!failed&&article?<>{features.favorites&&<FavoriteButton viewerId={access.status==='verified'?access.userId:undefined} documentId={article.id} revision={article.revision} initial={favorite}/>}{features.recent&&<RecentRecorder documentId={article.id} revision={article.revision}/>}{features.analytics&&<ArticleAnalytics documentId={article.id} revision={article.revision}/>}</>:undefined}/></EntryShell>;
+    // The persistent reader chrome reads the URL language. Normalize old or
+    // manually pasted article links after the authorized publication is known.
+    if(article&&((article.locale==='en')!==(params.lang==='en'))){
+      redirect(`/help-centre?article=${encodeURIComponent(article.id)}${article.locale==='en'?'&lang=en':''}`);
+    }
+    return <EntryShell account search={input} announcement={failed ? undefined : readerAnnouncement}><ReaderNavigation section={section} features={features} pages={pages} requested={requested} failed={failed} article={article} locale={article?.locale??locale} referenceAliases={referenceAliases} articleActions={!failed&&article?<>{features.favorites&&<FavoriteButton viewerId={access.status==='verified'?access.userId:undefined} documentId={article.id} revision={article.revision} initial={favorite} locale={article.locale}/>}{features.recent&&<RecentRecorder documentId={article.id} revision={article.revision}/>}{features.analytics&&<ArticleAnalytics documentId={article.id} revision={article.revision}/>}</>:undefined}/></EntryShell>;
   }
   const opening=enrollment&&enrollment.status!=='ready';
   const denied = access.status === 'denied';

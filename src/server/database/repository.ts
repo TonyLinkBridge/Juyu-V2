@@ -6,7 +6,7 @@ import {normalizeQa} from '../../qa/metadata.ts';
 import {isDeepStrictEqual} from 'node:util';
 import {decodeEditorBody,encodeEditorBody,editorMedia} from '../../editor/document.ts';
 import type {EditorData} from '../../editor/contract.ts';
-import type {ManagedAsset} from '../../media/model.ts';
+import {blockAssetIds,type ManagedAsset} from '../../media/model.ts';
 import {editorInput} from '../editor/input.ts';
 import {COVER_MIME_TYPES} from '../../domain/presentation.ts';
 import type { PoolClient } from 'pg';
@@ -38,7 +38,7 @@ async function load(client: PoolClient, id: string, scope: 'full' | 'editor' = '
   const result = await client.query('SELECT * FROM juyu.documents WHERE id=$1', [id]);
   const row = result.rows[0];
   if (!row) return null;
-  const versions = await client.query(`SELECT coalesce((SELECT json_agg(rc.category_id ORDER BY rc.category_id) FROM juyu.revision_categories rc WHERE rc.document_id=r.document_id AND rc.revision_id=r.revision_id),'[]') AS "categoryIds",r.revision_id AS id,r.title,r.body,r.audience,r.tags,r.custom_fields AS "customFields",r.qa_category,r.qa_position,r.content_blocks AS blocks,
+  const versions = await client.query(`SELECT coalesce((SELECT json_agg(rc.category_id ORDER BY rc.category_id) FROM juyu.revision_categories rc WHERE rc.document_id=r.document_id AND rc.revision_id=r.revision_id),'[]') AS "categoryIds",r.revision_id AS id,r.title,r.description,r.release_note AS "releaseNote",r.body,r.audience,r.tags,r.icon_key AS "iconKey",r.custom_fields AS "customFields",r.qa_category,r.qa_position,r.content_blocks AS blocks,
     CASE WHEN ra.asset_id IS NULL THEN NULL ELSE json_build_object('assetId',ra.asset_id,'alt',r.cover_alt,'position',r.cover_position) END AS cover,
     r.author_id AS "authorId",r.editor_id AS "editorId",r.created_at AS "createdAt"
     FROM juyu.revisions r LEFT JOIN juyu.revision_assets ra ON ra.document_id=r.document_id AND ra.revision_id=r.revision_id AND ra.usage='cover'
@@ -48,7 +48,7 @@ async function load(client: PoolClient, id: string, scope: 'full' | 'editor' = '
     id: row.id, kind: row.kind, sequence: row.sequence, lifecycle: row.lifecycle,
     publishedRevisionId: row.published_revision_id,
     workflow: { revisionId: row.workflow_revision_id, status: row.workflow_state, submittedBy: row.submitted_by, reviewerId: row.reviewer_id, approvedBy: row.approved_by },
-    revisions: versions.rows.map((revision) => (({qa_category,qa_position,...rest})=>({...rest,...(row.kind==='qa'?{qa:{category:qa_category,position:qa_position}}:{}),createdAt:rest.createdAt.toISOString()}))(revision)) as Revision[],
+    revisions: versions.rows.map((revision) => (({qa_category,qa_position,iconKey,...rest})=>({...rest,...(iconKey?{iconKey}:{}),...(row.kind==='qa'?{qa:{category:qa_category,position:qa_position}}:{}),createdAt:rest.createdAt.toISOString()}))(revision)) as Revision[],
     audit: history.rows.map((entry) => ({ ...entry, at: entry.at.toISOString() })) as AuditEntry[],
   };
 }
@@ -67,13 +67,15 @@ async function insertRevision(client: PoolClient, id: string, revision: Revision
     if(!asset.rowCount)throw new Error('INVALID_COVER: 请选择本篇文章已就绪的图片');
   }
   for(const block of revision.blocks??[]){
-    if(!('assetId' in block))continue;
-    const asset=(await client.query("SELECT mime_type FROM juyu.assets WHERE id=$1 AND document_id=$2 AND status='ready' FOR SHARE",[block.assetId,id])).rows[0];
-    if(!asset||(block.type==='image'&&!COVER_MIME_TYPES.includes(asset.mime_type))||(block.type==='video'&&!['video/mp4','video/webm'].includes(asset.mime_type))||(block.type==='audio'&&!['audio/mpeg','audio/ogg'].includes(asset.mime_type)))throw new Error('INVALID_MEDIA: 文件不可用或不属于本篇文章');
+    for(const assetId of blockAssetIds(block)){
+      const asset=(await client.query("SELECT mime_type FROM juyu.assets WHERE id=$1 AND document_id=$2 AND status='ready' FOR SHARE",[assetId,id])).rows[0];
+      if(!asset||((block.type==='image'||!('assetId' in block))&&!COVER_MIME_TYPES.includes(asset.mime_type))||(block.type==='video'&&!['video/mp4','video/webm'].includes(asset.mime_type))||(block.type==='audio'&&!['audio/mpeg','audio/ogg'].includes(asset.mime_type)))throw new Error('INVALID_MEDIA: 文件不可用或不属于本篇文章');
+    }
+    if(block.type==='image'&&block.darkAssetId){const dark=(await client.query("SELECT mime_type FROM juyu.assets WHERE id=$1 AND document_id=$2 AND status='ready' FOR SHARE",[block.darkAssetId,id])).rows[0];if(!dark||!COVER_MIME_TYPES.includes(dark.mime_type))throw new Error('INVALID_MEDIA: 深色主题图片不可用或不属于本篇文章');}
   }
-  await client.query(`INSERT INTO juyu.revisions(document_id,revision_id,title,body,audience,author_id,editor_id,created_at,tags,cover_alt,cover_position,content_blocks,qa_category,qa_position,custom_fields,category_ids)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`, [id, revision.id, revision.title, revision.body, revision.audience, revision.authorId, revision.editorId, revision.createdAt,revision.tags??[],revision.cover?.alt??'',revision.cover?.position??50,JSON.stringify(revision.blocks??[]),revision.qa?.category??'',revision.qa?.position??0,JSON.stringify(revision.customFields),normalizeCategoryIds(revision.categoryIds)]);
-  for(const assetId of new Set((revision.blocks??[]).flatMap(b=>'assetId' in b?[b.assetId]:[])))await client.query("INSERT INTO juyu.revision_assets(document_id,revision_id,asset_id,usage) VALUES($1,$2,$3,'inline')",[id,revision.id,assetId]);
+  await client.query(`INSERT INTO juyu.revisions(document_id,revision_id,title,body,audience,author_id,editor_id,created_at,tags,cover_alt,cover_position,content_blocks,qa_category,qa_position,custom_fields,category_ids,icon_key,description,release_note)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`, [id, revision.id, revision.title, revision.body, revision.audience, revision.authorId, revision.editorId, revision.createdAt,revision.tags??[],revision.cover?.alt??'',revision.cover?.position??50,JSON.stringify(revision.blocks??[]),revision.qa?.category??'',revision.qa?.position??0,JSON.stringify(revision.customFields),normalizeCategoryIds(revision.categoryIds),revision.iconKey??null,revision.description??'',revision.releaseNote??'']);
+  for(const assetId of new Set((revision.blocks??[]).flatMap(blockAssetIds)))await client.query("INSERT INTO juyu.revision_assets(document_id,revision_id,asset_id,usage) VALUES($1,$2,$3,'inline')",[id,revision.id,assetId]);
   if(revision.cover)await client.query("INSERT INTO juyu.revision_assets(document_id,revision_id,asset_id,usage) VALUES($1,$2,$3,'cover')",[id,revision.id,revision.cover.assetId]);
 }
 
@@ -101,7 +103,7 @@ async function persistNext(client:PoolClient,id:string,document:Document,next:Do
       for (const revision of next.revisions.slice(document.revisions.length)) {
         await insertRevision(client, id, revision,document.revisions.find(r=>r.id===document.workflow.revisionId));
         await client.query(`INSERT INTO juyu.revision_assets(document_id,revision_id,asset_id,usage)
-          SELECT document_id,$3,asset_id,usage FROM juyu.revision_assets WHERE document_id=$1 AND revision_id=$2 AND usage<>'cover' AND NOT (usage='inline' AND asset_id=ANY($4::uuid[])) ON CONFLICT DO NOTHING`,[id,document.workflow.revisionId,revision.id,(document.revisions.find(r=>r.id===document.workflow.revisionId)?.blocks??[]).flatMap(b=>'assetId' in b?[b.assetId]:[])]);
+          SELECT document_id,$3,asset_id,usage FROM juyu.revision_assets WHERE document_id=$1 AND revision_id=$2 AND usage<>'cover' AND NOT (usage='inline' AND asset_id=ANY($4::uuid[])) ON CONFLICT DO NOTHING`,[id,document.workflow.revisionId,revision.id,(document.revisions.find(r=>r.id===document.workflow.revisionId)?.blocks??[]).flatMap(blockAssetIds)]);
       }
       await persistReview(client, next, command, actor, now);
       const w = next.workflow;
@@ -114,7 +116,11 @@ async function persistNext(client:PoolClient,id:string,document:Document,next:Do
 async function editorSnapshot(client:PoolClient,doc:Document):Promise<EditorData> {
  const revision=doc.revisions.find(r=>r.id===doc.workflow.revisionId)!;
  const assets=(await client.query<ManagedAsset>("SELECT id,filename,mime_type AS mime,byte_size::text AS size,status FROM juyu.assets WHERE document_id=$1 ORDER BY created_at DESC,id",[doc.id])).rows;
- return {publicationNumber:(await client.query('SELECT juyu.publication_number($1) AS n',[doc.id])).rows[0]?.n??null,categoryIds:revision.categoryIds??[],categoryOptions:await readCategoryDefinitions(client),customFields:revision.customFields??[],fieldDefinitions:await readFieldDefinitions(client),...(revision.qa?{qa:revision.qa}:{}),documentId:doc.id,title:revision.title,body:revision.body,sequence:doc.sequence,status:doc.workflow.status,lifecycle:doc.lifecycle,blocks:revision.blocks??[],cover:revision.cover??null,tags:revision.tags??[],assets,kind:doc.kind,audience:revision.audience,publishedRevision:doc.publishedRevisionId};
+ const language=(await client.query<{locale:'zh-CN'|'en';translationOf:string|null}>('SELECT locale,translation_of AS "translationOf" FROM juyu.documents WHERE id=$1',[doc.id])).rows[0];
+ const sibling=language.locale==='en'?
+  (await client.query<{documentId:string;status:string;publishedRevision:number|null}>('SELECT id AS "documentId",workflow_state AS status,published_revision_id AS "publishedRevision" FROM juyu.documents WHERE id=$1',[language.translationOf])).rows[0]:
+  (await client.query<{documentId:string;status:string;publishedRevision:number|null}>('SELECT id AS "documentId",workflow_state AS status,published_revision_id AS "publishedRevision" FROM juyu.documents WHERE translation_of=$1 AND locale=\'en\'',[doc.id])).rows[0];
+ return {locale:language.locale,translationOf:language.translationOf,translation:sibling??null,publicationNumber:(await client.query('SELECT juyu.publication_number($1) AS n',[doc.id])).rows[0]?.n??null,categoryIds:revision.categoryIds??[],categoryOptions:await readCategoryDefinitions(client),customFields:revision.customFields??[],fieldDefinitions:await readFieldDefinitions(client),...(revision.qa?{qa:revision.qa}:{}),...(revision.iconKey?{iconKey:revision.iconKey}:{}),documentId:doc.id,title:revision.title,description:revision.description??'',releaseNote:revision.releaseNote??'',body:revision.body,sequence:doc.sequence,status:doc.workflow.status,lifecycle:doc.lifecycle,blocks:revision.blocks??[],cover:revision.cover??null,tags:revision.tags??[],assets,kind:doc.kind,audience:revision.audience,publishedRevision:doc.publishedRevisionId};
 }
 /** Server-only persistence boundary. Viewer must come from trusted server authentication,
  * never request JSON. All production transactions go through ScopedDatabase.
@@ -147,23 +153,29 @@ export class DocumentRepository {
       const document=await load(client,id,'editor');const now=new Date().toISOString();
       if(!document){
         if(input.expectedSequence!==null)throw new Error('NOT_FOUND');
+        if(input.locale==='en'){
+          const source=(await client.query<{kind:string;locale:string;lifecycle:string}>('SELECT kind,locale,lifecycle FROM juyu.documents WHERE id=$1 FOR SHARE',[input.translationOf])).rows[0];
+          if(!source||source.locale!=='zh-CN'||source.lifecycle!=='active'||source.kind!==input.kind)throw new Error('INVALID_TRANSLATION_SOURCE');
+        }
         const created=createDocument({...input,id,blocks},actor,now);
-        await client.query("INSERT INTO juyu.documents(id,kind,sequence,lifecycle,workflow_revision_id,workflow_state) VALUES($1,$2,0,'active',1,'draft')",[id,created.kind]);
+        await client.query("INSERT INTO juyu.documents(id,kind,sequence,lifecycle,workflow_revision_id,workflow_state,locale,translation_of) VALUES($1,$2,0,'active',1,'draft',$3,$4)",[id,created.kind,input.locale??'zh-CN',input.translationOf??null]);
         await insertRevision(client,id,created.revisions[0]);await insertAudit(client,id,created.audit[0]);
         return editorSnapshot(client,created);
       }
       if(document.lifecycle!=='active')throw new Error('INACTIVE_DOCUMENT');
+      const language=(await client.query<{locale:string;translationOf:string|null}>('SELECT locale,translation_of AS "translationOf" FROM juyu.documents WHERE id=$1',[id])).rows[0];
+      if(language.locale!==(input.locale??'zh-CN')||language.translationOf!==(input.translationOf??null))throw new Error('INVALID_LOCALE');
       if(document.workflow.status==='in_review')throw new Error('INVALID_STATE');
       if(document.kind!==input.kind)throw new Error('INVALID_INPUT: 资料类型不可更改');
       const revision=document.revisions.find(r=>r.id===document.workflow.revisionId)!;
       const replaySequence=input.expectedSequence===null?0:input.expectedSequence+1;
       const last=document.audit.at(-1);
       const qa=normalizeQa(input.qa===undefined?revision.qa:input.qa);
-      const identical=isDeepStrictEqual(revision.categoryIds??[],input.categoryIds===undefined?(revision.categoryIds??[]):input.categoryIds)&&isDeepStrictEqual(revision.customFields??[],input.customFields??[])&&isDeepStrictEqual(normalizeQa(revision.qa),qa)&&revision.title===input.title&&revision.body===input.body&&revision.audience===input.audience
-        &&isDeepStrictEqual(revision.tags??[],input.tags)&&isDeepStrictEqual(revision.cover??null,input.cover)&&isDeepStrictEqual(revision.blocks??[],blocks);
+      const identical=isDeepStrictEqual(revision.categoryIds??[],input.categoryIds===undefined?(revision.categoryIds??[]):input.categoryIds)&&isDeepStrictEqual(revision.customFields??[],input.customFields??[])&&isDeepStrictEqual(normalizeQa(revision.qa),qa)&&revision.title===input.title&&(revision.description??'')===input.description&&(revision.releaseNote??'')===input.releaseNote&&revision.body===input.body&&revision.audience===input.audience
+        &&isDeepStrictEqual(revision.tags??[],input.tags)&&isDeepStrictEqual(revision.cover??null,input.cover)&&isDeepStrictEqual(revision.blocks??[],blocks)&&(revision.iconKey??null)===(input.iconKey===undefined?revision.iconKey??null:input.iconKey);
       if(document.sequence===replaySequence&&document.workflow.status==='draft'&&revision.editorId===actor.id&&last?.actorId===actor.id&&last.action===(input.expectedSequence===null?'create':'edit')&&identical)return editorSnapshot(client,document);
       if(input.expectedSequence===null||document.sequence!==input.expectedSequence)throw new Error('CONFLICT');
-      const command:Command={type:'edit',...(input.categoryIds===undefined?{}:{categoryIds:input.categoryIds}),customFields:input.customFields??[],...(document.kind==='qa'?{qa}:{}),title:input.title,body:input.body,audience:input.audience,tags:input.tags,cover:input.cover,blocks};
+      const command:Command={type:'edit',...(input.categoryIds===undefined?{}:{categoryIds:input.categoryIds}),customFields:input.customFields??[],...(document.kind==='qa'?{qa}:{}),...(input.iconKey===undefined?{}:{iconKey:input.iconKey}),title:input.title,description:input.description,releaseNote:input.releaseNote,body:input.body,audience:input.audience,tags:input.tags,cover:input.cover,blocks};
       const next=transition(document,command,actor,{expectedSequence:input.expectedSequence,now});
       await persistNext(client,id,document,next,command,actor,now);
       return editorSnapshot(client,next);

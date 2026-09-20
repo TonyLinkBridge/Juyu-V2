@@ -14,6 +14,8 @@ export interface Viewer {
 }
 
 export interface Revision extends ArticlePresentation {
+  description?:string;
+  releaseNote?:string;
   categoryIds?:string[];
   customFields?:FieldSnapshot[];
   qa?:QaMetadata;

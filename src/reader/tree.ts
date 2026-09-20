@@ -1,12 +1,13 @@
 import {navigationPage,type NavigationPage} from './navigation.ts';
+import type {ReaderIconKey} from './icon-keys.ts';
 export type NavigationNode=(NavigationPage&{type:'document'})|NavigationGroup;
-export interface NavigationGroup {type:'group';id:string;title:string;descendants:NavigationNode[]}
-export interface NavigationCategory {id:string;name:string;parent_id:string|null;position:number}
+export interface NavigationGroup {type:'group';id:string;title:string;iconKey?:ReaderIconKey|null;descendants:NavigationNode[]}
+export interface NavigationCategory {id:string;name:string;parent_id:string|null;position:number;icon_key?:ReaderIconKey|null}
 export interface NavigationMembership {document_id:string;category_id:string}
 const compareText=(a:string,b:string)=>a<b?-1:a>b?1:0;
 
 /** Input must already be authorized. Never promote invalid category paths to root. */
-export function buildNavigationTree(pages:{id:string;title:string}[],categories:NavigationCategory[],memberships:NavigationMembership[],options:{repeatMemberships?:boolean}={}):NavigationNode[] {
+export function buildNavigationTree(pages:{id:string;title:string;description?:string;iconKey?:ReaderIconKey|null}[],categories:NavigationCategory[],memberships:NavigationMembership[],options:{repeatMemberships?:boolean;locale?:'zh-CN'|'en'}={}):NavigationNode[] {
  const children=new Map<string|null,NavigationCategory[]>();
  for(const category of categories) {
    const siblings=children.get(category.parent_id)??[];siblings.push(category);children.set(category.parent_id,siblings);
@@ -20,7 +21,7 @@ export function buildNavigationTree(pages:{id:string;title:string}[],categories:
    stack.push(...[...(children.get(category.id)??[])].reverse());
  }
  const rank=new Map(ordered.map((category,index)=>[category.id,index]));
- const nodes=new Map<string,NavigationGroup>(ordered.map(category=>[category.id,{type:'group',id:category.id,title:category.name,descendants:[]} ]));
+ const nodes=new Map<string,NavigationGroup>(ordered.map(category=>[category.id,{type:'group',id:category.id,title:category.name,...(category.icon_key?{iconKey:category.icon_key}:{}),descendants:[]} ]));
  const roots:NavigationNode[]=[];
  for(const category of ordered) {
    const node=nodes.get(category.id)!;
@@ -37,7 +38,7 @@ export function buildNavigationTree(pages:{id:string;title:string}[],categories:
    // A missing/invalid membership invalidates the entire page, even if another is valid.
    if(ids.some(id=>!rank.has(id)))continue;
    const target=ids.sort((a,b)=>rank.get(a)!-rank.get(b)!)[0];
-   const node:NavigationNode={type:'document',...navigationPage(page)};
+   const node:NavigationNode={type:'document',...navigationPage(page,options.locale)};
    if(target===undefined)roots.push(node);
    else for(const id of options.repeatMemberships?ids:[target])nodes.get(id)!.descendants.push({...node});
  }

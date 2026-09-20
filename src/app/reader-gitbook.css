@@ -4,11 +4,15 @@
  * 1376 = 288 + 48 + 768 + 16 + 256. Header and reading columns share this grid.
  */
 .entry-frame:has(.reader-layout) { --reading-width:1376px; --reading-gutter:max(32px,calc((100vw - var(--reading-width))/2)); background:var(--panel); }
+@media (min-width:1600px) { html[data-reader-width="wide"] .entry-frame:has(.reader-layout) { --reading-width:1536px; --reader-body-width:928px; } }
+html[data-reader-size="compact"] .entry-frame:has(.reader-layout) { --document-size:14px; --reader-text-size:14px; }
+html[data-reader-size="large"] .entry-frame:has(.reader-layout) { --document-size:19px; --reader-text-size:19px; }
+html[data-reader-font="serif"] .entry-frame:has(.reader-layout) { --document-font:Georgia,"Noto Serif CJK SC","Songti SC",serif; }
 /* Keep the header in the space reserved by both sticky reading rails. */
 .entry-frame:has(.reader-layout)>.reader-chrome { position:sticky; top:0; z-index:40; background:var(--panel); }
 .entry-frame:has(.reader-layout) .gitbook-heading,.entry-frame:has(.reader-layout) #reader-page-title,.entry-frame:has(.reader-layout) #main-content { scroll-margin-top:calc(var(--reader-chrome-height,64px) + 24px); }
 .entry-frame:has(.reader-layout) .knowledge-body,.entry-frame:has(.reader-layout) .knowledge-content { background:var(--panel); min-width:0; }
-.entry-frame:has(.reader-layout) .site-header { height:64px; min-height:64px; padding:0 var(--reading-gutter); display:grid; grid-template-columns:288px 48px minmax(0,768px) 16px 256px; gap:0; }
+.entry-frame:has(.reader-layout) .site-header { height:64px; min-height:64px; padding:0 var(--reading-gutter); display:grid; grid-template-columns:288px 48px minmax(0,var(--reader-body-width,768px)) 16px 256px; gap:0; }
 .entry-frame:has(.reader-layout) .site-header>.juyu-brand { grid-column:1; gap:10px; font-size:16px; }
 .entry-frame:has(.reader-layout) .juyu-brand img { width:94px; height:32px; }
 .entry-frame:has(.reader-layout) .juyu-brand>span { padding-left:10px; }
@@ -34,8 +38,9 @@
 .entry-frame:has(.reader-layout) .gitbook-group-descendants .gitbook-group-heading { margin:0; padding:0; }
 .entry-frame:has(.reader-layout) .gitbook-table-of-contents .toc-group { line-height:20px; }
 .entry-frame:has(.reader-layout) .gitbook-table-of-contents .ToCLinkItemStyles { line-height:20px; padding:6px 6px 6px 12px; }
-.entry-frame:has(.reader-layout) .reader-content.has-outline { display:grid; grid-template-columns:minmax(0,768px) 256px; gap:16px; padding:0; background:var(--panel); align-items:start; flex:1; }
-.entry-frame:has(.reader-layout) .reader-content .gitbook-page-body { width:100%; max-width:768px; min-width:0; margin:0; padding:32px 0 64px; }
+.entry-frame:has(.reader-layout) .reader-content.has-outline { display:grid; grid-template-columns:minmax(0,var(--reader-body-width,768px)) 256px; gap:16px; padding:0; background:var(--panel); align-items:start; flex:1; }
+.entry-frame:has(.reader-layout) .reader-content .gitbook-page-body { width:100%; max-width:var(--reader-body-width,768px); min-width:0; margin:0; padding:32px 0 64px; }
+.entry-frame:has(.reader-layout) .gitbook-document { font-size:var(--reader-text-size,16px); font-family:var(--document-font); }
 .entry-frame:has(.reader-layout) .reader-content .gitbook-page-header { border:0; padding:0; margin:0 0 24px; }
 .entry-frame:has(.reader-layout) .reader-breadcrumbs { color:var(--brand); font-size:12px; line-height:1.625; margin:0 0 12px; }
 .entry-frame:has(.reader-layout) .gitbook-page-header.gitbook-page-header h1 { font-size:36px; line-height:1.25; letter-spacing:-.025em; margin:12px 0; }
@@ -44,16 +49,57 @@
 .entry-frame:has(.reader-layout) .gitbook-page-header h1>span { min-width:0; }
 .entry-frame:has(.reader-layout) .article-publication-status { display:none; }
 .entry-frame:has(.reader-layout) .reader-version { font-size:12px; color:var(--muted); margin:0; }
+.entry-frame:has(.reader-layout) .reader-page-description { color:var(--muted); font-size:17px; line-height:1.65; margin:6px 0 14px; max-width:68ch; overflow-wrap:anywhere; }
+.entry-frame:has(.reader-layout) .reader-new-version { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:18px; padding:12px 14px; border:1px solid var(--line); border-left:3px solid var(--brand); border-radius:7px; background:var(--surface); color:var(--ink); font-size:13px; line-height:1.6; }
+.entry-frame:has(.reader-layout) .reader-new-version button { border:1px solid var(--brand); border-radius:6px; padding:6px 10px; min-height:32px; background:var(--panel); color:var(--brand); font-weight:600; cursor:pointer; }
+.entry-frame:has(.reader-layout) .reader-new-version button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+.reader-changelog { max-width:840px; margin:0 auto; padding:42px 24px 72px; }
+.reader-changelog h1 { margin:20px 0 8px; font-size:32px; }
+.reader-changelog>p { color:var(--muted); line-height:1.7; }
+.reader-changelog ol { list-style:none; margin:28px 0; padding:0; border-top:1px solid var(--line); }
+.reader-changelog li { display:grid; grid-template-columns:130px minmax(0,1fr); gap:4px 18px; padding:18px 0; border-bottom:1px solid var(--line); }
+.reader-changelog li time { grid-row:span 2; color:var(--muted); font-size:13px; }
+.reader-changelog li a { color:var(--ink); font-weight:650; overflow-wrap:anywhere; }
+.reader-changelog li a:hover { color:var(--brand); }
+.reader-changelog li span { color:var(--muted); font-size:12px; }
+.reader-changelog-note { grid-column:2; margin:6px 0 0; color:var(--ink); font-size:14px; line-height:1.65; white-space:pre-wrap; overflow-wrap:anywhere; }
+.review-release-note { white-space:pre-wrap; overflow-wrap:anywhere; }
+.reader-changelog nav { display:flex; gap:16px; }
+@media(max-width:600px) { .reader-changelog li { grid-template-columns:1fr; } .reader-changelog li time { grid-row:auto; } .reader-changelog-note { grid-column:1; } }
+.rich-steps ol { list-style:none; margin:20px 0; padding:0; counter-reset:none; }
+.rich-steps li { display:grid; grid-template-columns:32px minmax(0,1fr); gap:18px; position:relative; padding:0 0 28px; margin:0; }
+.rich-steps li:not(:last-child)::before { content:""; position:absolute; top:32px; bottom:0; left:15px; border-left:1px solid var(--line); }
+.rich-step-number { display:grid; place-items:center; width:32px; height:32px; border-radius:50%; color:#fff; background:#315fb3; font-size:15px; font-weight:700; line-height:1; }
+.rich-step-content { min-width:0; padding-top:2px; }
+.rich-step-content h3 { margin:0 0 10px; font-size:18px; line-height:1.45; }
+.rich-step-content p { margin:0; white-space:pre-wrap; }
+.rich-step-content .gitbook-document { margin-top:8px; }
+.rich-columns { display:grid; grid-template-columns:repeat(var(--reader-column-count),minmax(0,1fr)); gap:20px; margin:24px 0; align-items:start; }
+.rich-columns>article { min-width:0; padding:20px; border:1px solid var(--line); border-radius:10px; background:var(--surface); overflow-wrap:anywhere; }
+.rich-columns h3 { margin:0 0 12px; font-size:17px; line-height:1.45; }
+.rich-columns p { margin:0; white-space:pre-wrap; }
+@media (max-width:720px) { .rich-columns { grid-template-columns:minmax(0,1fr); gap:12px; } }
 .entry-frame:has(.reader-layout) .gitbook-page-aside { width:256px; min-width:0; min-height:0; align-self:start; padding:32px 0 24px 32px; margin:0; border:0; position:sticky; top:var(--reader-chrome-height,64px); max-height:calc(100dvh - var(--reader-chrome-height,64px)); overflow:auto; }
 .entry-frame:has(.reader-layout) .outline-disclosure { border:0; background:transparent; padding:0; }
 .entry-frame:has(.reader-layout) .outline-disclosure>summary { font-size:12px; font-weight:500; color:var(--muted); margin-bottom:12px; cursor:pointer; }
 .entry-frame:has(.reader-layout) .outline-link { display:block; font-size:13px; line-height:1.6; padding:6px 0; border:0; border-radius:0; color:var(--muted); background:transparent; }
 .entry-frame:has(.reader-layout) .outline-link.active { color:var(--brand); background:transparent; }
 .entry-frame:has(.reader-layout) .article-side-actions { display:flex; flex-direction:column; gap:6px; margin:20px 0; padding:0; border:0; }
+.entry-frame:has(.reader-layout) .reader-appearance { margin:20px 0 0; border-top:1px solid var(--line); padding-top:14px; color:var(--muted); font-size:13px; }
+.entry-frame:has(.reader-layout) .reader-appearance>summary { cursor:pointer; padding:6px 0; }
+.entry-frame:has(.reader-layout) .reader-appearance-panel { display:grid; gap:12px; padding:12px; margin-top:8px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.entry-frame:has(.reader-layout) .reader-appearance fieldset { margin:0; padding:0; border:0; }
+.entry-frame:has(.reader-layout) .reader-appearance legend { margin-bottom:6px; font-size:12px; color:var(--muted); }
+.entry-frame:has(.reader-layout) .reader-appearance-options { display:flex; flex-wrap:wrap; gap:5px; }
+.entry-frame:has(.reader-layout) .reader-appearance button { cursor:pointer; border:1px solid var(--line); border-radius:6px; padding:5px 8px; min-height:32px; background:var(--panel); color:var(--ink); font-size:12px; }
+.entry-frame:has(.reader-layout) .reader-appearance button[aria-pressed="true"] { border-color:var(--brand); background:var(--accent-soft); color:var(--brand); }
+.entry-frame:has(.reader-layout) .reader-appearance button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+.entry-frame:has(.reader-layout) .reader-appearance-reset { justify-self:start; }
 .entry-frame:has(.reader-layout) .article-side-actions .favorite-control { margin:0; }
 .entry-frame:has(.reader-layout) .article-side-actions .reader-pdf-link,.entry-frame:has(.reader-layout) .article-side-actions button.secondary-link { float:none; margin:0; display:flex; align-items:center; justify-content:flex-start; gap:8px; padding:6px 0; min-height:32px; width:100%; font-size:13px; font-weight:400; text-align:left; border:0; border-radius:6px; background:transparent; color:var(--muted); box-shadow:none; }
 .entry-frame:has(.reader-layout) .article-side-actions button>svg { flex-shrink:0; }
 .entry-frame:has(.reader-layout) .article-side-actions .reader-pdf-link:hover,.entry-frame:has(.reader-layout) .article-side-actions button.secondary-link:hover { color:var(--brand); background:var(--hover); }
+.reader-markdown-actions{display:grid;gap:3px}.reader-markdown-actions>p{margin:0;color:var(--muted);font-size:12px}.reader-markdown-dialog{width:min(780px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:22px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);box-shadow:0 24px 70px rgb(0 0 0 / .22)}.reader-markdown-dialog::backdrop{background:rgb(13 17 28 / .55)}.reader-markdown-dialog header,.reader-markdown-dialog>div{display:flex;align-items:center;justify-content:space-between;gap:10px}.reader-markdown-dialog h2{margin:0;font-size:20px}.reader-markdown-dialog p{color:var(--muted);font-size:13px;line-height:1.5}.reader-markdown-dialog textarea{display:block;width:100%;min-height:280px;max-height:55dvh;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:12px/1.6 ui-monospace,monospace;resize:vertical}.reader-markdown-dialog button{padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink);cursor:pointer}.reader-markdown-dialog>div{justify-content:flex-end;margin-top:12px}
 .entry-frame:has(.reader-layout) .gitbook-page-aside .reader-feedback { border:0; padding:0; margin:24px 0 0; background:transparent; }
 .entry-frame:has(.reader-layout) .gitbook-page-aside .feedback-rating { display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
 .entry-frame:has(.reader-layout) .gitbook-page-aside .feedback-rating p { font-size:14px; color:var(--muted); margin:0; }
@@ -73,6 +119,7 @@
  .entry-frame:has(.reader-layout) .reader-content.has-outline { display:flex; flex-direction:column; gap:0; }
  .entry-frame:has(.reader-layout) .gitbook-page-aside { display:contents; position:static; top:auto; max-height:none; overflow:visible; }
  .entry-frame:has(.reader-layout) .gitbook-page-aside .outline-disclosure { order:0; width:100%; padding-top:24px; }
+ .entry-frame:has(.reader-layout) .reader-appearance { order:2; }
  .entry-frame:has(.reader-layout) .reader-content .gitbook-page-body { order:1; }
  .entry-frame:has(.reader-layout) .article-side-actions { order:2; }
  .entry-frame:has(.reader-layout) .gitbook-page-aside .reader-feedback { order:3; margin-bottom:32px; }
@@ -86,6 +133,7 @@
  .entry-frame:has(.reader-layout) .reader-content.has-outline { display:flex; flex-direction:column; width:100%; padding:0 24px; gap:0; align-items:stretch; }
  .entry-frame:has(.reader-layout) .gitbook-page-aside { display:contents; position:static; top:auto; max-height:none; overflow:visible; }
  .entry-frame:has(.reader-layout) .gitbook-page-aside .outline-disclosure { order:0; padding-top:20px; }
+ .entry-frame:has(.reader-layout) .reader-appearance { order:2; }
  .entry-frame:has(.reader-layout) .reader-content .gitbook-page-body { order:1; padding:24px 0 48px; max-width:none; }
  .entry-frame:has(.reader-layout) .article-side-actions { order:2; flex-direction:row; flex-wrap:wrap; margin:0 0 20px; }
  .entry-frame:has(.reader-layout) .article-side-actions .reader-pdf-link { width:auto; }

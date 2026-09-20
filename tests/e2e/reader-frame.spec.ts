@@ -6,13 +6,23 @@ test.beforeAll(async()=>{bundle=await readerFrameBundle();});
 test('reader frame retains search and navigation when content changes; notices never move sidebar',async({page},info)=>{
  await page.route('**/reader-frame-fixture*',r=>r.fulfill({contentType:'text/html',body:'<html><body><div id="app"></div></body></html>'}));
  await page.goto('/reader-frame-fixture?q=example');await page.addStyleTag({content:bundle.css});await page.addScriptTag({content:bundle.script});
- const search=page.getByRole('textbox',{name:'测试搜索'}),side=page.locator('.knowledge-sidebar');
+ const search=page.getByRole('combobox',{name:'搜索资料'}),side=page.locator('.knowledge-sidebar');
  await expect(search).toBeVisible();await search.fill('保留输入');const initial=await side.boundingBox();
  await page.getByRole('button',{name:'关闭公告'}).click();const after=await side.boundingBox();expect(after?.y).toBe(initial?.y);
  await page.getByRole('button',{name:'OPS Internal',exact:true}).click();await expect(page.getByRole('heading',{name:'OPS Internal'})).toBeVisible();
  await expect(search).toHaveValue('保留输入');await expect(page.locator('header')).toHaveCount(1);await expect(page.getByText('重复目录')).toHaveCount(0);
  await page.screenshot({path:'output/verification/reader-frame-'+info.project.name+'.png',fullPage:true});
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+});
+
+test('English reader chrome keeps its language in search and quick links',async({page},info)=>{
+ await page.route('**/reader-frame-fixture*',r=>r.fulfill({contentType:'text/html',body:'<html lang="zh-CN"><body><div id="app"></div></body></html>'}));
+ await page.goto('/reader-frame-fixture?q=example&lang=en');await page.addScriptTag({content:bundle.script});
+ await expect(page.locator('html')).toHaveAttribute('lang','en');
+ if(info.project.name==='mobile')await page.getByRole('button',{name:'Open search'}).click();
+ await expect(page.getByRole('combobox',{name:'Search articles'})).toBeVisible();
+ await page.getByRole('button',{name:'Quick links'}).click();
+ await expect(page.getByRole('navigation',{name:'Help Centre quick links'}).getByRole('link',{name:'Help Centre'})).toHaveAttribute('href','/help-centre?lang=en');
 });
 
 test('article and PDF keep their own reading layout instead of gaining an extra sidebar',async({page})=>{
@@ -40,7 +50,7 @@ test('R01 search uses one persistent sidebar with a usable result column',async(
 test('R05 mobile header expands search and keeps theme and admin entry in account menu',async({page},info)=>{
  await page.route('**/reader-frame-fixture*',r=>r.fulfill({contentType:'text/html',body:'<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="app"></div></body></html>'}));
  await page.goto('/reader-frame-fixture?headerFixture=1&q=test');await page.addStyleTag({content:bundle.css});await page.addScriptTag({content:bundle.script});
- const input=page.getByRole('textbox',{name:'搜索资料'}),toggle=page.getByRole('button',{name:'打开搜索'}),account=page.locator('.account-menu>summary');
+ const input=page.getByRole('combobox',{name:'搜索资料'}),toggle=page.getByRole('button',{name:'打开搜索'}),account=page.locator('.account-menu>summary');
  if(info.project.name==='mobile'){
   await expect(input).toBeHidden();await expect(toggle).toBeVisible();await expect(page.locator('.account-controls>.theme-toggler')).toBeHidden();await expect(page.locator('.account-controls>.admin-console-button')).toBeHidden();
   await toggle.click();await expect(input).toBeFocused();await input.fill('域名');const box=await input.boundingBox();expect(box!.width).toBeGreaterThan(180);await input.press('Escape');await expect(input).toBeHidden();await expect(toggle).toBeFocused();
@@ -63,7 +73,7 @@ test('R21 PDF keeps shared account, search and navigation on screen and removes 
  await page.goto('/reader-frame-fixture?screen=pdf');await page.addStyleTag({content:bundle.css});await page.addStyleTag({content:pdfCSS});await page.addScriptTag({content:bundle.script});
  await expect(page.locator('header')).toHaveCount(1);await expect(page.getByText('重复标题栏')).toHaveCount(0);await expect(page.getByText('重复目录')).toHaveCount(0);
  if(info.project.name==='mobile')await page.getByRole('button',{name:'打开搜索'}).click();
- await expect(page.getByRole('textbox',{name:'测试搜索'})).toBeVisible();
+ await expect(page.getByRole('combobox',{name:'搜索资料'})).toBeVisible();
  await page.locator('.account-menu>summary').click();await expect(page.getByRole('button',{name:'退出登录',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'退出登录',exact:true})).toBeEnabled();await expect(page.getByRole('button',{name:'账号设置'})).toBeVisible();
  await page.locator(info.project.name==='mobile'?'.mobile-account-appearance':'.account-controls>.theme-toggler').getByLabel('深色',{exact:true}).check();await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
  if(info.project.name==='desktop')await page.locator('.account-menu>summary').click();

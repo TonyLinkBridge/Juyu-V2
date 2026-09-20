@@ -21,7 +21,7 @@ async function fixture(page:Page,options:{failed?:boolean;unsafe?:boolean;wait?:
 
 test('search submits Chinese with Enter, highlights and opens a real reader link using keyboard',async({page},info)=>{
  await fixture(page);await page.goto('/help-centre?q=');
- const input=page.getByRole('textbox',{name:'搜索资料'});
+ const input=page.getByRole('combobox',{name:'搜索资料'});
  await input.fill('域名 EPP');await input.press('Enter');
  await expect(page.getByRole('status')).toHaveText('“域名 EPP” · 找到 1 项结果');
  const list=page.getByRole('list',{name:'搜索结果列表'});
@@ -36,7 +36,7 @@ test('search submits Chinese with Enter, highlights and opens a real reader link
 
 test('empty, zero, invalid and literal markup states remain distinct and safe',async({page})=>{
  await fixture(page);await page.goto('/help-centre?q=');await expect(page.getByText('输入关键词，开始查找')).toBeVisible();
- const input=page.getByRole('textbox',{name:'搜索资料'});
+ const input=page.getByRole('combobox',{name:'搜索资料'});
  await input.fill('无法找到的关键词');await page.getByRole('button',{name:'搜索',exact:true}).click();await expect(page.getByText('没有找到相关结果')).toBeVisible();
  await page.goto('/help-centre?q=one&q=two');await expect(page.getByText('搜索条件不正确')).toBeVisible();
  await page.goto('/help-centre?q='+encodeURIComponent('x'.repeat(121)));await expect(page.getByText('搜索条件不正确')).toBeVisible();
@@ -57,8 +57,8 @@ test('pagination preserves query, total, browser history and out of range recove
 });
 
 test('clear, Escape and shortcuts preserve focus; Chinese composition does not submit early',async({page})=>{
- await fixture(page);await page.goto('/help-centre?q=');const input=page.getByRole('textbox',{name:'搜索资料'});
- await page.keyboard.press('Control+k');await expect(input).toBeFocused();await input.fill('费用');await input.press('Escape');await expect(input).toHaveValue('');await expect(input).toBeFocused();
+ await fixture(page);await page.goto('/help-centre?q=');const input=page.getByRole('combobox',{name:'搜索资料'});
+ await page.keyboard.press('Control+k');await expect(input).toBeFocused();await input.fill('费用');await input.press('Escape');await expect(input).toHaveValue('费用');await input.press('Escape');await expect(input).toHaveValue('');await expect(input).toBeFocused();
  await input.fill('域名');await page.getByRole('button',{name:'清空搜索'}).click();await expect(input).toHaveValue('');await expect(input).toBeFocused();
  await input.fill('域名');await input.dispatchEvent('compositionstart');await input.press('Enter');await expect(page).toHaveURL(/q=$/);
  await input.dispatchEvent('compositionend');await input.press('Enter');await expect(page.getByRole('status')).toContainText('45 项');
@@ -79,7 +79,7 @@ test('submission announces pending before the next document arrives',async({page
  // Observe before navigation: page.evaluate may wait for a new execution context
  // while the deliberately delayed document is pending.
  await page.evaluate(()=>{const observer=new MutationObserver(()=>{if(document.querySelector('.search-pending')?.textContent==='正在搜索…'){void (window as unknown as {reportSearchPending:()=>Promise<void>}).reportSearchPending();observer.disconnect();}});observer.observe(document.body,{subtree:true,childList:true,characterData:true});});
- const input=page.getByRole('textbox',{name:'搜索资料'});await input.fill('EPP');
+ const input=page.getByRole('combobox',{name:'搜索资料'});await input.fill('EPP');
  await input.press('Enter',{noWaitAfter:true});
  try{await expect.poll(()=>pendingObserved).toBe(true);}finally{release();}
  await expect(page.getByRole('status')).toContainText('找到 1 项');
@@ -87,7 +87,7 @@ test('submission announces pending before the next document arrives',async({page
 
 
 test('overlong pasted input is rejected visibly without truncating the employee query',async({page})=>{
- await fixture(page);await page.goto('/help-centre?q=');const input=page.getByRole('textbox',{name:'搜索资料'});
+ await fixture(page);await page.goto('/help-centre?q=');const input=page.getByRole('combobox',{name:'搜索资料'});
  const query='域'.repeat(121);await input.fill(query);await expect(input).toHaveValue(query);
  await input.press('Enter');await expect(page.getByRole('alert')).toContainText('最多 120 个字符');await expect(page).toHaveURL(/q=$/);await expect(input).toHaveAttribute('aria-invalid','true');
  await input.fill('EPP');await input.press('Enter');await expect(page.getByRole('status')).toContainText('找到 1 项');

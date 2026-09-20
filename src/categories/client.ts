@@ -38,7 +38,9 @@ export async function saveCategory(id: string, input: CategoryWrite): Promise<Ca
   const saved = definitions([await response.json()])[0];
   if (!saved || saved.id !== id || saved.version !== (write.expectedVersion ?? 0) + 1 ||
       saved.name !== write.name || saved.parentId !== write.parentId || saved.position !== write.position ||
-      saved.enabled !== write.enabled || saved.audience !== write.audience) {
+      saved.enabled !== write.enabled || saved.audience !== write.audience ||
+      (write.iconKey!==undefined&&saved.iconKey!==write.iconKey) ||
+      (write.englishName!==undefined&&(saved.englishName??null)!==(write.englishName??null))) {
     throw new Error('INVALID_ACK');
   }
   return saved;

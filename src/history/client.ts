@@ -1,7 +1,7 @@
 import {normalizeFieldSnapshots} from '../fields/model.ts';
 import {normalizeQa} from '../qa/metadata.ts';
 import type {HistoryVersion,RestoreVersionInput,RestoreVersionAck} from './model.ts';
-import {normalizePresentation} from '../domain/presentation.ts';
+import {normalizeDescription,normalizePresentation,normalizeReleaseNote} from '../domain/presentation.ts';
 export class HistoryRestoreRejected extends Error {}
 const record=(v:unknown):v is Record<string,unknown>=>Boolean(v)&&typeof v==='object'&&!Array.isArray(v);
 const integer=(v:unknown,min=1)=>Number.isSafeInteger(v)&&Number(v)>=min&&Number(v)<=2147483647;
@@ -15,7 +15,7 @@ export async function readHistoryVersion(documentId:string,revision:number,minim
  if(!record(data)||data.documentId!==documentId||!integer(data.sequence,minimumSequence)||!integer(data.currentRevision,minimumRevision)||!['active','archived','trashed'].includes(String(data.lifecycle))||!['draft','in_review','changes_requested','approved','queued','published'].includes(String(data.status))||!(data.publishedRevision===null||integer(data.publishedRevision)&&Number(data.publishedRevision)<=Number(data.currentRevision))||typeof data.canRestore!=='boolean')return bad();
  const version=data.version;
  if(!record(version)||version.revision!==revision||revision>Number(data.currentRevision)||!text(version.title)||!text(version.body)||!id(version.authorId)||!text(version.authorName)||!id(version.editorId)||!text(version.editorName)||!date(version.createdAt)||!['staff','ops','admin'].includes(String(version.audience))||!Array.isArray(version.tags)||!Array.isArray(version.blocks)||!(version.cover===null||record(version.cover)))return bad();
- try{normalizeFieldSnapshots(version.customFields);if(version.qa!==undefined)normalizeQa(version.qa);normalizePresentation({tags:version.tags,blocks:version.blocks,cover:version.cover as HistoryVersion['version']['cover']});}catch{return bad();}
+ try{if(version.description!==undefined&&(typeof version.description!=='string'||normalizeDescription(version.description)!==version.description))return bad();if(version.releaseNote!==undefined&&(typeof version.releaseNote!=='string'||normalizeReleaseNote(version.releaseNote)!==version.releaseNote))return bad();normalizeFieldSnapshots(version.customFields);if(version.qa!==undefined)normalizeQa(version.qa);normalizePresentation({tags:version.tags,blocks:version.blocks,cover:version.cover as HistoryVersion['version']['cover']});}catch{return bad();}
  if(!Array.isArray(data.categories)||!data.categories.every(c=>record(c)&&id(c.id)&&text(c.name))||!Array.isArray(data.assets)||!data.assets.every(a=>record(a)&&id(a.id)&&text(a.filename)&&text(a.mime)&&typeof a.size==='string'&&/^\d+$/.test(a.size)&&text(a.status)))return bad();
  if(data.canRestore&&(data.lifecycle!=='active'||data.status==='in_review'||revision>=Number(data.currentRevision)||data.assets.some(a=>a.status!=='ready')))return bad();
  return data as unknown as HistoryVersion;

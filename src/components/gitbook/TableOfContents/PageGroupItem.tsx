@@ -4,6 +4,7 @@
 // Native hidden removes collapsed links from keyboard and accessibility trees.
 import React from 'react';
 import {BookOpen,Users,ShieldCheck,Plant,CurrencyDollar,Plugs,ChatCircle} from '@phosphor-icons/react';
+import {ReaderIcon} from '../../../reader/icons';
 import type {NavigationGroup} from '../../../reader/tree';
 import {PagesList} from './PagesList';
 import {ToCButtonItemStyles} from './styles';
@@ -22,7 +23,7 @@ export function PageGroupItem(props:{page:NavigationGroup;currentPagePath:string
        aria-expanded={hasDescendants?isOpen:undefined} aria-controls={panelId}
        onClick={handleToggle}
        className={['ToCButtonItemStyles',...ToCButtonItemStyles.flat(),'toc-group min-h-8 w-full border-0 text-left'].join(' ')}>
-       <CategoryIcon className="toc-icon" size={16} aria-hidden="true"/><span className="min-w-0 flex-1">{page.title}</span>
+       {page.iconKey?<ReaderIcon icon={page.iconKey}/>:<CategoryIcon className="toc-icon" size={16} aria-hidden="true"/>}<span className="min-w-0 flex-1">{page.title}</span>
        {hasDescendants&&<svg className="toc-group-chevron" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" data-open={isOpen}><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" strokeWidth="1.5"/></svg>}
      </button>
    </div>

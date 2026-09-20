@@ -8,9 +8,9 @@ import {nativeReferenceTable} from '../../reference/native.ts';
 import {normalizeBlocks} from '../../media/model.ts';
 import {readReaderSections} from '../ops/repository.ts';
 
-async function readReferenceDetailVerified(client:PoolClient,id:string):Promise<ReferenceDetail>{
+async function readReferenceDetailVerified(client:PoolClient,id:string,locale:'zh-CN'|'en'='zh-CN'):Promise<ReferenceDetail>{
  reviewId(id);
- const item=(await client.query<ReferenceItem>('SELECT id,title,revision,tags,juyu.publication_number(id) AS "publicationNumber" FROM juyu.read_reference_publications() WHERE id=$1',[id])).rows[0];
+ const item=(await client.query<ReferenceItem>('SELECT item.id,item.title,item.revision,item.tags,juyu.publication_number(item.id) AS "publicationNumber" FROM juyu.read_reference_publications() item WHERE item.id=$1 AND EXISTS(SELECT 1 FROM juyu.read_publication_language(item.id) l WHERE l.locale=$2)',[id,locale])).rows[0];
  if(!item)throw new Error('NOT_FOUND');
  const publication=(await client.query<{body:string}>("SELECT body FROM juyu.read_publication($1) WHERE kind='reference' AND revision_id=$2",[id,item.revision])).rows[0];
  if(!publication)throw new Error('NOT_FOUND');
@@ -34,27 +34,27 @@ async function readReferenceDetailVerified(client:PoolClient,id:string):Promise<
  return {...item,tables};
 }
 
-export async function readReference(client:PoolClient,page=1):Promise<ReferencePage>{
+export async function readReference(client:PoolClient,page=1,locale:'zh-CN'|'en'='zh-CN'):Promise<ReferencePage>{
  positiveInteger(page);await readReaderSections(client);
  // Pagination and the editing entry use the same current-identity snapshot.
- const total=(await client.query<{n:number}>('SELECT count(*)::int AS n FROM juyu.read_reference_publications()')).rows[0].n;
+ const total=(await client.query<{n:number}>('SELECT count(*)::int AS n FROM juyu.read_reference_publications() item WHERE EXISTS(SELECT 1 FROM juyu.read_publication_language(item.id) l WHERE l.locale=$1)',[locale])).rows[0].n;
  const pages=Math.max(1,Math.ceil(total/20));page=Math.min(page,pages);
- const items=(await client.query<ReferenceItem>('SELECT id,title,revision,tags,juyu.publication_number(id) AS "publicationNumber" FROM juyu.read_reference_publications() ORDER BY title COLLATE "C",id COLLATE "C" LIMIT 20 OFFSET $1',[(page-1)*20])).rows;
+ const items=(await client.query<ReferenceItem>('SELECT item.id,item.title,item.revision,item.tags,juyu.publication_number(item.id) AS "publicationNumber" FROM juyu.read_reference_publications() item WHERE EXISTS(SELECT 1 FROM juyu.read_publication_language(item.id) l WHERE l.locale=$1) ORDER BY item.title COLLATE "C",item.id COLLATE "C" LIMIT 20 OFFSET $2',[locale,(page-1)*20])).rows;
  const canEdit=(await client.query<{allowed:boolean}>('SELECT juyu.is_admin() AS allowed')).rows[0].allowed;
  return {items,total,page,pages,canEdit};
 }
 
-export async function readReferenceDetail(client:PoolClient,id:string):Promise<ReferenceDetail>{
+export async function readReferenceDetail(client:PoolClient,id:string,locale:'zh-CN'|'en'='zh-CN'):Promise<ReferenceDetail>{
  await readReaderSections(client);
- return readReferenceDetailVerified(client,id);
+ return readReferenceDetailVerified(client,id,locale);
 }
 
-export async function readReferencePage(client:PoolClient,page=1,article?:string):Promise<{data:ReferencePage;detail?:ReferenceDetail;detailState:'idle'|'ready'|'unavailable'}>{
+export async function readReferencePage(client:PoolClient,page=1,article?:string,locale:'zh-CN'|'en'='zh-CN'):Promise<{data:ReferencePage;detail?:ReferenceDetail;detailState:'idle'|'ready'|'unavailable'}>{
  positiveInteger(page);await readReaderSections(client);
 
- const total=(await client.query<{n:number}>('SELECT count(*)::int AS n FROM juyu.read_reference_publications()')).rows[0].n;
+ const total=(await client.query<{n:number}>('SELECT count(*)::int AS n FROM juyu.read_reference_publications() item WHERE EXISTS(SELECT 1 FROM juyu.read_publication_language(item.id) l WHERE l.locale=$1)',[locale])).rows[0].n;
  const pages=Math.max(1,Math.ceil(total/20));page=Math.min(page,pages);
- const items=(await client.query<ReferenceItem>('SELECT id,title,revision,tags,juyu.publication_number(id) AS "publicationNumber" FROM juyu.read_reference_publications() ORDER BY title COLLATE "C",id COLLATE "C" LIMIT 20 OFFSET $1',[(page-1)*20])).rows;
+ const items=(await client.query<ReferenceItem>('SELECT item.id,item.title,item.revision,item.tags,juyu.publication_number(item.id) AS "publicationNumber" FROM juyu.read_reference_publications() item WHERE EXISTS(SELECT 1 FROM juyu.read_publication_language(item.id) l WHERE l.locale=$1) ORDER BY item.title COLLATE "C",item.id COLLATE "C" LIMIT 20 OFFSET $2',[locale,(page-1)*20])).rows;
  const canEdit=(await client.query<{allowed:boolean}>('SELECT juyu.is_admin() AS allowed')).rows[0].allowed;
  const data={items,total,page,pages,canEdit};
 
@@ -62,7 +62,7 @@ export async function readReferencePage(client:PoolClient,page=1,article?:string
  if(!selected)return {data,detailState:'idle'};
 
  try{
-  const detail=await readReferenceDetailVerified(client,selected);
+  const detail=await readReferenceDetailVerified(client,selected,locale);
   return {data,detail,detailState:'ready'};
  }catch{
   return {data,detailState:'unavailable'};
