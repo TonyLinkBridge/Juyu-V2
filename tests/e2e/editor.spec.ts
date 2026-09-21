@@ -22,7 +22,13 @@ async function insertFromRail(page:Page,name:'添加行内注释'|'插入行内�
  await page.getByRole('navigation',{name:'编辑工具'}).getByRole('button',{name:'内容插入',exact:true}).click();
  await page.getByRole('region',{name:'内容插入'}).getByRole('button',{name:new RegExp(`^${name}`)}).click();
 }
-async function slash(page:Page,name:string){await page.locator('.bn-editor').click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');await page.keyboard.type('/');await page.locator('.bn-suggestion-menu').getByText(name,{exact:true}).click();}
+async function insertBlockFromRail(page:Page,name:'提示框'|'代码块'|'表格'){
+ await page.getByRole('navigation',{name:'编辑工具'}).getByRole('button',{name:'内容插入',exact:true}).click();
+ await page.getByRole('region',{name:'内容插入'}).getByRole('button',{name:new RegExp(`^${name}`)}).click();
+}
+async function insertNativeSlashBlock(page:Page,name:'代码块'){
+ await page.locator('.bn-editor').click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');await page.keyboard.type('/');await page.locator('.bn-suggestion-menu').getByText(name,{exact:true}).click();
+}
 test('release note autosaves, survives reload, and stays editable only before review',async({page})=>{
  let saved=structuredClone(editorFixture);
  await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
@@ -211,7 +217,7 @@ test('real BlockNote edits autosave reload and mixed blocks preview in order',as
  let saved=structuredClone(editorFixture);let writes=0;
  await page.route('**/api/admin/editor/*',async route=>{const value=route.request().postDataJSON();expect(value.expectedSequence).toBe(saved.sequence);saved={...saved,...value,sequence:saved.sequence+1};writes++;await route.fulfill({json:saved});});
  await mount(page,()=>saved);await typeText(page,' 中文更新');await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});expect(writes).toBeGreaterThan(0);
- await slash(page,'提示框');const hint=page.locator('.editor-embedded').last();const nested=hint.locator('xpath=ancestor::div[@data-node-type="blockContainer"][1]').locator('.bn-block-group .bn-inline-content').last();await nested.click();await page.keyboard.insertText('核对二审');await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
+ await insertBlockFromRail(page,'提示框');const hint=page.locator('.editor-embedded').last();const nested=hint.locator('xpath=ancestor::div[@data-node-type="blockContainer"][1]').locator('.bn-block-group .bn-inline-content').last();await nested.click();await page.keyboard.insertText('核对二审');await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
  await page.getByRole('button',{name:'预览草稿',exact:true}).click();await expect(page.locator('.editor-preview')).toContainText('中文更新');await expect(page.locator('.editor-preview')).toContainText('核对二审');
  await page.reload();await expect(page.locator('.bn-editor')).toContainText('中文更新');await expect(page.locator('.editor-embedded')).toHaveCount(1);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`output/verification/editor-${info.project.name}.png`,fullPage:true});await page.evaluate(()=>document.documentElement.dataset.theme='dark');await page.locator('.editor-canvas').scrollIntoViewIfNeeded();await page.screenshot({path:`output/verification/editor-dark-${info.project.name}.png`,fullPage:false});
@@ -220,7 +226,7 @@ test('callout edits in place and uses a focused appearance inspector',async({pag
  let saved=structuredClone(editorFixture);
  await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
  await mount(page,()=>saved);
- await slash(page,'提示框');
+ await insertBlockFromRail(page,'提示框');
  const hint=page.locator('.editor-embedded').last();
  await hint.click();
  await expect(hint.getByText('编辑此内容块',{exact:true})).toHaveCount(0);
@@ -273,7 +279,7 @@ test('real editor pages and GET PUT reject unconfigured forged identity',async({
 test('native code block edits directly and keeps its text through save and reload',async({page})=>{
  let saved=structuredClone(editorFixture);
  await page.route('**/api/admin/editor/*',async route=>{saved={...saved,...route.request().postDataJSON(),sequence:saved.sequence+1};await route.fulfill({json:saved});});
- await mount(page,()=>saved);await slash(page,'代码块');await page.locator('[data-content-type="codeBlock"] select').selectOption('python');await page.locator('[data-content-type="codeBlock"] pre').click();await page.keyboard.insertText('print("保留代码")');await expect(page.locator('[data-content-type="codeBlock"] code [style*="--shiki"]')).not.toHaveCount(0);await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});await page.reload();await expect(page.locator('[data-content-type="codeBlock"] code')).toHaveText('print("保留代码")');
+ await mount(page,()=>saved);await insertNativeSlashBlock(page,'代码块');await page.locator('[data-content-type="codeBlock"] select').selectOption('python');await page.locator('[data-content-type="codeBlock"] pre').click();await page.keyboard.insertText('print("保留代码")');await expect(page.locator('[data-content-type="codeBlock"] code [style*="--shiki"]')).not.toHaveCount(0);await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});await page.reload();await expect(page.locator('[data-content-type="codeBlock"] code')).toHaveText('print("保留代码")');
 });
 test('recovery compares server content preserves local input and adopts the server sequence explicitly',async({page},info)=>{
  let server={...editorFixture,title:'服务器最新标题',body:'另一位管理员的正文',sequence:4};let writes=0;
@@ -384,6 +390,7 @@ test('native slash menu and selection toolbar expose original block and formatti
  await page.route('**/api/admin/editor/*',route=>route.fulfill({json:{...editorFixture,...route.request().postDataJSON(),sequence:4}}));
  await mount(page,()=>editorFixture);const editor=page.locator('.bn-editor');await editor.click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');await page.keyboard.type('/');
  const menu=page.locator('.bn-suggestion-menu');await expect(menu).toBeVisible();await expect(menu).toContainText('检查清单');await expect(menu).toContainText('引用');await expect(menu).toContainText('音频');await expect(menu).toContainText('表格');
+ await expect(menu).not.toContainText('扩展内容');await expect(menu).not.toContainText('提示框');await expect(menu).not.toContainText('分页标签');await expect(menu).not.toContainText('操作步骤');await expect(menu).not.toContainText('分栏布局');await expect(menu).not.toContainText('引用文章');await expect(menu).not.toContainText('操作按钮');await expect(menu).not.toContainText('外部内容');await expect(menu).not.toContainText('数学公式');await expect(menu).not.toContainText('流程图');await expect(menu).not.toContainText('资料表格');await expect(menu).not.toContainText('代码示例');
  await page.keyboard.press('Escape');await page.keyboard.press('Backspace');await page.keyboard.insertText('选择文字显示完整工具栏');await page.keyboard.press('Shift+Home');
  await expect(page.locator('.bn-formatting-toolbar')).toBeVisible();await expect(page.locator('.bn-formatting-toolbar button')).not.toHaveCount(6);
  await page.keyboard.press('ArrowRight');await expect(page.locator('.bn-formatting-toolbar')).toBeHidden();

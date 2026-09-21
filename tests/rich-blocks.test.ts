@@ -70,7 +70,7 @@ test('in-content action button keeps a safe link in reader and PDF',()=>{
  assert.throws(()=>normalizeBlocks([{...button,label:''}]),/INVALID_MEDIA/);
 });
 test('hint keeps a validated custom icon and prints nested formatted links inside the callout',()=>{
- const hint={id:'hint',type:'hint',style:'warning',title:'操作前核对',body:'',iconKey:'shield'};
+ const hint:Extract<MediaBlock,{type:'hint'}>={id:'hint',type:'hint',style:'warning',title:'操作前核对',body:'',iconKey:'shield'};
  assert.deepEqual(normalizeBlocks([hint]),[hint]);
  assert.throws(()=>normalizeBlocks([{...hint,iconKey:'<script>'}]),/INVALID_MEDIA/);
  const body=encodeEditorBody([{id:'hint',type:'juyu',props:{payload:JSON.stringify(hint)},children:[{id:'line',type:'paragraph',props:{textAlignment:'left',textColor:'default',backgroundColor:'default'},content:[{type:'text',text:'先核实',styles:{bold:true}},{type:'link',href:'https://example.com/help',content:[{type:'text',text:'处理规则',styles:{}}]}],children:[]}]}]);
