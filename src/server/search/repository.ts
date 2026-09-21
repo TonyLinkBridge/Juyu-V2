@@ -26,7 +26,7 @@ export async function searchPublications(client:PoolClient,nodes:NavigationNode[
   // A projection/tree inconsistency is an unavailable result, never a leaked item
   // or a fabricated zero count. Both are read in the same authorized snapshot.
   if(!path)throw new Error('SEARCH_UNAVAILABLE');
-  return {id:row.id!,title:row.title,...path,href:searchResultHref(row.kind,row.id!,path.href,locale),kind:row.kind,revision:row.revision,tags:row.tags,snippet:searchSnippet(row.search_text,parsed.query)};
+  return {id:row.id!,title:row.title,...path,href:searchResultHref(row.kind,row.id!,path.href,locale),kind:row.kind,revision:row.revision,tags:row.tags,snippet:searchSnippet(row.search_text,parsed.query,{title:row.title,tags:row.tags})};
  });
  return {...state,total,pages:Math.ceil(total/20),results};
 }

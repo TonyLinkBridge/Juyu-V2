@@ -225,14 +225,15 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--focus); outline
 .search-submit { background: var(--panel); border: 1px solid var(--line); padding: 5px 11px; font-size: 12px; color: var(--ink); }
 .search-submit:hover,.search-clear:hover { background: var(--accent-hover); }
 .search-pending { position: absolute; top: 100%; right: 0; font-size: 11px; color: var(--brand); background: var(--panel); }
-.search-popover { position:absolute; top:calc(100% + 8px); left:0; z-index:80; width:min(560px,90vw); max-height:min(480px,70vh); display:flex; flex-direction:column; border:1px solid var(--line); border-radius:12px; background:var(--panel); color:var(--ink); box-shadow:0 18px 48px #0002; overflow:hidden; }
-.search-scope-picker { display:flex; gap:4px; overflow-x:auto; padding:8px; border-bottom:1px solid var(--line); scrollbar-width:thin; }
+.search-popover { position:absolute; top:calc(100% + 8px); left:0; z-index:80; width:100%; max-height:min(480px,70vh); display:flex; flex-direction:column; border:1px solid var(--line); border-radius:12px; background:var(--panel); color:var(--ink); box-shadow:0 18px 48px #0002; overflow:hidden; text-align:left; }
+.search-scope-picker { display:flex; gap:6px; overflow-x:auto; padding:12px; border-bottom:1px solid var(--line); scrollbar-width:thin; flex-shrink:0; }
 .search-scope-picker button { white-space:nowrap; border:0; border-radius:6px; padding:6px 9px; background:transparent; color:var(--muted); font:inherit; font-size:12px; cursor:pointer; }
 .search-scope-picker button:hover,.search-scope-picker button.is-selected { background:var(--accent-soft); color:var(--ink); }
 .search-suggestions { overflow:auto; padding:8px; min-height:0; }
 .search-suggestions>a[role="option"] { display:grid; gap:3px; padding:10px 12px; border-radius:7px; text-decoration:none; color:var(--ink); }
 .search-suggestions>a[role="option"]:hover,.search-suggestions>a[role="option"].is-active { background:var(--accent-soft); }
 .search-suggestions>a[role="option"] span,.search-suggestions>a[role="option"] small { color:var(--muted); font-size:12px; }
+.search-suggestions>a[role="option"] small { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; line-height:1.55; }
 .search-suggestions>a[role="option"] strong { font-size:14px; font-weight:600; }
 .search-suggestions>p { margin:8px 12px; font-size:13px; color:var(--muted); }
 .search-suggestions-all { display:block; padding:10px 12px; border-top:1px solid var(--line); color:var(--brand); font-size:13px; text-decoration:none; }

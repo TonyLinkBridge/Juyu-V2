@@ -47,8 +47,14 @@ export function searchTitles(nodes:NavigationNode[],raw:string|string[]|undefine
 }
 
 /** Plain text excerpt only. Call after authorization; React escapes it when displayed. */
-export function searchSnippet(text:string,query:string):string {
- const plain=text.replace(/\s+/g,' ').trim();
+export function searchSnippet(text:string,query:string,publication?:{title:string;tags:string[]}):string {
+ let source=text;
+ if(publication){
+  const lines=source.split(/\r?\n/);const prefix=[publication.title,...publication.tags];let consumed=0;
+  while(consumed<prefix.length&&lines[consumed]?.trim()===prefix[consumed].trim())consumed++;
+  if(consumed===prefix.length)source=lines.slice(consumed).join('\n');
+ }
+ const plain=source.replace(/\s+/g,' ').trim();
  if(plain.length<=240)return plain;
  const folded=foldSearchText(plain);
  const positions=foldSearchText(query).split(/\s+/).filter(Boolean).map(word=>folded.indexOf(word)).filter(index=>index>=0);

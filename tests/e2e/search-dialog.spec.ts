@@ -45,6 +45,17 @@ test('changing search scope requests matching results and keeps scope on full-re
  await expect(page.getByRole('link',{name:/查看全部 1 项结果/})).toHaveAttribute('href','/help-centre?q=%E5%9F%9F%E5%90%8D&scope=qa');
  expect(scopes).toContain('qa');
 });
+test('search popover matches the search field and keeps its controls comfortable',async({page})=>{
+ await page.route('**/api/search?*',route=>route.fulfill({json:{status:'ready',query:'额度',page:1,pages:1,total:1,results:[{id:'q',title:'信用额度说明',href:'/help-centre/qa?question=q',breadcrumbs:[],kind:'qa',snippet:'很长的标准答案。'.repeat(80)}]}}));
+ await page.route('**/__search_dialog_fixture',route=>route.fulfill({contentType:'text/html',body:`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><style>${bundle.css}</style></head><body><section class="home-hero"><div class="home-search" style="width:min(800px,100%)"><div id="search-input"></div></div></section><script id="data" type="application/json">{}</script><script>${bundle.script}</script></body></html>`}));
+ await page.goto('/__search_dialog_fixture');await page.getByRole('combobox',{name:'搜索资料'}).fill('额度');
+ const popover=page.locator('.search-popover');await expect(popover).toBeVisible();
+ const form=page.getByRole('search',{name:'资料库搜索'});const formBox=await form.boundingBox();const popoverBox=await popover.boundingBox();
+ expect(formBox).not.toBeNull();expect(popoverBox).not.toBeNull();expect(Math.abs(popoverBox!.width-formBox!.width)).toBeLessThanOrEqual(1);
+ const pickerPadding=await page.locator('.search-scope-picker').evaluate(element=>parseFloat(getComputedStyle(element).paddingTop));expect(pickerPadding).toBeGreaterThanOrEqual(12);
+ await expect(popover).toHaveCSS('text-align','left');
+ const snippet=page.getByRole('option').locator('small');await expect(snippet).toHaveCSS('-webkit-line-clamp','2');
+});
 test('recent searches reappear within this tab, keep their scope and can be cleared',async({page})=>{
  await page.route('**/__search_dialog_fixture',route=>route.fulfill({contentType:'text/html',body:`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><style>${bundle.css}</style></head><body><div id="search-input"></div><script id="data" type="application/json">{}</script><script>${bundle.script}</script></body></html>`}));
  await page.route('**/api/search?*',route=>route.fulfill({json:{status:'ready',query:'域名',page:1,pages:1,total:0,results:[]}}));
