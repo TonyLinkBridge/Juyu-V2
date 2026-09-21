@@ -16,6 +16,9 @@
 .lifecycle-confirm,.review-decision-confirm{padding:22px;border:1px solid var(--line);border-radius:12px;background:var(--panel);box-shadow:0 4px 18px #00000008}
 .lifecycle-confirm h3,.review-decision-confirm h3{font-size:18px;line-height:1.4;margin:0 0 12px}
 .lifecycle-confirm p,.review-decision-confirm p{font-size:14px;line-height:1.7}
+.review-decision-confirm .review-english-quality{display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.review-english-quality input{flex:none;width:18px;height:18px;margin:2px 0 0;accent-color:var(--brand)}
+.review-decision-confirm .review-english-quality span{font-size:14px;line-height:1.6;color:var(--ink)}
 
 /* Focused article settings: one task per panel. */
 .editor-focused .editor-settings-drawer{width:min(440px,100vw);color:var(--foreground);}

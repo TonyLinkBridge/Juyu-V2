@@ -84,7 +84,7 @@ async function insertAudit(client: PoolClient, id: string, entry: AuditEntry) {
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [id, entry.sequence, entry.action, entry.actorId, entry.revisionId, entry.at, entry.reviewerId, entry.previousReviewerId, entry.reason]);
 }
 
-async function persistReview(client: PoolClient, next: Document, command: Command, actor: Viewer, now: string) {
+async function persistReview(client: PoolClient, next: Document, command: Command, actor: Viewer, now: string,englishQualityConfirmed=false) {
   const w = next.workflow;
   if (command.type === 'submit') {
     await client.query(`INSERT INTO juyu.reviews(document_id,submitted_sequence,revision_id,submitted_by,reviewer_id,status,submitted_at)
@@ -92,20 +92,20 @@ async function persistReview(client: PoolClient, next: Document, command: Comman
   } else if (['reassign', 'approve', 'reject', 'withdraw'].includes(command.type)) {
     const result = command.type === 'reassign'
       ? await client.query("UPDATE juyu.reviews SET reviewer_id=$2 WHERE document_id=$1 AND status='in_review'", [next.id, w.reviewerId])
-      : await client.query(`UPDATE juyu.reviews SET status=$2,decided_by=$3,decided_at=$4,reason=$5
-          WHERE document_id=$1 AND status='in_review'`, [next.id, { approve: 'approved', reject: 'rejected', withdraw: 'withdrawn' }[command.type as 'approve' | 'reject' | 'withdraw'], actor.id, now, command.type === 'reject' ? command.reason.trim() : null]);
+      : await client.query(`UPDATE juyu.reviews SET status=$2,decided_by=$3,decided_at=$4,reason=$5,english_quality_confirmed=$6
+          WHERE document_id=$1 AND status='in_review'`, [next.id, { approve: 'approved', reject: 'rejected', withdraw: 'withdrawn' }[command.type as 'approve' | 'reject' | 'withdraw'], actor.id, now, command.type === 'reject' ? command.reason.trim() : null,command.type==='approve'&&englishQualityConfirmed]);
     if (result.rowCount !== 1) throw new Error('INTEGRITY: 缺少待审记录');
   }
 }
 
 
-async function persistNext(client:PoolClient,id:string,document:Document,next:Document,command:Command,actor:Viewer,now:string){
+async function persistNext(client:PoolClient,id:string,document:Document,next:Document,command:Command,actor:Viewer,now:string,englishQualityConfirmed=false){
       for (const revision of next.revisions.slice(document.revisions.length)) {
         await insertRevision(client, id, revision,document.revisions.find(r=>r.id===document.workflow.revisionId));
         await client.query(`INSERT INTO juyu.revision_assets(document_id,revision_id,asset_id,usage)
           SELECT document_id,$3,asset_id,usage FROM juyu.revision_assets WHERE document_id=$1 AND revision_id=$2 AND usage<>'cover' AND NOT (usage='inline' AND asset_id=ANY($4::uuid[])) ON CONFLICT DO NOTHING`,[id,document.workflow.revisionId,revision.id,(document.revisions.find(r=>r.id===document.workflow.revisionId)?.blocks??[]).flatMap(blockAssetIds)]);
       }
-      await persistReview(client, next, command, actor, now);
+      await persistReview(client, next, command, actor, now, englishQualityConfirmed);
       const w = next.workflow;
       await client.query(`UPDATE juyu.documents SET sequence=$2,published_revision_id=$3,workflow_revision_id=$4,
         workflow_state=$5,submitted_by=$6,reviewer_id=$7,approved_by=$8,updated_at=$9 WHERE id=$1`,

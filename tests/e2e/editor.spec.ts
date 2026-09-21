@@ -35,6 +35,15 @@ test('release note autosaves, survives reload, and stays editable only before re
  await settings(page,'更新说明');
  await expect(page.getByRole('textbox',{name:'更新说明'})).toBeDisabled();
 });
+test('English article editor uses English for its main actions and settings',async({page})=>{
+ const english={...structuredClone(editorFixture),locale:'en' as const,translationOf:'11111111-1111-4111-8111-111111111111',title:'How to update your email'};
+ await mount(page,()=>english);
+ await expect(page.getByRole('button',{name:'Preview draft'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Article settings',exact:true})).toBeVisible();
+ await expect(page.getByRole('textbox',{name:'Article title'})).toHaveValue('How to update your email');
+ await page.getByRole('button',{name:'Article settings',exact:true}).click();
+ await expect(page.getByRole('dialog',{name:'Article settings'}).getByRole('button',{name:'Save and manage'})).toBeVisible();
+});
 test('pasting a supported video URL into an empty paragraph creates a gated embed',async({page})=>{
  let saved={...structuredClone(editorFixture),body:encodeEditorBody([{id:'empty',type:'paragraph',props:{textAlignment:'left',textColor:'default',backgroundColor:'default'},content:[],children:[]}])};
  await page.route('**/api/admin/editor/*',route=>{saved={...saved,...route.request().postDataJSON(),sequence:saved.sequence+1};return route.fulfill({json:saved});});

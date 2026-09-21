@@ -6,17 +6,17 @@ import {transition} from '../../domain/workflow.ts';
 import {reviewId} from '../../review/model.ts';
 import {publicationInput,type PublicationAck,type PublicationDetail,type PublicationHistory} from '../../review/publication.ts';
 import {loadDocument,persistDocumentTransition,readEditorSnapshot} from '../database/repository.ts';
-interface Receipt {revision:number;submittedBy:string;reviewerId:string;reviewerName:string;status:string;reason:string|null;submittedAt:Date;decidedAt:Date|null;decidedBy:string|null;submittedSequence:number}
+interface Receipt {revision:number;submittedBy:string;reviewerId:string;reviewerName:string;status:string;reason:string|null;submittedAt:Date;decidedAt:Date|null;decidedBy:string|null;submittedSequence:number;locale:'zh-CN'|'en';englishQualityConfirmed:boolean}
 async function requireCurrentAdmin(c:PoolClient,actor:Viewer){
  if(!(await c.query('SELECT juyu.is_admin() AND juyu.actor_id()=$1 AND juyu.review_admin_eligible($1) AS ok',[actor.id])).rows[0]?.ok)throw new Error('FORBIDDEN');
 }
 async function latestReceipt(c:PoolClient,id:string):Promise<Receipt|null>{
- return (await c.query<Receipt>(`SELECT r.revision_id AS revision,r.submitted_by AS "submittedBy",r.reviewer_id AS "reviewerId",m.display_name AS "reviewerName",r.status,r.reason,r.submitted_at AS "submittedAt",r.decided_at AS "decidedAt",r.decided_by AS "decidedBy",r.submitted_sequence AS "submittedSequence"
- FROM juyu.reviews r JOIN juyu.members m ON m.clerk_user_id=r.reviewer_id WHERE r.document_id=$1 ORDER BY r.submitted_sequence DESC LIMIT 1`,[id])).rows[0]??null;
+ return (await c.query<Receipt>(`SELECT r.revision_id AS revision,r.submitted_by AS "submittedBy",r.reviewer_id AS "reviewerId",m.display_name AS "reviewerName",r.status,r.reason,r.submitted_at AS "submittedAt",r.decided_at AS "decidedAt",r.decided_by AS "decidedBy",r.submitted_sequence AS "submittedSequence",d.locale,r.english_quality_confirmed AS "englishQualityConfirmed"
+ FROM juyu.reviews r JOIN juyu.members m ON m.clerk_user_id=r.reviewer_id JOIN juyu.documents d ON d.id=r.document_id WHERE r.document_id=$1 ORDER BY r.submitted_sequence DESC LIMIT 1`,[id])).rows[0]??null;
 }
 function matchingApproval(d:Document,r:Receipt|null):r is Receipt {
  const w=d.workflow,revision=d.revisions.find(v=>v.id===w.revisionId),submitted=d.audit.find(e=>e.sequence===r?.submittedSequence);
- if(!r||!revision||!['approved','queued','published'].includes(w.status)||r.revision!==w.revisionId||r.submittedBy!==w.submittedBy
+ if(!r||!revision||!['approved','queued','published'].includes(w.status)||(r.locale==='en'&&!r.englishQualityConfirmed)||r.revision!==w.revisionId||r.submittedBy!==w.submittedBy
   ||r.reviewerId!==w.reviewerId||w.approvedBy!==r.reviewerId||r.decidedBy!==r.reviewerId||r.status!=='approved'||r.reason!==null||!r.decidedAt
   ||[r.submittedBy,revision.authorId,revision.editorId].includes(r.reviewerId)||submitted?.action!=='submit'||submitted.revisionId!==r.revision
   ||submitted.actorId!==r.submittedBy||submitted.at!==r.submittedAt.toISOString())return false;

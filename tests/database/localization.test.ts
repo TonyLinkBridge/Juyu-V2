@@ -61,6 +61,33 @@ test('an English draft saves separately without copying or changing Chinese cont
  await assert.rejects(repo.saveEditor(randomUUID(),{...input,translationOf:randomUUID()},actor),/INVALID_TRANSLATION_SOURCE/);
 });
 
+test('English publication requires the independent reviewer to confirm a natural-language review',async()=>{
+ const source=randomUUID(),english=randomUUID(),repo=new DocumentRepository(db);
+ const writer={id:'writer',role:'admin' as const,companyVerified:true},reviewer={...writer,id:'reviewer'};
+ await document(source);
+ const saved=await repo.saveEditor(english,{expectedSequence:null,locale:'en',translationOf:source,title:'Update your account email',body:encodeEditorBody([{id:'step',type:'paragraph',content:[{type:'text',text:'Ask the account owner to contact support.',styles:{}}]}]),kind:'article',audience:'staff',tags:[],cover:null},writer);
+ const authorService=new AuthorizationService(db,async()=>writer),reviewerService=new AuthorizationService(db,async()=>reviewer);
+ await authorService.submitReview(english,{expectedSequence:saved.sequence,reviewerId:reviewer.id});
+ await assert.rejects(reviewerService.decideReview(english,{expectedSequence:saved.sequence+1,action:'approve'}),/ENGLISH_REVIEW_REQUIRED/);
+ await reviewerService.decideReview(english,{expectedSequence:saved.sequence+1,action:'approve',englishReviewConfirmed:true});
+ assert.equal((await fixture.pool.query('SELECT english_quality_confirmed FROM juyu.reviews WHERE document_id=$1',[english])).rows[0]?.english_quality_confirmed,true);
+ const detail=await authorService.publicationDetail(english);
+ assert.equal(detail.canQueue,true);
+});
+
+test('an older English approval without a quality attestation cannot be queued',async()=>{
+ const source=randomUUID(),english=randomUUID(),repo=new DocumentRepository(db);
+ const writer={id:'writer',role:'admin' as const,companyVerified:true},reviewer={...writer,id:'reviewer'};
+ await document(source);
+ const saved=await repo.saveEditor(english,{expectedSequence:null,locale:'en',translationOf:source,title:'Account email',body:encodeEditorBody([{id:'step',type:'paragraph',content:[{type:'text',text:'Contact support.',styles:{}}]}]),kind:'article',audience:'staff',tags:[],cover:null},writer);
+ const submitted=await repo.execute(english,{type:'submit'},writer,{expectedSequence:saved.sequence,reviewer});
+ await repo.execute(english,{type:'approve'},reviewer,{expectedSequence:submitted.sequence,reviewer});
+ const authorService=new AuthorizationService(db,async()=>writer);
+ const detail=await authorService.publicationDetail(english);
+ assert.equal(detail.canQueue,false);
+ await assert.rejects(authorService.changePublication(english,{expectedSequence:submitted.sequence+1,action:'queue'}),/CONFLICT|INVALID_STATE|APPROVAL/);
+});
+
 test('employee language switch exposes only separately published and currently authorized versions',async()=>{
  const source=randomUUID(),english=randomUUID(),repo=new DocumentRepository(db);
  const writer={id:'writer',role:'admin' as const,companyVerified:true},reviewer={...writer,id:'reviewer'},employee={id:'employee',role:'support' as const,companyVerified:true};

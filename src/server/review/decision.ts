@@ -4,13 +4,13 @@ import {transition} from '../../domain/workflow.ts';
 import {reviewId} from '../../review/model.ts';
 import {decisionInput,type DecisionAck,type ReviewDetail} from '../../review/decision.ts';
 import {loadDocument,persistDocumentTransition,readEditorSnapshot} from '../database/repository.ts';
-interface Receipt {revision:number;submittedBy:string;reviewerId:string;reviewerName:string;status:string;reason:string|null;submittedAt:Date;decidedAt:Date|null;decidedBy:string|null;submittedSequence:number}
+interface Receipt {revision:number;submittedBy:string;reviewerId:string;reviewerName:string;status:string;reason:string|null;submittedAt:Date;decidedAt:Date|null;decidedBy:string|null;submittedSequence:number;locale:'zh-CN'|'en';englishQualityConfirmed:boolean}
 async function requireCurrentAdmin(c:PoolClient,actor:Viewer){
  if(!(await c.query('SELECT juyu.is_admin() AND juyu.actor_id()=$1 AND juyu.review_admin_eligible($1) AS ok',[actor.id])).rows[0]?.ok)throw new Error('FORBIDDEN');
 }
 async function latestReceipt(c:PoolClient,id:string):Promise<Receipt|null>{
- return (await c.query<Receipt>(`SELECT r.revision_id AS revision,r.submitted_by AS "submittedBy",r.reviewer_id AS "reviewerId",m.display_name AS "reviewerName",r.status,r.reason,r.submitted_at AS "submittedAt",r.decided_at AS "decidedAt",r.decided_by AS "decidedBy",r.submitted_sequence AS "submittedSequence"
- FROM juyu.reviews r JOIN juyu.members m ON m.clerk_user_id=r.reviewer_id WHERE r.document_id=$1 ORDER BY r.submitted_sequence DESC LIMIT 1`,[id])).rows[0]??null;
+ return (await c.query<Receipt>(`SELECT r.revision_id AS revision,r.submitted_by AS "submittedBy",r.reviewer_id AS "reviewerId",m.display_name AS "reviewerName",r.status,r.reason,r.submitted_at AS "submittedAt",r.decided_at AS "decidedAt",r.decided_by AS "decidedBy",r.submitted_sequence AS "submittedSequence",d.locale,r.english_quality_confirmed AS "englishQualityConfirmed"
+ FROM juyu.reviews r JOIN juyu.members m ON m.clerk_user_id=r.reviewer_id JOIN juyu.documents d ON d.id=r.document_id WHERE r.document_id=$1 ORDER BY r.submitted_sequence DESC LIMIT 1`,[id])).rows[0]??null;
 }
 function matchesReview(d:Document,r:Receipt|null){
  const w=d.workflow,submitted=d.audit.find(e=>e.sequence===r?.submittedSequence);
@@ -42,13 +42,15 @@ export async function decideSavedReview(c:PoolClient,id:string,value:unknown,act
  const ack:DecisionAck={documentId:id,sequence:d.sequence,revision:w.revisionId,status,action:input.action,reason,reviewerId:actor.id};
  if(d.sequence===input.expectedSequence+1&&w.status===status&&independentReviewer(d,actor)&&matchesReview(d,receipt)
   &&last?.action===input.action&&last.actorId===actor.id&&last.reviewerId===actor.id&&last.revisionId===w.revisionId&&last.reason===reason
-  &&receipt?.status===receiptStatus&&receipt.decidedBy===actor.id&&receipt.reason===reason&&receipt.decidedAt?.toISOString()===last.at)return ack;
+  &&receipt?.status===receiptStatus&&receipt.decidedBy===actor.id&&receipt.reason===reason&&receipt.decidedAt?.toISOString()===last.at
+  &&(input.action!=='approve'||receipt.locale!=='en'||receipt.englishQualityConfirmed))return ack;
  if(d.sequence!==input.expectedSequence)throw new Error('CONFLICT');
  if(w.status!=='in_review')throw new Error('INVALID_STATE');
  if(!independentReviewer(d,actor))throw new Error('NOT_REVIEWER');
  if(!matchesReview(d,receipt)||receipt?.status!=='in_review'||receipt.decidedBy!==null||receipt.decidedAt!==null)throw new Error('CONFLICT');
+ if(input.action==='approve'&&receipt.locale==='en'&&!input.englishReviewConfirmed)throw new Error('ENGLISH_REVIEW_REQUIRED');
  const now=new Date().toISOString(),command=input.action==='approve'?{type:'approve' as const}:{type:'reject' as const,reason:reason!};
  const next=transition(d,command,actor,{expectedSequence:input.expectedSequence,now});
- await persistDocumentTransition(c,id,d,next,command,actor,now);
+ await persistDocumentTransition(c,id,d,next,command,actor,now,input.action==='approve'&&receipt.locale==='en'&&input.englishReviewConfirmed===true);
  return {...ack,sequence:next.sequence};
 }

@@ -18,5 +18,5 @@ export async function sendDecision(id:string,input:DecisionInput,revision:number
 }
 export function decisionError(error:unknown,reading=false){const code=error instanceof Error?error.message:'';
  if(reading)return code==='FORBIDDEN'?'当前账号没有管理权限，无法读取二审详情。':'未能读取最新二审状态，已暂停决定。原内容和输入仍保留，请重新读取。';
- return code==='CONFLICT'?'文章版本已改变。原输入仍保留，请重新读取二审状态，核对后再决定。':['FORBIDDEN','NOT_REVIEWER'].includes(code)?'当前账号不是本次指定的可用二审管理员，不能操作。请重新读取二审状态。':code==='REASON_REQUIRED'?'请填写退回原因，再核对当前二审状态。':['INVALID_STATE','INACTIVE_DOCUMENT','NOT_FOUND'].includes(code)?'文章或二审状态已改变，请重新读取二审状态。':'决定结果尚未确认。原操作与原因已保留；请重试原决定完成核对。';
+ return code==='ENGLISH_REVIEW_REQUIRED'?'批准英文稿前，请确认已检查自然英语表达、术语和业务含义。':code==='CONFLICT'?'文章版本已改变。原输入仍保留，请重新读取二审状态，核对后再决定。':['FORBIDDEN','NOT_REVIEWER'].includes(code)?'当前账号不是本次指定的可用二审管理员，不能操作。请重新读取二审状态。':code==='REASON_REQUIRED'?'请填写退回原因，再核对当前二审状态。':['INVALID_STATE','INACTIVE_DOCUMENT','NOT_FOUND'].includes(code)?'文章或二审状态已改变，请重新读取二审状态。':'决定结果尚未确认。原操作与原因已保留；请重试原决定完成核对。';
 }

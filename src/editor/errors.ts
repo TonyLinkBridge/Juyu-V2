@@ -1,5 +1,34 @@
 /** Only public error codes cross the editor boundary; never show raw server errors. */
-export function saveError(code:string):string {
+export function saveError(code:string,locale:'zh-CN'|'en'='zh-CN'):string {
+ if(locale==='en'){
+  const messages:Record<string,string>={
+   INVALID_TITLE:'Add a title or question, then check its length and characters.',
+   INVALID_DESCRIPTION:'Keep the short description under 300 characters and on one line.',
+   INVALID_RELEASE_NOTE:'Keep the update note under 600 characters and remove unsupported characters.',
+   INVALID_BODY:'Check the format or length of the content you just added.',
+   INVALID_QA:'Check the Q&A category and use a whole number from 0 to 999999 for its order.',
+   INVALID_CATEGORY:'Choose up to 20 valid categories without duplicates.',
+   INVALID_FIELDS:'Check the required custom fields and their values in article settings.',
+   INVALID_MEDIA:'An image or attachment is unavailable or belongs to another article. Upload it here again.',
+   INVALID_COVER:'Choose an available cover image uploaded to this article.',
+   INVALID_PRESENTATION:'Check the tags and cover settings.',
+   INVALID_INPUT:'The server rejected one or more fields. Keep this page open and check your latest changes.',
+   FIELD_CONFLICT:'Custom field settings changed. Copy a backup, then compare with the latest server version.',
+   CONFLICT:'Another admin or tab saved this article. Compare with the latest server version before trying again.',
+   INVALID_STATE:'This article is in review. Load its latest status before editing.',
+   INACTIVE_DOCUMENT:'This article is inactive. Load its latest status before editing.',
+   FORBIDDEN:'Your access changed. Ask an admin to check your permissions.',
+   NOT_FOUND:'This article was not found. Keep your input and check whether it was deleted.',
+   USE_EDITOR:'Open this article in the editor to make this change.',
+   UPLOAD_TOO_LARGE:'Reduce the size of the content or file before trying again.',
+   AUTH_NOT_CONFIGURED:'Sign-in or database access is not configured. Contact an administrator.',
+   EDITOR_UNAVAILABLE:'The save service is unavailable. Keep your input and check the latest version before retrying.',
+   INVALID_ACK:'The server response could not confirm the save. Load the latest version before trying again.',
+   NETWORK_ERROR:'The connection dropped or timed out. Keep your input and check the latest version before retrying.',
+   UNRECOGNIZED_RESPONSE:'The server did not explain the error. Keep your input and ask an admin to check the request.',
+  };
+  return `Save not confirmed: ${messages[code]??'An unknown error occurred. Keep your input and ask an admin to check the request.'}`;
+ }
  const messages:Record<string,string>={
   INVALID_TITLE:'标题或问题为空、过长或包含不支持的字符。请检查后再保存。',
   INVALID_DESCRIPTION:'文章简介最多 300 字，不能包含换行或控制字符。请检查后再保存。',
@@ -29,7 +58,20 @@ export function saveError(code:string):string {
  return `保存尚未确认：${messages[code]??'出现未识别的保存错误。请保留输入并联系管理员核对请求记录。'}`;
 }
 
-export function validationError(code:string):string {
+export function validationError(code:string,locale:'zh-CN'|'en'='zh-CN'):string {
+ if(locale==='en'){
+  const messages:Record<string,string>={
+   INVALID_QA:'Use a whole number from 0 to 999999 for the Q&A order.',
+   INVALID_DESCRIPTION:'Keep the short description under 300 characters and on one line.',
+   INVALID_RELEASE_NOTE:'Keep the update note under 600 characters and remove unsupported characters.',
+   INVALID_FIELDS:'Check the required custom fields and their values in article settings.',
+   INVALID_CATEGORY:'Choose an active category.',
+   INVALID_PRESENTATION:'Check the tags and cover settings in article settings.',
+   INVALID_BODY:'Check the format or length of the content you just added.',
+   PRIVATE_EDITOR_FILE_REQUIRED:'Upload images and attachments to this article first. External URLs can be text links.',
+  };
+  return `${messages[code]??'Check the content you just changed.'} Your input is still here.`;
+ }
  const messages:Record<string,string>={
   INVALID_QA:'问答排序须为 0 至 999999 的整数；请检查问答分类与排序。',
   INVALID_DESCRIPTION:'文章简介最多 300 字，且不能换行。请检查简介。',
