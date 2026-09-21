@@ -23,8 +23,17 @@ export async function sendPublication(documentId:string,input:PublicationInput,r
  if(!record(value)||value.documentId!==documentId||value.sequence!==input.expectedSequence+1||value.revision!==revision||value.action!==input.action||value.status!==(input.action==='queue'?'queued':'published')||value.publishedRevision!==(input.action==='queue'?previousPublication:revision)||value.approvedBy!==approvedBy)throw new Error('INVALID_ACK');
  return value as unknown as PublicationAck;
 }
-export function publicationError(error:unknown,reading=false):string {
+export function publicationError(error:unknown,reading=false,locale:'zh-CN'|'en'='zh-CN'):string {
  const code=error instanceof Error?error.message:'';
+ if(locale==='en'){
+  if(reading)return code==='FORBIDDEN'?'This account cannot manage publication.':'Could not load the latest publication status. Publishing is paused until you reload and check it.';
+  if(error instanceof PublicationRejected){
+   if(code==='INVALID_APPROVAL')return 'This version does not have a valid review approval. Reload and check its review record.';
+   if(['INVALID_MEDIA','UPLOAD_IN_PROGRESS'].includes(code))return 'An attachment is still uploading or is unavailable. Fix the file, then reload the publication status.';
+   return 'Your access or the article’s review status changed. Reload before trying again.';
+  }
+  return 'The result is not confirmed. Your original action and version are preserved; retry the same action to check its status.';
+ }
  if(reading)return code==='FORBIDDEN'?'当前账号没有发布管理权限，无法读取最新状态。':'未能读取最新发布状态。已暂停操作，请重新读取后核对。';
  if(error instanceof PublicationRejected){
   if(code==='INVALID_APPROVAL')return '当前版本缺少有效的二审批准，操作未执行。请重新读取并核对审核记录。';
