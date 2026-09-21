@@ -18,6 +18,10 @@ async function settings(page:Page,section='保存与管理'){
  await page.getByRole('dialog',{name:'文章设置',exact:true}).getByRole('button',{name:new RegExp('^'+section)}).click();
 }
 async function closeSettings(page:Page){await page.getByRole('button',{name:'关闭文章设置',exact:true}).click();}
+async function insertFromRail(page:Page,name:'添加行内注释'|'插入行内元素'){
+ await page.getByRole('navigation',{name:'编辑工具'}).getByRole('button',{name:'内容插入',exact:true}).click();
+ await page.getByRole('region',{name:'内容插入'}).getByRole('button',{name:new RegExp(`^${name}`)}).click();
+}
 async function slash(page:Page,name:string){await page.locator('.bn-editor').click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');await page.keyboard.type('/');await page.locator('.bn-suggestion-menu').getByText(name,{exact:true}).click();}
 test('release note autosaves, survives reload, and stays editable only before review',async({page})=>{
  let saved=structuredClone(editorFixture);
@@ -45,6 +49,32 @@ test('English article editor uses English for its main actions and settings',asy
  await expect(page.getByRole('button',{name:'Categories: Account security'})).toBeVisible();
  await page.getByRole('button',{name:'Article settings',exact:true}).click();
  await expect(page.getByRole('dialog',{name:'Article settings'}).getByRole('button',{name:'Save and manage'})).toBeVisible();
+});
+test('editor separates workflow actions from a right-side authoring rail',async({page},testInfo)=>{
+ const runtimeErrors:string[]=[];
+ page.on('pageerror',error=>runtimeErrors.push(error.message));
+ page.on('console',message=>{if(message.type()==='error')runtimeErrors.push(message.text());});
+ await mount(page,()=>structuredClone(editorFixture));
+ const toolbar=page.locator('.editor-toolbar');
+ await expect(toolbar.getByRole('button',{name:'预览草稿',exact:true})).toBeVisible();
+ await expect(toolbar.getByRole('button',{name:'文章设置',exact:true})).toHaveCount(0);
+ const rail=page.getByRole('navigation',{name:'编辑工具'});
+ await expect(rail.getByRole('button',{name:'预览',exact:true})).toBeVisible();
+ await expect(rail.getByRole('button',{name:'内容插入',exact:true})).toBeVisible();
+ await expect(rail.getByRole('button',{name:'共用片段',exact:true})).toBeVisible();
+ await expect(rail.getByRole('button',{name:'文章设置',exact:true})).toBeVisible();
+ await rail.getByRole('button',{name:'内容插入',exact:true}).click();
+ const panel=page.getByRole('region',{name:'内容插入'});
+ await expect(panel).toBeVisible();
+ await expect(panel.getByRole('button',{name:/^提示框/})).toBeVisible();
+ await expect(panel.getByRole('button',{name:/^代码块/})).toBeVisible();
+ await expect(panel.getByRole('button',{name:/^表格/})).toBeVisible();
+ await expect(panel.getByRole('button',{name:/^添加行内注释/})).toBeVisible();
+ await expect(panel.getByRole('button',{name:/^插入行内元素/})).toBeVisible();
+ await page.screenshot({path:`output/verification/editor-authoring-rail-${testInfo.project.name}.png`});
+ await panel.getByRole('button',{name:/^提示框/}).click();
+ await expect(page.locator('[data-juyu-type="hint"]')).toBeVisible();
+ expect(runtimeErrors).toEqual([]);
 });
 test('pasting a supported video URL into an empty paragraph creates a gated embed',async({page})=>{
  let saved={...structuredClone(editorFixture),body:encodeEditorBody([{id:'empty',type:'paragraph',props:{textAlignment:'left',textColor:'default',backgroundColor:'default'},content:[],children:[]}])};
@@ -134,7 +164,7 @@ test('inline annotation saves selected words and opens as a note in the reader p
  await mount(page,()=>saved);
  await page.locator('.bn-editor').click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');await page.keyboard.insertText('需要说明的词');
  for(let index=0;index<'需要说明的词'.length;index++)await page.keyboard.press('Shift+ArrowLeft');
- await page.getByRole('button',{name:'添加行内注释'}).click();
+ await insertFromRail(page,'添加行内注释');
  const dialog=page.getByRole('dialog',{name:'添加行内注释'});
  await expect(dialog).toBeVisible();await dialog.getByRole('textbox',{name:'注释内容'}).fill('员工点击后看到的解释');await dialog.getByRole('button',{name:'插入注释'}).click();
  await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
@@ -152,7 +182,7 @@ test('inline icon, formula and image keep their meaning after autosave and previ
  await mount(page,()=>saved);
  await page.locator('.bn-editor').click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');
  for(const kind of ['icon','math','image'] as const){
-  await page.getByRole('button',{name:'插入行内元素'}).click();
+  await insertFromRail(page,'插入行内元素');
   const dialog=page.getByRole('dialog',{name:'插入行内元素'});await dialog.getByRole('combobox',{name:'行内元素类型'}).selectOption(kind);
   if(kind==='icon')await dialog.getByRole('combobox',{name:'行内图标'}).selectOption('shield');
   if(kind==='math')await dialog.getByRole('textbox',{name:'行内公式'}).fill('x^2');

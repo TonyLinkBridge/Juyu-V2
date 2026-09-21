@@ -9,6 +9,7 @@
 .juyu-toast{pointer-events:auto;display:flex;gap:16px;align-items:start;padding:16px 18px;border:1px solid var(--line);border-left:4px solid #368461;border-radius:12px;background:var(--panel);color:var(--ink);box-shadow:0 8px 28px #0002;font-size:14px;line-height:1.65;overflow-wrap:anywhere}
 .juyu-toast.error{border-left-color:var(--brand)}.juyu-toast>div{flex:1}.juyu-toast button{background:transparent;border:0;font-size:12px;color:var(--muted);padding:3px;cursor:pointer}
 @media(max-width:640px){.juyu-toasts{right:16px;bottom:16px}}
+@media(max-width:900px){body:has(.article-editor.editor-focused) .juyu-toasts{bottom:80px}}
 
 .juyu-nav-pending{display:inline-block;width:12px;height:12px;flex-shrink:0;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;margin-left:8px;animation:juyu-spin .7s linear infinite}
 @keyframes juyu-spin{to{transform:rotate(360deg)}}

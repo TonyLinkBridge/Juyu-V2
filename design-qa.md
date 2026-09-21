@@ -1,41 +1,51 @@
-# GitBook reading-layout comparison — 2026-09-14
+# Editor authoring rail design QA
+
+- Source visual truth: `/Users/tony/.codex/generated_images/01a07e8f-7d3d-7913-ae5a-b945e4845a98/exec-82a42b5c-c6d3-4173-977a-b4c705ae449a.png`
+- Desktop implementation: `/Users/tony/Documents/ChatGPT/Juyu V2/output/verification/editor-authoring-rail-desktop.png`
+- Mobile implementation: `/Users/tony/Documents/ChatGPT/Juyu V2/output/verification/editor-authoring-rail-mobile.png`
+- Comparison image: `/tmp/editor-design-comparison.png`
+- Source pixels: 1487 x 1058.
+- Desktop implementation pixels and CSS viewport: 1440 x 1000 at device scale factor 1.
+- Mobile implementation pixels and CSS viewport: 390 x 844 at device scale factor 1.
+- State: light theme, article editor, content-insert panel open.
+- Scope: the selected fourth concept's workflow/action hierarchy and insert-panel layout. Source and implementation use different sample article content, so content density was not treated as a fidelity signal.
+
+## Full-view comparison evidence
+
+The source and implementation were placed in one side-by-side image before review. Both keep workflow actions in the top bar, use a narrow fixed authoring rail at the far right, and open a wider insert panel immediately beside it while preserving the document as the primary area. The implementation uses the existing product tokens and production components rather than copying decorative placeholder content from the concept.
+
+The mobile capture uses the responsive counterpart of the same hierarchy: the rail becomes a four-action bottom dock, and the insert panel becomes a scrollable bottom sheet above it. The final document content and notifications retain bottom clearance.
+
+## Focused region evidence
+
+The desktop and mobile captures render the complete control labels clearly enough to inspect the rail, panel heading, block cards, spacing, borders, active state, and close action. No separate crop was required.
+
+## Required fidelity surfaces
+
+- Fonts and typography: existing product type stack retained; heading, label, helper, and action hierarchy match the concept's relative emphasis.
+- Spacing and layout rhythm: 72 px rail and 340 px desktop panel preserve the concept's narrow-rail/wider-panel proportions; mobile uses a 64 px bottom dock.
+- Colors and tokens: existing panel, border, muted, focus, hover, accent-soft, and brand tokens are used in light and dark themes.
+- Image and icon fidelity: no raster artwork is required; product-standard Phosphor icons are used for the same semantic actions.
+- Copy and content: Chinese labels explain what each action inserts. Existing English localization is present for the same controls.
+
+## Interaction and runtime checks
+
+- Desktop and mobile can open the insert panel, see all five actions, insert a callout, and render the inserted block.
+- The targeted browser test checks page errors and console errors; none were reported.
+- Existing BlockNote editing, autosave, recovery, snippets, article settings, Q&A settings, upload, preview, and mobile flows passed the full editor regression suite.
+
+## Findings
+
+No actionable P0, P1, or P2 mismatch remains within this item's scope.
+
+## Comparison history
+
+- Initial responsive check found notifications and the fixture's final page action could sit under the mobile dock.
+- Fix: raised editor notifications above the dock and added bottom safe space to the editor page.
+- Post-fix evidence: the final mobile capture and the complete mobile editor regression suite show reachable controls and content.
+
+## Follow-up polish
+
+- P3: production content density and the real authenticated header should be reviewed after deployment because the current evidence uses the controlled editor fixture.
 
 final result: passed
-
-Scope: the agreed reading-page layout adaptation, retaining JUYU branding, authenticated account actions, existing article content, the two-value feedback model and private PDF/favorite functions. This is not a claim that every GitBook product feature or arbitrary article body is duplicated.
-
-## Reference and capture
-
-- Source: https://tony-14.gitbook.io/help-center/getting-started/getting-started-checklist
-- Source code: /Users/tony/Downloads/gitbook-main/packages/gitbook/src/components/ (TableOfContents, Header, PageAside, PageBody).
-- Implementation: http://127.0.0.1:3212/design-preview/article-email
-- Both pages were opened and captured together at 1710 × 983 CSS pixels, light theme, collapsed and expanded category states. The source uses English onboarding content; JUYU uses the existing Chinese email article and nested categories. Content-specific line breaks, topic counts and block types were not treated as geometry mismatches.
-- JUYU has a 30.148px development-only preview notice above its header. Measurements below subtract this notice from vertical comparisons.
-- Mobile inspection at 390 × 844, plus desktop dark theme. The mobile feedback control was clicked in the in-app browser, and its comment field received focus without being covered.
-
-## Iteration and fixes
-
-1. Removed the old full-width reader/grey sidebar/right-rail card overrides in product-shell.css. Added a scoped reader stylesheet grounded in the reference grid.
-2. Reference and implementation now both have sidebar x=167, w=288; main x=503, w=768; rail x=1287, w=256; header h=64; search x=503, at 1710px viewport width.
-3. The source home and group rows are x=155, w=292, y=96 and 144. Final JUYU rows are x=155, w=292, y=126.148 and 174.148 including the local notice, matching the reference after subtracting it.
-4. Restored compact icon navigation and removed duplicated article title in the breadcrumb. Category icons use JUYU topic semantics; this does not add a persisted custom-icon management feature.
-5. Kept account, theme, admin and exit access in the account menu. The desktop preview menu was opened and its theme/admin controls inspected. Real sign-out was not executed.
-6. Reduced feedback and utility chrome while preserving accessible labels, feedback submission semantics, errors, and version information. The right rail contains an outline where the actual article has headings; the reference checklist has no equivalent outline.
-7. Removed desktop sticky positioning when the rail uses the mobile flow. Fixed the test fixture's missing mobile search wrapper, which had caused overflow and misleading pointer interception.
-8. Scoped the new CSS strongly enough to resist the old rules even when built stylesheet chunks are consumed in a different order.
-9. Local sample favorites now use a clearly labeled, isolated preview state. Sample feedback has an initial empty snapshot, avoiding a read against a nonexistent production article.
-
-## Verification
-
-- Production build, TypeScript and built-style/browser asset checks passed.
-- Eight desktop/mobile layout and navigation checks passed; after the final 8px adjustment, both layout checks and twelve feedback checks passed again (14/14).
-- Long-title wrapping, collapsed/expanded keyboard navigation, exact selected article, history navigation, dark text readability, mobile overflow and feedback focus were exercised.
-- Screenshots: output/verification/gitbook-layout-{light,dark,collapsed}-{desktop,mobile}.png (local test fixture); actual reference and implementation captures are in this task's browser tool results.
-- Live production deployment, authenticated multi-role acceptance and real-device testing are not claimed by this local visual change. Nothing was pushed or deployed in this turn.
-
-## 2026-09-14 push preparation
-
-- The live article body contained bold paragraphs instead of headings. Three headings were saved through the production editor and submitted to haley@juyu.com for review; publication remains pending.
-- Editor code now explains missing headings inline and previews the outline using the same parsed sections as the reader.
-- Removed the inherited full-viewport minimum height from the new right rail to prevent a sticky-position regression.
-- This record does not establish production acceptance of the unpushed visual changes.
