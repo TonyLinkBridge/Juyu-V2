@@ -12,7 +12,7 @@ import {mathMarkup} from '../../science/model';
 import {normalizeBlocks,type ManagedAsset,type MediaBlock} from '../../media/model';
 import {MediaFields} from './MediaFields';
 import {MediaBlocks} from '../gitbook/Media/MediaBlocks';
-export const EditorContext=createContext<{documentId:string;assets:ManagedAsset[];frozen:boolean;locale:'zh-CN'|'en'}>({documentId:'',assets:[],frozen:false,locale:'zh-CN'});
+export const EditorContext=createContext<{documentId:string;assets:ManagedAsset[];frozen:boolean;locale:'zh-CN'|'en';activeHintId:string|null;selectHint:(id:string)=>void}>({documentId:'',assets:[],frozen:false,locale:'zh-CN',activeHintId:null,selectHint:()=>{}});
 const juyuInline=createReactInlineContentSpec({type:'juyuInline',propSchema:{kind:{default:'icon',values:['icon','math','image'] as const},value:{default:''},label:{default:''}},content:'none'}, {
  render:({inlineContent})=>{
   const {kind,value,label}=inlineContent.props;
@@ -32,9 +32,19 @@ const juyu=createReactBlockSpec({type:'juyu',propSchema:{payload:{default:''}},c
   const media={...payload,id:block.id} as MediaBlock;
   try{normalizeBlocks([media]);}catch{invalid=true;}
   const names=context.locale==='en'?{image:'Image',video:'Video',audio:'Audio',file:'File',table:'Table',hint:'Callout',code:'Code',tabs:'Tabs',steps:'Steps',columns:'Columns',articleReference:'Article card',button:'Button',externalEmbed:'External content',math:'Equation',diagram:'Diagram'}:{image:'图片',video:'影片',audio:'音频',file:'文件',table:'表格',hint:'提示框',code:'代码框',tabs:'分页标签',steps:'操作步骤',columns:'分栏布局',articleReference:'引用文章',button:'操作按钮',externalEmbed:'外部内容',math:'数学公式',diagram:'流程图'};
-  return <div className="editor-embedded" data-juyu-type={media.type} data-juyu-style={media.type==='hint'?media.style:undefined} contentEditable={false}><strong>{names[media.type]}</strong>{invalid&&<p role="alert">{t('此内容块尚未符合保存要求，请修正下方输入。','This block is not ready to save. Check the fields below.')}</p>}<details><summary>{t('编辑此内容块','Edit this block')}</summary><fieldset disabled={context.frozen}><MediaFields block={media} assets={context.assets} documentId={context.documentId} frozen={context.frozen} locale={context.locale} onChange={next=>editor.updateBlock(block,{props:{payload:JSON.stringify(next)}})}/></fieldset></details>
-   {!invalid&&(media.type==='hint'?<p className="editor-embedded-note">{t('完整提示框请使用顶部的「预览草稿」查看。','Use Preview draft above to see the full callout.')}</p>:<details><summary>{t('查看此块预览','Preview this block')}</summary><MediaBlocks blocks={[media]} documentId={context.documentId} locale={context.locale} admin/></details>)}
-   <div className="media-toolbar">{media.type==='hint'&&<button type="button" disabled={context.frozen} onClick={()=>editor.updateBlock(block,{children:[...block.children,{type:'paragraph',content:''}] as never})}>{t('在提示框中添加段落','Add a paragraph to the callout')}</button>}<button type="button" disabled={context.frozen} onClick={()=>editor.moveBlocksUp(block)}>{t('上移内容块','Move block up')}</button><button type="button" disabled={context.frozen} onClick={()=>editor.moveBlocksDown(block)}>{t('下移内容块','Move block down')}</button><button type="button" disabled={context.frozen} onClick={()=>editor.removeBlocks([block])}>{t('删除内容块','Delete block')}</button></div>
+  if(media.type==='hint'){
+   const update=(next:typeof media)=>editor.updateBlock(block,{props:{payload:JSON.stringify(next)}});
+   const selected=context.activeHintId===block.id;
+   return <div className={`editor-embedded editor-hint-shell${selected?' is-selected':''}`} data-juyu-type="hint" data-juyu-style={media.style} contentEditable={false} onClick={()=>context.selectHint(block.id)}><div className="editor-hint-layout">
+     <span className="editor-hint-icon" aria-hidden="true">{media.iconKey?<ReaderIcon icon={media.iconKey} size={20}/>:({info:'ⓘ',success:'✓',warning:'!',danger:'⚠'})[media.style]}</span>
+     <div className="editor-hint-heading">{media.showTitle!==false&&<input aria-label={t('提示标题','Callout title')} maxLength={200} disabled={context.frozen} value={media.title} placeholder={t('提示标题（选填）','Callout title (optional)')} onFocus={()=>context.selectHint(block.id)} onChange={event=>update({...media,title:event.target.value})}/>}</div>
+     <button className="editor-hint-add" type="button" disabled={context.frozen} aria-label={t('在提示框中新增内容','Add content to callout')} title={t('在提示框中新增内容','Add content to callout')} onClick={event=>{event.stopPropagation();context.selectHint(block.id);editor.updateBlock(block,{children:[...block.children,{type:'paragraph',content:''}] as never});}}>+</button>
+    </div>
+   </div>;
+  }
+  return <div className="editor-embedded" data-juyu-type={media.type} contentEditable={false}><strong>{names[media.type]}</strong>{invalid&&<p role="alert">{t('此内容块尚未符合保存要求，请修正下方输入。','This block is not ready to save. Check the fields below.')}</p>}<details><summary>{t('编辑此内容块','Edit this block')}</summary><fieldset disabled={context.frozen}><MediaFields block={media} assets={context.assets} documentId={context.documentId} frozen={context.frozen} locale={context.locale} onChange={next=>editor.updateBlock(block,{props:{payload:JSON.stringify(next)}})}/></fieldset></details>
+   {!invalid&&<details><summary>{t('查看此块预览','Preview this block')}</summary><MediaBlocks blocks={[media]} documentId={context.documentId} locale={context.locale} admin/></details>}
+   <div className="media-toolbar"><button type="button" disabled={context.frozen} onClick={()=>editor.moveBlocksUp(block)}>{t('上移内容块','Move block up')}</button><button type="button" disabled={context.frozen} onClick={()=>editor.moveBlocksDown(block)}>{t('下移内容块','Move block down')}</button><button type="button" disabled={context.frozen} onClick={()=>editor.removeBlocks([block])}>{t('删除内容块','Delete block')}</button></div>
   </div>;
  },
  toExternalHTML:({block})=><p>{block.props.payload}</p>,

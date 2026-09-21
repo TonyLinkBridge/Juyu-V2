@@ -76,6 +76,8 @@ test('hint keeps a validated custom icon and prints nested formatted links insid
  const body=encodeEditorBody([{id:'hint',type:'juyu',props:{payload:JSON.stringify(hint)},children:[{id:'line',type:'paragraph',props:{textAlignment:'left',textColor:'default',backgroundColor:'default'},content:[{type:'text',text:'先核实',styles:{bold:true}},{type:'link',href:'https://example.com/help',content:[{type:'text',text:'处理规则',styles:{}}]}],children:[]}]}]);
  const html=pdfHTML({id:'rich-hint',title:'提示框',revision:1,body,blocks:[]});
  assert.match(html,/<aside class="pdf-hint"[\s\S]*<strong>操作前核对<\/strong>[\s\S]*<strong>先核实<\/strong>[\s\S]*href="https:\/\/example.com\/help"[\s\S]*<\/aside>/);
+ const hidden={...hint,showTitle:false};assert.deepEqual(normalizeBlocks([hidden]),[hidden]);
+ const hiddenHTML=pdfHTML({id:'hidden-hint',title:'隐藏标题',revision:1,body:'',blocks:[hidden]});assert.doesNotMatch(hiddenHTML,/操作前核对/);
 });
 test('tabs accept only known decorative icons while retaining stable tab identities',()=>{
  const richTabs={id:'tabs',type:'tabs',tabs:[{id:'one',title:'注册',body:'步骤',iconKey:'book'},{id:'two',title:'转入',body:'说明',iconKey:null}]};

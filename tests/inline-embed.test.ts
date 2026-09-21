@@ -17,6 +17,13 @@ test('editing canvas renders inline embeds without changing stored paragraphs, t
  assert.equal((canvas[0] as {content:{rows:{cells:{content:{type:string}[]}[]}[]}}).content.rows[0].cells[0].content[0].type,'juyuInline');
  assert.deepEqual(fromCanvasBlocks(canvas),[table]);
 });
+test('legacy callout body becomes an editable nested paragraph without losing its text',()=>{
+ const legacy={id:'legacy-hint',type:'juyu' as const,props:{payload:JSON.stringify({id:'legacy-hint',type:'hint',style:'info',title:'请注意',body:'先核实员工身份'})},children:[]};
+ const [canvas]=toCanvasBlocks([legacy]) as {props:{payload:string};children:{type:string;content:{type:string;text:string}[]}[]}[];
+ assert.equal(JSON.parse(canvas.props.payload).body,'');
+ assert.equal(canvas.children[0].type,'paragraph');
+ assert.deepEqual(canvas.children[0].content,[{type:'text',text:'先核实员工身份',styles:{}}]);
+});
 test('inline icon, formula and private image keep typed payloads',()=>{
  for(const item of [{type:'icon' as const,icon:'shield' as const},{type:'math' as const,source:'x^2+y^2'},{type:'image' as const,assetId}])assert.deepEqual(inlineEmbed(inlineEmbedHref(item)),item);
  assert.throws(()=>normalizeInline([{type:'link',href:'#juyu-image-../../secret',content:[{type:'text',text:'x',styles:{}}]}]),/INVALID_EDITOR_DOCUMENT/);

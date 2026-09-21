@@ -211,26 +211,37 @@ test('real BlockNote edits autosave reload and mixed blocks preview in order',as
  let saved=structuredClone(editorFixture);let writes=0;
  await page.route('**/api/admin/editor/*',async route=>{const value=route.request().postDataJSON();expect(value.expectedSequence).toBe(saved.sequence);saved={...saved,...value,sequence:saved.sequence+1};writes++;await route.fulfill({json:saved});});
  await mount(page,()=>saved);await typeText(page,' 中文更新');await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});expect(writes).toBeGreaterThan(0);
- await slash(page,'提示框');const fields=page.locator('.editor-embedded').last();await fields.getByText('编辑此内容块',{exact:true}).click();await fields.locator('textarea').fill('核对二审');await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
+ await slash(page,'提示框');const hint=page.locator('.editor-embedded').last();const nested=hint.locator('xpath=ancestor::div[@data-node-type="blockContainer"][1]').locator('.bn-block-group .bn-inline-content').last();await nested.click();await page.keyboard.insertText('核对二审');await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
  await page.getByRole('button',{name:'预览草稿',exact:true}).click();await expect(page.locator('.editor-preview')).toContainText('中文更新');await expect(page.locator('.editor-preview')).toContainText('核对二审');
  await page.reload();await expect(page.locator('.bn-editor')).toContainText('中文更新');await expect(page.locator('.editor-embedded')).toHaveCount(1);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`output/verification/editor-${info.project.name}.png`,fullPage:true});await page.evaluate(()=>document.documentElement.dataset.theme='dark');await page.locator('.editor-canvas').scrollIntoViewIfNeeded();await page.screenshot({path:`output/verification/editor-dark-${info.project.name}.png`,fullPage:false});
 });
-test('hint can add a nested editable paragraph that survives autosave and preview',async({page})=>{
+test('callout edits in place and uses a focused appearance inspector',async({page})=>{
  let saved=structuredClone(editorFixture);
  await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
  await mount(page,()=>saved);
  await slash(page,'提示框');
  const hint=page.locator('.editor-embedded').last();
- await hint.getByText('编辑此内容块',{exact:true}).click();
- await hint.getByRole('combobox',{name:'提示图标'}).selectOption('shield');
- await hint.getByRole('button',{name:'在提示框中添加段落'}).click();
+ await hint.click();
+ await expect(hint.getByText('编辑此内容块',{exact:true})).toHaveCount(0);
+ await hint.getByRole('textbox',{name:'提示标题'}).fill('执行前核对');
+ const hintLayout=await hint.evaluate(element=>{const layout=element.querySelector('.editor-hint-layout')!,icon=element.querySelector('.editor-hint-icon')!.getBoundingClientRect(),title=element.querySelector('.editor-hint-heading')!.getBoundingClientRect(),add=element.querySelector('.editor-hint-add')!.getBoundingClientRect();return {display:getComputedStyle(layout).display,iconRight:icon.right,titleLeft:title.left,titleRight:title.right,addLeft:add.left};});
+ expect(hintLayout.display).toBe('grid');expect(hintLayout.titleLeft).toBeGreaterThanOrEqual(hintLayout.iconRight);expect(hintLayout.addLeft).toBeGreaterThanOrEqual(hintLayout.titleRight);
+ const inspector=page.getByRole('region',{name:'提示框设置'});
+ await expect(inspector).toBeVisible();
+ await inspector.getByRole('button',{name:'注意'}).click();
+ await inspector.getByRole('combobox',{name:'提示图标'}).selectOption('shield');
+ await expect(inspector.getByRole('checkbox',{name:'显示标题'})).toBeChecked();
+ await page.screenshot({path:`output/verification/rich-hint-inspector-${test.info().project.name}.png`,fullPage:false});
+ await inspector.getByRole('button',{name:'关闭提示框设置'}).click();
  const nested=hint.locator('xpath=ancestor::div[@data-node-type="blockContainer"][1]').locator('.bn-block-group .bn-inline-content').last();
  await nested.click();await page.keyboard.insertText('先核实员工身份');
  await expect.poll(()=>saved.body.startsWith('JUYU_BLOCKNOTE_V1\n')&&JSON.parse(saved.body.split('\n').slice(1).join('\n')).some((block:{type:string;children:{content:{text:string}[]}[]})=>block.type==='juyu'&&block.children.some(child=>child.content.some(text=>text.text==='先核实员工身份'))),{timeout:8000}).toBe(true);
- expect(JSON.parse(JSON.parse(saved.body.split('\n').slice(1).join('\n')).find((block:{type:string})=>block.type==='juyu').props.payload).iconKey).toBe('shield');
+ const payload=JSON.parse(JSON.parse(saved.body.split('\n').slice(1).join('\n')).find((block:{type:string})=>block.type==='juyu').props.payload);
+ expect(payload).toMatchObject({style:'warning',title:'执行前核对',iconKey:'shield',showTitle:true});
  await page.getByRole('button',{name:'预览草稿',exact:true}).click();
- await expect(page.locator('.editor-preview .rich-hint')).toContainText('先核实员工身份');
+ await expect(page.locator('.editor-preview .rich-hint-warning')).toContainText('执行前核对');
+ await expect(page.locator('.editor-preview .rich-hint-warning')).toContainText('先核实员工身份');
  await page.screenshot({path:`output/verification/rich-hint-nested-${test.info().project.name}.png`,fullPage:true});
 });
 test('typing during an outstanding save is retained and saved with the acknowledged sequence',async({page})=>{

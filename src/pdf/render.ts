@@ -37,7 +37,7 @@ export function pdfContent(article:Publication,coverSource?:string,images?:Recor
  const renderMedia=(b:MediaBlock,children=''):string=>{
   if(b.type==='math'){try{return `<figure>${mathMarkup(b.source)}<figcaption>${e(b.caption)}</figcaption></figure>`;}catch{return `<p>${label('公式错误','Invalid formula')}: ${e(b.source)}</p>`;}}
   if(b.type==='diagram'){const src=images?.['diagram:'+b.id]??`/api/articles/${encodeURIComponent(article.id)}/diagram?revision=${article.revision}&block=${encodeURIComponent(b.id)}`;return `<figure><img style="max-height:180mm" src="${e(src)}" alt="${e(b.caption||label('流程图','Flowchart'))}"><figcaption>${e(b.caption)}</figcaption></figure>`;}
-  if(b.type==='hint')return `<aside class="pdf-hint" role="note" aria-label="${e(hintLabels[b.style])}"><strong>${e(b.title||hintLabels[b.style])}</strong>${b.body?`<p>${e(b.body)}</p>`:''}${children?`<div class="pdf-hint-nested">${children}</div>`:''}</aside>`;
+  if(b.type==='hint')return `<aside class="pdf-hint" role="note" aria-label="${e(hintLabels[b.style])}">${b.showTitle===false?'':`<strong>${e(b.title||hintLabels[b.style])}</strong>`}${b.body?`<p>${e(b.body)}</p>`:''}${children?`<div class="pdf-hint-nested">${children}</div>`:''}</aside>`;
   if(b.type==='code'){
    const highlighted=codeLineNumbers(b.highlightLines),added=codeLineNumbers(b.addedLines),removed=codeLineNumbers(b.removedLines);
    const lines=b.code.split('\n').map((line,index)=>{const number=index+1,kind=removed.has(number)?' pdf-code-removed':added.has(number)?' pdf-code-added':highlighted.has(number)?' pdf-code-highlighted':'';return `<span class="pdf-code-line${kind}">${b.lineNumbers?`${String(number).padStart(3,' ')}  `:''}${e(line)||' '}</span>`;}).join('');

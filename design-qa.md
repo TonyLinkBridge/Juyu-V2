@@ -48,4 +48,42 @@ No actionable P0, P1, or P2 mismatch remains within this item's scope.
 
 - P3: production content density and the real authenticated header should be reviewed after deployment because the current evidence uses the controlled editor fixture.
 
+item result: passed
+
+# Callout context inspector design QA
+
+- Source visual truth: `/Users/tony/.codex/generated_images/01a07e8f-7d3d-7913-ae5a-b945e4845a98/exec-faac7bc6-82b9-41ab-abc9-779c1d6ef627.png`
+- Desktop implementation with inspector: `/Users/tony/Documents/ChatGPT/Juyu V2/output/verification/rich-hint-inspector-desktop.png`
+- Mobile implementation with inspector: `/Users/tony/Documents/ChatGPT/Juyu V2/output/verification/rich-hint-inspector-mobile.png`
+- Editor and publication-preview comparison: `/Users/tony/Documents/ChatGPT/Juyu V2/output/verification/rich-hint-nested-desktop.png`
+- State: light theme, warning callout selected, title and shield icon set, body edited as a nested BlockNote paragraph.
+- Scope: the selected second concept's direct content editing, focused appearance inspector, semantic styles, optional title, compact add action, and responsive behavior.
+
+## Full-view comparison evidence
+
+The selected concept and rendered editor share the same division of responsibility: content stays in the document while appearance controls live in a context inspector. The production implementation retains the existing authoring rail and product tokens. On mobile, the inspector becomes a bottom sheet above the authoring dock; closing it returns the user to the callout body.
+
+## Focused region evidence
+
+The desktop and mobile screenshots show all inspector controls without clipping. The editor/preview screenshot confirms that icon, title, warning color, and nested body order match the publication preview. Automated layout assertions verify that the icon, title, and compact add button remain in one row.
+
+## Required fidelity surfaces
+
+- Typography and spacing: title, nested body, helpers, and inspector labels keep the approved hierarchy and existing document rhythm.
+- Color and state: info, success, warning, and danger use semantic tokens; the selected style has a clear focus border.
+- BlockNote behavior: the callout body is a real nested BlockNote document, so rich text, links, lists, tables, and child blocks remain available.
+- Responsive behavior: desktop keeps the document and inspector visible together; mobile uses a single-column bottom sheet with reachable controls.
+- Existing content: legacy plain callout bodies are moved into an editable paragraph on the canvas without dropping their text.
+
+## Findings and fixes
+
+- Initial capture found BlockNote forcing the custom renderer's direct children to `display:block`, which stacked the icon, title, and add action.
+- Fix: introduced an internal callout layout container and added an explicit grid override plus automated position checks.
+- Initial mobile capture also showed the inspector's two-column parent grid squeezing sections and the delete label.
+- Fix: the callout inspector now owns a single-column layout at every width while the four semantic style choices remain a two-column group.
+
+## Remaining boundary
+
+- Real authenticated production rendering still requires deployment. This item is locally verified in the controlled editor fixture and production build.
+
 final result: passed

@@ -25,6 +25,16 @@ export function fromCanvasInline(content:(EditorInline|CanvasInline)[]):EditorIn
 export function toCanvasBlocks(blocks:EditorBlock[]):unknown[]{
  return blocks.map(block=>{
   const children=toCanvasBlocks(block.children);
+  if(block.type==='juyu'){
+   try{
+    const payload=JSON.parse(block.props.payload) as Record<string,unknown>;
+    if(payload.type==='hint'&&typeof payload.body==='string'&&payload.body){
+     const legacyBody={type:'paragraph',content:[{type:'text',text:payload.body,styles:{}}],children:[]};
+     return {...block,props:{payload:JSON.stringify({...payload,body:''})},children:[legacyBody,...children]};
+    }
+   }catch{}
+   return {...block,children};
+  }
   if(block.type==='table')return {...block,content:{...block.content,rows:block.content.rows.map(row=>({cells:row.cells.map(cell=>({...cell,content:toCanvasInline(cell.content)}))}))},children};
   if('content' in block)return {...block,content:toCanvasInline(block.content),children};
   return {...block,children};

@@ -24,7 +24,7 @@ function inlineMarkdown(content:EditorInline[]):string{return content.map(part=>
  return result;
  }).join('');}
 function mediaMarkdown(block:MediaBlock):string{
- if(block.type==='hint')return `> **${escape(block.title||'提示')}**\n> ${escape(block.body).replace(/\n/g,'\n> ')}`;
+ if(block.type==='hint')return `${block.showTitle===false?'':`> **${escape(block.title||'提示')}**\n`}> ${escape(block.body).replace(/\n/g,'\n> ')}`;
  if(block.type==='code')return `\`\`\`${block.language||'text'}\n${block.code}\n\`\`\``;
  if(block.type==='math')return `$$\n${block.source}\n$$`;
  if(block.type==='diagram')return `\`\`\`mermaid\n${block.source}\n\`\`\``;
