@@ -36,11 +36,13 @@ test('release note autosaves, survives reload, and stays editable only before re
  await expect(page.getByRole('textbox',{name:'更新说明'})).toBeDisabled();
 });
 test('English article editor uses English for its main actions and settings',async({page})=>{
- const english={...structuredClone(editorFixture),locale:'en' as const,translationOf:'11111111-1111-4111-8111-111111111111',title:'How to update your email'};
+ const categoryId='00000000-0000-4000-8000-000000000126';
+ const english={...structuredClone(editorFixture),locale:'en' as const,translationOf:'11111111-1111-4111-8111-111111111111',title:'How to update your email',categoryIds:[categoryId],categoryOptions:[{id:categoryId,version:1,name:'账户安全',englishName:'Account security',parentId:null,position:0,audience:'staff' as const,enabled:true}]};
  await mount(page,()=>english);
  await expect(page.getByRole('button',{name:'Preview draft'})).toBeVisible();
  await expect(page.getByRole('button',{name:'Article settings',exact:true})).toBeVisible();
  await expect(page.getByRole('textbox',{name:'Article title'})).toHaveValue('How to update your email');
+ await expect(page.getByRole('button',{name:'Categories: Account security'})).toBeVisible();
  await page.getByRole('button',{name:'Article settings',exact:true}).click();
  await expect(page.getByRole('dialog',{name:'Article settings'}).getByRole('button',{name:'Save and manage'})).toBeVisible();
 });
