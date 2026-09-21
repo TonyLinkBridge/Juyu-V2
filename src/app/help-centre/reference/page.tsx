@@ -38,5 +38,5 @@ export default async function ReferenceCollectionPage({searchParams}:{searchPara
   if(error instanceof Error&&error.message.split(':')[0]==='FORBIDDEN')state='denied';
  }
 
- return <EntryShell account navigation={<ReaderMenu currentHref="/help-centre/reference"/>} search={locale==='en'?<SearchInput locale="en"/>:<FeatureSearch/>}><main id="main-content" className="editor-main search-main"><ReferenceView data={data} detail={detail} state={state} detailState={detailState} locale={locale}/></main></EntryShell>;
+ return <EntryShell account locale={locale} navigation={<ReaderMenu currentHref="/help-centre/reference"/>} search={locale==='en'?<SearchInput locale="en"/>:<FeatureSearch/>}><main id="main-content" className="editor-main search-main"><ReferenceView data={data} detail={detail} state={state} detailState={detailState} locale={locale}/></main></EntryShell>;
 }

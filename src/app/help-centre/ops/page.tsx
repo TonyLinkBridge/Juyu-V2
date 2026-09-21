@@ -37,6 +37,6 @@ export default async function OpsCollectionPage({searchParams}:{searchParams:Pro
   }
 
   if(firstId)redirect('/help-centre?article='+encodeURIComponent(firstId)+(locale==='en'?'&lang=en':''));
-  return <EntryShell account navigation={<ReaderMenu currentHref="/help-centre/ops"/>} search={locale==='en'?<SearchInput locale="en"/>:<FeatureSearch query=""/>}><main id="main-content" className="editor-main search-main"><OpsCollection data={data} state={state} locale={locale}/></main></EntryShell>;
+  return <EntryShell account locale={locale} navigation={<ReaderMenu currentHref="/help-centre/ops"/>} search={locale==='en'?<SearchInput locale="en"/>:<FeatureSearch query=""/>}><main id="main-content" className="editor-main search-main"><OpsCollection data={data} state={state} locale={locale}/></main></EntryShell>;
  });
 }

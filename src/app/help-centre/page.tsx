@@ -57,13 +57,13 @@ const admin = await adminPromise;
     if(homeParams.article===undefined&&homeParams.q===undefined){
       let home:Awaited<ReturnType<Awaited<ReturnType<typeof applicationAuthorization>>['home']>>|undefined;
       try{home=await(await applicationAuthorization()).home(homeLocale);}catch{}
-      if(!home)return <EntryShell><main id="main-content" className="message-main"><h1>资料库暂时无法读取</h1><p>请稍后重试。读取失败不会被当作没有内容。</p><Link href="/help-centre">重新读取</Link></main></EntryShell>;
+      if(!home)return <EntryShell locale={homeLocale}><main id="main-content" className="message-main"><h1>{homeLocale==='en'?'The knowledge base is unavailable':'资料库暂时无法读取'}</h1><p>{homeLocale==='en'?'Try again later. A loading failure is not treated as an empty knowledge base.':'请稍后重试。读取失败不会被当作没有内容。'}</p><Link href={homeLocale==='en'?'/help-centre?lang=en':'/help-centre'}>{homeLocale==='en'?'Try again':'重新读取'}</Link></main></EntryShell>;
       if(library){
         const first=firstTreePage(home.pages);
         if(first)redirect(first.href);
-        return <EntryShell account search={home.features.search?<SearchInput query="" locale={homeLocale}/>:undefined}><ReaderNavigation pages={home.pages} features={home.features} locale={homeLocale}/></EntryShell>;
+        return <EntryShell account locale={homeLocale} search={home.features.search?<SearchInput query="" locale={homeLocale}/>:undefined}><ReaderNavigation pages={home.pages} features={home.features} locale={homeLocale}/></EntryShell>;
       }
-      return <EntryShell account announcement={readerAnnouncement} navigation={<ReaderQuickLinks items={home.menu} currentHref="/help-centre" locale={homeLocale}/>} search={home.features.search?<SearchInput query="" locale={homeLocale}/>:undefined}>{<KnowledgeHome {...home} locale={homeLocale} search={home.features.search} showRecent={home.features.recent} admin={admin.status==='admin'}/>}</EntryShell>;
+      return <EntryShell account locale={homeLocale} announcement={readerAnnouncement} navigation={<ReaderQuickLinks items={home.menu} currentHref="/help-centre" locale={homeLocale}/>} search={home.features.search?<SearchInput query="" locale={homeLocale}/>:undefined}>{<KnowledgeHome {...home} locale={homeLocale} search={home.features.search} showRecent={home.features.recent} admin={admin.status==='admin'}/>}</EntryShell>;
     }
     let features=closedFeatureFlags,featuresUnavailable=false;
     let pages:NavigationNode[]=[];
@@ -82,12 +82,12 @@ if(params.q!==undefined){
   }
 }
 let input=features.search?<SearchInput key={`${locale}:${query}`} query={query} scope={scope??'all'} locale={locale}/>:undefined;
-    if(params.q!==undefined&&!features.search)return <EntryShell navigation={<ReaderMenu/>}><FeatureNotice feature="search" unavailable={featuresUnavailable}/></EntryShell>;
+    if(params.q!==undefined&&!features.search)return <EntryShell locale={locale} navigation={<ReaderMenu/>}><FeatureNotice feature="search" unavailable={featuresUnavailable}/></EntryShell>;
     if(params.q!==undefined){
       let search=searchTitles([],params.q,params.page);
       if(scope===null)search={...search,status:'invalid'};
       else try {({pages,search}=await (await applicationAuthorization()).search(params.q,params.page,scope,locale));}catch{failed=true;}
-      return <EntryShell navigation={<ReaderMenu currentHref="/help-centre"/>} search={input} announcement={failed ? undefined : readerAnnouncement}><div className="reader-search-layout">
+      return <EntryShell locale={locale} navigation={<ReaderMenu currentHref="/help-centre"/>} search={input} announcement={failed ? undefined : readerAnnouncement}><div className="reader-search-layout">
         <SearchAnalytics search={search} enabled={!failed&&features.analytics}><SearchResults search={search} scope={scope??'all'} failed={failed} locale={locale} retryHref={searchHref(query,search.page,scope??'all',locale)}/></SearchAnalytics>
       </div></EntryShell>;
     }
@@ -100,7 +100,7 @@ let input=features.search?<SearchInput key={`${locale}:${query}`} query={query} 
     if(article&&((article.locale==='en')!==(params.lang==='en'))){
       redirect(`/help-centre?article=${encodeURIComponent(article.id)}${article.locale==='en'?'&lang=en':''}`);
     }
-    return <EntryShell account search={input} announcement={failed ? undefined : readerAnnouncement}><ReaderNavigation section={section} features={features} pages={pages} requested={requested} failed={failed} article={article} locale={article?.locale??locale} referenceAliases={referenceAliases} articleActions={!failed&&article?<>{features.favorites&&<FavoriteButton viewerId={access.status==='verified'?access.userId:undefined} documentId={article.id} revision={article.revision} initial={favorite} locale={article.locale}/>}{features.recent&&<RecentRecorder documentId={article.id} revision={article.revision}/>}{features.analytics&&<ArticleAnalytics documentId={article.id} revision={article.revision}/>}</>:undefined}/></EntryShell>;
+    return <EntryShell account locale={article?.locale??locale} search={input} announcement={failed ? undefined : readerAnnouncement}><ReaderNavigation section={section} features={features} pages={pages} requested={requested} failed={failed} article={article} locale={article?.locale??locale} referenceAliases={referenceAliases} articleActions={!failed&&article?<>{features.favorites&&<FavoriteButton viewerId={access.status==='verified'?access.userId:undefined} documentId={article.id} revision={article.revision} initial={favorite} locale={article.locale}/>}{features.recent&&<RecentRecorder documentId={article.id} revision={article.revision}/>}{features.analytics&&<ArticleAnalytics documentId={article.id} revision={article.revision}/>}</>:undefined}/></EntryShell>;
   }
   const opening=enrollment&&enrollment.status!=='ready';
   const denied = access.status === 'denied';

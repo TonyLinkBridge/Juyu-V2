@@ -34,11 +34,12 @@ function setMode(mode: ThemeMode) {
   try { localStorage.setItem(THEME_STORAGE_KEY, mode); } catch { /* Still usable for this page. */ }
   window.dispatchEvent(new Event(eventName));
 }
-export function ThemeToggler({compact=false}:{compact?:boolean}={}) {
+export function ThemeToggler({compact=false,locale='zh-CN'}:{compact?:boolean;locale?:'zh-CN'|'en'}={}) {
   const selected = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
   const name = useId();
-  return <fieldset className={`theme-toggler ${compact?'theme-toggler-compact':''}`}><legend>外观主题</legend>
-    {([['light','浅色'],['system','跟随系统'],['dark','深色']] as const).map(([mode,label]) =>
+  const choices=locale==='en'?([['light','Light'],['system','System'],['dark','Dark']] as const):([['light','浅色'],['system','跟随系统'],['dark','深色']] as const);
+  return <fieldset className={`theme-toggler ${compact?'theme-toggler-compact':''}`}><legend>{locale==='en'?'Appearance':'外观主题'}</legend>
+    {choices.map(([mode,label]) =>
       <label key={mode} title={label}>
         <input aria-label={label} type="radio" name={name} value={mode} checked={selected === mode} onChange={() => setMode(mode)}/>
         <span><ThemeIcon mode={mode}/>{compact?<span className="theme-choice-label">{label}</span>:label}</span>

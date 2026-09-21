@@ -19,8 +19,14 @@ test('English reader chrome keeps its language in search and quick links',async(
  await page.route('**/reader-frame-fixture*',r=>r.fulfill({contentType:'text/html',body:'<html lang="zh-CN"><body><div id="app"></div></body></html>'}));
  await page.goto('/reader-frame-fixture?q=example&lang=en');await page.addScriptTag({content:bundle.script});
  await expect(page.locator('html')).toHaveAttribute('lang','en');
+ await expect(page.getByRole('navigation',{name:'Help Centre language'}).getByRole('link',{name:'EN',exact:true})).toHaveAttribute('aria-current','page');
+ await expect(page.getByRole('navigation',{name:'Help Centre language'}).getByRole('link',{name:'中文',exact:true})).toHaveAttribute('href','/help-centre');
  if(info.project.name==='mobile')await page.getByRole('button',{name:'Open search'}).click();
  await expect(page.getByRole('combobox',{name:'Search articles'})).toBeVisible();
+ await page.locator('.account-menu>summary').click();
+ await expect(page.locator('.mobile-account-appearance').getByRole('group',{name:'Appearance'})).toBeVisible();
+ await expect(page.getByText('账号权限',{exact:true})).toHaveCount(0);
+ await page.keyboard.press('Escape');
  await page.getByRole('button',{name:'Quick links'}).click();
  await expect(page.getByRole('navigation',{name:'Help Centre quick links'}).getByRole('link',{name:'Help Centre'})).toHaveAttribute('href','/help-centre?lang=en');
 });
