@@ -105,7 +105,7 @@ export class AuthorizationService {
  const allowed=(await c.query('SELECT qa.id FROM juyu.read_qa_publications() qa WHERE qa.id=$1 AND EXISTS(SELECT 1 FROM juyu.read_publication_language(qa.id) l WHERE l.locale=$2)',[id,locale])).rows[0];if(!allowed)throw new Error('FORBIDDEN');
  const row=(await c.query('SELECT document_id,title,revision_id,body FROM juyu.read_publication($1)',[id])).rows[0];if(!row)throw new Error('FORBIDDEN');
  return {id:row.document_id,title:row.title,revision:row.revision_id,body:row.body,...await readPresentation(c,id)};},true);}
-  async qa(page=1,category?:string,q='',locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readQa(c,page,category,q,locale),true);}
+  async qa(page=1,category?:string,q='',locale:'zh-CN'|'en'='zh-CN',topic?:string){const v=await this.viewer();return this.database.run(v,c=>readQa(c,page,category,q,locale,topic),true);}
   async reference(page=1,locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readReference(c,page,locale),true);}
   async referenceDetail(id:string,locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readReferenceDetail(c,id,locale),true);}
   async referencePage(page=1,article?:string,locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readReferencePage(c,page,article,locale),true);}

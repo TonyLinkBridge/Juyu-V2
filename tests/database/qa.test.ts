@@ -22,7 +22,7 @@ beforeEach(async()=>{await fixture.pool.query('TRUNCATE juyu.documents CASCADE')
 
 const answer=(text:string)=>encodeEditorBody([{id:'answer',type:'paragraph',content:[{type:'text',text,styles:{}}]}]);
 const input={expectedSequence:null,title:'Question',body:answer('OldAnswerText'),kind:'qa',audience:'staff',tags:['Help'],cover:null,qa:{category:'Billing',position:8}};
-async function collection(v:Viewer=support,page=1,category?:string){const {readQa}=await import('../../src/server/qa/repository.ts');return db.run(v,c=>readQa(c,page,category),true);}
+async function collection(v:Viewer=support,page=1,category?:string,topic?:string){const {readQa}=await import('../../src/server/qa/repository.ts');return db.run(v,c=>readQa(c,page,category,'','zh-CN',topic),true);}
 test('QA metadata survives creation replay draft review publication and version restoration',async()=>{
  const id=randomUUID();const saved=await service(admin).saveDraft(id,input);assert.deepEqual(saved.qa,input.qa);
  assert.deepEqual((await service(admin).saveDraft(id,{...input,qa:{category:' Billing ',position:8}})).qa,input.qa);
@@ -68,6 +68,17 @@ test('QA collection applies published permissions stable ordering exact category
  assert.ok(!JSON.stringify(first).includes('Private answer'));
  for(const page of [0,-1,NaN,1.2,2147483648])await assert.rejects(collection(support,page),/INVALID_INPUT/);
  for(const category of [null,[],12,'x'.repeat(81),'x\n'])await assert.rejects(collection(support,1,category as string),/INVALID_INPUT/);
+});
+test('QA collection exposes related topics and filters one published question through every matching topic',async()=>{
+ const shared=await repo.create({id:randomUUID(),kind:'qa',title:'0元签约店铺信用额度',body:'Answer',audience:'staff',tags:['签约店铺','信用额度'],qa:{category:'会员权益',position:0}},admin);
+ const other=await repo.create({id:randomUUID(),kind:'qa',title:'其他问题',body:'Answer',audience:'staff',tags:['账户安全'],qa:{category:'账户管理',position:1}},admin);
+ await publish(shared);await publish(other);
+ const all=await collection();assert.deepEqual(all.topics,['信用额度','签约店铺','账户安全']);assert.equal(all.total,2);
+ const store=await collection(support,1,undefined,'签约店铺');assert.equal(store.total,1);assert.equal(store.items[0].title,'0元签约店铺信用额度');assert.equal(store.topic,'签约店铺');
+ const credit=await collection(support,1,undefined,'信用额度');assert.equal(credit.total,1);assert.equal(credit.items[0].id,store.items[0].id);
+ assert.equal((await service().qa(1,undefined,'签约店铺','zh-CN')).total,1);
+ assert.equal((await service().qa(1,undefined,'','zh-CN',' 签约店铺 ')).total,1);
+ for(const topic of [null,[],12,'x'.repeat(41),'x\n'])await assert.rejects(collection(support,1,undefined,topic as string),/INVALID_INPUT/);
 });
 test('QA collection excludes revoked identities denied access categories and unavailable publications',async()=>{
  const d=await publish(await draft('QA','qa'));const cat=randomUUID();await fixture.pool.query("INSERT INTO juyu.categories(id,name,audience) VALUES($1,'Restricted','admin')",[cat]);await fixture.pool.query('INSERT INTO juyu.revision_categories VALUES($1,1,$2)',[d.id,cat]);

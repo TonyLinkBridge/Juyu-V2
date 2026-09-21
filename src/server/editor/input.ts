@@ -23,6 +23,7 @@ export function editorInput(value:unknown):SaveDraftInput {
  if(!Array.isArray(x.tags)||(x.cover!==null&&(!x.cover||typeof x.cover!=='object'||Array.isArray(x.cover))))return invalid('INVALID_PRESENTATION');
  let body:string;try{const blocks=decodeEditorBody(x.body);if(blocks===null)return invalid('INVALID_BODY');body=encodeEditorBody(blocks);}catch{return invalid('INVALID_BODY');}
  const {tags,cover,iconKey}=normalizePresentation({tags:x.tags,cover:x.cover as SaveDraftInput['cover'],...(x.iconKey===undefined?{}:{iconKey:x.iconKey as SaveDraftInput['iconKey']})});
+ if(x.kind==='qa'&&tags.length>5)return invalid('INVALID_QA');
  let categoryIds:ReturnType<typeof normalizeCategoryIds>|undefined,customFields:ReturnType<typeof normalizeFieldSnapshots>|undefined,qa:ReturnType<typeof qaForKind>={};
  try{if(x.categoryIds!==undefined)categoryIds=normalizeCategoryIds(x.categoryIds);}catch{return invalid('INVALID_CATEGORY');}
  try{if(x.customFields!==undefined)customFields=normalizeFieldSnapshots(x.customFields);}catch{return invalid('INVALID_FIELDS');}

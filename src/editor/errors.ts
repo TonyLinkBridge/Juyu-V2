@@ -6,7 +6,7 @@ export function saveError(code:string,locale:'zh-CN'|'en'='zh-CN'):string {
    INVALID_DESCRIPTION:'Keep the short description under 300 characters and on one line.',
    INVALID_RELEASE_NOTE:'Keep the update note under 600 characters and remove unsupported characters.',
    INVALID_BODY:'Check the format or length of the content you just added.',
-   INVALID_QA:'Check the Q&A category and use a whole number from 0 to 999999 for its order.',
+   INVALID_QA:'Check the Q&A category, use no more than 5 related topics, and use a whole number from 0 to 999999 for its order.',
    INVALID_CATEGORY:'Choose up to 20 valid categories without duplicates.',
    INVALID_FIELDS:'Check the required custom fields and their values in article settings.',
    INVALID_MEDIA:'An image or attachment is unavailable or belongs to another article. Upload it here again.',
@@ -34,7 +34,7 @@ export function saveError(code:string,locale:'zh-CN'|'en'='zh-CN'):string {
   INVALID_DESCRIPTION:'文章简介最多 300 字，不能包含换行或控制字符。请检查后再保存。',
   INVALID_RELEASE_NOTE:'更新说明最多 600 字，不能包含异常控制字符。请打开文章设置检查。',
   INVALID_BODY:'正文格式或长度不符合要求。请检查最近插入的内容；当前输入仍保留。',
-  INVALID_QA:'问答分类或排序不符合要求。分类最多 80 字，排序须为 0 至 999999 的整数。',
+  INVALID_QA:'问答设置不符合要求。主要分类最多 80 字，相关话题最多 5 个，排序须为 0 至 999999 的整数。',
   INVALID_CATEGORY:'所选文章分类无效、重复或超过 20 项。请重新选择分类。',
   INVALID_FIELDS:'自定义字段的数据格式不正确。请打开文章设置检查字段。',
   INVALID_MEDIA:'正文中的图片或附件不可用，或不属于这篇资料。请重新上传并插入该文件。',
@@ -61,7 +61,7 @@ export function saveError(code:string,locale:'zh-CN'|'en'='zh-CN'):string {
 export function validationError(code:string,locale:'zh-CN'|'en'='zh-CN'):string {
  if(locale==='en'){
   const messages:Record<string,string>={
-   INVALID_QA:'Use a whole number from 0 to 999999 for the Q&A order.',
+   INVALID_QA:'Use no more than 5 related topics and a whole number from 0 to 999999 for the Q&A order.',
    INVALID_DESCRIPTION:'Keep the short description under 300 characters and on one line.',
    INVALID_RELEASE_NOTE:'Keep the update note under 600 characters and remove unsupported characters.',
    INVALID_FIELDS:'Check the required custom fields and their values in article settings.',
@@ -73,7 +73,7 @@ export function validationError(code:string,locale:'zh-CN'|'en'='zh-CN'):string 
   return `${messages[code]??'Check the content you just changed.'} Your input is still here.`;
  }
  const messages:Record<string,string>={
-  INVALID_QA:'问答排序须为 0 至 999999 的整数；请检查问答分类与排序。',
+  INVALID_QA:'相关话题最多 5 个，问答排序须为 0 至 999999 的整数；请检查问答设置。',
   INVALID_DESCRIPTION:'文章简介最多 300 字，且不能换行。请检查简介。',
   INVALID_RELEASE_NOTE:'更新说明最多 600 字，不能包含异常控制字符；请打开文章设置检查。',
   INVALID_FIELDS:'自定义字段的必填项、类型或选项不正确；请打开文章设置核对。',

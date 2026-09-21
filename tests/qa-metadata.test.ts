@@ -20,3 +20,8 @@ test('QA metadata rejects invalid fields and non-QA metadata while old input rem
  assert.equal(editorInput({...input,kind:'article',qa:{category:'',position:0}}).qa,undefined);
  assert.throws(()=>createDocument({...input,id:'qa',kind:'qa',audience:'staff',qa:{category:'x',position:0}},{...admin,role:'support'},'2026-09-09'),/FORBIDDEN/);
 });
+test('Q&A accepts up to five related topics while ordinary articles keep the existing tag limit',()=>{
+ assert.deepEqual(editorInput({...input,tags:['店铺','信用额度','会员权益','签约','0元'],qa:{category:'会员权益',position:0}}).tags,['店铺','信用额度','会员权益','签约','0元']);
+ assert.throws(()=>editorInput({...input,tags:['一','二','三','四','五','六'],qa:{category:'会员权益',position:0}}),/INVALID_QA/);
+ assert.equal(editorInput({...input,kind:'article',tags:['一','二','三','四','五','六']}).tags.length,6);
+});
