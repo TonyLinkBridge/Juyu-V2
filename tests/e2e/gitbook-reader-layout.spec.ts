@@ -11,6 +11,7 @@ test('GitBook reading grid stays aligned with the header and keeps nested naviga
  const data={article,requested:'email',pages:[{type:'group',id:'accounts',title:'账户管理',descendants:[{type:'group',id:'security',title:'账户安全',descendants:[{type:'document',id:'email',title:article.title,href:'/help-centre?article=email'},{type:'document',id:'long',title:'一个很长的文章标题用于检查在小屏幕上的换行显示是否完整以及是否挤出目录范围',href:'/help-centre?article=long'}]}]}]};
  await page.route('**/gitbook-layout-fixture',r=>r.fulfill({contentType:'text/html',body:`<!doctype html><html lang="zh-CN" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${bundle.css}</style></head><body><div class="entry-frame"><div class="reader-chrome"><header class="site-header has-search"><a class="juyu-brand"><span>Help Centre</span></a><div class="header-search"><button class="header-search-toggle">搜索</button><div class="header-search-panel"><input aria-label="搜索资料"></div></div><div class="account-controls"><button>账号</button></div></header></div><div id="reader"></div></div><script id="data" type="application/json">${JSON.stringify(data)}</script><script>${bundle.script}</script></body></html>`}));
  await page.goto('/gitbook-layout-fixture');
+ await expect(page.getByRole('navigation',{name:'文章语言'})).toHaveCount(0);
  if(mobile)await page.getByRole('button',{name:'打开文章目录'}).click();
  const nav=page.getByRole('navigation',{name:'文章目录'});
  await expect(nav.getByRole('link',{name:article.title,exact:true})).toBeVisible();

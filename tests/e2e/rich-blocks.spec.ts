@@ -200,7 +200,8 @@ test('tab rich text saves and reopens without showing serialized data',async({pa
  await page.getByRole('button',{name:'新增分页标签',exact:true}).click();
  const tab=page.getByRole('region',{name:'编辑标签 1',exact:true});
  await tab.getByRole('button',{name:'使用完整排版编辑'}).click();
- await tab.locator('.rich-tab-body-editor [contenteditable=true]').first().fill('已排版的步骤');
+ const nestedEditor=tab.locator('.rich-tab-body-editor [contenteditable=true]').first();await nestedEditor.click();await page.keyboard.type('/');await expect(page.locator('.bn-suggestion-menu')).toBeVisible();await expect(page.locator('.bn-suggestion-menu')).not.toContainText('扩展内容');await page.keyboard.press('Escape');await page.keyboard.press('Backspace');
+ await nestedEditor.fill('已排版的步骤');
  await page.getByRole('button',{name:'保存草稿',exact:true}).click();
  await expect(page.getByRole('status')).toContainText('草稿已保存');
  const saved=(bodies.at(-1)?.blocks as Array<{type:string;tabs?:Array<{body:string}>}>).find(block=>block.type==='tabs');
