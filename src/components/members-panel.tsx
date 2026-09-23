@@ -3,7 +3,8 @@ import { useState } from 'react';
 import type { MemberList, MemberRow } from '../server/members/service';
 import type { MemberChange } from '../server/members/input';
 import type { Role } from '../domain/model';
-const labels={support:'Support · 客服',ops:'Ops · 运营',admin:'Admin · 管理员'};
+const labels:Record<Role,string>={support:'Support · 客服',ops:'Ops · 运营',admin:'Admin · 管理员',super_admin:'Super Admin · 超级管理员'};
+const assignableRoles=['support','ops','admin'] as const;
 const errors:Record<string,string>={NO_CHANGE:'角色没有变化，无需提交。',FORBIDDEN:'你或目标成员的访问权限已变化，请刷新后核对。',SELF_CHANGE:'不能修改自己的角色或停用自己，请由另一位管理员操作。',CONFLICT:'角色已被其他管理员修改，请刷新后重新选择。',MEMBER_BUSY:'另一项成员操作正在执行，请稍后重试。',MEMBER_PENDING:'有权限修改或账号开通尚未完成，请刷新查看对应成员状态。',AUTH_NOT_CONFIGURED:'成员服务尚未连接。',SERVICE_UNAVAILABLE:'成员服务暂时不可用，请稍后重试。'};
 export function MembersPanel({initial}:{initial:MemberList}){
  const [data,setData]=useState(initial),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
@@ -40,7 +41,7 @@ export function MembersPanel({initial}:{initial:MemberList}){
    <h2>{member.display_name}</h2><p>{member.verified_email}</p><p className="member-state">{member.clerk_user_id===data.actorId?'你 · ':''}{member.enrollment_pending?'等待开通核对':member.pending?'等待核对':member.disabled_at?'已停用':member.providerStatus==='blocked'?'Clerk 账号已受限':member.providerStatus==='unavailable'?'Clerk 暂时无法读取':'已启用'}</p>
    {member.enrollment_pending&&<p className="access-policy">请该成员登录资料库，核对自己的开通申请。若持续未完成，请联系身份服务管理员确认原请求已结束后处理。</p>}
    <label>角色<select aria-label={`${member.verified_email} 的角色`} value={member.role??''} disabled={busy||pending||member.pending||Boolean(member.disabled_at)||member.providerStatus!=='active'||member.clerk_user_id===data.actorId||!member.role} onChange={event=>setConfirmation({member,change:{type:'role',expectedRole:member.role!,role:event.target.value as Role}})}>
-    {!member.role&&<option value="">角色未设置或无法读取</option>}{Object.entries(labels).map(([value,label])=><option key={value} value={value}>{label}</option>)}
+    {!member.role&&<option value="">角色未设置或无法读取</option>}{member.role==='super_admin'&&<option value="super_admin">{labels.super_admin}</option>}{assignableRoles.map(value=><option key={value} value={value}>{labels[value]}</option>)}
    </select></label>
    <button className="secondary-link" disabled={busy||pending||member.pending||member.clerk_user_id===data.actorId} onClick={()=>setConfirmation({member,change:{type:'disable',disabled:!member.disabled_at}})}>{member.disabled_at?'恢复访问':'停用访问'}</button>
   </article>)}</div>

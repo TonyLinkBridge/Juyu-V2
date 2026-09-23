@@ -1,16 +1,24 @@
 import type { Document, Revision, Role, Viewer } from './model.ts';
 
 export function parseRole(value: unknown): Role | null {
-  return value === 'support' || value === 'ops' || value === 'admin' ? value : null;
+  return value === 'support' || value === 'ops' || value === 'admin' || value === 'super_admin' ? value : null;
 }
 
-function isVerified(viewer: Viewer | null): viewer is Viewer & { role: Role } {
+export function isVerified(viewer: Viewer | null): viewer is Viewer & { role: Role } {
   return viewer !== null && typeof viewer.id === 'string' && viewer.id.trim().length > 0
     && viewer.companyVerified === true && parseRole(viewer.role) !== null;
 }
 
+export function isAdministratorRole(role: Role | null): boolean {
+  return role === 'admin' || role === 'super_admin';
+}
+
+export function isSuperAdmin(viewer: Viewer | null): boolean {
+  return isVerified(viewer) && viewer.role === 'super_admin';
+}
+
 export function canManage(viewer: Viewer | null): boolean {
-  return isVerified(viewer) && viewer.role === 'admin';
+  return isVerified(viewer) && isAdministratorRole(viewer.role);
 }
 
 export function readPublished(viewer: Viewer | null, document: Document): Revision | null {
@@ -19,8 +27,8 @@ export function readPublished(viewer: Viewer | null, document: Document): Revisi
   const revision = document.revisions.find((item) => item.id === document.publishedRevisionId);
   if (!revision) return null;
   const allowed = revision.audience === 'staff'
-    || (revision.audience === 'ops' && (viewer.role === 'ops' || viewer.role === 'admin'))
-    || (revision.audience === 'admin' && viewer.role === 'admin');
+    || (revision.audience === 'ops' && (viewer.role === 'ops' || isAdministratorRole(viewer.role)))
+    || (revision.audience === 'admin' && isAdministratorRole(viewer.role));
   return allowed ? structuredClone(revision) : null;
 }
 

@@ -15,8 +15,9 @@ test('admin requires company verification before any role lookup', async () => {
   assert.equal(reads, 0);
 });
 
-test('only the current exact publicMetadata admin role is permitted', async () => {
+test('only current administrator publicMetadata roles are permitted', async () => {
   assert.deepEqual(await resolveAdminAccess(company, async () => user), { status: 'admin', userId: user.id });
+  assert.deepEqual(await resolveAdminAccess(company, async () => ({...user,publicMetadata:{role:'super_admin'}})), { status: 'admin', userId: user.id });
   for (const role of ['support', 'ops', 'Admin', 'superadmin', '', undefined, null, ['admin']]) assert.deepEqual(await resolveAdminAccess(company, async () => ({ ...user, publicMetadata: { role } })), { status: 'denied' });
 });
 

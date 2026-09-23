@@ -1,3 +1,4 @@
+import type {Role} from '../domain/model.ts';
 export const navigationPages=['home','ops','reference','qa','favorites','recent','forms'] as const;
 export type NavigationPage=typeof navigationPages[number];
 export type NavigationTarget={type:'page';page:NavigationPage}|{type:'category';categoryId:string};
@@ -18,4 +19,5 @@ export function parseNavigationWrite(value:unknown):NavigationWrite{const x=obje
 export function normalizeNavigationConfig(value:unknown):NavigationConfig{const x=object(value);exact(x,['version','entries']);return {version:version(x.version),entries:entries(x.entries,true)};}
 export function navigationHref(value:NavigationTarget):string{const normalized=target(value);return normalized.type==='page'?(normalized.page==='home'?'/help-centre':`/help-centre/${normalized.page}`):`/help-centre/categories/${normalized.categoryId}`;}
 export function normalizeMenuItems(value:unknown):MenuItem[]{if(!Array.isArray(value)||value.length>40)return bad();const allowed=navigationPages.map(page=>navigationHref({type:'page',page}));const items=value.map(v=>{const x=object(v);exact(x,['id','label','href']);if(typeof x.id!=='string'||!uuid.test(x.id)||typeof x.href!=='string'||(!allowed.includes(x.href)&&!/^\/help-centre\/categories\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(x.href)))return bad();const name=label(x.label);if(name!==x.label)return bad();return {id:x.id,label:name,href:x.href};});if(new Set(items.map(x=>x.id)).size!==items.length)return bad();return items;}
+export function navigationAllowed(entry:NavigationEntry,role:Role):boolean{const parsed=entries([entry],true)[0];const effective=role==='super_admin'?'admin':role;return parsed.roles.includes(effective);}
 export const defaultNavigationEntries:NavigationEntry[]=navigationPages.map((page,index)=>({id:`00000000-0000-4000-8000-${String(index+1).padStart(12,'0')}`,label:({home:'帮助中心',ops:'OPS Internal',reference:'Reference 速查',qa:'Q&A 问答',favorites:'我的收藏',recent:'最近浏览',forms:'内部表单'})[page],enabled:true,roles:page==='ops'?['ops','admin']:['support','ops','admin'],target:{type:'page',page}}));

@@ -7,7 +7,7 @@ export async function readReaderSections(client:PoolClient):Promise<ReaderSectio
   JOIN juyu.members m ON m.clerk_user_id=i.member_id
   WHERE m.verified_email IS NOT NULL AND m.observed_at IS NOT NULL`)).rows[0];
  if(!identity)throw new Error('FORBIDDEN');
- return {ops:identity.role==='ops'||identity.role==='admin'};
+ return {ops:identity.role==='ops'||identity.role==='admin'||identity.role==='super_admin'};
 }
 
 export async function readFirstOpsId(client:PoolClient,locale:'zh-CN'|'en'='zh-CN'):Promise<string|null>{

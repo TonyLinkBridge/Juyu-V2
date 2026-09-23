@@ -1,11 +1,16 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readNavigationSettings,saveNavigationSettings,NavigationWriteRejected} from '../src/navigation-settings/client.ts';
-import type {NavigationEntry} from '../src/navigation-settings/model.ts';
+import {navigationAllowed,type NavigationEntry} from '../src/navigation-settings/model.ts';
 const entry:NavigationEntry={id:'11111111-1111-4111-8111-111111111111',label:'帮助中心',enabled:true,roles:['support','ops','admin'],target:{type:'page',page:'home'}};
 const category={id:'22222222-2222-4222-8222-222222222222',version:1,name:'团队资料',parentId:null,position:0,audience:'staff',enabled:true};
 const write={expectedVersion:0,entries:[entry]};
 const config={version:1,entries:[entry]};
+test('Super Admin inherits navigation entries assigned to Admin without becoming a stored audience',()=>{
+ assert.equal(navigationAllowed(entry,'super_admin'),true);
+ assert.equal(navigationAllowed({...entry,roles:['ops']},'super_admin'),false);
+ assert.throws(()=>navigationAllowed({...entry,roles:['super_admin'] as never},'super_admin'),/INVALID_INPUT/);
+});
 test('navigation settings reads complete uncached config and current categories together',async()=>{
  const original=globalThis.fetch;const calls:{url:string;init?:RequestInit}[]=[];
  globalThis.fetch=async(url,init)=>{calls.push({url:String(url),init});return Response.json(String(url).endsWith('/categories')?[category]:{config});};

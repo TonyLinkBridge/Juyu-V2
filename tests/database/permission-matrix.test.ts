@@ -16,7 +16,7 @@ import {exportPDF} from '../../src/server/pdf/export.ts';
 import {storageFixture} from '../storage/http-fixture.ts';
 
 let fixture:Awaited<ReturnType<typeof temporaryDatabase>>,files:Awaited<ReturnType<typeof storageFixture>>,runtime:Pool,issuer:Pool,db:ScopedDatabase,repo:DocumentRepository,store:SupabasePrivateStorage;
-const admin:Viewer={id:'a',role:'admin',companyVerified:true},reviewer:Viewer={...admin,id:'b'},support:Viewer={id:'s',role:'support',companyVerified:true},ops:Viewer={id:'o',role:'ops',companyVerified:true};
+const admin:Viewer={id:'a',role:'admin',companyVerified:true},reviewer:Viewer={...admin,id:'b'},superAdmin:Viewer={id:'x',role:'super_admin',companyVerified:true},support:Viewer={id:'s',role:'support',companyVerified:true},ops:Viewer={id:'o',role:'ops',companyVerified:true};
 const service=(viewer:Viewer)=>new AuthorizationService(db,async()=>viewer);
 type Sample={doc:Document;assets:AssetFile[]};
 let samples:Record<'staff'|'ops'|'admin'|'draft',Sample>;
@@ -45,19 +45,19 @@ function exported(s:AuthorizationService,d:Document,render:(html:string)=>Promis
 }
 before(async()=>{
  fixture=await temporaryDatabase();await migrate(fixture.pool);files=await storageFixture();store=new SupabasePrivateStorage(files.url,'test-only-key',{allowLoopback:true});
- await fixture.pool.query("INSERT INTO juyu.members(clerk_user_id,display_name,observed_role,verified_email,observed_at) VALUES('a','Admin','admin','a@example.test',now()),('b','Reviewer','admin','b@example.test',now()),('s','Support','support','s@example.test',now()),('o','Ops','ops','o@example.test',now())");
+ await fixture.pool.query("INSERT INTO juyu.members(clerk_user_id,display_name,observed_role,verified_email,observed_at) VALUES('a','Admin','admin','a@example.test',now()),('b','Reviewer','admin','b@example.test',now()),('x','Super Admin','super_admin','x@example.test',now()),('s','Support','support','s@example.test',now()),('o','Ops','ops','o@example.test',now())");
  const rp=randomBytes(24).toString('hex'),ip=randomBytes(24).toString('hex');await fixture.pool.query(`CREATE ROLE matrix_runtime LOGIN PASSWORD '${rp}' IN ROLE juyu_runtime; CREATE ROLE matrix_issuer LOGIN PASSWORD '${ip}' IN ROLE juyu_context_issuer`);
  runtime=fixture.connectAs('matrix_runtime',rp);issuer=fixture.connectAs('matrix_issuer',ip);db=new ScopedDatabase(runtime,issuer);repo=new DocumentRepository(db);
 });
 after(async()=>{await runtime?.end();await issuer?.end();await fixture?.close();await files?.close();});
 beforeEach(async()=>{
  await fixture.pool.query('TRUNCATE juyu.documents CASCADE');
- await fixture.pool.query("UPDATE juyu.members SET disabled_at=null,observed_role=CASE clerk_user_id WHEN 's' THEN 'support' WHEN 'o' THEN 'ops' ELSE 'admin' END");
+ await fixture.pool.query("UPDATE juyu.members SET disabled_at=null,observed_role=CASE clerk_user_id WHEN 's' THEN 'support' WHEN 'o' THEN 'ops' WHEN 'x' THEN 'super_admin' ELSE 'admin' END");
  samples={staff:await sample('staff'),ops:await sample('ops'),admin:await sample('admin'),draft:await sample('staff',false)};
 });
 
-for(const viewer of [support,ops,admin])test(`T055 ${viewer.role}: same content permissions across reader, search, files, PDF and personal lists`,async()=>{
- const s=service(viewer),allowed=new Set([samples.staff.doc.id,...(viewer.role!=='support'?[samples.ops.doc.id]:[]),...(viewer.role==='admin'?[samples.admin.doc.id]:[])]);
+for(const viewer of [support,ops,admin,superAdmin])test(`T055 ${viewer.role}: same content permissions across reader, search, files, PDF and personal lists`,async()=>{
+ const s=service(viewer),administrator=viewer.role==='admin'||viewer.role==='super_admin',allowed=new Set([samples.staff.doc.id,...(viewer.role!=='support'?[samples.ops.doc.id]:[]),...(administrator?[samples.admin.doc.id]:[])]);
  const search=await s.search('T055');assert.equal(search.search.total,allowed.size);assert.deepEqual(new Set(search.search.results.map(x=>x.id)),allowed);
  assert.deepEqual(new Set((await s.navigation()).map(x=>x.id)),allowed);
  for(const {doc,assets} of Object.values(samples)){
@@ -74,6 +74,13 @@ for(const viewer of [support,ops,admin])test(`T055 ${viewer.role}: same content 
  assert.deepEqual(new Set((await s.favorites()).items.map(x=>x.id)),allowed);assert.deepEqual(new Set((await s.recent()).items.map(x=>x.id)),allowed);
  const another=viewer.id==='s'?ops:support;assert.equal((await service(another).favorites()).total,0);assert.equal((await service(another).recent()).total,0);
  if(viewer.role==='support')await assert.rejects(s.ops(),/FORBIDDEN/);else assert.equal((await s.ops()).total,1);
+});
+
+test('T055 Super Admin inherits Admin SQL access while the exact role check stays distinct',async()=>{
+ const inherited=await db.run(superAdmin,c=>c.query('SELECT juyu.is_admin() AS admin,juyu.is_super_admin() AS super_admin'));
+ assert.deepEqual(inherited.rows[0],{admin:true,super_admin:true});
+ const ordinary=await db.run(admin,c=>c.query('SELECT juyu.is_admin() AS admin,juyu.is_super_admin() AS super_admin'));
+ assert.deepEqual(ordinary.rows[0],{admin:true,super_admin:false});
 });
 
 test('T055 existing service cannot retain revoked access to content, search, files or personal records',async()=>{

@@ -1,7 +1,7 @@
 import type {FieldSnapshot} from '../fields/model.ts';
 import type {QaMetadata} from '../qa/model.ts';
 import type {ArticlePresentation} from './presentation.ts';
-export type Role = 'support' | 'ops' | 'admin';
+export type Role = 'support' | 'ops' | 'admin' | 'super_admin';
 export type Audience = 'staff' | 'ops' | 'admin';
 export type ContentKind = 'article' | 'ops' | 'reference' | 'qa';
 export type Status = 'draft' | 'in_review' | 'changes_requested' | 'approved' | 'queued' | 'published';

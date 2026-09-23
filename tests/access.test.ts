@@ -1,18 +1,24 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { canManage, canReadAsset, parseRole, readPublished, searchProjection } from '../src/domain/access.ts';
+import { canManage, canReadAsset, isAdministratorRole, isSuperAdmin, parseRole, readPublished, searchProjection } from '../src/domain/access.ts';
 import type { Audience, Viewer } from '../src/domain/model.ts';
 import { adminA, ops, publishedDocument, support } from './fixtures.ts';
 
-test('Clerk role metadata only recognizes the three configured roles', () => {
-  for (const role of ['support', 'ops', 'admin']) assert.equal(parseRole(role), role);
+const superAdmin:Viewer={id:'super-1',role:'super_admin',companyVerified:true};
+
+test('Clerk role metadata recognizes Super Admin as an exact configured role', () => {
+  for (const role of ['support', 'ops', 'admin', 'super_admin']) assert.equal(parseRole(role), role);
   for (const value of ['trainer', 'Admin', '', null, undefined, {}, ['admin']]) assert.equal(parseRole(value), null);
+  assert.equal(isAdministratorRole('super_admin'),true);
+  assert.equal(isSuperAdmin(superAdmin),true);
+  assert.equal(isSuperAdmin(adminA),false);
 });
 
 const matrix: [Viewer, Audience, boolean][] = [
   [support, 'staff', true], [support, 'ops', false], [support, 'admin', false],
   [ops, 'staff', true], [ops, 'ops', true], [ops, 'admin', false],
   [adminA, 'staff', true], [adminA, 'ops', true], [adminA, 'admin', true],
+  [superAdmin, 'staff', true], [superAdmin, 'ops', true], [superAdmin, 'admin', true],
 ];
 for (const [viewer, audience, allowed] of matrix) {
   test(`${viewer.role} reading ${audience} published content: ${allowed}`, () => {
@@ -29,6 +35,7 @@ test('missing identity, empty id, unverified company and unknown roles are denie
   assert.equal(canManage(support), false);
   assert.equal(canManage(ops), false);
   assert.equal(canManage(adminA), true);
+  assert.equal(canManage(superAdmin), true);
 });
 
 test('archived, trashed and unpublished documents disappear even for an Admin reader', () => {

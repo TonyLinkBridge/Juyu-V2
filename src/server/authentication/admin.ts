@@ -1,5 +1,5 @@
 import type { CompanyAccess } from './company.ts';
-import { parseRole } from '../../domain/access.ts';
+import { isAdministratorRole, parseRole } from '../../domain/access.ts';
 import { protectedResponse } from '../authorization/service.ts';
 export type AdminAccess = { status: 'unconfigured' | 'unavailable' | 'signed_out' | 'denied' } | { status: 'admin'; userId: string };
 export interface AdminUser {
@@ -12,7 +12,7 @@ export async function resolveAdminAccess(company: CompanyAccess, loadUser: (id: 
   try {
     const user = await loadUser(company.userId);
     const primary = user.emailAddresses.find(item => item.id === user.primaryEmailAddressId);
-    if (user.id !== company.userId || user.banned || user.locked || parseRole(user.publicMetadata?.role) !== 'admin'
+    if (user.id !== company.userId || user.banned || user.locked || !isAdministratorRole(parseRole(user.publicMetadata?.role))
       || primary?.verification?.status !== 'verified' || primary.emailAddress.toLowerCase() !== company.email) return { status: 'denied' };
     return { status: 'admin', userId: user.id };
   } catch { return { status: 'unavailable' }; }
