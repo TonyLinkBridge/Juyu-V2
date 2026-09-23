@@ -4,7 +4,7 @@ import { randomBytes } from 'node:crypto';
 import { temporaryDatabase } from './fixture.ts';
 import { migrate } from '../../src/server/database/migrate.ts';
 import { MemberStore } from '../../src/server/members/store.ts';
-import { MemberService } from '../../src/server/members/service.ts';
+import { MemberService, promoteInitialSuperAdmin } from '../../src/server/members/service.ts';
 import { ScopedDatabase } from '../../src/server/database/scoped.ts';
 let fixture: Awaited<ReturnType<typeof temporaryDatabase>>;
 let runtime: import('pg').Pool, issuer: import('pg').Pool;
@@ -31,8 +31,9 @@ test('pending member changes block an otherwise valid database context',async()=
  assert.equal((await db.run(viewer,c=>c.query('SELECT juyu.is_admin() AS allowed'))).rows[0].allowed,true);
 });
 
-function setupService(actor='a') {
- const people = new Map(['a','b','c'].map(id=>[id,{id,role:id==='c'?'support':'admin',email:`${id}@company.test`,displayName:id}]));
+function setupService(actor='a',roles:Partial<Record<'a'|'b'|'c'|'s'|'t',import('../../src/domain/model.ts').Role>>={}) {
+ type Person={id:string;role:import('../../src/domain/model.ts').Role;email:string;displayName:string};
+ const people = new Map<string,Person>((['a','b','c','s','t'] as const).map(id=>[id,{id,role:roles[id]??(id==='c'?'support':'admin'),email:`${id}@company.test`,displayName:id}]));
  let failWrite=false;
  const provider={
   async user(id:string){const p=people.get(id)!;return {id,banned:false,locked:false,publicMetadata:{role:p.role},primaryEmailAddressId:'e',emailAddresses:[{id:'e',emailAddress:p.email,verification:{status:'verified'}}]};},
@@ -69,6 +70,23 @@ test('self-demotion and self-disable are blocked and cross-demotions serialize',
  const results=await Promise.allSettled([service.change('b',{type:'role',role:'ops',expectedRole:'admin'}),other.change('a',{type:'role',role:'ops',expectedRole:'admin'})]);
  assert.equal(results.filter(r=>r.status==='fulfilled').length,1);
  const roles=await Promise.all(['a','b'].map(id=>provider.verified(id)));assert.equal(roles.filter(p=>p.role==='admin').length,1);
+});
+test('only Super Admin can grant or remove the role and self-change protection wins',async()=>{
+ const ordinary=setupService('a',{b:'admin'});for(const id of ['a','b'])await ordinary.store.bind(await ordinary.provider.verified(id));
+ await assert.rejects(ordinary.service.change('b',{type:'role',role:'super_admin',expectedRole:'admin'}),/SUPER_ADMIN_REQUIRED/);
+ ordinary.people.get('b')!.role='super_admin';await ordinary.store.bind(await ordinary.provider.verified('b'));
+ await assert.rejects(ordinary.service.change('b',{type:'role',role:'admin',expectedRole:'super_admin'}),/SUPER_ADMIN_REQUIRED/);
+ const privileged=setupService('s',{s:'super_admin',t:'super_admin'});for(const id of ['s','t'])await privileged.store.bind(await privileged.provider.verified(id));
+ await assert.rejects(privileged.service.change('s',{type:'role',role:'admin',expectedRole:'super_admin'}),/SELF_CHANGE/);
+ assert.equal((await privileged.service.change('t',{type:'role',role:'admin',expectedRole:'super_admin'})).status,'applied');
+ await fixture.pool.query("UPDATE juyu.members SET observed_role='admin',disabled_at=NULL WHERE clerk_user_id IN('b','s','t')");
+});
+test('active Super Admin count excludes disabled accounts for final-account protection',async()=>{
+ const {store,provider}=setupService('s',{s:'super_admin',t:'super_admin'});for(const id of ['s','t'])await store.bind(await provider.verified(id));
+ assert.equal(await store.activeSuperAdminCount(),2);
+ await fixture.pool.query("UPDATE juyu.members SET disabled_at=now() WHERE clerk_user_id='t'");
+ assert.equal(await store.activeSuperAdminCount(),1);
+ await fixture.pool.query("UPDATE juyu.members SET observed_role='admin',disabled_at=NULL WHERE clerk_user_id IN('s','t')");
 });
 test('uncertain Clerk write persists denial until read-only reconciliation records actual result',async()=>{
  const {store,provider,service,setFail}=setupService();for(const id of ['a','c'])await store.bind(await provider.verified(id));
@@ -135,4 +153,16 @@ test('completed member history cannot be rewritten',async()=>{
  await assert.rejects(issuer.query("UPDATE juyu.member_operations SET actor_id='b' WHERE id=$1",[op.id]),/IMMUTABLE/);
  await assert.rejects(fixture.pool.query('DELETE FROM juyu.member_operations WHERE id=$1',[op.id]),/IMMUTABLE/);
  await service.change('c',{type:'disable',disabled:false});
+});
+test('controlled first promotion records one exact verified Admin and refuses a second promotion',async()=>{
+ const person={id:'user_FirstOwner',role:'admin' as import('../../src/domain/model.ts').Role,email:'owner@company.test',displayName:'Owner'};
+ const provider={
+  async user(id:string){return {id,banned:false,locked:false,publicMetadata:{role:person.role},primaryEmailAddressId:'e',emailAddresses:[{id:'e',emailAddress:person.email,verification:{status:'verified'}}]};},
+  async verified(id:string){return id===person.id?person:null;},
+  async setRole(id:string,role:import('../../src/domain/model.ts').Role){assert.equal(id,person.id);person.role=role;}
+ };
+ const store=new MemberStore(issuer),op=await promoteInitialSuperAdmin(store,provider,person.id);
+ assert.equal(op.status,'applied');assert.equal(op.actor_id,person.id);assert.equal(op.target_id,person.id);assert.equal(op.before_role,'admin');assert.equal(op.observed_role,'super_admin');
+ assert.equal(await store.activeSuperAdminCount(),1);
+ await assert.rejects(promoteInitialSuperAdmin(store,provider,'user_SecondOwner'),/SUPER_ADMIN_ALREADY_EXISTS/);
 });

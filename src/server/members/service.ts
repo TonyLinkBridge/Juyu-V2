@@ -1,7 +1,7 @@
 import type { PoolClient } from 'pg';
 import type { AdminUser } from '../authentication/admin.ts';
 import type { VerifiedMember } from '../authentication/member.ts';
-import { parseRole } from '../../domain/access.ts';
+import { isAdministratorRole, parseRole } from '../../domain/access.ts';
 import type { Role } from '../../domain/model.ts';
 import { MemberStore } from './store.ts';
 import { parseMemberChange, type MemberChange } from './input.ts';
@@ -12,14 +12,14 @@ export interface MemberProvider {
 }
 export interface Operation {id:string;actor_id:string;target_id:string;kind:'role'|'disable';before_role:Role|null;requested_role:Role|null;requested_disabled:boolean|null;observed_role:Role|null;status:'pending'|'applied'|'conflict';created_at:string;finished_at:string|null;reconciled_by:string|null}
 export interface MemberRow {clerk_user_id:string;display_name:string;verified_email:string;disabled_at:string|null;observed_role:Role|null;pending:boolean;enrollment_pending?:boolean;role:Role|null;providerStatus:'active'|'blocked'|'unavailable'}
-export interface MemberList {actorId:string;members:MemberRow[];operations:Operation[];nextCursor:string|null}
+export interface MemberList {actorId:string;actorRole:'admin'|'super_admin';members:MemberRow[];operations:Operation[];nextCursor:string|null}
 export class MemberService {
  private store:MemberStore;private authenticate:()=>Promise<VerifiedMember|null>;private provider:MemberProvider;
  constructor(store:MemberStore,authenticate:()=>Promise<VerifiedMember|null>,provider:MemberProvider){this.store=store;this.authenticate=authenticate;this.provider=provider;}
  private async actor(client?:PoolClient):Promise<VerifiedMember>{
   if(!client)return this.store.locked(c=>this.actor(c),true);
   const member=await this.authenticate();
-  if(member?.role!=='admin')throw new Error('FORBIDDEN: admin required');
+  if(!member||!isAdministratorRole(member.role))throw new Error('FORBIDDEN: admin required');
   await this.store.bind(member,client);return member;
  }
  async list(after=''):Promise<MemberList>{
@@ -38,7 +38,7 @@ export class MemberService {
     }catch{return {...row,role:null,providerStatus:'unavailable' as const};}
    }));members.push(...group);
   }
-  return {actorId:actor.id,members,operations:data.operations,nextCursor:data.rows.length>25?rows.at(-1).clerk_user_id:null};
+  return {actorId:actor.id,actorRole:actor.role as 'admin'|'super_admin',members,operations:data.operations,nextCursor:data.rows.length>25?rows.at(-1).clerk_user_id:null};
  }
  async change(target:string,input:MemberChange):Promise<Operation>{
   const change=parseMemberChange(input);
@@ -58,6 +58,12 @@ export class MemberService {
    const before=parseRole(user.publicMetadata?.role);
    if(change.type==='role'&&before!==change.expectedRole)throw new Error('CONFLICT');
    if(change.type==='role'&&before===change.role)throw new Error('NO_CHANGE');
+   const touchesSuper=before==='super_admin'||change.type==='role'&&change.role==='super_admin';
+   if(touchesSuper&&actor.role!=='super_admin')throw new Error('SUPER_ADMIN_REQUIRED');
+   const removesActiveSuper=before==='super_admin'&&(
+    change.type==='disable'&&change.disabled||change.type==='role'&&change.role!=='super_admin'
+   );
+   if(removesActiveSuper&&await this.store.activeSuperAdminCount(client)<=1)throw new Error('LAST_SUPER_ADMIN');
    const op=(await client.query(`INSERT INTO juyu.member_operations(actor_id,target_id,kind,before_role,requested_role,requested_disabled,before_disabled)
      VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *`,[actor.id,target,change.type,before,change.type==='role'?change.role:null,change.type==='disable'?change.disabled:null,Boolean(existing.disabled_at)])).rows[0] as Operation;
    if(change.type==='disable')return this.finish(client,op,before,null);
@@ -94,4 +100,30 @@ export class MemberService {
    await client.query('COMMIT');return result;
   }catch(error){await client.query('ROLLBACK');throw error;}
  }
+}
+
+export async function promoteInitialSuperAdmin(store:MemberStore,provider:MemberProvider,target:string):Promise<Operation>{
+ if(!/^user_[A-Za-z0-9]+$/.test(target))throw new Error('EXACT_CLERK_USER_ID_REQUIRED');
+ return store.locked(async client=>{
+  if((await client.query("SELECT 1 FROM juyu.member_operations WHERE status='pending'")).rowCount)throw new Error('MEMBER_PENDING');
+  if(await store.activeSuperAdminCount(client)!==0)throw new Error('SUPER_ADMIN_ALREADY_EXISTS');
+  const eligible=await provider.verified(target);
+  if(!eligible||eligible.id!==target||eligible.role!=='admin')throw new Error('TARGET_MUST_BE_VERIFIED_ADMIN');
+  const user=await provider.user(target);
+  if(user.id!==target||user.banned||user.locked||parseRole(user.publicMetadata?.role)!=='admin')throw new Error('TARGET_MUST_BE_VERIFIED_ADMIN');
+  await store.bind(eligible,client);
+  const initialization=(await client.query('SELECT owner_id FROM juyu.initialization WHERE singleton=true')).rows[0] as {owner_id:string|null}|undefined;
+  if(initialization?.owner_id&&initialization.owner_id!==target)throw new Error('INITIAL_OWNER_MISMATCH');
+  const op=(await client.query(`INSERT INTO juyu.member_operations(actor_id,target_id,kind,before_role,requested_role,requested_disabled,before_disabled)
+   VALUES($1,$1,'role','admin','super_admin',NULL,false) RETURNING *`,[target])).rows[0] as Operation;
+  try{await provider.setRole(target,'super_admin');}catch{/* The fresh read below decides whether the remote write applied. */}
+  const observed=await provider.user(target);
+  if(observed.id!==target||parseRole(observed.publicMetadata?.role)!=='super_admin')throw new Error('PROMOTION_UNCONFIRMED');
+  await client.query('BEGIN');
+  try{
+   await client.query("UPDATE juyu.members SET observed_role='super_admin',observed_at=clock_timestamp() WHERE clerk_user_id=$1",[target]);
+   const result=(await client.query("UPDATE juyu.member_operations SET status='applied',observed_role='super_admin',finished_at=clock_timestamp(),reconciled_by=$1 WHERE id=$2 AND status='pending' RETURNING *",[target,op.id])).rows[0] as Operation;
+   await client.query('COMMIT');return result;
+  }catch(error){await client.query('ROLLBACK');throw error;}
+ });
 }

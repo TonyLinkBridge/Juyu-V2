@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {memberBrowserBundle,memberFixture} from '../helpers/member-browser';
+import {memberBrowserBundle,memberFixture,superMemberFixture} from '../helpers/member-browser';
 let bundle:Awaited<ReturnType<typeof memberBrowserBundle>>;
 test.beforeAll(async()=>{bundle=await memberBrowserBundle();});
 test.beforeEach(async({page})=>{
@@ -44,4 +44,9 @@ test('pending new account is identified and its ordinary member controls are dis
  await expect(card.getByLabel('support@company.test 的角色')).toBeDisabled();await expect(card.getByRole('button',{name:'停用访问'})).toBeDisabled();
  await expect(card.getByText(/请该成员登录资料库/)).toBeVisible();
  await expect(page.getByLabel('ops@company.test 的角色')).toBeEnabled();
+});
+test('only Super Admin sees Super Admin as an assignable role',async({page})=>{
+ await expect(page.getByLabel('support@company.test 的角色').locator('option[value="super_admin"]')).toHaveCount(0);
+ await page.evaluate((data)=>(window as unknown as {mountMembers:(value:unknown)=>void}).mountMembers(data),superMemberFixture);
+ await expect(page.getByLabel('support@company.test 的角色').locator('option[value="super_admin"]')).toHaveCount(1);
 });

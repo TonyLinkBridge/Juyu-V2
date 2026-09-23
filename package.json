@@ -42,6 +42,7 @@
     "@blocknote/core": "0.54.0",
     "@blocknote/mantine": "0.54.0",
     "@blocknote/react": "0.54.0",
+    "@clerk/backend": "3.17.1",
     "@tiptap/core": "3.31.3",
     "@tiptap/pm": "3.31.3",
     "@clerk/localizations": "4.16.0",

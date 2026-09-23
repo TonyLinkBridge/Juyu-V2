@@ -33,6 +33,13 @@ export class MemberStore {
   };
   return client?check(client):this.read(check);
  }
+ async activeSuperAdminCount(client?:PoolClient):Promise<number>{
+  const count=async(c:PoolClient)=>(await c.query(`SELECT count(*)::int AS count FROM juyu.members m
+   WHERE m.observed_role='super_admin' AND m.disabled_at IS NULL AND m.verified_email IS NOT NULL AND m.observed_at IS NOT NULL
+   AND NOT EXISTS(SELECT 1 FROM juyu.member_operations o WHERE o.target_id=m.clerk_user_id AND o.status='pending')
+   AND NOT EXISTS(SELECT 1 FROM juyu.role_enrollments e WHERE e.member_id=m.clerk_user_id AND e.state='pending')`)).rows[0].count as number;
+  return client?count(client):this.read(count);
+ }
  async bind(member:VerifiedMember,client?:PoolClient):Promise<Viewer>{
   if(!member?.id?.trim()||!parseRole(member.role)||!member.email?.trim()||!member.displayName?.trim())throw new Error('FORBIDDEN: invalid member');
   const bind=async(c:PoolClient)=>{

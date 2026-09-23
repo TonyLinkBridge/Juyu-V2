@@ -13,8 +13,8 @@ export async function memberResponse(action:()=>Promise<unknown>):Promise<Respon
  try{return Response.json(await action(),{headers});}
  catch(error){
   const raw=error instanceof Error?error.message:'';
-  const code=raw.startsWith('FORBIDDEN')?'FORBIDDEN':['AUTH_NOT_CONFIGURED','INVALID_INPUT','NOT_FOUND','CONFLICT','NO_CHANGE','SELF_CHANGE','MEMBER_BUSY','MEMBER_PENDING'].includes(raw)?raw:'SERVICE_UNAVAILABLE';
-  const status=code==='FORBIDDEN'?403:code==='INVALID_INPUT'?400:code==='NOT_FOUND'?404:['CONFLICT','NO_CHANGE','SELF_CHANGE','MEMBER_BUSY','MEMBER_PENDING'].includes(code)?409:503;
+  const code=raw.startsWith('FORBIDDEN')?'FORBIDDEN':['AUTH_NOT_CONFIGURED','INVALID_INPUT','NOT_FOUND','CONFLICT','NO_CHANGE','SELF_CHANGE','MEMBER_BUSY','MEMBER_PENDING','SUPER_ADMIN_REQUIRED','LAST_SUPER_ADMIN'].includes(raw)?raw:'SERVICE_UNAVAILABLE';
+  const status=['FORBIDDEN','SUPER_ADMIN_REQUIRED'].includes(code)?403:code==='INVALID_INPUT'?400:code==='NOT_FOUND'?404:['CONFLICT','NO_CHANGE','SELF_CHANGE','MEMBER_BUSY','MEMBER_PENDING','LAST_SUPER_ADMIN'].includes(code)?409:503;
   return Response.json({error:code},{status,headers});
  }
 }
