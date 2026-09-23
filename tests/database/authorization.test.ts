@@ -109,6 +109,8 @@ test('Super Admin direct publication is atomic, readable and counted without a f
  doc=await owner.execute(id,{type:'direct_publish'},superAdmin,{expectedSequence:doc.sequence});
  assert.equal(doc.workflow.approvalMode,'super_admin');assert.equal(doc.workflow.status,'published');
  assert.equal(doc.audit.at(-1)?.action,'direct_publish');assert.equal(doc.audit.at(-1)?.reason,null);
+ const direct=(await new AuthorizationService(db,async()=>superAdmin).history(id)).events.find(event=>event.action==='direct_publish');
+ assert.deepEqual(direct&&{action:direct.action,actorId:direct.actorId,reviewerId:direct.reviewerId,reviewerName:direct.reviewerName,previousReviewerId:direct.previousReviewerId,previousReviewerName:direct.previousReviewerName,reason:direct.reason},{action:'direct_publish',actorId:'super',reviewerId:null,reviewerName:null,previousReviewerId:null,previousReviewerName:null,reason:null});
  const row=(await fixture.pool.query('SELECT approval_mode,submitted_by,reviewer_id,approved_by FROM juyu.documents WHERE id=$1',[id])).rows[0];
  assert.deepEqual(row,{approval_mode:'super_admin',submitted_by:'super',reviewer_id:'super',approved_by:'super'});
  assert.equal((await fixture.pool.query('SELECT count(*)::int AS n FROM juyu.reviews WHERE document_id=$1',[id])).rows[0].n,0);

@@ -57,8 +57,8 @@ export async function readPublicationDetail(c:PoolClient,id:string,actor:Viewer)
  const receipt=await latestReceipt(c,id),valid=matchingApproval(d,receipt);
  const revision=d.revisions.find(item=>item.id===d.workflow.revisionId)!;
  const exactSuper=Boolean((await c.query('SELECT juyu.is_super_admin() AND juyu.actor_id()=$1 AS ok',[actor.id])).rows[0]?.ok);
- const history=(await c.query<Omit<PublicationHistory,'at'>&{at:Date}>(`SELECT a.sequence,a.revision_id AS revision,a.action,a.actor_id AS "actorId",m.display_name AS "actorName",a.at
- FROM juyu.audit_log a JOIN juyu.members m ON m.clerk_user_id=a.actor_id WHERE a.document_id=$1 AND a.action IN ('queue','publish','direct_publish') ORDER BY a.sequence DESC LIMIT 21`,[id])).rows;
+ const history=(await c.query<Omit<PublicationHistory,'at'>&{at:Date}>(`SELECT a.sequence,a.revision_id AS revision,a.action,a.actor_id AS "actorId",coalesce(m.display_name,a.actor_id) AS "actorName",a.at
+ FROM juyu.audit_log a LEFT JOIN juyu.members m ON m.clerk_user_id=a.actor_id WHERE a.document_id=$1 AND a.action IN ('queue','publish','direct_publish') ORDER BY a.sequence DESC LIMIT 21`,[id])).rows;
  return {article:await readEditorSnapshot(c,d),revision:d.workflow.revisionId,approval:valid?{revision:receipt.revision,reviewerId:receipt.reviewerId,reviewerName:receipt.reviewerName,approvedAt:receipt.decidedAt!.toISOString()}:null,
   canQueue:valid&&d.workflow.status==='approved',canPublish:valid&&d.workflow.status==='queued',canDirectPublish:exactSuper&&revision.editorId===actor.id&&['draft','changes_requested'].includes(d.workflow.status),history:history.slice(0,20).map(h=>({...h,at:h.at.toISOString()})),historyMore:history.length>20};
 }

@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {historyActionLabel} from '../src/history/model.ts';
 const snapshot={documentId:'history-local',sequence:9,currentRevision:3,publishedRevision:2,lifecycle:'active',status:'draft',version:{revision:1,title:'历史标题',authorId:'author',authorName:'原作者',editorId:'editor',editorName:'原编辑',createdAt:'2026-09-01T00:00:00Z',body:'# 历史正文',audience:'staff',tags:['流程'],cover:null,blocks:[]},categories:[{id:'category',name:'客服'}],assets:[],canRestore:true};
+test('direct publication history uses one explicit Super Admin label in both languages',()=>{
+ assert.equal(historyActionLabel('direct_publish','zh-CN'),'Super Admin 直接发布');
+ assert.equal(historyActionLabel('direct_publish','en'),'Published directly by Super Admin');
+});
 test('restore acknowledges only the exact source new draft version sequence and unchanged formal pointer',async()=>{
  const m=await import('../src/history/client.ts'),old=globalThis.fetch,input={expectedSequence:9,sourceRevision:1};
  const ack={documentId:'history-local',sequence:10,revision:4,sourceRevision:1,status:'draft',publishedRevision:2};

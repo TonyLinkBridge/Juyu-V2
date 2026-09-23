@@ -1,7 +1,7 @@
 import {fixtureAssets} from '../helpers/fixture-assets';
 import {test,expect,type Page} from '@playwright/test';
 import {historyBrowserBundle,historyVersionFixture as fixture,historyPageFixture,historyAssetId} from '../helpers/history-browser';
-import type {HistoryPage,HistoryVersion,DeletedHistoryPage} from '../../src/history/model';
+import type {HistoryEvent,HistoryPage,HistoryVersion,DeletedHistoryPage} from '../../src/history/model';
 let bundle:Awaited<ReturnType<typeof historyBrowserBundle>>;
 test.beforeEach(async({page})=>{await fixtureAssets(page,'history');});
 test.beforeAll(async()=>{bundle=await historyBrowserBundle();});
@@ -27,6 +27,16 @@ test('timeline exposes truthful separate totals pagination evidence and immutabl
  await mount(page,historyPageFixture,true);const history=page.getByRole('region',{name:'操作时间线',exact:true});await expect(history).toContainText('共 32 条');await expect(history).toContainText('本页 2 条');await expect(history).toContainText('来源版本 1');await expect(history).toContainText('原正式版 2');await expect(history).toContainText('旧审核人');await expect(history).toContainText('新审核人');await expect(history).toContainText('交接给其他审核人');
  await expect(page.getByRole('link',{name:'下一页操作记录'})).toHaveAttribute('href','/admin/history?article=history-local&eventPage=2&versionPage=1');await expect(page.getByRole('link',{name:'下一页版本'})).toHaveAttribute('href','/admin/history?article=history-local&eventPage=1&versionPage=2');await expect(page.getByRole('link',{name:'查看版本 1'})).toHaveAttribute('href','/admin/history?article=history-local&revision=1');await expect(page.getByRole('region',{name:'版本列表'})).toContainText('共 31 个版本');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`output/verification/history-timeline-${info.project.name}.png`,fullPage:true});
+});
+test('Super Admin direct publication is one truthful event without review details',async({page})=>{
+ const direct:HistoryEvent={sequence:10,action:'direct_publish',revision:3,actorId:'super-a',actorName:'Tony',reviewerId:null,reviewerName:null,previousReviewerId:null,previousReviewerName:null,reason:null,sourceRevision:null,previousPublishedRevision:2,at:'2026-09-10T01:00:00Z'};
+ await mount(page,{...historyPageFixture,sequence:10,status:'published',publishedRevision:3,events:[direct],eventTotal:1,eventPages:1},true);
+ const history=page.getByRole('region',{name:'操作时间线',exact:true});
+ await expect(history.getByText('Super Admin 直接发布',{exact:true})).toBeVisible();
+ await expect(history).toContainText('操作人：Tony');
+ await expect(history).not.toContainText('审核人：');
+ await expect(history).not.toContainText('原因：');
+ await expect(history.locator('time')).toHaveCount(1);
 });
 test('purged receipts display metadata and audit only with no preview or recovery',async({page})=>{
  await mount(page,{...historyPageFixture,lifecycle:'purged',revision:null,status:null,publishedRevision:null,versions:[],versionTotal:0,versionPages:1,events:[{...historyPageFixture.events[0],action:'purge',sourceRevision:null,revision:null}],eventTotal:1,eventPages:1},true);await expect(page.getByText('永久删除记录',{exact:true})).toBeVisible();await expect(page.getByText('正文已永久删除；版本文件不再提供预览或恢复。附件清理进度请查看回收站。',{exact:true})).toBeVisible();await expect(page.getByRole('link',{name:/查看版本/})).toHaveCount(0);await expect(page.getByRole('button',{name:/恢复/})).toHaveCount(0);await expect(page.getByRole('region',{name:'操作时间线'})).toContainText('永久删除');await expect(page.getByRole('link',{name:'查看附件清理进度'})).toHaveAttribute('href','/admin/trash');

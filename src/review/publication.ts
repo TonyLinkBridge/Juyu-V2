@@ -1,5 +1,10 @@
 import type {EditorData} from '../editor/contract.ts';
 export interface PublicationHistory {sequence:number;revision:number;action:'queue'|'publish'|'direct_publish';actorId:string;actorName:string;at:string}
+export function publicationHistoryLabel(action:PublicationHistory['action'],locale:'zh-CN'|'en'='zh-CN'){
+ if(action==='direct_publish')return locale==='en'?'Published directly by Super Admin':'Super Admin 直接发布';
+ if(action==='queue')return locale==='en'?'Scheduled':'加入等待发布';
+ return locale==='en'?'Published':'正式发布';
+}
 export interface PublicationDetail {
  article:EditorData;revision:number;approval:null|{revision:number;reviewerId:string;reviewerName:string;approvedAt:string};
  canQueue:boolean;canPublish:boolean;canDirectPublish:boolean;history:PublicationHistory[];historyMore:boolean;
