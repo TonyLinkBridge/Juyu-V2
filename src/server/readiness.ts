@@ -5,11 +5,16 @@ import {databaseConfiguration} from '../config/database';
 import {databasePoolOptions} from '../config/database-tls';
 import {getReadinessReport,type Environment,type DependencyState} from '../config/readiness';
 import {checkRole} from './database/scoped';
+function signingKeysUrl(env:Environment){
+ const origin=new URL(env.APP_ORIGIN!);
+ if(origin.hostname.endsWith('.vercel.app'))return new URL('/__clerk/.well-known/jwks.json',origin).toString();
+ const host=Buffer.from(env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!.split('_')[2],'base64').toString('utf8').slice(0,-1);
+ return `https://${host}/.well-known/jwks.json`;
+}
 async function authentication(env:Environment):Promise<DependencyState>{
  if(clerkConfiguration(env)!=='configured')return 'not_checked';
  // Only the PUBLIC publishable key is decoded. No secret or user data is sent.
- const host=Buffer.from(env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!.split('_')[2],'base64').toString('utf8').slice(0,-1);
- try{const response=await fetch(`https://${host}/.well-known/jwks.json`,{signal:AbortSignal.timeout(2000),cache:'no-store',redirect:'error'});
+ try{const response=await fetch(signingKeysUrl(env),{signal:AbortSignal.timeout(2000),cache:'no-store',redirect:'error'});
   if(!response.ok)return 'failed';const data=await response.json();return Array.isArray(data.keys)&&data.keys.some((key:Record<string,unknown>)=>key.kty==='RSA'&&typeof key.n==='string'&&typeof key.e==='string'&&typeof key.kid==='string')?'ok':'failed';
  }catch{return 'failed';}
 }

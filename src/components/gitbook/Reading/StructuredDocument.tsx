@@ -19,7 +19,7 @@ export function StructuredDocument({blocks,documentId,revision,admin=false,local
     if(b.type==='image'&&b.props.showPreview!==false&&privateAssetId(b.props.url)){
      const group:GalleryImage[]=[];
      let end=i;
-     while(end<nodes.length){const candidate=nodes[end];if(candidate.type!=='image'||candidate.props.showPreview===false||!privateAssetId(candidate.props.url)||(end>i&&nodes[end-1].children.length>0))break;group.push({id:candidate.id,src:mediaAssetUrl(privateAssetId(candidate.props.url)!,admin,documentId,revision),alt:candidate.props.name,caption:candidate.props.caption,width:candidate.props.previewWidth});end++;}
+     while(end<nodes.length){const candidate=nodes[end];if(candidate.type!=='image'||candidate.props.showPreview===false||!privateAssetId(candidate.props.url)||(end>i&&nodes[end-1].children.length>0))break;group.push({id:candidate.id,src:mediaAssetUrl(privateAssetId(candidate.props.url)!,admin,documentId,revision),alt:candidate.props.name,caption:candidate.props.caption,width:candidate.props.previewWidth,alignment:candidate.props.textAlignment});end++;}
      result.push(<Fragment key={b.id}><ImageGallery images={group}/>{children}</Fragment>);i=end-1;continue;
     }
     const id=privateAssetId(b.props.url);if(!id){result.push(<p key={b.id}>{locale==='en'?'No file attached yet.':'尚未添加文件'}</p>,...children);continue;}
