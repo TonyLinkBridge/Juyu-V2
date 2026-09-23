@@ -9,15 +9,16 @@ let component:typeof import('../../src/components/tasks/TasksWorkspace').TasksWo
 async function workspaceComponent(){
  if(component)return component;
  const directory=resolve('output/verification/workspace-fixture');await mkdir(directory,{recursive:true});await writeFile(resolve(directory,'package.json'),'{"type":"commonjs"}');
- for(const name of ['src/components/shell/NavigationLink.tsx','src/workspace/model.ts',...['TaskCard','TaskColumn','TasksBoard','TasksFilters','TasksList','TasksWorkspace'].map(n=>`src/components/tasks/${n}.tsx`)]){
+ await writeFile(resolve(directory,'next-navigation.js'),'exports.useRouter=()=>({refresh(){}});');
+ for(const name of ['src/components/shell/NavigationLink.tsx','src/workspace/model.ts','src/lifecycle/client.ts','src/drafts/client.ts',...['DraftRowAction','TaskCard','TaskColumn','TasksBoard','TasksFilters','TasksList','TasksWorkspace'].map(n=>`src/components/tasks/${n}.tsx`)]){
   const destination=resolve(directory,name.replace(/\.tsx?$/,'.js'));await mkdir(dirname(destination),{recursive:true});
-  const compiled=ts.transpileModule(await readFile(name,'utf8'),{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText.replace(/require\("([^"\n]+)\.ts"\)/g,'require("$1.js")');
+  const compiled=ts.transpileModule(await readFile(name,'utf8'),{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText.replace(/require\("([^"\n]+)\.ts"\)/g,'require("$1.js")').replace('require("next/navigation")','require("../../../next-navigation.js")');
   await writeFile(destination,compiled);
  }
  component=require(resolve(directory,'src/components/tasks/TasksWorkspace.js')).TasksWorkspace;return component;
 }
 import {statuses,workspaceQuery,type WorkspaceItem,type WorkspaceData} from '../../src/workspace/model';
-export const workspaceRows:WorkspaceItem[]=Array.from({length:36},(_,i)=>({id:`local-${i}`,title:i===0?'中文标题 <script> 不执行':`资料核对 ${i}`,kind:i%3===0?'ops':'article',status:statuses[i%6].id,revision:2,publishedRevision:i%6===0?1:i%6===5?2:null,updatedAt:'2026-09-09T03:00:00.000Z',author:'管理员 A',editor:'管理员 A',submitter:i%6===0?null:'管理员 A',reviewer:i%6===0?null:'管理员 B'}));
+export const workspaceRows:WorkspaceItem[]=Array.from({length:36},(_,i)=>({id:`local-${i}`,title:i===0?'中文标题 <script> 不执行':`资料核对 ${i}`,kind:i%3===0?'ops':'article',status:statuses[i%6].id,sequence:2,revision:2,publishedRevision:i===0?1:i%6===5?2:null,updatedAt:'2026-09-09T03:00:00.000Z',author:'管理员 A',editor:'管理员 A',submitter:i%6===0?null:'管理员 A',reviewer:i%6===0?null:'管理员 B'}));
 export async function workspaceHTML(url:string,{empty=false,failed=false}:{empty?:boolean;failed?:boolean}={}){
  const u=new URL(url),input=Object.fromEntries(u.searchParams);const query=workspaceQuery(input);
  // Isolated UI data only. Real query semantics/authorization are exercised against PostgreSQL separately.

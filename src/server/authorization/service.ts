@@ -23,6 +23,7 @@ import {readControlDetail,changeSavedReviewControl} from '../review/control.ts';
 import {readReviewDetail,decideSavedReview} from '../review/decision.ts';
 import {readReviewers,submitSavedReview} from '../review/repository.ts';
 import {readTrash,changeLifecycle,cleanupJobs,startCleanupAttempt,cleanupPending,finishCleanup} from '../lifecycle/repository.ts';
+import {discardWorkingDraft} from '../drafts/repository.ts';
 import type {EditorData} from '../../editor/contract.ts';
 import {decodeEditorBody} from '../../editor/document.ts';
 import {readWorkspace} from '../workspace/repository.ts';
@@ -130,6 +131,7 @@ export class AuthorizationService {
   async submitReview(id:string,input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>submitSavedReview(c,id,input,v));}
   async trash(page=1,cleanupPage=1){const v=await this.viewer(true);return this.database.run(v,c=>readTrash(c,page,cleanupPage),true);}
   async lifecycle(id:string,input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>changeLifecycle(c,id,input));}
+  async discardDraft(id:string,input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>discardWorkingDraft(c,id,input));}
   async cleanupJobs(id:string){const v=await this.viewer(true);return this.database.run(v,c=>cleanupJobs(c,id),true);}
   async startCleanupAttempt(id:string,key:string){const v=await this.viewer(true);return this.database.run(v,c=>startCleanupAttempt(c,id,key));}
   async cleanupPending(id:string){const v=await this.viewer(true);return this.database.run(v,c=>cleanupPending(c,id),true);}

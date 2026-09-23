@@ -17,7 +17,7 @@ export async function readWorkspace(c:PoolClient,actorId:string,input:QueryInput
  for(const row of grouped.rows)counts[row.status]=row.n;
  const total=query.status==='all'?Object.values(counts).reduce((a,b)=>a+b,0):counts[query.status];
  const pages=Math.max(1,Math.ceil(total/30)),page=Math.min(query.page,pages);
- const result=await c.query<WorkspaceItem>(`SELECT d.id,r.title,d.kind,d.workflow_state AS status,
+ const result=await c.query<WorkspaceItem>(`SELECT d.id,r.title,d.kind,d.workflow_state AS status,d.sequence,
  juyu.publication_number(d.id) AS "publicationNumber", r.qa_category AS "qaCategory",r.qa_position AS "qaPosition",r.revision_id AS revision,d.published_revision_id AS "publishedRevision",d.updated_at AS "updatedAt",
  a.display_name AS author,e.display_name AS editor,s.display_name AS submitter,v.display_name AS reviewer,(d.workflow_state='in_review' AND d.reviewer_id=$4) AS "canReview"
  ${from} JOIN juyu.members a ON a.clerk_user_id=r.author_id JOIN juyu.members e ON e.clerk_user_id=r.editor_id

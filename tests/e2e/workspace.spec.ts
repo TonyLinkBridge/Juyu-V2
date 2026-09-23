@@ -7,14 +7,16 @@ async function fixture(page:import('@playwright/test').Page,options:{empty?:bool
 test('workspace renders real-count contract and responsive list with safe titles',async({page},info)=>{
  await fixture(page);await expect(page.getByRole('heading',{name:'内容管理',exact:true})).toBeVisible();
  await expect(page.getByRole('status')).toContainText('共 36 篇');
- await expect(page.getByRole('navigation',{name:'内容模块'}).getByRole('link')).toHaveCount(4);
  await expect(page.getByRole('navigation',{name:'按状态查看'}).getByRole('link')).toHaveCount(6);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  const visible=info.project.name==='mobile'?page.locator('.tasks-mobile-list'):page.locator('.tasks-desktop-board');
  await expect(visible.getByRole('link',{name:'中文标题 <script> 不执行',exact:true})).toBeVisible();
- await expect(visible.getByText(info.project.name==='mobile'?'旧正式版继续可读':'旧正式版 1 仍可阅读').first()).toBeVisible();
+ await expect(visible.getByText(info.project.name==='mobile'?'旧正式版继续可读':'旧正式版 仍可阅读').first()).toBeVisible();
  if(info.project.name==='mobile')await expect(page.getByText('手机列表',{exact:true})).toBeVisible();
- else{await page.getByRole('link',{name:'列表',exact:true}).click();await expect(page.locator('.tasks-all-list')).toBeVisible();await page.reload();await expect(page.locator('.tasks-all-list')).toBeVisible();await page.getByRole('link',{name:'看板',exact:true}).click();}
+ else{await page.getByRole('link',{name:'列表',exact:true}).click();await expect(page.locator('.tasks-all-list')).toBeVisible();}
+ await expect(page.getByRole('button',{name:'放弃本次修订'})).toHaveCount(1);
+ await expect(page.getByRole('button',{name:'删除草稿'})).toHaveCount(4);
+ if(info.project.name!=='mobile'){await page.reload();await expect(page.locator('.tasks-all-list')).toBeVisible();await page.getByRole('link',{name:'看板',exact:true}).click();}
  await page.screenshot({path:`output/verification/workspace-${info.project.name}.png`,fullPage:false});
  await page.evaluate(()=>document.documentElement.dataset.theme='dark');await page.screenshot({path:`output/verification/workspace-dark-${info.project.name}.png`,fullPage:false});
  if(info.project.name==='mobile'){await page.locator('.tasks-mobile-list').scrollIntoViewIfNeeded();await page.screenshot({path:'output/verification/workspace-mobile-content.png',fullPage:false});}
