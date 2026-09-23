@@ -47,14 +47,15 @@ test('Super Admin directly publishes only their own saved draft with exact retry
  const own=await repo.create({id:randomUUID(),kind:'article',title:'Super 草稿',body:'核对完成',audience:'staff'},superAdmin);
  assert.equal((await service().publicationDetail(own.id)).canDirectPublish,false);
  const detail=await service(superAdmin).publicationDetail(own.id);assert.equal(detail.canDirectPublish,true);assert.equal(detail.canQueue,false);assert.equal(detail.canPublish,false);
+ assert.equal((await repo.getEditor(own.id,superAdmin)).canDirectPublish,true);assert.equal((await repo.getEditor(own.id,a)).canDirectPublish,false);
  await assert.rejects(service().changePublication(own.id,{expectedSequence:0,action:'direct_publish'}),/FORBIDDEN/);
  const input={expectedSequence:0,action:'direct_publish' as const};
  const first=await service(superAdmin).changePublication(own.id,input);
  assert.deepEqual(first,{documentId:own.id,sequence:1,revision:1,action:'direct_publish',status:'published',publishedRevision:1,approvedBy:'super'});
  assert.deepEqual(await service(superAdmin).changePublication(own.id,input),first);
  const saved=await repo.getForManagement(own.id,superAdmin);assert.equal(saved?.audit.filter(item=>item.action==='direct_publish').length,1);
- assert.equal((await service(superAdmin).publicationDetail(own.id)).history[0]?.action,'direct_publish');
- const other=await draft();assert.equal((await service(superAdmin).publicationDetail(other.id)).canDirectPublish,false);
+ assert.equal((await service(superAdmin).publicationDetail(own.id)).history[0]?.action,'direct_publish');assert.equal((await repo.getEditor(own.id,superAdmin)).canDirectPublish,false);
+ const other=await draft();assert.equal((await service(superAdmin).publicationDetail(other.id)).canDirectPublish,false);assert.equal((await repo.getEditor(other.id,superAdmin)).canDirectPublish,false);
  await assert.rejects(service(superAdmin).changePublication(other.id,{expectedSequence:0,action:'direct_publish'}),/FORBIDDEN/);
 });
 test('direct publication rechecks role after the document lock and validates pending uploads',async()=>{

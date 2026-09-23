@@ -56,6 +56,20 @@ test('English article editor uses English for its main actions and settings',asy
  await page.getByRole('button',{name:'Article settings',exact:true}).click();
  await expect(page.getByRole('dialog',{name:'Article settings'}).getByRole('button',{name:'Save and manage'})).toBeVisible();
 });
+test('server-authorized Super Admin can directly publish the exact saved draft without a reason field',async({page})=>{
+ const article={...structuredClone(editorFixture),canDirectPublish:true};const writes:unknown[]=[];
+ await page.route('**/api/admin/review/*/publication',route=>{if(route.request().method()==='GET')return route.fulfill({json:{article,revision:1,approval:null,canQueue:false,canPublish:false,canDirectPublish:true,history:[],historyMore:false}});writes.push(route.request().postDataJSON());return route.fulfill({json:{documentId:article.documentId,sequence:4,revision:1,action:'direct_publish',status:'published',publishedRevision:1,approvedBy:'super-a'}});});
+ await mount(page,()=>article);
+ await page.getByRole('button',{name:'批准并发布',exact:true}).click();const dialog=page.getByRole('dialog',{name:'批准并发布'});await expect(dialog.locator('textarea,input[type="text"]')).toHaveCount(0);await dialog.getByRole('button',{name:'取消',exact:true}).click();expect(writes).toHaveLength(0);
+ await page.getByRole('button',{name:'批准并发布',exact:true}).click();await page.getByRole('dialog',{name:'批准并发布'}).getByRole('button',{name:'确认发布',exact:true}).click();await expect(page.locator('.editor-notices').getByRole('status')).toContainText('已由你的 Super Admin 账号批准并发布');expect(writes).toEqual([{action:'direct_publish',expectedSequence:3}]);await expect(page.getByRole('alert')).toContainText('已经批准并发布');
+});
+test('English Super Admin editor requires natural-English confirmation before direct publication',async({page})=>{
+ const article={...structuredClone(editorFixture),locale:'en' as const,title:'How to update your email',canDirectPublish:true};const writes:unknown[]=[];
+ await page.route('**/api/admin/review/*/publication',route=>{if(route.request().method()==='GET')return route.fulfill({json:{article,revision:1,approval:null,canQueue:false,canPublish:false,canDirectPublish:true,history:[],historyMore:false}});writes.push(route.request().postDataJSON());return route.fulfill({json:{documentId:article.documentId,sequence:4,revision:1,action:'direct_publish',status:'published',publishedRevision:1,approvedBy:'super-a'}});});
+ await mount(page,()=>article);await page.getByRole('button',{name:'Approve and publish',exact:true}).click();const dialog=page.getByRole('dialog',{name:'Approve and publish'});const confirm=dialog.getByRole('button',{name:'Confirm publication',exact:true});await expect(confirm).toBeDisabled();await dialog.getByRole('checkbox').check();await confirm.click();await expect.poll(()=>writes).toEqual([{action:'direct_publish',expectedSequence:3,englishQualityConfirmed:true}]);
+});
+test('editor never exposes direct publication to an ordinary Admin',async({page})=>{await mount(page,()=>structuredClone(editorFixture));await expect(page.getByRole('button',{name:'批准并发布',exact:true})).toHaveCount(0);});
+test('editor disables direct publication while input is unsaved',async({page})=>{const article={...structuredClone(editorFixture),canDirectPublish:true};await mount(page,()=>article);const button=page.getByRole('button',{name:'批准并发布',exact:true});await expect(button).toBeEnabled();await page.getByRole('textbox',{name:'文章标题'}).fill('尚未保存的新标题');await expect(button).toBeDisabled();});
 test('editor separates workflow actions from a right-side authoring rail',async({page},testInfo)=>{
  const runtimeErrors:string[]=[];
  page.on('pageerror',error=>runtimeErrors.push(error.message));

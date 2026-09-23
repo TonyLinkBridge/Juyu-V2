@@ -90,7 +90,6 @@ test('an older English approval without a quality attestation cannot be queued',
 
 test('Super Admin direct English publication requires an explicit natural-language check and creates one publication event',async()=>{
  const source=randomUUID(),english=randomUUID(),repo=new DocumentRepository(db);
- const writer={id:'writer',role:'admin' as const,companyVerified:true};
  const superAdmin={id:'super',role:'super_admin' as const,companyVerified:true};
  const employee={id:'employee',role:'support' as const,companyVerified:true};
  const superService=new AuthorizationService(db,async()=>superAdmin);

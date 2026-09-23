@@ -9,3 +9,6 @@
 @media(min-width:1051px){.admin-page-content .review-decision{grid-template-columns:minmax(0,1fr) 360px}}
 
 .admin-page-content:has(.review-decision){padding-top:24px}.admin-page-content .editor-main:has(.review-decision)>.back-link{margin-bottom:0}.admin-page-content .editor-main:has(.review-decision)>h1{line-height:1.25;margin:12px 0 16px}.admin-page-content .review-decision{row-gap:16px}.review-reading-panel>header>p:last-child{margin:8px 0 0}.review-reading-panel>header{margin-bottom:16px}
+
+.article-editor>.direct-publish-confirmation{margin:16px 28px}.direct-publish-confirmation .review-decision-actions{display:flex;gap:10px;flex-wrap:wrap}.direct-publish-confirmation .review-decision-actions button{min-height:40px;padding:9px 14px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink)}.direct-publish-confirmation .review-decision-actions button:first-child{background:var(--action);border-color:var(--action);color:var(--action-text)}
+@media(max-width:640px){.article-editor>.direct-publish-confirmation{margin:12px}.direct-publish-confirmation .review-decision-actions button{width:100%}}
