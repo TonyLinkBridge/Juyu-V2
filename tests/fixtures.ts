@@ -11,7 +11,7 @@ export function publishedDocument(audience: Audience = 'staff'): Document {
   return {
     id: 'doc-1', kind: 'article', sequence: 4, lifecycle: 'active', publishedRevisionId: 1,
     revisions: [{ id: 1, title: '正式标题', body: '旧正式内容', audience, authorId: 'admin-a', editorId: 'admin-a', createdAt: now }],
-    workflow: { revisionId: 1, status: 'published', submittedBy: 'admin-a', reviewerId: 'admin-b', approvedBy: 'admin-b' },
+    workflow: { revisionId: 1, status: 'published', approvalMode:'standard', submittedBy: 'admin-a', reviewerId: 'admin-b', approvedBy: 'admin-b' },
     audit: [],
   };
 }

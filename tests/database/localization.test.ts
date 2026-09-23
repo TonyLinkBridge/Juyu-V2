@@ -14,7 +14,7 @@ let runtime:Pool,issuer:Pool,db:ScopedDatabase;
 before(async()=>{
  fixture=await temporaryDatabase();
  await migrate(fixture.pool);
- await fixture.pool.query("INSERT INTO juyu.members(clerk_user_id,display_name,observed_role,verified_email,observed_at) VALUES('writer','Writer','admin','writer@example.test',now()),('reviewer','Reviewer','admin','reviewer@example.test',now()),('employee','Employee','support','employee@example.test',now())");
+ await fixture.pool.query("INSERT INTO juyu.members(clerk_user_id,display_name,observed_role,verified_email,observed_at) VALUES('writer','Writer','admin','writer@example.test',now()),('reviewer','Reviewer','admin','reviewer@example.test',now()),('super','Super','super_admin','super@example.test',now()),('employee','Employee','support','employee@example.test',now())");
  const rp=randomBytes(24).toString('hex'),ip=randomBytes(24).toString('hex');
  await fixture.pool.query(`CREATE ROLE locale_runtime LOGIN PASSWORD '${rp}' IN ROLE juyu_runtime;CREATE ROLE locale_issuer LOGIN PASSWORD '${ip}' IN ROLE juyu_context_issuer`);
  runtime=fixture.connectAs('locale_runtime',rp);issuer=fixture.connectAs('locale_issuer',ip);db=new ScopedDatabase(runtime,issuer);
@@ -86,6 +86,30 @@ test('an older English approval without a quality attestation cannot be queued',
  const detail=await authorService.publicationDetail(english);
  assert.equal(detail.canQueue,false);
  await assert.rejects(authorService.changePublication(english,{expectedSequence:submitted.sequence+1,action:'queue'}),/CONFLICT|INVALID_STATE|APPROVAL/);
+});
+
+test('Super Admin direct English publication requires an explicit natural-language check and creates one publication event',async()=>{
+ const source=randomUUID(),english=randomUUID(),repo=new DocumentRepository(db);
+ const writer={id:'writer',role:'admin' as const,companyVerified:true};
+ const superAdmin={id:'super',role:'super_admin' as const,companyVerified:true};
+ const employee={id:'employee',role:'support' as const,companyVerified:true};
+ const body=encodeEditorBody([{id:'step',type:'paragraph',content:[{type:'text' as const,text:'Reach our support team with your account ID.',styles:{}}]}]);
+ await document(source);
+ await repo.execute(source,{type:'direct_publish'},superAdmin,{expectedSequence:0});
+ const saved=await repo.saveEditor(english,{expectedSequence:null,locale:'en',translationOf:source,title:'How to update your account email',releaseNote:'Clarifies the account ownership check.',body,kind:'article',audience:'staff',tags:[],cover:null},writer);
+ await assert.rejects(repo.execute(english,{type:'direct_publish'},superAdmin,{expectedSequence:saved.sequence}),/ENGLISH_REVIEW_REQUIRED/);
+ const published=await repo.execute(english,{type:'direct_publish',englishQualityConfirmed:true},superAdmin,{expectedSequence:saved.sequence});
+ assert.equal(published.workflow.status,'published');
+ assert.equal(published.workflow.approvalMode,'super_admin');
+ assert.equal(published.audit.at(-1)?.action,'direct_publish');
+ assert.equal(published.audit.filter(item=>item.action==='direct_publish').length,1);
+ assert.equal((await fixture.pool.query('SELECT count(*)::int AS n FROM juyu.reviews WHERE document_id=$1',[english])).rows[0]?.n,0);
+ const reader=new AuthorizationService(db,async()=>employee);
+ assert.deepEqual((await reader.changelog(1,'en')).items.map(item=>item.id),[english]);
+ assert.equal((await reader.article(english))?.title,'How to update your account email');
+ const superService=new AuthorizationService(db,async()=>superAdmin);
+ await superService.changeAvailability(english,{expectedSequence:published.sequence,action:'unpublish'});
+ await superService.changeAvailability(source,{expectedSequence:1,action:'unpublish'});
 });
 
 test('employee language switch exposes only separately published and currently authorized versions',async()=>{

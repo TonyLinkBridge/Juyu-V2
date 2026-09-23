@@ -16,7 +16,7 @@ import type { Viewer } from '../../src/domain/model.ts';
 
 let fixture: Awaited<ReturnType<typeof temporaryDatabase>>;
 let runtime: Pool, issuer: Pool, db: ScopedDatabase, owner: DocumentRepository;
-const a: Viewer = { id:'a', role:'admin', companyVerified:true }, b: Viewer = {...a,id:'b'};
+const a: Viewer = { id:'a', role:'admin', companyVerified:true }, b: Viewer = {...a,id:'b'},superAdmin:Viewer={id:'super',role:'super_admin',companyVerified:true};
 const support: Viewer = { id:'support',role:'support',companyVerified:true };
 const ops: Viewer = { id:'ops',role:'ops',companyVerified:true };
 test('home snapshot includes only published content allowed to this reader',async()=>{
@@ -35,9 +35,9 @@ async function published(id: string, kind: 'article'|'ops'='article') {
 before(async()=>{
   fixture=await temporaryDatabase();
   await migrate(fixture.pool);
-  await fixture.pool.query("INSERT INTO juyu.members(clerk_user_id,display_name,observed_role) VALUES ('a','A','admin'),('b','B','admin'),('support','Support','support'),('ops','Ops','ops')");
+  await fixture.pool.query("INSERT INTO juyu.members(clerk_user_id,display_name,observed_role) VALUES ('a','A','admin'),('b','B','admin'),('super','Super','super_admin'),('support','Support','support'),('ops','Ops','ops')");
   // Editor configuration now requires the verified enrollment facts promised by a/b Viewer fixtures.
-  await fixture.pool.query("UPDATE juyu.members SET verified_email=clerk_user_id||'@example.test',observed_at=now() WHERE clerk_user_id IN ('a','b','support','ops')");
+  await fixture.pool.query("UPDATE juyu.members SET verified_email=clerk_user_id||'@example.test',observed_at=now() WHERE clerk_user_id IN ('a','b','super','support','ops')");
   owner=new DocumentRepository(ownerTransactions(fixture.pool));
   regular=await published('regular'); internal=await published('internal','ops');
   draftId=(await owner.create({id:'draft',kind:'article',title:'secret draft',body:'hidden',audience:'staff'},a)).id;
@@ -100,6 +100,32 @@ test('release notes remain private until the matching revision is approved and p
   doc=await owner.execute(doc.id,{type},type==='approve'?b:a,{expectedSequence:doc.sequence,reviewer:b});
  assert.equal((await staff.changelog(1)).items.find(item=>item.id===doc.id)?.releaseNote,'第二版：补充资料\n并修正流程');
  await assert.rejects(new AuthorizationService(db,async()=>null).changelog(1),/FORBIDDEN/);
+});
+
+test('Super Admin direct publication is atomic, readable and counted without a fabricated review',async()=>{
+ const id='super-direct-publication';
+ let doc=await owner.create({id,kind:'article',title:'直接发布',body:'已核对的正式内容',audience:'staff',releaseNote:'直接发布说明'},superAdmin);
+ await assert.rejects(owner.execute(id,{type:'direct_publish'},a,{expectedSequence:doc.sequence}),/FORBIDDEN/);
+ doc=await owner.execute(id,{type:'direct_publish'},superAdmin,{expectedSequence:doc.sequence});
+ assert.equal(doc.workflow.approvalMode,'super_admin');assert.equal(doc.workflow.status,'published');
+ assert.equal(doc.audit.at(-1)?.action,'direct_publish');assert.equal(doc.audit.at(-1)?.reason,null);
+ const row=(await fixture.pool.query('SELECT approval_mode,submitted_by,reviewer_id,approved_by FROM juyu.documents WHERE id=$1',[id])).rows[0];
+ assert.deepEqual(row,{approval_mode:'super_admin',submitted_by:'super',reviewer_id:'super',approved_by:'super'});
+ assert.equal((await fixture.pool.query('SELECT count(*)::int AS n FROM juyu.reviews WHERE document_id=$1',[id])).rows[0].n,0);
+ const reader=new AuthorizationService(db,async()=>support),article=await reader.article(id),feed=await reader.changelog(1);
+ assert.equal(article?.body,'已核对的正式内容');assert.equal(article?.publicationNumber,1);assert.ok(article?.publishedAt);
+ assert.equal(feed.items.find(item=>item.id===id)?.releaseNote,'直接发布说明');
+});
+
+test('database integrity rejects forged direct publication by an ordinary Admin',async()=>{
+ const id='forged-direct-publication',doc=await owner.create({id,kind:'article',title:'伪造测试',body:'不可发布',audience:'staff'},a),client=await fixture.pool.connect();
+ try{
+  await client.query('BEGIN');
+  await client.query("INSERT INTO juyu.audit_log(document_id,sequence,action,actor_id,revision_id,at,reviewer_id) VALUES($1,1,'direct_publish','a',1,now(),'a')",[id]);
+  await client.query("UPDATE juyu.documents SET sequence=1,workflow_state='published',approval_mode='super_admin',published_revision_id=1,submitted_by='a',reviewer_id='a',approved_by='a' WHERE id=$1",[id]);
+  await assert.rejects(client.query('COMMIT'),/missing super admin publication evidence/);
+ }finally{await client.query('ROLLBACK').catch(()=>{});client.release();}
+ assert.equal(doc.workflow.status,'draft');
 });
 
 test('reusable fragments are admin-only templates and do not alter published articles',async()=>{

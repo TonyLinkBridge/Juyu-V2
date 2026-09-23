@@ -3,14 +3,15 @@ import {normalizeFieldSnapshots,type FieldSnapshot} from '../fields/model.ts';
 import {qaForKind} from '../qa/metadata.ts';
 import type {QaMetadata} from '../qa/model.ts';
 import {normalizeDescription,normalizeReleaseNote,normalizePresentation,type ArticlePresentation} from './presentation.ts';
-import { canManage } from './access.ts';
+import { canManage, isSuperAdmin } from './access.ts';
 import type { Audience, ContentKind, Document, Revision, Status, Viewer, Workflow } from './model.ts';
 
 export interface DraftInput extends ArticlePresentation { categoryIds?:string[]; customFields?:FieldSnapshot[]; qa?:QaMetadata; id: string; title: string; description?:string; body: string; audience: Audience; kind: ContentKind }
 export type Command =
   | ({ type: 'edit'; categoryIds?:string[]; customFields?:FieldSnapshot[]; qa?:QaMetadata; title: string; description?:string; body: string; audience: Audience } & ArticlePresentation)
   | { type: 'reject'; reason: string }
-  | { type: 'submit' | 'withdraw' | 'reassign' | 'approve' | 'queue' | 'publish' };
+  | { type: 'submit' | 'withdraw' | 'reassign' | 'approve' | 'queue' | 'publish' }
+  | { type:'direct_publish';englishQualityConfirmed?:boolean };
 export interface CommandContext { expectedSequence: number; now: string; reviewer?: Viewer }
 
 function requireAdmin(actor: Viewer | null): asserts actor is Viewer {
@@ -27,7 +28,7 @@ function validateContent(content: Pick<Revision, 'title' | 'body' | 'audience'>,
 }
 
 function freshWorkflow(revisionId: number): Workflow {
-  return { revisionId, status: 'draft', reviewerId: null, submittedBy: null, approvedBy: null };
+  return { revisionId, status: 'draft', approvalMode:'standard', reviewerId: null, submittedBy: null, approvedBy: null };
 }
 
 function requireState(document: Document, allowed: Status[]) {
@@ -98,7 +99,7 @@ export function transition(document: Document, command: Command, actor: Viewer |
     case 'submit':
       requireState(document, ['draft', 'changes_requested']);
       requireReviewer(context.reviewer, revision, actor.id);
-      next.workflow = { revisionId: revision.id, status: 'in_review', reviewerId: context.reviewer.id, submittedBy: actor.id, approvedBy: null };
+      next.workflow = { revisionId: revision.id, status: 'in_review', approvalMode:'standard', reviewerId: context.reviewer.id, submittedBy: actor.id, approvedBy: null };
       break;
     case 'withdraw':
       requireState(document, ['in_review']);
@@ -135,6 +136,12 @@ export function transition(document: Document, command: Command, actor: Viewer |
       requireApproval(document, revision);
       next.workflow.status = 'published';
       next.publishedRevisionId = revision.id;
+      break;
+    case 'direct_publish':
+      requireState(document,['draft','changes_requested']);
+      if(!isSuperAdmin(actor))throw new Error('FORBIDDEN: 只有 Super Admin 可以直接批准并发布');
+      next.workflow={revisionId:revision.id,status:'published',approvalMode:'super_admin',submittedBy:actor.id,reviewerId:actor.id,approvedBy:actor.id};
+      next.publishedRevisionId=revision.id;
       break;
     default:
       throw new Error('INVALID_COMMAND: 不支持的操作');

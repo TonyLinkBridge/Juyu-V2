@@ -47,7 +47,7 @@ async function load(client: PoolClient, id: string, scope: 'full' | 'editor' = '
   return {
     id: row.id, kind: row.kind, sequence: row.sequence, lifecycle: row.lifecycle,
     publishedRevisionId: row.published_revision_id,
-    workflow: { revisionId: row.workflow_revision_id, status: row.workflow_state, submittedBy: row.submitted_by, reviewerId: row.reviewer_id, approvedBy: row.approved_by },
+    workflow: { revisionId: row.workflow_revision_id, status: row.workflow_state, approvalMode:row.approval_mode, submittedBy: row.submitted_by, reviewerId: row.reviewer_id, approvedBy: row.approved_by },
     revisions: versions.rows.map((revision) => (({qa_category,qa_position,iconKey,...rest})=>({...rest,...(iconKey?{iconKey}:{}),...(row.kind==='qa'?{qa:{category:qa_category,position:qa_position}}:{}),createdAt:rest.createdAt.toISOString()}))(revision)) as Revision[],
     audit: history.rows.map((entry) => ({ ...entry, at: entry.at.toISOString() })) as AuditEntry[],
   };
@@ -108,8 +108,8 @@ async function persistNext(client:PoolClient,id:string,document:Document,next:Do
       await persistReview(client, next, command, actor, now, englishQualityConfirmed);
       const w = next.workflow;
       await client.query(`UPDATE juyu.documents SET sequence=$2,published_revision_id=$3,workflow_revision_id=$4,
-        workflow_state=$5,submitted_by=$6,reviewer_id=$7,approved_by=$8,updated_at=$9 WHERE id=$1`,
-        [id, next.sequence, next.publishedRevisionId, w.revisionId, w.status, w.submittedBy, w.reviewerId, w.approvedBy, now]);
+        workflow_state=$5,approval_mode=$6,submitted_by=$7,reviewer_id=$8,approved_by=$9,updated_at=$10 WHERE id=$1`,
+        [id, next.sequence, next.publishedRevisionId, w.revisionId, w.status, w.approvalMode, w.submittedBy, w.reviewerId, w.approvedBy, now]);
       await insertAudit(client, id, next.audit[next.audit.length - 1]);
 }
 
@@ -206,8 +206,9 @@ export class DocumentRepository {
   async execute(id: string, command: Command, actor: Viewer | null, context: { expectedSequence: number; reviewer?: Viewer }): Promise<Document> {
     requireAdmin(actor);
     return this.database.run(actor, async (client) => {
-      const locked = await client.query('SELECT id FROM juyu.documents WHERE id=$1 FOR UPDATE', [id]);
+      const locked = await client.query<{id:string;locale:'zh-CN'|'en'}>('SELECT id,locale FROM juyu.documents WHERE id=$1 FOR UPDATE', [id]);
       if (!locked.rowCount) throw new Error('NOT_FOUND: 资料不存在');
+      if(command.type==='direct_publish'&&locked.rows[0].locale==='en'&&command.englishQualityConfirmed!==true)throw new Error('ENGLISH_REVIEW_REQUIRED');
       const document = await load(client, id);
       if (!document) throw new Error('NOT_FOUND: 资料不存在');
       const now = new Date().toISOString();

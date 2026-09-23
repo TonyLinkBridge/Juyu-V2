@@ -31,6 +31,7 @@ export interface Revision extends ArticlePresentation {
 export interface Workflow {
   revisionId: number;
   status: Status;
+  approvalMode: 'standard' | 'super_admin';
   submittedBy: string | null;
   reviewerId: string | null;
   approvedBy: string | null;
@@ -38,7 +39,7 @@ export interface Workflow {
 
 export interface AuditEntry {
   sequence: number;
-  action: 'create' | 'edit' | 'submit' | 'withdraw' | 'reassign' | 'reject' | 'approve' | 'queue' | 'publish' | 'trash' | 'restore' | 'archive' | 'unpublish' | 'unarchive' | 'restore_version';
+  action: 'create' | 'edit' | 'submit' | 'withdraw' | 'reassign' | 'reject' | 'approve' | 'queue' | 'publish' | 'direct_publish' | 'trash' | 'restore' | 'archive' | 'unpublish' | 'unarchive' | 'restore_version';
   actorId: string;
   revisionId: number;
   at: string;

@@ -14,6 +14,7 @@ const run = (doc: Document, command: Command, actor: Viewer = adminA, reviewer?:
 const submitted = () => run(create(), { type: 'submit' }, adminA, adminB);
 const approved = () => run(submitted(), { type: 'approve' }, adminB);
 const published = () => run(run(approved(), { type: 'queue' }), { type: 'publish' });
+const superAdmin:Viewer={id:'super-a',role:'super_admin',companyVerified:true};
 
 test('new documents are private drafts and record the creator', () => {
   const doc = create();
@@ -131,6 +132,26 @@ test('publishing requires approval then explicit publication queue', () => {
   assert.equal(queued.publishedRevisionId, null);
   assert.equal(run(queued, { type: 'publish' }).workflow.status, 'published');
   assert.equal(readPublished(support, published())?.body, '旧正式内容');
+});
+
+test('Super Admin directly publishes one truthful workflow event without a reason',()=>{
+ const doc=run(create(),{type:'direct_publish'},superAdmin);
+ assert.equal(doc.workflow.status,'published');
+ assert.equal(doc.workflow.approvalMode,'super_admin');
+ assert.equal(doc.workflow.submittedBy,superAdmin.id);
+ assert.equal(doc.workflow.reviewerId,superAdmin.id);
+ assert.equal(doc.workflow.approvedBy,superAdmin.id);
+ assert.equal(doc.publishedRevisionId,1);
+ assert.equal(doc.audit.at(-1)?.action,'direct_publish');
+ assert.equal(doc.audit.at(-1)?.reason,null);
+ assert.throws(()=>run(create(),{type:'direct_publish'},adminA),/FORBIDDEN/);
+});
+
+test('direct publication accepts a returned draft but requires withdrawal from active review',()=>{
+ const returned=run(submitted(),{type:'reject',reason:'补充资料'},adminB);
+ assert.equal(run(returned,{type:'direct_publish'},superAdmin).workflow.status,'published');
+ assert.throws(()=>run(submitted(),{type:'direct_publish'},superAdmin),/INVALID_STATE/);
+ assert.throws(()=>run(published(),{type:'direct_publish'},superAdmin),/INVALID_STATE/);
 });
 
 test('new drafts leave the current formal version readable until replacement publishes', () => {

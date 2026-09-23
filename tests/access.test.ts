@@ -49,7 +49,7 @@ test('archived, trashed and unpublished documents disappear even for an Admin re
 test('a confidential new draft does not replace the readable published version', () => {
   const doc = publishedDocument();
   doc.revisions.push({ ...doc.revisions[0], id: 2, title: '保密草稿', body: '保密正文', audience: 'ops' });
-  doc.workflow = { revisionId: 2, status: 'in_review', reviewerId: 'admin-b', submittedBy: 'admin-a', approvedBy: null };
+  doc.workflow = { revisionId: 2, status: 'in_review', approvalMode:'standard', reviewerId: 'admin-b', submittedBy: 'admin-a', approvedBy: null };
   assert.equal(readPublished(support, doc)?.body, '旧正式内容');
   assert.deepEqual(searchProjection(support, [doc]), [{ documentId: 'doc-1', title: '正式标题', body: '旧正式内容', revisionId: 1 }]);
   assert.equal(canReadAsset(support, doc, { documentId: 'doc-1', revisionId: 2 }), false);
