@@ -140,6 +140,7 @@ export function transition(document: Document, command: Command, actor: Viewer |
     case 'direct_publish':
       requireState(document,['draft','changes_requested']);
       if(!isSuperAdmin(actor))throw new Error('FORBIDDEN: 只有 Super Admin 可以直接批准并发布');
+      if(revision.editorId!==actor.id)throw new Error('FORBIDDEN: Super Admin 只能直接发布自己最后保存的版本');
       next.workflow={revisionId:revision.id,status:'published',approvalMode:'super_admin',submittedBy:actor.id,reviewerId:actor.id,approvedBy:actor.id};
       next.publishedRevisionId=revision.id;
       break;

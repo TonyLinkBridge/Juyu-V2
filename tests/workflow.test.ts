@@ -135,7 +135,8 @@ test('publishing requires approval then explicit publication queue', () => {
 });
 
 test('Super Admin directly publishes one truthful workflow event without a reason',()=>{
- const doc=run(create(),{type:'direct_publish'},superAdmin);
+ const own=createDocument(input,superAdmin,now);
+ const doc=run(own,{type:'direct_publish'},superAdmin);
  assert.equal(doc.workflow.status,'published');
  assert.equal(doc.workflow.approvalMode,'super_admin');
  assert.equal(doc.workflow.submittedBy,superAdmin.id);
@@ -145,10 +146,13 @@ test('Super Admin directly publishes one truthful workflow event without a reaso
  assert.equal(doc.audit.at(-1)?.action,'direct_publish');
  assert.equal(doc.audit.at(-1)?.reason,null);
  assert.throws(()=>run(create(),{type:'direct_publish'},adminA),/FORBIDDEN/);
+ assert.throws(()=>run(create(),{type:'direct_publish'},superAdmin),/FORBIDDEN/);
 });
 
 test('direct publication accepts a returned draft but requires withdrawal from active review',()=>{
- const returned=run(submitted(),{type:'reject',reason:'补充资料'},adminB);
+ const own=createDocument(input,superAdmin,now);
+ const submittedOwn=run(own,{type:'submit'},superAdmin,adminB);
+ const returned=run(submittedOwn,{type:'reject',reason:'补充资料'},adminB);
  assert.equal(run(returned,{type:'direct_publish'},superAdmin).workflow.status,'published');
  assert.throws(()=>run(submitted(),{type:'direct_publish'},superAdmin),/INVALID_STATE/);
  assert.throws(()=>run(published(),{type:'direct_publish'},superAdmin),/INVALID_STATE/);

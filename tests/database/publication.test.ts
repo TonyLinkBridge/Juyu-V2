@@ -9,12 +9,12 @@ import {DocumentRepository} from '../../src/server/database/repository.ts';
 import {AuthorizationService} from '../../src/server/authorization/service.ts';
 import type {Viewer} from '../../src/domain/model.ts';
 let fixture:Awaited<ReturnType<typeof temporaryDatabase>>,runtime:Pool,issuer:Pool,db:ScopedDatabase,repo:DocumentRepository;
-const a:Viewer={id:'a',role:'admin',companyVerified:true},b:Viewer={...a,id:'b'},c:Viewer={...a,id:'c'},manager:Viewer={...a,id:'manager'},staff:Viewer={id:'staff',role:'support',companyVerified:true};
+const a:Viewer={id:'a',role:'admin',companyVerified:true},b:Viewer={...a,id:'b'},c:Viewer={...a,id:'c'},manager:Viewer={...a,id:'manager'},superAdmin:Viewer={id:'super',role:'super_admin',companyVerified:true},staff:Viewer={id:'staff',role:'support',companyVerified:true};
 const service=(v:Viewer|null=manager)=>new AuthorizationService(db,async()=>v);
 async function draft(){return repo.create({id:randomUUID(),kind:'article',title:'审核管理',body:'正式内容',audience:'staff'},a);}
 async function pending(){const d=await draft();await service(a).submitReview(d.id,{expectedSequence:0,reviewerId:'b'});return d;}
 async function restoreMember(id:string){await fixture.pool.query("UPDATE juyu.members SET disabled_at=null,observed_role='admin',verified_email=$2,observed_at=now() WHERE clerk_user_id=$1",[id,`${id}@example.test`]);}
-before(async()=>{fixture=await temporaryDatabase();await migrate(fixture.pool);await fixture.pool.query("INSERT INTO juyu.members(clerk_user_id,display_name,observed_role,verified_email,observed_at) VALUES('a','A','admin','a@example.test',now()),('b','B','admin','b@example.test',now()),('c','C','admin','c@example.test',now()),('manager','Manager','admin','manager@example.test',now()),('staff','Support','support','staff@example.test',now())");const rp=randomBytes(24).toString('hex'),ip=randomBytes(24).toString('hex');await fixture.pool.query(`CREATE ROLE publication_runtime LOGIN PASSWORD '${rp}' IN ROLE juyu_runtime; CREATE ROLE publication_issuer LOGIN PASSWORD '${ip}' IN ROLE juyu_context_issuer`);runtime=fixture.connectAs('publication_runtime',rp);issuer=fixture.connectAs('publication_issuer',ip);db=new ScopedDatabase(runtime,issuer);repo=new DocumentRepository(db);});
+before(async()=>{fixture=await temporaryDatabase();await migrate(fixture.pool);await fixture.pool.query("INSERT INTO juyu.members(clerk_user_id,display_name,observed_role,verified_email,observed_at) VALUES('a','A','admin','a@example.test',now()),('b','B','admin','b@example.test',now()),('c','C','admin','c@example.test',now()),('manager','Manager','admin','manager@example.test',now()),('super','Super','super_admin','super@example.test',now()),('staff','Support','support','staff@example.test',now())");const rp=randomBytes(24).toString('hex'),ip=randomBytes(24).toString('hex');await fixture.pool.query(`CREATE ROLE publication_runtime LOGIN PASSWORD '${rp}' IN ROLE juyu_runtime; CREATE ROLE publication_issuer LOGIN PASSWORD '${ip}' IN ROLE juyu_context_issuer`);runtime=fixture.connectAs('publication_runtime',rp);issuer=fixture.connectAs('publication_issuer',ip);db=new ScopedDatabase(runtime,issuer);repo=new DocumentRepository(db);});
 after(async()=>{if(runtime)await runtime.end();if(issuer)await issuer.end();if(fixture)await fixture.close();});
 test('publication boundary exists before releasing approved revisions',async()=>{
  assert.equal(typeof service().publicationDetail,'function');
@@ -42,6 +42,30 @@ test('approved revision queues manually before publication and returns named imm
  const queued=await service().changePublication(d.id,{expectedSequence:2,action:'queue'});assert.deepEqual(queued,{documentId:d.id,sequence:3,revision:1,action:'queue',status:'queued',publishedRevision:null,approvedBy:'b'});assert.equal(await service(staff).article(d.id),null);assert.equal((await service().publicationDetail(d.id)).canPublish,true);
  const published=await service(c).changePublication(d.id,{expectedSequence:3,action:'publish'});assert.deepEqual(published,{documentId:d.id,sequence:4,revision:1,action:'publish',status:'published',publishedRevision:1,approvedBy:'b'});assert.equal((await service(staff).article(d.id))?.body,'正式内容');
  const saved=await service().publicationDetail(d.id);assert.equal(saved.canQueue,false);assert.equal(saved.canPublish,false);assert.equal(saved.historyMore,false);assert.deepEqual(saved.history.map(({at,...x})=>{assert.ok(at);return x;}),[{sequence:4,revision:1,action:'publish',actorId:'c',actorName:'C'},{sequence:3,revision:1,action:'queue',actorId:'manager',actorName:'Manager'}]);
+});
+test('Super Admin directly publishes only their own saved draft with exact retry acknowledgement',async()=>{
+ const own=await repo.create({id:randomUUID(),kind:'article',title:'Super 草稿',body:'核对完成',audience:'staff'},superAdmin);
+ assert.equal((await service().publicationDetail(own.id)).canDirectPublish,false);
+ const detail=await service(superAdmin).publicationDetail(own.id);assert.equal(detail.canDirectPublish,true);assert.equal(detail.canQueue,false);assert.equal(detail.canPublish,false);
+ await assert.rejects(service().changePublication(own.id,{expectedSequence:0,action:'direct_publish'}),/FORBIDDEN/);
+ const input={expectedSequence:0,action:'direct_publish' as const};
+ const first=await service(superAdmin).changePublication(own.id,input);
+ assert.deepEqual(first,{documentId:own.id,sequence:1,revision:1,action:'direct_publish',status:'published',publishedRevision:1,approvedBy:'super'});
+ assert.deepEqual(await service(superAdmin).changePublication(own.id,input),first);
+ const saved=await repo.getForManagement(own.id,superAdmin);assert.equal(saved?.audit.filter(item=>item.action==='direct_publish').length,1);
+ assert.equal((await service(superAdmin).publicationDetail(own.id)).history[0]?.action,'direct_publish');
+ const other=await draft();assert.equal((await service(superAdmin).publicationDetail(other.id)).canDirectPublish,false);
+ await assert.rejects(service(superAdmin).changePublication(other.id,{expectedSequence:0,action:'direct_publish'}),/FORBIDDEN/);
+});
+test('direct publication rechecks role after the document lock and validates pending uploads',async()=>{
+ const own=await repo.create({id:randomUUID(),kind:'article',title:'锁定草稿',body:'正文',audience:'staff'},superAdmin);
+ const pending=await asset(own.id,'image/png','pending');
+ await assert.rejects(service(superAdmin).changePublication(own.id,{expectedSequence:0,action:'direct_publish'}),/UPLOAD_IN_PROGRESS/);
+ await fixture.pool.query("UPDATE juyu.assets SET status='quarantined' WHERE id=$1",[pending]);
+ const blocker=await fixture.pool.connect();await blocker.query('BEGIN');await blocker.query('SELECT id FROM juyu.documents WHERE id=$1 FOR UPDATE',[own.id]);
+ const work=service(superAdmin).changePublication(own.id,{expectedSequence:0,action:'direct_publish'}).then(value=>({value,error:null}),error=>({value:null,error}));
+ try{await waitForLock('SELECT id FROM juyu.documents%');await fixture.pool.query("UPDATE juyu.members SET observed_role='admin' WHERE clerk_user_id='super'");}finally{await blocker.query('COMMIT');blocker.release();}
+ try{assert.match((await work).error?.message??'unexpected success',/FORBIDDEN/);assert.equal((await service(a).editor(own.id)).sequence,0);}finally{await fixture.pool.query("UPDATE juyu.members SET observed_role='super_admin' WHERE clerk_user_id='super'");}
 });
 test('only current eligible company Admin may read or publish even with stale trusted context',async()=>{
  const d=await approved();for(const v of [null,staff,{...manager,companyVerified:false}]){await assert.rejects(service(v).publicationDetail(d.id),/FORBIDDEN/);await assert.rejects(service(v).changePublication(d.id,{expectedSequence:2,action:'queue'}),/FORBIDDEN/);}

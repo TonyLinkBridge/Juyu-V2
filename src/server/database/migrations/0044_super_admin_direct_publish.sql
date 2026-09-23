@@ -54,6 +54,7 @@ BEGIN
   WHERE a.document_id=d.id AND a.revision_id=d.workflow_revision_id
    AND a.action='direct_publish' AND a.actor_id=d.submitted_by
    AND a.actor_id=d.reviewer_id AND a.actor_id=d.approved_by
+   AND r.editor_id=a.actor_id
    AND m.observed_role='super_admin'
  ) THEN RAISE EXCEPTION 'INTEGRITY: missing super admin publication evidence';END IF;
  IF d.published_revision_id IS NOT NULL AND NOT EXISTS(

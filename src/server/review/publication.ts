@@ -10,6 +10,9 @@ interface Receipt {revision:number;submittedBy:string;reviewerId:string;reviewer
 async function requireCurrentAdmin(c:PoolClient,actor:Viewer){
  if(!(await c.query('SELECT juyu.is_admin() AND juyu.actor_id()=$1 AND juyu.review_admin_eligible($1) AS ok',[actor.id])).rows[0]?.ok)throw new Error('FORBIDDEN');
 }
+async function requireCurrentSuperAdmin(c:PoolClient,actor:Viewer){
+ if(!(await c.query('SELECT juyu.is_super_admin() AND juyu.actor_id()=$1 AND juyu.review_admin_eligible($1) AS ok',[actor.id])).rows[0]?.ok)throw new Error('FORBIDDEN');
+}
 async function latestReceipt(c:PoolClient,id:string):Promise<Receipt|null>{
  return (await c.query<Receipt>(`SELECT r.revision_id AS revision,r.submitted_by AS "submittedBy",r.reviewer_id AS "reviewerId",m.display_name AS "reviewerName",r.status,r.reason,r.submitted_at AS "submittedAt",r.decided_at AS "decidedAt",r.decided_by AS "decidedBy",r.submitted_sequence AS "submittedSequence",d.locale,r.english_quality_confirmed AS "englishQualityConfirmed"
  FROM juyu.reviews r JOIN juyu.members m ON m.clerk_user_id=r.reviewer_id JOIN juyu.documents d ON d.id=r.document_id WHERE r.document_id=$1 ORDER BY r.submitted_sequence DESC LIMIT 1`,[id])).rows[0]??null;
@@ -52,32 +55,45 @@ async function requireReadyAssets(c:PoolClient,d:Document){
 export async function readPublicationDetail(c:PoolClient,id:string,actor:Viewer):Promise<PublicationDetail>{
  reviewId(id);await requireCurrentAdmin(c,actor);const d=await loadDocument(c,id);if(!d)throw new Error('NOT_FOUND');if(d.lifecycle!=='active')throw new Error('INACTIVE_DOCUMENT');
  const receipt=await latestReceipt(c,id),valid=matchingApproval(d,receipt);
+ const revision=d.revisions.find(item=>item.id===d.workflow.revisionId)!;
+ const exactSuper=Boolean((await c.query('SELECT juyu.is_super_admin() AND juyu.actor_id()=$1 AS ok',[actor.id])).rows[0]?.ok);
  const history=(await c.query<Omit<PublicationHistory,'at'>&{at:Date}>(`SELECT a.sequence,a.revision_id AS revision,a.action,a.actor_id AS "actorId",m.display_name AS "actorName",a.at
- FROM juyu.audit_log a JOIN juyu.members m ON m.clerk_user_id=a.actor_id WHERE a.document_id=$1 AND a.action IN ('queue','publish') ORDER BY a.sequence DESC LIMIT 21`,[id])).rows;
+ FROM juyu.audit_log a JOIN juyu.members m ON m.clerk_user_id=a.actor_id WHERE a.document_id=$1 AND a.action IN ('queue','publish','direct_publish') ORDER BY a.sequence DESC LIMIT 21`,[id])).rows;
  return {article:await readEditorSnapshot(c,d),revision:d.workflow.revisionId,approval:valid?{revision:receipt.revision,reviewerId:receipt.reviewerId,reviewerName:receipt.reviewerName,approvedAt:receipt.decidedAt!.toISOString()}:null,
-  canQueue:valid&&d.workflow.status==='approved',canPublish:valid&&d.workflow.status==='queued',history:history.slice(0,20).map(h=>({...h,at:h.at.toISOString()})),historyMore:history.length>20};
+  canQueue:valid&&d.workflow.status==='approved',canPublish:valid&&d.workflow.status==='queued',canDirectPublish:exactSuper&&revision.editorId===actor.id&&['draft','changes_requested'].includes(d.workflow.status),history:history.slice(0,20).map(h=>({...h,at:h.at.toISOString()})),historyMore:history.length>20};
 }
 export async function changeSavedPublication(c:PoolClient,id:string,value:unknown,actor:Viewer):Promise<PublicationAck>{
  reviewId(id);const input=publicationInput(value);
  if(!(await c.query('SELECT pg_try_advisory_xact_lock_shared(84620915) AS acquired')).rows[0]?.acquired)throw new Error('MEMBER_BUSY');
  await requireCurrentAdmin(c,actor);
+ if(input.action==='direct_publish')await requireCurrentSuperAdmin(c,actor);
  await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[`editor:${id}`]);
  if(!(await c.query('SELECT id FROM juyu.documents WHERE id=$1 FOR UPDATE',[id])).rowCount)throw new Error('NOT_FOUND');
  await c.query('SELECT clerk_user_id FROM juyu.members WHERE clerk_user_id=ANY($1::text[]) ORDER BY clerk_user_id FOR SHARE',[[actor.id]]);
  await requireCurrentAdmin(c,actor);
+ if(input.action==='direct_publish')await requireCurrentSuperAdmin(c,actor);
  const d=await loadDocument(c,id);if(!d)throw new Error('NOT_FOUND');if(d.lifecycle!=='active')throw new Error('INACTIVE_DOCUMENT');
+ const locale=input.action==='direct_publish'?(await c.query<{locale:string}>('SELECT locale FROM juyu.documents WHERE id=$1',[id])).rows[0]?.locale:null;
+ if(input.action==='direct_publish'&&locale==='en'&&input.englishQualityConfirmed!==true)throw new Error('ENGLISH_REVIEW_REQUIRED');
  const w=d.workflow,last=d.audit.at(-1),receipt=await latestReceipt(c,id),valid=matchingApproval(d,receipt),status=input.action==='queue'?'queued':'published';
+ const directCommitted=input.action==='direct_publish'&&w.approvalMode==='super_admin'&&w.status==='published'&&w.submittedBy===actor.id&&w.reviewerId===actor.id&&w.approvedBy===actor.id&&d.publishedRevisionId===w.revisionId;
  const ack:PublicationAck={documentId:id,sequence:d.sequence,revision:w.revisionId,action:input.action,status,publishedRevision:d.publishedRevisionId,approvedBy:w.approvedBy!};
  // A retry acknowledges the already committed event, even if an asset changed
  // later. It never republishes, updates the timestamp, or adds another audit row.
  if(d.sequence===input.expectedSequence+1&&last?.sequence===d.sequence&&last.action===input.action&&last.actorId===actor.id
-  &&last.revisionId===w.revisionId&&w.status===status&&valid)return ack;
+  &&last.revisionId===w.revisionId&&w.status===status&&(input.action==='direct_publish'?directCommitted:valid))return ack;
  if(d.sequence!==input.expectedSequence)throw new Error('CONFLICT');
- if(w.status!==(input.action==='queue'?'approved':'queued'))throw new Error('INVALID_STATE');
- if(!valid)throw new Error('INVALID_APPROVAL');
+ if(input.action==='direct_publish'){
+  if(!['draft','changes_requested'].includes(w.status))throw new Error('INVALID_STATE');
+  const revision=d.revisions.find(item=>item.id===w.revisionId)!;
+  if(revision.editorId!==actor.id)throw new Error('FORBIDDEN');
+ }else{
+  if(w.status!==(input.action==='queue'?'approved':'queued'))throw new Error('INVALID_STATE');
+  if(!valid)throw new Error('INVALID_APPROVAL');
+ }
  await requireReadyAssets(c,d);
- const now=new Date().toISOString(),command={type:input.action};
+ const now=new Date().toISOString(),command=input.action==='direct_publish'?{type:'direct_publish' as const,...(input.englishQualityConfirmed?{englishQualityConfirmed:true as const}:{})}:{type:input.action};
  const next=transition(d,command,actor,{expectedSequence:input.expectedSequence,now});
  await persistDocumentTransition(c,id,d,next,command,actor,now);
- return {...ack,sequence:next.sequence,publishedRevision:next.publishedRevisionId};
+ return {...ack,sequence:next.sequence,publishedRevision:next.publishedRevisionId,approvedBy:next.workflow.approvedBy!};
 }
