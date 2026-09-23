@@ -44,6 +44,36 @@ test('Reference table text projection preserves columns across row and column sp
  assert.deepEqual(tableTextGrid(table),[['第一列','第二列'],['','仍是第二列'],['合并','']]);
 });
 
+test('native table border settings survive validation and structured saves',()=>{
+ const borderData=JSON.stringify({'0:0':{top:{width:2,color:'#111111'},right:null,bottom:{width:1,color:'#cc2233'},left:{width:2,color:'#111111'}}});
+ const table=p('bordered-table','table',{borderData},{type:'tableContent',rows:[{cells:[[{type:'text',text:'有边框',styles:{}}]]}]});
+ const [normalized]=normalizeEditorBlocks([table]);
+ assert.equal(normalized.type,'table');
+ if(normalized.type==='table')assert.equal(normalized.props.borderData,borderData);
+ assert.equal(decodeEditorBody(encodeEditorBody([table]))?.[0].type,'table');
+ assert.equal((decodeEditorBody(encodeEditorBody([table]))?.[0] as {props:{borderData:string}}).props.borderData,borderData);
+});
+
+test('native table border settings render in PDF without losing hidden edges',()=>{
+ const borderData=JSON.stringify({'0:0':{top:{width:2,color:'#111111'},right:null,bottom:{width:1,color:'#cc2233'},left:{width:3,color:'#334455'}}});
+ const table=p('bordered-table','table',{borderData},{type:'tableContent',rows:[{cells:[[{type:'text',text:'边框测试',styles:{}}]]}]});
+ const html=pdfHTML({id:'bordered',title:'表格边框',revision:1,body:encodeEditorBody([table])});
+ assert.match(html,/border-top:2px solid #111111/);
+ assert.match(html,/border-right:none/);
+ assert.match(html,/border-bottom:1px solid #cc2233/);
+ assert.match(html,/border-left:3px solid #334455/);
+});
+
+test('native table vertical alignment survives saves and renders in PDF',()=>{
+ const verticalAlignData=JSON.stringify({'0:0':'middle'});
+ const table=p('aligned-table','table',{verticalAlignData},{type:'tableContent',rows:[{cells:[{type:'tableCell',props:{rowspan:2},content:[{type:'text',text:'垂直居中',styles:{}}]},[{type:'text',text:'右上',styles:{}}]]},{cells:[[{type:'text',text:'右下',styles:{}}]]}]});
+ const [normalized]=normalizeEditorBlocks([table]);
+ assert.equal(normalized.type,'table');
+ if(normalized.type==='table')assert.equal(normalized.props.verticalAlignData,verticalAlignData);
+ assert.equal((decodeEditorBody(encodeEditorBody([table]))?.[0] as {props:{verticalAlignData:string}}).props.verticalAlignData,verticalAlignData);
+ assert.match(pdfHTML({id:'aligned',title:'表格垂直对齐',revision:1,body:encodeEditorBody([table])}),/vertical-align:middle/);
+});
+
 test('native numbered lists retain zero and negative starting numbers from pasted HTML',()=>{
  for(const start of [0,-3,4]){
   const body=encodeEditorBody([p('number','numberedListItem',{start})]);

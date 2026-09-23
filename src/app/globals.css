@@ -686,6 +686,15 @@ button, input, select { color: inherit; }
 .editor-focused .editor-preview>h2,.entry-frame .gitbook-page-header.gitbook-page-header h1{font-size:var(--document-title);font-weight:700;line-height:1.4;letter-spacing:-.7px}
 @media(max-width:640px){:root{--document-title:29px}}
 .editor-canvas .bn-editor,.gitbook-document.native-document{color:var(--ink)}
+.bn-table-border-menu{min-width:190px}
+.bn-table-border-settings{display:grid;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);color:var(--ink);font-size:12px}
+.bn-table-border-settings>span{font-weight:650}
+.bn-table-border-widths{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.bn-table-border-widths button{display:grid;place-items:center;gap:3px;min-height:34px;padding:4px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}
+.bn-table-border-widths button[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
+.bn-table-border-widths button span{display:block;width:28px;border-top-style:solid;border-top-color:currentColor}
+.bn-table-border-settings label{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0}
+.bn-table-border-settings input[type=color]{width:44px;height:30px;padding:2px;border:1px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer}
 
 /* Reference reuses article inline marks; keep links discoverable in dense tables. */
 .reference-rich-table a{text-decoration:underline;text-underline-offset:2px}

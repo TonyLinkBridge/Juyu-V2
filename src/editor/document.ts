@@ -1,6 +1,6 @@
 import {normalizeBlocks,type MediaBlock} from '../media/model.ts';
 import {invalid as bad,record,keys,boundedText,color,normalizeInline,inlineText,type EditorInline} from './inline.ts';
-import {alignment,normalizeTable,type TableContent,type Alignment} from './table.ts';
+import {alignment,normalizeTable,normalizeTableBorderData,normalizeTableVerticalAlignData,type TableContent,type Alignment} from './table.ts';
 import {inlineEmbed} from './inline-embed.ts';
 export type {EditorInline,EditorStyles} from './inline.ts';
 export {inlineText} from './inline.ts';
@@ -9,7 +9,7 @@ export type FileType='image'|'video'|'audio'|'file';
 export type EditorFileProps={backgroundColor:string;textAlignment?:Alignment;name:string;url:string;caption:string;showPreview?:boolean;previewWidth?:number};
 export type EditorBlock=
  |{id:string;type:'paragraph'|'heading'|'bulletListItem'|'numberedListItem'|'checkListItem'|'toggleListItem'|'quote'|'codeBlock';props:EditorTextProps;content:EditorInline[];children:EditorBlock[]}
- |{id:string;type:'table';props:{textColor:string};content:TableContent;children:EditorBlock[]}
+ |{id:string;type:'table';props:{textColor:string;borderData?:string;verticalAlignData?:string};content:TableContent;children:EditorBlock[]}
  |{id:string;type:FileType;props:EditorFileProps;children:EditorBlock[]}
  |{id:string;type:'divider';props:Record<string,never>;children:EditorBlock[]}
  |{id:string;type:'juyu';props:{payload:string};children:EditorBlock[]};
@@ -31,7 +31,7 @@ export function normalizeEditorBlocks(value:unknown):EditorBlock[]{
    let m:MediaBlock;try{m=normalizeBlocks([raw])[0];}catch{return bad();}if(m.id!==id)return bad();media.push(m);return {id,type:'juyu',props:{payload:JSON.stringify(m)},children:Array.from(child,c=>visit(c,depth+1))};}
   const children=Array.from(child,c=>visit(c,depth+1));
   if(b.type==='divider'){keys(p,[]);if(b.content!==undefined)return bad();return {id,type:'divider',props:{},children};}
-  if(b.type==='table'){keys(p,['textColor']);return {id,type:'table',props:{textColor:color(p.textColor===undefined?'default':p.textColor)},content:normalizeTable(b.content),children};}
+  if(b.type==='table'){keys(p,['textColor','borderData','verticalAlignData']);return {id,type:'table',props:{textColor:color(p.textColor===undefined?'default':p.textColor),borderData:normalizeTableBorderData(p.borderData),verticalAlignData:normalizeTableVerticalAlignData(p.verticalAlignData)},content:normalizeTable(b.content),children};}
   if(['image','video','audio','file'].includes(String(b.type))){
    const type=b.type as FileType;keys(p,['backgroundColor','name','url','caption',...(['image','video'].includes(type)?['textAlignment','previewWidth']:[]),...(type!=='file'?['showPreview']:[])]);if(b.content!==undefined)return bad();
    const url=boundedText(p.url===undefined?'':p.url,200);if(url&&!privateAssetId(url))throw new Error('PRIVATE_EDITOR_FILE_REQUIRED');

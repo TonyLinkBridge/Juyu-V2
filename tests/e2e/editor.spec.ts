@@ -386,6 +386,24 @@ test('native editor preserves rich paste, links, formatting and native table thr
  await page.locator('.editor-preview').scrollIntoViewIfNeeded();await page.screenshot({path:`output/verification/native-editor-${info.project.name}.png`,fullPage:true});
 });
 
+test('native table border menu saves selected edges and preview renders the same border',async({page})=>{
+ const txt=(text:string)=>[{type:'text',text,styles:{}}];
+ let saved={...structuredClone(editorFixture),body:encodeEditorBody([{id:'border-table',type:'table',props:{textColor:'default'},content:{type:'tableContent',columnWidths:[160,160],headerRows:0,rows:[{cells:[txt('左格'),txt('右格')]}]},children:[]}])};
+ await page.route('**/api/admin/editor/*',route=>{saved={...saved,...route.request().postDataJSON(),sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);const firstCell=page.locator('.bn-editor td').first();await firstCell.hover();await page.locator('.bn-table-cell-handle').click();await page.getByText('边框',{exact:true}).hover();const menu=page.locator('.bn-table-border-menu');await expect(menu).toBeVisible();await menu.getByRole('button',{name:'2px'}).click();await menu.getByLabel('边框颜色').fill('#cc2233');await menu.getByText('下边框',{exact:true}).click();
+ await expect.poll(()=>saved.body.includes('borderData'),{timeout:8000}).toBe(true);await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});expect(saved.body).toContain('\\"bottom\\":{\\"width\\":2,\\"color\\":\\"#cc2233\\"}');await expect(firstCell).toHaveCSS('border-bottom-width','2px');await expect(firstCell).toHaveCSS('border-bottom-color','rgb(204, 34, 51)');
+ await page.reload();await expect(firstCell).toHaveCSS('border-bottom-width','2px');await expect(firstCell).toHaveCSS('border-bottom-color','rgb(204, 34, 51)');await page.getByRole('button',{name:'预览草稿',exact:true}).click();const previewCell=page.locator('.editor-preview td').first();await expect(previewCell).toHaveCSS('border-bottom-width','2px');await expect(previewCell).toHaveCSS('border-bottom-color','rgb(204, 34, 51)');
+});
+
+test('native table menu vertically aligns a merged cell through save, reopen and preview',async({page})=>{
+ const txt=(text:string)=>[{type:'text',text,styles:{}}];
+ let saved={...structuredClone(editorFixture),body:encodeEditorBody([{id:'aligned-table',type:'table',props:{textColor:'default'},content:{type:'tableContent',columnWidths:[180,240],headerRows:0,rows:[{cells:[{type:'tableCell',props:{rowspan:2,textColor:'default',backgroundColor:'default',textAlignment:'left'},content:txt('合并单元格')},txt('第一行\n增加高度')]},{cells:[txt('第二行\n继续增加高度')]}]},children:[]}])};
+ await page.route('**/api/admin/editor/*',route=>{saved={...saved,...route.request().postDataJSON(),sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);const mergedCell=page.locator('.bn-editor td[rowspan="2"]').first();await mergedCell.hover();await page.locator('.bn-table-cell-handle').click();await page.getByText('垂直对齐',{exact:true}).hover();await page.getByText('居中',{exact:true}).click();
+ await expect.poll(()=>saved.body.includes('verticalAlignData'),{timeout:8000}).toBe(true);await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});expect(saved.body).toContain('\\"0:0\\":\\"middle\\"');await expect(mergedCell).toHaveCSS('vertical-align','middle');
+ await page.reload();await expect(page.locator('.bn-editor td[rowspan="2"]').first()).toHaveCSS('vertical-align','middle');await page.getByRole('button',{name:'预览草稿',exact:true}).click();await expect(page.locator('.editor-preview td[rowspan="2"]').first()).toHaveCSS('vertical-align','middle');
+});
+
 test('native slash menu and selection toolbar expose original block and formatting controls',async({page})=>{
  await page.route('**/api/admin/editor/*',route=>route.fulfill({json:{...editorFixture,...route.request().postDataJSON(),sequence:4}}));
  await mount(page,()=>editorFixture);const editor=page.locator('.bn-editor');await editor.click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');await page.keyboard.type('/');
