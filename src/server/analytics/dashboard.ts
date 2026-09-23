@@ -6,7 +6,7 @@ export async function readAnalyticsDashboard(c:PoolClient,days:unknown=30):Promi
  const selected=rangeDays(days);
  const allowed=(await c.query<{allowed:boolean}>(`SELECT EXISTS(
   SELECT 1 FROM juyu.current_identity() i JOIN juyu.members m ON m.clerk_user_id=i.member_id
-  WHERE i.role='admin' AND m.observed_at IS NOT NULL AND nullif(btrim(m.verified_email),'') IS NOT NULL
+  WHERE i.role IN('admin','super_admin') AND m.observed_at IS NOT NULL AND nullif(btrim(m.verified_email),'') IS NOT NULL
  ) AS allowed`)).rows[0]?.allowed;
  if(allowed!==true)throw new Error('FORBIDDEN');
  const result=await c.query<{data:DashboardData}>(`

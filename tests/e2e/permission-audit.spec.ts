@@ -17,7 +17,8 @@ test('T055 every business HTTP method rejects forged identity and conditional-ca
   const source=await readFile(file,'utf8');const methods=[...source.matchAll(/export\s+(?:async\s+)?function\s+(GET|POST|PUT|PATCH|DELETE|HEAD)\b/g)].map(x=>x[1]);
   expect(methods.length,`No recognized methods: ${file}`).toBeGreaterThan(0);
   for(const method of [...methods,...(methods.includes('GET')&&!methods.includes('HEAD')?['HEAD']:[])]){
-   const url=path+((method==='GET'||method==='HEAD')&&path===`/api/favorites/${id}`?'?revision=1':'');
+   const query=(method==='GET'||method==='HEAD')?(path===`/api/favorites/${id}`?'?revision=1':path==='/api/search'?'?q=account':''):'';
+   const url=path+query;
    const response=await request.fetch(url,{method,maxRedirects:0,headers:{...claims,'if-none-match':'"forged-cache"','if-modified-since':'Wed, 01 Jan 2099 00:00:00 GMT'},...(method==='GET'||method==='HEAD'?{}:{data:{role:'admin',memberId:'forged-admin',companyVerified:true}})});
    expect(response.status(),method+' '+path).toBe(503);expect(response.headers()['cache-control'],path).toContain('no-store');
    if(method==='HEAD')expect(await response.body(),path).toHaveLength(0);else{const body=await response.json();expect(Object.keys(body),path).toEqual(['error']);expect(/^(AUTH_NOT_CONFIGURED|[A-Z_]+_UNAVAILABLE)$/.test(body.error)||(path.endsWith('/diagram')&&body.error==='流程图不可读取。')||(path==='/api/admin/workspace'&&body.error==='内容暂时无法读取，请稍后重试。'),path).toBe(true);}checked.push({path,method,status:response.status()});
