@@ -7,7 +7,7 @@ import {confirmAction,notify} from '../feedback/feedback';
 import {Gear,Eye,X,ImageSquare,ArrowLeft,PlusCircle,Stack,Info,Code,Table,ChatCircleText,LinkSimple} from '@phosphor-icons/react';
 import {SyntaxHighlightingExtension} from '@blocknote/core/extensions';
 import {codeHighlighter} from '../../editor/highlight';
-import {nativeEditorContent} from '../../editor/native';
+import {editorThemeDefaults,nativeEditorContent} from '../../editor/native';
 import {safeLink} from '../../editor/inline';
 import {annotationHref} from '../../editor/annotation';
 import {inlineEmbedHref} from '../../editor/inline-embed';
@@ -207,7 +207,7 @@ function ReadyEditor({recoveryOwner,initial,newReference,newQa,newOps,newTransla
    let fields:ReturnType<typeof fieldPayload>;
    try{fields=fieldPayload();}catch{throw new Error('INVALID_FIELDS');}
    let body:string;
-   try{body=encodeEditorBody(editorSnapshot(editor.document));}catch(error){throw error instanceof Error&&error.message==='PRIVATE_EDITOR_FILE_REQUIRED'?error:new Error('INVALID_BODY');}
+   try{body=encodeEditorBody(editorThemeDefaults(editorSnapshot(editor.document)));}catch(error){throw error instanceof Error&&error.message==='PRIVATE_EDITOR_FILE_REQUIRED'?error:new Error('INVALID_BODY');}
    let qa:ReturnType<typeof normalizeQa>|undefined;
    if(kind==='qa')try{qa=normalizeQa({category:qaCategory,position:Number(qaPosition)});}catch{throw new Error('INVALID_QA');}
    const content:Content={locale,translationOf,categoryIds:categories,...fields,title:title.trim(),description:description.trim(),releaseNote:releaseNote.trim(),body,kind,audience,tags:presentation.tags,cover:presentation.cover,iconKey:presentation.iconKey,...(qa===undefined?{}:{qa})};

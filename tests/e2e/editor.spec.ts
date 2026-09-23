@@ -236,6 +236,14 @@ test('real BlockNote edits autosave reload and mixed blocks preview in order',as
  await page.reload();await expect(page.locator('.bn-editor')).toContainText('中文更新');await expect(page.locator('.editor-embedded')).toHaveCount(1);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`output/verification/editor-${info.project.name}.png`,fullPage:true});await page.evaluate(()=>document.documentElement.dataset.theme='dark');await page.locator('.editor-canvas').scrollIntoViewIfNeeded();await page.screenshot({path:`output/verification/editor-dark-${info.project.name}.png`,fullPage:false});
 });
+test('BlockNote default text follows dark theme while authored emphasis colours remain',async({page})=>{
+ const body=encodeEditorBody([{id:'theme-text',type:'paragraph',props:{textAlignment:'left',textColor:'rgb(0, 0, 0)',backgroundColor:'default'},content:[{type:'text',text:'普通黑字',styles:{textColor:'rgb(0, 0, 0)'}},{type:'text',text:'红色强调',styles:{textColor:'red'}}],children:[]}]);
+ await mount(page,()=>({...structuredClone(editorFixture),body}));
+ await page.evaluate(()=>document.documentElement.dataset.theme='dark');
+ const root=page.locator('.editor-canvas .bn-container');await expect(root).toHaveAttribute('data-color-scheme','dark');
+ const colors=await page.locator('.bn-editor').evaluate(editor=>{const walker=document.createTreeWalker(editor,NodeFilter.SHOW_TEXT);let node:Node|null;const result:{normal?:string;emphasis?:string;editor:string}={editor:getComputedStyle(editor).color};while(node=walker.nextNode()){if(node.textContent?.includes('普通黑字'))result.normal=getComputedStyle(node.parentElement!).color;if(node.textContent?.includes('红色强调'))result.emphasis=getComputedStyle(node.parentElement!).color;}return result;});
+ expect(colors.normal).toBe(colors.editor);expect(colors.normal).not.toBe('rgb(0, 0, 0)');expect(colors.emphasis).not.toBe(colors.normal);
+});
 test('callout edits in place and uses a focused appearance inspector',async({page})=>{
  let saved=structuredClone(editorFixture);
  await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});

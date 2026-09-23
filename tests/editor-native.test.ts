@@ -90,3 +90,36 @@ test('saved reader content preserves all palette colors and combined inline form
  assert.deepEqual(nativeEditorContent(read!,[]),original);
  assert.equal(encodeEditorBody(nativeEditorContent(read!,[])),saved);
 });
+
+test('editable copy restores neutral black text to BlockNote default without losing authored colour contrast',()=>{
+ const black='rgb(0, 0, 0)';
+ const blocks=normalizeEditorBlocks([
+  p('neutral','paragraph',{textColor:black,backgroundColor:'default'},[
+   {type:'text',text:'普通正文',styles:{textColor:black}},
+   {type:'text',text:'红色强调',styles:{textColor:'red'}},
+   {type:'text',text:'有底色黑字',styles:{textColor:black,backgroundColor:'yellow'}},
+  ]),
+  p('table-theme','table',{textColor:black},{type:'tableContent',rows:[{cells:[
+   {type:'tableCell',props:{textColor:black,backgroundColor:'default'},content:[{type:'text',text:'普通表格字',styles:{textColor:'#000000'}}]},
+   {type:'tableCell',props:{textColor:black,backgroundColor:'yellow'},content:[{type:'text',text:'保留黑字',styles:{textColor:black}}]}
+  ]}]})
+ ]);
+ const editable=nativeEditorContent(blocks,[]);
+ const paragraph=editable[0];
+ assert.equal(paragraph.type,'paragraph');
+ if(paragraph.type!=='paragraph')return;
+ assert.equal(paragraph.props.textColor,'default');
+ assert.deepEqual(paragraph.content[0],{type:'text',text:'普通正文',styles:{}});
+ assert.deepEqual(paragraph.content[1],{type:'text',text:'红色强调',styles:{textColor:'red'}});
+ assert.deepEqual(paragraph.content[2],{type:'text',text:'有底色黑字',styles:{textColor:black,backgroundColor:'yellow'}});
+ const table=editable[1];
+ assert.equal(table.type,'table');
+ if(table.type!=='table')return;
+ assert.equal(table.props.textColor,'default');
+ assert.equal(table.content.rows[0].cells[0].props.textColor,'default');
+ assert.deepEqual(table.content.rows[0].cells[0].content[0],{type:'text',text:'普通表格字',styles:{}});
+ assert.equal(table.content.rows[0].cells[1].props.textColor,black);
+ const preserved=table.content.rows[0].cells[1].content[0];
+ assert.equal(preserved.type,'text');
+ if(preserved.type==='text')assert.equal(preserved.styles.textColor,black);
+});
