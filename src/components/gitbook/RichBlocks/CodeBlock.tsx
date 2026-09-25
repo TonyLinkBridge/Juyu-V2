@@ -4,7 +4,7 @@ import {codeHighlighter} from '../../../editor/highlight';
 import {codeLineNumbers} from '../../../media/code-lines';
 import type {TextBlock} from '../../../media/model';
 import {CopyCodeButton} from './CopyCodeButton';
-import {useReaderLocale} from '../Media/ArticleReferenceContext';
+import {useReaderLocale} from '../../reader-support/ArticleReferenceContext';
 export function CodeBlock({block}:{block:Extract<TextBlock,{type:'code'}>}){
  const english=useReaderLocale()==='en';
  const [highlight,setHighlight]=useState<{code:string;language:string;html:string}|null>(null);

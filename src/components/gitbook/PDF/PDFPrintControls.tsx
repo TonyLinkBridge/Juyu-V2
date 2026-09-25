@@ -1,6 +1,9 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
+import Link from 'next/link';
+import {buttonVariants} from 'fumadocs-ui/components/ui/button';
 import {PrintButton} from './PrintButton';
+import {articleContentPath} from '../../../reader/content-path';
 // Adapted from GitBook print controls and image-loading feedback; JUYU adds
 // confirmed server download with explicit failure recovery.
 export function PDFPrintControls({documentId,revision,coverId,publicationNumber,locale='zh-CN'}:{publicationNumber?:number|null;documentId:string;revision:number;coverId:string|null;locale?:'zh-CN'|'en'}){
@@ -24,7 +27,7 @@ export function PDFPrintControls({documentId,revision,coverId,publicationNumber,
   finally{clearTimeout(timer);if(request.current===controller)setBusy(false);}
  }
  return <div className="pdf-controls">
-  <div className="pdf-actions"><a className="secondary-link" href={`/help-centre?article=${encodeURIComponent(documentId)}${english?'&lang=en':''}`}>{english?'← Back to article':'← 返回文章'}</a><button className="secondary-link" type="button" disabled={busy} onClick={()=>void download()}>{english?busy?'Generating PDF…':'Download PDF':busy?'正在生成 PDF…':'下载 PDF'}</button><PrintButton disabled={!ready||imageError} documentId={documentId} revision={revision} coverId={coverId} locale={locale}/></div>
+  <div className="pdf-actions"><Link className={buttonVariants({variant:'outline'})} href={articleContentPath(documentId)}>{english?'← Back to article':'← 返回文章'}</Link><button className={buttonVariants({variant:'outline'})} type="button" disabled={busy} onClick={()=>void download()}>{english?busy?'Generating PDF…':'Download PDF':busy?'正在生成 PDF…':'下载 PDF'}</button><PrintButton disabled={!ready||imageError} documentId={documentId} revision={revision} coverId={coverId} locale={locale}/></div>
   <p>{english?`You’re viewing ${publicationNumber?`published version ${publicationNumber}`:'published content'}. Access is checked again when you download.`:`当前为${publicationNumber?`正式版本 ${publicationNumber}`:'已发布内容'}。下载内容以生成时的权限检查为准。`}</p>
   {(!ready||imageError)&&<p role="alert">{english?imageError?'The cover image didn’t load, so printing is unavailable. Reload this page and try again.':'Preparing images…':imageError?'封面未能加载，打印暂不可用。请重新载入页面；下载时服务器也会检查图片。':'正在准备图片，请稍候…'}</p>}
   <p role="status">{message}</p>

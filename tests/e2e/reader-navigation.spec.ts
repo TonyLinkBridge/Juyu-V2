@@ -95,29 +95,6 @@ test('group buttons control unique panels and nested document navigation retains
 
 const readingBody=['# 转出前准备','核对域名状态与申请人资料。','- 检查申请资料','- 确认域名状态','## 操作步骤',...Array.from({length:12},()=> '这是一段仅用于阅读排版验收的示例文本。它不代表正式业务规则。'.repeat(5)),'## 操作步骤','3. 提交申请','4. 等待处理','# 注意事项','请以正式发布的内部规则为准。'].join('\n\n');
 
-test('published body and outline share anchors, preserve deep links and do not execute markup',async({page},info)=>{
- await fixture(page,pages,false,readingBody+'\n\n<script>window.readerInjected=true</script>\n<img src="https://outside.example/private" onerror="alert(1)">');
- await page.goto('/help-centre?article=page-1');
- await expect(page.getByRole('heading',{level:1})).toHaveText('域名转出操作说明');
- const outline=page.getByRole('navigation',{name:'本页目录'});
- await expect(outline.getByRole('link',{name:'操作步骤',exact:true})).toHaveCount(2);
- await outline.getByRole('link',{name:'操作步骤',exact:true}).nth(1).click();
- await expect(page).toHaveURL(/#section-3$/);
-
- await expect.poll(()=>page.locator('#section-3').evaluate(element=>element.getBoundingClientRect().top>=0&&element.getBoundingClientRect().bottom<=window.innerHeight)).toBe(true);
- await expect(outline.locator('[aria-current="location"]')).toHaveAttribute('href','#section-3');
- await page.evaluate(()=>window.scrollTo(0,0));
- await expect(outline.locator('[aria-current="location"]')).toHaveAttribute('href','#section-1');
- await outline.getByRole('link',{name:'操作步骤',exact:true}).nth(1).click();
- await expect(outline.locator('[aria-current="location"]')).toHaveAttribute('href','#section-3');
- await page.reload();await expect.poll(()=>page.locator('#section-3').evaluate(element=>element.getBoundingClientRect().top>=0&&element.getBoundingClientRect().bottom<=window.innerHeight)).toBe(true);
- await expect(page.locator('.gitbook-document script,.gitbook-document img')).toHaveCount(0);
- expect(await page.evaluate(()=>Object.prototype.hasOwnProperty.call(window,'readerInjected'))).toBe(false);
- await page.goto('/help-centre?article=page-1');
- expect(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth)).toBe(false);
- await page.screenshot({path:`output/verification/reading-${info.project.name}.png`});
-});
-
 test('plain and empty formal bodies do not fabricate an outline',async({page})=>{
  await fixture(page,pages,false,'没有标题的正式文本。\n下一行继续显示。');await page.goto('/help-centre?article=page-0');
  await expect(page.locator('.gitbook-document')).toContainText('没有标题的正式文本。');
@@ -126,16 +103,6 @@ test('plain and empty formal bodies do not fabricate an outline',async({page})=>
  await expect(page.getByText('这篇文章暂时没有正文。')).toBeVisible();
  await expect(page.getByRole('navigation',{name:'本页目录'})).toHaveCount(0);
 });
-
-test('outline follows manual scrolling to the end and back through a long section',async({page})=>{
- await fixture(page,pages,false,readingBody);await page.goto('/help-centre?article=page-1');
- const outline=page.getByRole('navigation',{name:'本页目录'});
- await page.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));
- await expect(outline.locator('[aria-current="location"]')).toHaveAttribute('href','#section-4');
- await page.locator('#section-2').evaluate(element=>window.scrollTo(0,window.scrollY+element.getBoundingClientRect().top+200));
- await expect(outline.locator('[aria-current="location"]')).toHaveAttribute('href','#section-2');
-});
-
 
 test('mobile menu opens as a modal, closes with Escape and restores focus',async({page})=>{
  await page.setViewportSize({width:390,height:844});await fixture(page,nested);await page.goto('/help-centre?article=page-1');
@@ -187,18 +154,6 @@ test('closing a scrolled page restores scroll and resizing to desktop releases t
  await page.setViewportSize({width:390,height:844});await expect(trigger).toBeVisible();await expect(dialog).not.toBeVisible();await trigger.click();await expect(dialog).toBeVisible();
 });
 
-test('narrow landscape and wide table containers do not expand the reading page',async({page})=>{
- await page.setViewportSize({width:568,height:320});await fixture(page,pages,false,readingBody);await page.goto('/help-centre?article=page-1');await openDirectory(page);
- const dialog=page.getByRole('dialog',{name:'文章目录菜单'});await expect(dialog.getByRole('button',{name:'关闭文章目录'})).toBeInViewport();
- const nav=dialog.getByRole('navigation',{name:'文章目录'});await nav.getByRole('link',{name:'业务操作说明 35',exact:true}).click();await expect(dialog).not.toBeVisible();
- // Layout-only fixture: the real table renderer is still a future content task.
- await page.locator('.gitbook-document').evaluate(element=>{const region=document.createElement('div');region.className='reader-scroll-region';region.tabIndex=0;region.setAttribute('aria-label','表格排版测试');const table=document.createElement('table');table.style.minWidth='1200px';const row=table.insertRow();for(let i=0;i<12;i++)row.insertCell().textContent='示例表格列 '+i;region.append(table);element.append(region);});
- const region=page.getByLabel('表格排版测试');expect(await region.evaluate(element=>element.scrollWidth>element.clientWidth)).toBe(true);
- await region.evaluate(element=>{element.scrollLeft=300;});expect(await region.evaluate(element=>element.scrollLeft)).toBeGreaterThan(0);
- expect(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth)).toBe(false);
-});
-
-
 test('unsupported modal browsers retain a working details fallback without runtime errors',async({page})=>{
  await page.setViewportSize({width:390,height:844});
  await page.addInitScript(()=>{Object.defineProperty(HTMLDialogElement.prototype,'showModal',{value:undefined,configurable:true});Object.defineProperty(HTMLDialogElement.prototype,'close',{value:undefined,configurable:true});});
@@ -212,42 +167,4 @@ test('mobile-first reader reveals its current deep directory item after switchin
  await page.setViewportSize({width:390,height:844});await fixture(page);await page.goto('/help-centre?article=page-34');
  await expect(page.getByRole('button',{name:'打开文章目录'})).toBeVisible();await page.setViewportSize({width:1440,height:1000});
   await expect(page.getByRole('navigation',{name:'文章目录'}).locator('[aria-current="page"]')).toBeInViewport({ratio:1});
-});
-
-
-test('breadcrumb hierarchy and page cards follow the visible directory with native history',async({page},info)=>{
- await fixture(page,nested);await page.goto('/help-centre?article=page-2');
- const crumbs=page.getByRole('navigation',{name:'面包屑'});
- await expect(crumbs.getByRole('link',{name:'资料目录'})).toHaveAttribute('href','/help-centre/library');
- await expect(crumbs.locator('li')).toHaveCount(4);
- await expect(crumbs.locator('li').last()).toHaveText('域名转出');
- await expect(crumbs.locator('summary[aria-label="切换分类：客服知识"]')).toBeVisible();
- const cards=page.getByRole('navigation',{name:'文章翻页'});
- await expect(cards.getByRole('link',{name:'上一篇: 域名转出操作说明'})).toHaveAttribute('href','/help-centre?article=page-1');
- await expect(cards.getByRole('link',{name:'下一篇: 开始使用资料库'})).toHaveAttribute('href','/help-centre?article=page-0');
- expect(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth)).toBe(false);
- await page.screenshot({path:`output/verification/page-links-${info.project.name}.png`,fullPage:true});
- await cards.getByRole('link',{name:'下一篇: 开始使用资料库'}).focus();await page.keyboard.press('Enter');
- await expect(page.getByRole('heading',{level:1})).toHaveText('开始使用资料库');
- await page.reload();await expect(cards.getByRole('link',{name:'下一篇: 业务操作说明 5'})).toBeVisible();
- await page.goBack();await expect(page.getByRole('heading',{level:1})).toHaveText('费用与退款规则');
- await crumbs.getByRole('link',{name:'资料目录'}).click();await expect(page.getByRole('heading',{level:1})).toHaveText('欢迎使用资料库');await expect(cards).toHaveCount(0);
-});
-
-test('single, first, last and unavailable articles expose only usable page navigation',async({page})=>{
- await fixture(page,[pages[0]]);await page.goto('/help-centre?article=page-0');
- await expect(page.getByRole('navigation',{name:'文章翻页'})).toHaveCount(0);await expect(page.getByRole('navigation',{name:'面包屑'}).locator('li')).toHaveCount(1);
- await page.unrouteAll();await fixture(page,[pages[0],pages[1]]);await page.goto('/help-centre?article=page-0');
- const cards=page.getByRole('navigation',{name:'文章翻页'});await expect(cards.getByRole('link')).toHaveCount(1);await expect(cards.getByRole('link')).toHaveAttribute('rel','next');
- await cards.getByRole('link').click();await expect(cards.getByRole('link')).toHaveCount(1);await expect(cards.getByRole('link')).toHaveAttribute('rel','prev');
- await page.goto('/help-centre?article=unreadable');await expect(cards).toHaveCount(0);await expect(page.getByRole('navigation',{name:'面包屑'})).toHaveCount(0);await expect(page.getByRole('button',{name:'回到顶部'})).toHaveCount(0);
-});
-
-test('back to top scrolls fully and returns keyboard focus while retaining the article deep link',async({page})=>{
- await fixture(page,pages,false,readingBody);await page.goto('/help-centre?article=page-1#section-3');
- const button=page.getByRole('button',{name:'回到顶部'});
- await button.focus();await page.keyboard.press('Enter');
- await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBe(0);await expect(page.getByRole('heading',{level:1})).toBeFocused();await expect(page).toHaveURL(/article=page-1#section-3$/);
- await page.emulateMedia({reducedMotion:'reduce'});await button.focus();await page.keyboard.press('Enter');
- await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBe(0);await expect(page.getByRole('heading',{level:1})).toBeFocused();
 });

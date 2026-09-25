@@ -1,6 +1,7 @@
 'use client';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {recordRecentView} from '../../recent/client';
+import {articleContentPath} from '../../reader/content-path';
 type Props={documentId:string;revision:number};
 export function RecentRecorder(props:Props){return <Recorder key={`${props.documentId}:${props.revision}`} {...props}/>;}
 function Recorder({documentId,revision}:Props){
@@ -24,5 +25,5 @@ function Recorder({documentId,revision}:Props){
  },[record]);
  function retry(){if(state.current.pending||document.visibilityState!=='visible')return;setBusy(true);void record();}
  if(!error)return null;
- return <aside className="recent-recording" aria-label="最近浏览记录"><p role="status">{error}</p><div className="favorite-recovery"><button className="secondary-link" type="button" disabled={busy} onClick={retry}>{busy?'正在记录…':'重试记录浏览'}</button><a href={`/help-centre?article=${encodeURIComponent(documentId)}`}>刷新文章</a></div></aside>;
+ return <aside className="recent-recording" aria-label="最近浏览记录"><p role="status">{error}</p><div className="favorite-recovery"><button className="secondary-link" type="button" disabled={busy} onClick={retry}>{busy?'正在记录…':'重试记录浏览'}</button><a href={articleContentPath(documentId)}>刷新文章</a></div></aside>;
 }

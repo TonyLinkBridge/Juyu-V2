@@ -10,6 +10,7 @@ async function route(error='',empty=false){
  if(name.endsWith('/company-clerk'))return {employeeCompanyAccess:async()=>({status:'verified'})};
  if(name.endsWith('/enrollment/application'))return {applicationEnrollment:async()=>({inspect:async()=>({status:'ready'})})};
  if(name.endsWith('/members/entry'))return {bindCurrentMember:async()=>{}};
+ if(name.endsWith('/reader-presentation'))return {readReaderPresentation:async()=>({items:[],features:{search:true}})};
  if(name.endsWith('/reference/http'))return {referenceQuery};
  if(name.endsWith('/authorization/application'))return {applicationAuthorization:async()=>({referencePage:async(_page:number,requested?:string)=>{if(['FORBIDDEN','SERVICE_UNAVAILABLE'].includes(error))throw new Error(error);const data={items:empty?[]:[{id:'00000000-0000-4000-8000-000000000001'}],total:empty?0:1,page:1,pages:1};const id=requested??data.items[0]?.id;return {data,detail:id&&!error?{id,title:'费用',revision:1,tables:[]}:undefined,detailState:id?(error?'unavailable':'ready'):'idle'};}})};
  return new Proxy({},{get:(_,key)=>String(key)});

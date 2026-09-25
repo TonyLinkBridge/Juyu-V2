@@ -1,6 +1,6 @@
 'use client';
 import {useId,useState,type ReactNode} from 'react';
-import {useReaderLocale} from '../Media/ArticleReferenceContext';
+import {useReaderLocale} from './ArticleReferenceContext';
 export function InlineAnnotation({note,children}:{note:string;children:ReactNode}){
  const english=useReaderLocale()==='en';
  const id=useId(),[open,setOpen]=useState(false);

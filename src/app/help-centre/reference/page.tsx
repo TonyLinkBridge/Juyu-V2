@@ -1,4 +1,3 @@
-import {ReaderMenu} from '../../../components/navigation-settings/ReaderMenu';
 import {redirect} from 'next/navigation';
 import {clerkConfiguration} from '../../../config/clerk';
 import {employeeCompanyAccess} from '../../../server/authentication/company-clerk';
@@ -7,10 +6,8 @@ import {bindCurrentMember} from '../../../server/members/entry';
 import {applicationAuthorization} from '../../../server/authorization/application';
 import {referenceQuery} from '../../../server/reference/http';
 import type {ReferencePage,ReferenceDetail} from '../../../reference/model';
-import {EntryShell} from '../../../components/entry-shell';
-import {ReferenceView} from '../../../components/reference/ReferenceView';
-import {FeatureSearch} from '../../../components/features/FeatureSearch';
-import {SearchInput} from '../../../components/gitbook/Search/SearchInput';
+import {FumadocsReferencePage} from '../../../components/fumadocs/FumadocsReferencePage';
+import {readReaderPresentation} from '../../../server/reader-presentation';
 
 export const dynamic='force-dynamic';
 
@@ -38,5 +35,7 @@ export default async function ReferenceCollectionPage({searchParams}:{searchPara
   if(error instanceof Error&&error.message.split(':')[0]==='FORBIDDEN')state='denied';
  }
 
- return <EntryShell account locale={locale} navigation={<ReaderMenu currentHref="/help-centre/reference"/>} search={locale==='en'?<SearchInput locale="en"/>:<FeatureSearch/>}><main id="main-content" className="editor-main search-main"><ReferenceView data={data} detail={detail} state={state} detailState={detailState} locale={locale}/></main></EntryShell>;
+ let menu:Awaited<ReturnType<typeof readReaderPresentation>>['items']=[],search=false;
+ try{const presentation=await readReaderPresentation();menu=presentation.items;search=presentation.features.search;}catch{}
+ return <FumadocsReferencePage data={data} detail={detail} state={state} detailState={detailState} locale={locale} menu={menu} search={search}/>;
 }

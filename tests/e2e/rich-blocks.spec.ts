@@ -18,16 +18,6 @@ async function editor(page:Page){let state=structuredClone(initial);const bodies
  await page.route('**/api/admin/media/rich-test',route=>{const body=route.request().postDataJSON();bodies.push(body);state={...state,blocks:body.blocks,cover:body.cover,sequence:state.sequence+1};return route.fulfill({json:state});});await page.goto('/admin/media?article=rich-test');return bodies;
 }
 async function reader(page:Page,content=blocks){await page.route(url=>url.pathname==='/help-centre',route=>route.fulfill({contentType:'text/html',body:html({pages:[{type:'document',id:'rich-test',title:'提示、代码和标签 · 本地示例',href:'/help-centre?article=rich-test'}],requested:'rich-test',article:{id:'rich-test',title:'提示、代码和标签 · 本地示例',revision:1,body:'员工正式阅读示例',blocks:content}})}));await page.route('**/api/articles/rich-test/feedback?**',route=>route.fulfill({json:{feedback:null}}));await page.goto('/help-centre');}
-test('reader can view and copy the authorized article as Markdown',async({page,context})=>{
- await context.grantPermissions(['clipboard-read','clipboard-write']);await reader(page);
- await page.getByRole('button',{name:'查看 Markdown'}).click();
- const dialog=page.getByRole('dialog',{name:'文章 Markdown'});
- await expect(dialog.getByRole('textbox',{name:'文章 Markdown 内容'})).toContainText('# 提示、代码和标签');
- await expect(dialog.getByRole('textbox',{name:'文章 Markdown 内容'})).toContainText('员工正式阅读示例');
- await dialog.getByRole('button',{name:'复制全文'}).click();
- const copied=await page.evaluate(()=>navigator.clipboard.readText());expect(copied).toContain('# 提示、代码和标签');
- await dialog.getByRole('button',{name:'关闭',exact:true}).click();await expect(dialog).not.toBeVisible();
-});
 test('external embed waits for the reader click and keeps a safe original link',async({page})=>{
  let requests=0;
  await page.route('https://www.youtube-nocookie.com/**',route=>{requests++;return route.fulfill({contentType:'text/html',body:'<!doctype html><title>Local video frame</title>'});});
@@ -236,7 +226,7 @@ test('same-named tabs synchronize across groups and long tab rows expose an over
 });
 test('copy preserves actual clipboard bytes and literal code never runs in either theme',async({page,context},info)=>{
  await context.grantPermissions(['clipboard-read','clipboard-write']);await reader(page);await page.getByRole('button',{name:'复制代码',exact:true}).click();await expect(page.getByText('已复制',{exact:true})).toBeVisible();expect(await page.evaluate(()=>navigator.clipboard.readText())).toBe(code);expect(await page.evaluate(()=>Object.hasOwn(window,'richInjected'))).toBe(false);
- for(const theme of ['浅色','深色']){await page.getByRole('radio',{name:theme,exact:true}).check();await expect(page.locator('html')).toHaveAttribute('data-theme',theme==='浅色'?'light':'dark');await expect(page.locator('.reader-pdf-link')).toBeVisible();await page.screenshot({path:`output/verification/rich-reader-${info.project.name}-${theme==='浅色'?'light':'dark'}.png`,fullPage:true});}
+ for(const theme of ['浅色','深色']){await page.getByRole('radio',{name:theme,exact:true}).check();await expect(page.locator('html')).toHaveAttribute('data-theme',theme==='浅色'?'light':'dark');await expect(page.getByRole('link',{name:'PDF 阅读／导出'})).toBeVisible();await page.screenshot({path:`output/verification/rich-reader-${info.project.name}-${theme==='浅色'?'light':'dark'}.png`,fullPage:true});}
 });
 test('clipboard rejection never reports success and retry succeeds',async({page})=>{
  await page.addInitScript(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('DENIED');}}});});await reader(page);await page.getByRole('button',{name:'复制代码',exact:true}).click();await expect(page.getByText('复制失败，请选中代码后手动复制。',{exact:true})).toBeVisible();await expect(page.getByText('已复制',{exact:true})).toHaveCount(0);await page.evaluate(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{}}});});await page.getByRole('button',{name:'复制代码',exact:true}).click();await expect(page.getByText('已复制',{exact:true})).toBeVisible();

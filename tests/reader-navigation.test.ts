@@ -2,12 +2,11 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {navigationPage,selectNavigationPage} from '../src/reader/navigation.ts';
 
-test('navigation URLs keep opaque identifiers inside a local query parameter',()=>{
+test('navigation URLs keep opaque identifiers inside the formal article path',()=>{
  const page=navigationPage({id:'../运营?role=admin&#标题',title:'公开标题'});
  const url=new URL(page.href,'https://internal.example');
- assert.equal(url.pathname,'/help-centre');
- assert.equal(url.searchParams.get('article'),'../运营?role=admin&#标题');
- assert.deepEqual([...url.searchParams.keys()],['article']);
+ assert.equal(url.pathname,'/help-centre/articles/..%2F%E8%BF%90%E8%90%A5%3Frole%3Dadmin%26%23%E6%A0%87%E9%A2%98');
+ assert.deepEqual([...url.searchParams.keys()],[]);
  assert.equal(url.hash,'');
 });
 test('selection uses exact authorized IDs and never defaults an unavailable request to another page',()=>{

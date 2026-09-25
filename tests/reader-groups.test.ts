@@ -20,7 +20,7 @@ test('multiple memberships appear once deterministically and stable IDs survive 
  assert.equal(first[0].type,'group');assert.equal(second[0].id,'c');
  if(first[0].type==='group')assert.equal(first[0].descendants.filter(n=>n.id==='one').length,1);
  assert.deepEqual(first.map(n=>n.id),second.map(n=>n.id));
- assert.equal(selectTreePage(second,'one')?.href,'/help-centre?article=one');
+ assert.equal(selectTreePage(second,'one')?.href,'/help-centre/articles/one');
 });
 test('missing or cyclic ancestors cannot promote categorized documents to the root',()=>{
  const broken=[{id:'x',name:'hidden',parent_id:'y',position:0},{id:'y',name:'hidden',parent_id:'x',position:0},{id:'orphan',name:'hidden',parent_id:'gone',position:0}];
@@ -34,7 +34,7 @@ test('category and document identifiers may overlap without losing either node',
  const tree=buildNavigationTree([{id:'same',title:'article'}],[{id:'same',name:'category',parent_id:null,position:0}],[{document_id:'same',category_id:'same'}]);
  assert.equal(selectTreePage(tree,'same')?.title,'article');
 });
-test('English directory links keep the reader in English',()=>{
+test('English directory links open the English publication directly',()=>{
  const tree=buildNavigationTree([{id:'guide',title:'Getting started'}],[],[],{locale:'en'});
- assert.equal(selectTreePage(tree,'guide')?.href,'/help-centre?article=guide&lang=en');
+ assert.equal(selectTreePage(tree,'guide')?.href,'/help-centre/articles/guide');
 });

@@ -1,16 +1,10 @@
 import {closedFeatureFlags} from '../../features/model';
-import {FeatureNotice} from '../../components/features/FeatureNotice';
-import {ArticleAnalytics} from '../../components/analytics/ArticleAnalytics';
-import {SearchAnalytics} from '../../components/analytics/SearchAnalytics';
-import {RecentRecorder} from '../../components/recent/RecentRecorder';
-import {FavoriteButton} from '../../components/favorites/FavoriteButton';
-import {ReaderMenu} from '../../components/navigation-settings/ReaderMenu';
 import {readerAnnouncement} from '../../config/reader-presentation';
-import {SearchInput} from '../../components/gitbook/Search/SearchInput';
-import {SearchResults} from '../../components/gitbook/Search/SearchResults';
 import {parseSearchQuery,parseSearchScope,searchTitles,searchHref} from '../../reader/search';
 import type {Publication} from '../../reader/body';
-import {ReaderNavigation} from '../../components/reader-navigation';
+import {FumadocsDirectoryState} from '../../components/fumadocs/FumadocsDirectoryState';
+import {FumadocsHomeShell,FumadocsKnowledgeHome} from '../../components/fumadocs/FumadocsKnowledgeHome';
+import {FumadocsSearchPage} from '../../components/fumadocs/FumadocsSearchPage';
 import {applicationAuthorization} from '../../server/authorization/application';
 import type {NavigationNode} from '../../reader/tree';
 import { applicationEnrollment } from '../../server/enrollment/application';
@@ -22,11 +16,11 @@ import Link from 'next/link';
 import { adminForCompany } from '../../server/authentication/admin-clerk';
 import { clerkConfiguration } from '../../config/clerk';
 import { employeeCompanyAccess } from '../../server/authentication/company-clerk';
-import { EntryShell, ShieldIcon } from '../../components/entry-shell';
+import {ShieldIcon} from '../../components/entry-shell';
 import { EmployeeSignOut } from '../../components/employee-sign-out';
 import {firstTreePage} from '../../reader/tree';
-import {KnowledgeHome} from '../../components/home/KnowledgeHome';
-import {ReaderQuickLinks} from '../../components/navigation-settings/ReaderQuickLinks';
+import {formalFumadocsPublicationPath} from '../../fumadocs/publication';
+import type {MenuItem} from '../../navigation-settings/model';
 export const dynamic = 'force-dynamic';
 export default async function HelpCentre({searchParams,library=false}:{library?:boolean;searchParams:Promise<{article?:string|string[];q?:string|string[];page?:string|string[];scope?:string|string[];lang?:string|string[]}>}) {
   const access = await employeeCompanyAccess();
@@ -57,16 +51,16 @@ const admin = await adminPromise;
     if(homeParams.article===undefined&&homeParams.q===undefined){
       let home:Awaited<ReturnType<Awaited<ReturnType<typeof applicationAuthorization>>['home']>>|undefined;
       try{home=await(await applicationAuthorization()).home(homeLocale);}catch{}
-      if(!home)return <EntryShell locale={homeLocale}><main id="main-content" className="message-main"><h1>{homeLocale==='en'?'The knowledge base is unavailable':'资料库暂时无法读取'}</h1><p>{homeLocale==='en'?'Try again later. A loading failure is not treated as an empty knowledge base.':'请稍后重试。读取失败不会被当作没有内容。'}</p><Link href={homeLocale==='en'?'/help-centre?lang=en':'/help-centre'}>{homeLocale==='en'?'Try again':'重新读取'}</Link></main></EntryShell>;
+      if(!home)return <FumadocsHomeShell account locale={homeLocale}><section className="message-main"><h1>{homeLocale==='en'?'The knowledge base is unavailable':'资料库暂时无法读取'}</h1><p>{homeLocale==='en'?'Try again later. A loading failure is not treated as an empty knowledge base.':'请稍后重试。读取失败不会被当作没有内容。'}</p><Link href={homeLocale==='en'?'/help-centre?lang=en':'/help-centre'}>{homeLocale==='en'?'Try again':'重新读取'}</Link></section></FumadocsHomeShell>;
       if(library){
         const first=firstTreePage(home.pages);
         if(first)redirect(first.href);
-        return <EntryShell account locale={homeLocale} search={home.features.search?<SearchInput query="" locale={homeLocale}/>:undefined}><ReaderNavigation pages={home.pages} features={home.features} locale={homeLocale}/></EntryShell>;
+        return <FumadocsDirectoryState pages={home.pages} menu={home.menu} features={home.features} locale={homeLocale}/>;
       }
-      return <EntryShell account locale={homeLocale} announcement={readerAnnouncement} navigation={<ReaderQuickLinks items={home.menu} currentHref="/help-centre" locale={homeLocale}/>} search={home.features.search?<SearchInput query="" locale={homeLocale}/>:undefined}>{<KnowledgeHome {...home} locale={homeLocale} search={home.features.search} showRecent={home.features.recent} admin={admin.status==='admin'}/>}</EntryShell>;
+      return <FumadocsKnowledgeHome pages={home.pages} menu={home.menu} latest={home.latest} recent={home.recent} locale={homeLocale} search={home.features.search} showRecent={home.features.recent} admin={admin.status==='admin'} announcement={readerAnnouncement}/>;
     }
     let features=closedFeatureFlags,featuresUnavailable=false;
-    let pages:NavigationNode[]=[];
+    let pages:NavigationNode[]=[],menu:MenuItem[]=[];
     let article:Publication|null=null;
     let failed=false;
     const params=await searchParams;
@@ -74,33 +68,41 @@ const admin = await adminPromise;
     const query=parseSearchQuery(params.q).query;
     const scope=parseSearchScope(params.scope);
     const locale=params.lang==='en'?'en':'zh-CN';
+let authorization:Awaited<ReturnType<typeof applicationAuthorization>>|undefined;
 if(params.q!==undefined){
   try{
-    features=await(await applicationAuthorization()).features();
+    authorization=await applicationAuthorization();
+    features=await authorization.features();
   }catch{
     featuresUnavailable=true;
   }
 }
-let input=features.search?<SearchInput key={`${locale}:${query}`} query={query} scope={scope??'all'} locale={locale}/>:undefined;
-    if(params.q!==undefined&&!features.search)return <EntryShell locale={locale} navigation={<ReaderMenu/>}><FeatureNotice feature="search" unavailable={featuresUnavailable}/></EntryShell>;
+    if(params.q!==undefined&&!features.search){
+      if(authorization)try{[pages,menu]=await Promise.all([authorization.categoryNavigationTree(),authorization.readerMenu()]);}catch{}
+      return <FumadocsDirectoryState pages={pages} menu={menu} features={features} failed={featuresUnavailable} locale={locale}
+       title={featuresUnavailable?(locale==='en'?'Search is temporarily unavailable':'搜索暂时无法使用'):(locale==='en'?'Search is turned off':'搜索已暂停')}
+       description={featuresUnavailable?(locale==='en'?'Reload the page. If the problem continues, contact an admin.':'请重新加载页面，若持续失败请联系管理员。'):(locale==='en'?'An admin has turned search off. You can still browse published content from the directory.':'管理员已暂停搜索，你仍可从资料目录浏览已发布内容。')}
+       retryHref={searchHref(query,1,scope??'all',locale)}/>;
+    }
     if(params.q!==undefined){
       let search=searchTitles([],params.q,params.page);
-      if(scope===null)search={...search,status:'invalid'};
-      else try {({pages,search}=await (await applicationAuthorization()).search(params.q,params.page,scope,locale));}catch{failed=true;}
-      return <EntryShell locale={locale} navigation={<ReaderMenu currentHref="/help-centre"/>} search={input} announcement={failed ? undefined : readerAnnouncement}><div className="reader-search-layout">
-        <SearchAnalytics search={search} enabled={!failed&&features.analytics}><SearchResults search={search} scope={scope??'all'} failed={failed} locale={locale} retryHref={searchHref(query,search.page,scope??'all',locale)}/></SearchAnalytics>
-      </div></EntryShell>;
+      try{
+        const service=authorization??await applicationAuthorization();
+        if(scope===null){search={...search,status:'invalid'};pages=await service.categoryNavigationTree();}
+        else ({pages,search}=await service.search(params.q,params.page,scope,locale));
+        try{menu=await service.readerMenu();}catch{}
+      }catch{failed=true;}
+      return <FumadocsSearchPage pages={pages} menu={menu} features={features} search={search} scope={scope??'all'} failed={failed} locale={locale} retryHref={searchHref(query,search.page,scope??'all',locale)}/>;
     }
-    let favorite:import('../../favorites/model').FavoriteState|undefined;
-    let section:'ops'|undefined;let destination:string|undefined;let referenceAliases:Record<string,string>|undefined;try {({features,pages,article,destination,favorite,section,referenceAliases}=await (await applicationAuthorization()).reader(requested));} catch {failed=true;}
-    input=features.search?<SearchInput key={`${article?.locale??locale}:${query}`} query={query} scope={scope??'all'} locale={article?.locale??locale}/>:undefined;
+    let destination:string|undefined;
+    try {
+      const authorization=await applicationAuthorization();
+      ({features,pages,article,destination}=await authorization.reader(requested));
+      if(!destination&&!article)try{menu=await authorization.readerMenu();}catch{}
+    } catch {failed=true;}
     if(destination)redirect(destination);
-    // The persistent reader chrome reads the URL language. Normalize old or
-    // manually pasted article links after the authorized publication is known.
-    if(article&&((article.locale==='en')!==(params.lang==='en'))){
-      redirect(`/help-centre?article=${encodeURIComponent(article.id)}${article.locale==='en'?'&lang=en':''}`);
-    }
-    return <EntryShell account locale={article?.locale??locale} search={input} announcement={failed ? undefined : readerAnnouncement}><ReaderNavigation section={section} features={features} pages={pages} requested={requested} failed={failed} article={article} locale={article?.locale??locale} referenceAliases={referenceAliases} articleActions={!failed&&article?<>{features.favorites&&<FavoriteButton viewerId={access.status==='verified'?access.userId:undefined} documentId={article.id} revision={article.revision} initial={favorite} locale={article.locale}/>}{features.recent&&<RecentRecorder documentId={article.id} revision={article.revision}/>}{features.analytics&&<ArticleAnalytics documentId={article.id} revision={article.revision}/>}</>:undefined}/></EntryShell>;
+    if(article)redirect(formalFumadocsPublicationPath(article.id));
+    return <FumadocsDirectoryState pages={pages} menu={menu} features={features} requested={requested} failed={failed} locale={locale}/>;
   }
   const opening=enrollment&&enrollment.status!=='ready';
   const denied = access.status === 'denied';
@@ -110,11 +112,11 @@ let input=features.search?<SearchInput key={`${locale}:${query}`} query={query} 
     : enrollment?.status==='ready'?'你的账号已开通。文章阅读页面仍在准备中，暂时不能查阅资料。':access.status === 'verified'
       ? '公司账号验证已通过。资料库仍在准备中，请等待管理员完成开通。'
       : '公司账号验证尚未配置，暂时不能查阅内部资料，请等待管理员完成设置。';
-  return <EntryShell><main id="main-content" className="access-main"><section className="access-card">
+  return <FumadocsHomeShell><div className="access-main"><section className="access-card">
     <div className="entry-icon"><ShieldIcon /></div><p className="card-kicker">TEAM KNOWLEDGE</p>
     <h1>{title}</h1><p className="access-description">{description}</p>
     {opening&&<EnrollmentPanel initial={enrollment!}/>}
     {!opening && !memberBlocked && admin.status === 'admin' && <Link className="secondary-link" href="/admin">进入管理后台</Link>}
     <EmployeeSignOut />
-  </section></main></EntryShell>;
+  </section></div></FumadocsHomeShell>;
 }

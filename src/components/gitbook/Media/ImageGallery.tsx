@@ -1,7 +1,7 @@
 'use client';
 /* eslint-disable @next/next/no-img-element -- private files must keep session-bound delivery. */
 import {useEffect,useRef,useState,type CSSProperties} from 'react';
-import {useReaderLocale} from './ArticleReferenceContext';
+import {useReaderLocale} from '../../reader-support/ArticleReferenceContext';
 
 export interface GalleryImage {id:string;src:string;darkSrc?:string;alt:string;caption?:string;width?:number;alignment?:'left'|'center'|'right'|'justify'}
 

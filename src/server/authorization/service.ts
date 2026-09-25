@@ -160,7 +160,7 @@ export class AuthorizationService {
       return readNavigationTree(client);
     },true);
   }
-async reader(requested:string|string[]|undefined):Promise<{features:Awaited<ReturnType<typeof readFeatureFlags>>;section?:'ops';pages:NavigationNode[];article:Publication|null;favorite?:import('../../favorites/model.ts').FavoriteState;destination?:string;referenceAliases?:Record<string,string>}> {
+async reader(requested:string|string[]|undefined):Promise<{viewerId:string;features:Awaited<ReturnType<typeof readFeatureFlags>>;section?:'ops';pages:NavigationNode[];article:Publication|null;favorite?:import('../../favorites/model.ts').FavoriteState;destination?:string;referenceAliases?:Record<string,string>}> {
   const viewer=await this.viewer();
   return this.database.run(viewer,async client=>{
     const flags=await readFeatureFlags(client);
@@ -169,6 +169,7 @@ async reader(requested:string|string[]|undefined):Promise<{features:Awaited<Retu
     const requestedLanguage=typeof requested==='string'?(await client.query<{locale:'zh-CN'|'en'}>('SELECT locale FROM juyu.read_publication_language($1)',[requested])).rows[0]?.locale:'zh-CN';
     if(kind==='qa'){
       return {
+        viewerId:viewer.id,
         features:flags,
         pages:[],
         article:null,
@@ -182,6 +183,7 @@ async reader(requested:string|string[]|undefined):Promise<{features:Awaited<Retu
     const selected=selectTreePage(pages,requested);
     if(!selected){
       return {
+        viewerId:viewer.id,
         features:flags,
         pages,
         article:null
@@ -203,6 +205,7 @@ async reader(requested:string|string[]|undefined):Promise<{features:Awaited<Retu
          CROSS JOIN LATERAL juyu.read_publication_language(p.id) l WHERE l.locale='en'`,[treeIds(pages)])).rows.map(item=>[item.source,item.id]))
       : undefined;
     return {
+      viewerId:viewer.id,
       features:flags,
       pages,
       favorite,

@@ -1,5 +1,6 @@
 import type {ContentKind} from '../domain/model.ts';
 import type {NavigationNode} from './tree.ts';
+import {contentPath} from './content-path.ts';
 export const SEARCH_LIMIT=120;
 const PAGE_SIZE=20;
 export type SearchScope='all'|ContentKind;
@@ -69,5 +70,6 @@ export function searchSnippet(text:string,query:string,publication?:{title:strin
 
 /** Called after server authorization; Q&A opens its independent answer page directly. */
 export function searchResultHref(kind:ContentKind,id:string,articleHref:string,locale:'zh-CN'|'en'='zh-CN'):string {
- return kind==='qa'?`/help-centre/qa?question=${encodeURIComponent(id)}${locale==='en'?'&lang=en':''}#qa-${encodeURIComponent(id)}`:articleHref;
+ void articleHref;
+ return contentPath(kind,id,locale);
 }

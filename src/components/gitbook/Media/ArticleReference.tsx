@@ -1,7 +1,7 @@
 'use client';
 import type {MediaBlock} from '../../../media/model';
 import {ReaderIcon} from '../../../reader/icons';
-import {useAuthorizedReference,useReaderLocale} from './ArticleReferenceContext';
+import {useAuthorizedReference,useReaderLocale} from '../../reader-support/ArticleReferenceContext';
 
 export function ArticleReference({block,admin=false}:{block:Extract<MediaBlock,{type:'articleReference'}>;admin?:boolean}){
  const page=useAuthorizedReference(block.targetId);

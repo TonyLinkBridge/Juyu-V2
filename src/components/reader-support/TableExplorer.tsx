@@ -1,6 +1,6 @@
 'use client';
 import {useMemo,useState} from 'react';
-import type {MediaBlock} from '../../../media/model';
+import type {MediaBlock} from '../../media/model';
 import {useReaderLocale} from './ArticleReferenceContext';
 
 type TableBlock=Extract<MediaBlock,{type:'table'}>;

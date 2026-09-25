@@ -1,10 +1,10 @@
 import type {ReactNode,CSSProperties} from 'react';
-import {inlineText,screenInlineStyle,type EditorInline} from '../../../editor/inline';
-import {annotationText} from '../../../editor/annotation';
-import {inlineEmbed} from '../../../editor/inline-embed';
-import {ReaderIcon} from '../../../reader/icons';
-import {mediaAssetUrl} from '../../../history/paths';
-import {mathMarkup} from '../../../science/model';
+import {inlineText,screenInlineStyle,type EditorInline} from '../../editor/inline';
+import {annotationText} from '../../editor/annotation';
+import {inlineEmbed} from '../../editor/inline-embed';
+import {ReaderIcon} from '../../reader/icons';
+import {mediaAssetUrl} from '../../history/paths';
+import {mathMarkup} from '../../science/model';
 import {InlineAnnotation} from './InlineAnnotation';
 /* eslint-disable @next/next/no-img-element -- session-protected inline assets use the private endpoint. */
 export const structuredStyle=(p:{textColor?:string;backgroundColor?:string;textAlignment?:CSSProperties['textAlign']}):CSSProperties=>({...screenInlineStyle(p),textAlign:p.textAlignment} as CSSProperties);

@@ -1,7 +1,7 @@
 import {Fragment,type ReactNode} from 'react';
 import {inlineText,isFileBlock,privateAssetId,type EditorBlock} from '../../../editor/document';
-import {StructuredInline,structuredStyle as style} from './StructuredInline';
-export {StructuredInline} from './StructuredInline';
+import {StructuredInline,structuredStyle as style} from '../../reader-support/StructuredInline';
+export {StructuredInline} from '../../reader-support/StructuredInline';
 import {mediaAssetUrl} from '../../../history/paths';
 import {CodeBlock} from '../RichBlocks/CodeBlock';
 import {Hint} from '../RichBlocks/Hint';

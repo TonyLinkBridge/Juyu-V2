@@ -1,6 +1,7 @@
 'use client';
 // Adapted from GitBook PDF/PrintButton.tsx; current access is checked before printing.
 import {useState} from 'react';
+import {buttonVariants} from 'fumadocs-ui/components/ui/button';
 export function PrintButton({disabled,documentId,revision,coverId,locale='zh-CN'}:{disabled:boolean;documentId:string;revision:number;coverId:string|null;locale?:'zh-CN'|'en'}){
  const [busy,setBusy]=useState(false);const [error,setError]=useState('');
  async function print(){
@@ -9,5 +10,5 @@ export function PrintButton({disabled,documentId,revision,coverId,locale='zh-CN'
   catch{setError(locale==='en'?'We couldn’t confirm your access to this version. Reopen the PDF from the article page.':'无法确认当前文章权限或版本，请返回文章重新打开后打印。');}
   finally{setBusy(false);}
  }
- return <div><button className="secondary-link" type="button" disabled={disabled||busy} onClick={()=>void print()}>{locale==='en'?busy?'Checking access…':'Print page':busy?'正在核对…':'打印此页'}</button>{error&&<p role="alert">{error}</p>}</div>;
+ return <div><button className={buttonVariants({variant:'outline'})} type="button" disabled={disabled||busy} onClick={()=>void print()}>{locale==='en'?busy?'Checking access…':'Print page':busy?'正在核对…':'打印此页'}</button>{error&&<p role="alert">{error}</p>}</div>;
 }

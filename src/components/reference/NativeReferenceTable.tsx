@@ -1,6 +1,6 @@
 import type {ReferenceTableData} from '../../reference/model';
 import {visibleReferenceCells,type VisibleReferenceCell} from '../../reference/native';
-import {StructuredInline,structuredStyle} from '../gitbook/Reading/StructuredInline';
+import {StructuredInline,structuredStyle} from '../reader-support/StructuredInline';
 
 function cells(items:VisibleReferenceCell[],locale:'zh-CN'|'en'){
  return items.map(({cell,column,rowSpan,colSpan,header})=>{

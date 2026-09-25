@@ -1,0 +1,255 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+[data-fumadocs-publication-actions] .reader-appearance { margin:0;color:var(--color-fd-muted-foreground);font-size:.8125rem; }
+[data-fumadocs-publication-actions] .reader-appearance>summary { width:max-content;cursor:pointer;padding:4px 0;color:var(--color-fd-foreground); }
+[data-fumadocs-publication-actions] .reader-appearance-panel { display:grid;gap:12px;margin-top:8px;padding:12px;border:1px solid var(--color-fd-border);border-radius:var(--radius-lg);background:var(--color-fd-card); }
+[data-fumadocs-publication-actions] .reader-appearance fieldset { margin:0;padding:0;border:0; }
+[data-fumadocs-publication-actions] .reader-appearance legend { margin-bottom:6px;font-size:.75rem;color:var(--color-fd-muted-foreground); }
+[data-fumadocs-publication-actions] .reader-appearance-options { display:flex;flex-wrap:wrap;gap:6px; }
+[data-fumadocs-publication-actions] .reader-appearance button { cursor:pointer;border:1px solid var(--color-fd-border);border-radius:var(--radius-md);padding:5px 8px;background:var(--color-fd-secondary);color:var(--color-fd-secondary-foreground);font-size:.75rem; }
+[data-fumadocs-publication-actions] .reader-appearance button[aria-pressed='true'] { border-color:var(--color-fd-primary);color:var(--color-fd-primary); }
+.fumadocs-publication-feedback { margin-top:28px;color:var(--color-fd-foreground); }
+.fumadocs-publication-feedback .reader-feedback { margin:0;padding:24px 0;border-color:var(--color-fd-border); }
+.fumadocs-publication-feedback .feedback-rating button,
+.fumadocs-publication-feedback .feedback-submit button,
+.fumadocs-publication-feedback .reader-feedback>form>button { border-color:var(--color-fd-border);background:var(--color-fd-secondary);color:var(--color-fd-secondary-foreground); }
+.fumadocs-publication-feedback textarea { border-color:var(--color-fd-border);background:var(--color-fd-card);color:var(--color-fd-card-foreground); }
+.fumadocs-account .account-controls { margin:0; }
+.fumadocs-account .account-menu>summary { background:var(--color-fd-secondary);color:var(--color-fd-secondary-foreground); }
+.fumadocs-account .account-menu>div { background:var(--color-fd-popover);border-color:var(--color-fd-border);color:var(--color-fd-popover-foreground); }
+.fumadocs-search-results {
+ --ink:var(--color-fd-foreground);
+ --muted:var(--color-fd-muted-foreground);
+ --line:var(--color-fd-border);
+ --brand:var(--color-fd-primary);
+ --panel:var(--color-fd-card);
+ --hover:var(--color-fd-accent);
+ --accent-soft:var(--color-fd-accent);
+ color:var(--color-fd-foreground);
+}
+
+.fumadocs-pdf-content {
+ --ink:var(--color-fd-foreground);
+ --muted:var(--color-fd-muted-foreground);
+ --line:var(--color-fd-border);
+ --panel:var(--color-fd-card);
+ color:var(--color-fd-foreground);
+}
+.fumadocs-pdf-content .pdf-shell { width:100%;max-width:none;padding:0 0 60px; }
+
+@media print {
+ body:has([data-fumadocs-pdf-page]) #nd-sidebar,
+ body:has([data-fumadocs-pdf-page]) #nd-subnav,
+ body:has([data-fumadocs-pdf-page]) #nd-toc,
+ body:has([data-fumadocs-pdf-page]) [data-sidebar-placeholder],
+ body:has([data-fumadocs-pdf-page]) [data-toc-popover-trigger],
+ body:has([data-fumadocs-pdf-page]) .fumadocs-pdf-screen-heading,
+ body:has([data-fumadocs-pdf-page]) .pdf-controls { display:none!important; }
+ body:has([data-fumadocs-pdf-page]) [data-fumadocs-pdf-page],
+ body:has([data-fumadocs-pdf-page]) [data-fumadocs-pdf-content] { width:100%!important;max-width:none!important;margin:0!important;padding:0!important; }
+ body:has([data-fumadocs-pdf-page]) .pdf-paper { margin:0!important;box-shadow:none!important; }
+}
+
+html[data-reader-size='compact'] [data-fumadocs-publication] .bn-editor.bn-default-styles { font-size:14px; }
+html[data-reader-size='large'] [data-fumadocs-publication] .bn-editor.bn-default-styles { font-size:19px; }
+html[data-reader-size='compact'] [data-fumadocs-publication] .bn-editor.bn-default-styles .bn-block-content:not([data-content-type='heading']) .bn-inline-content { font-size:14px!important; }
+html[data-reader-size='large'] [data-fumadocs-publication] .bn-editor.bn-default-styles .bn-block-content:not([data-content-type='heading']) .bn-inline-content { font-size:19px!important; }
+html[data-reader-font='serif'] [data-fumadocs-publication] .bn-editor.bn-default-styles { font-family:Georgia,'Noto Serif CJK SC','Songti SC',serif; }
+@media (min-width:1600px) {
+ html[data-reader-width='wide'] [data-fumadocs-publication] { max-width:1168px; }
+}
+
+.fumadocs-reader-columns {
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:18px;
+ margin:24px 0;
+ align-items:start;
+}
+.fumadocs-reader-columns[data-column-count='3'] { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.fumadocs-reader-columns>article {
+ min-width:0;
+ padding-inline-start:18px;
+ border-inline-start:1px solid var(--color-fd-border);
+ overflow-wrap:anywhere;
+}
+.fumadocs-reader-columns>article:first-child { padding-inline-start:0;border-inline-start:0; }
+.fumadocs-reader-columns>article>h3 { margin:0 0 10px;font-size:1rem;line-height:1.4;font-weight:500; }
+.fumadocs-reader-columns>article>p { margin:0;color:var(--color-fd-muted-foreground);white-space:pre-wrap; }
+
+.fumadocs-reader-code { width:100%;min-width:0; }
+.fumadocs-code-wrap pre,
+.fumadocs-code-wrap .line { white-space:pre-wrap;overflow-wrap:anywhere; }
+.fumadocs-code-wrap pre { min-width:100%;width:100%; }
+.fumadocs-code-viewport.is-collapsed { max-height:calc(var(--juyu-code-visible-lines) * 1lh + .875rem); }
+.fumadocs-code-viewport.is-expanded { max-height:none; }
+
+.fumadocs-reader-image {
+ max-width:100%;
+ margin-block:24px;
+}
+.fumadocs-reader-image[data-image-alignment='left'] { margin-inline:0 auto; }
+.fumadocs-reader-image[data-image-alignment='center'] { margin-inline:auto; }
+.fumadocs-reader-image[data-image-alignment='right'] { margin-inline:auto 0; }
+.fumadocs-reader-image[data-image-alignment='justify'] { width:100%!important;margin-inline:0; }
+.fumadocs-reader-image [data-rmiz] { display:block;max-width:100%; }
+.fumadocs-reader-image img { display:block;width:100%;max-width:100%;height:auto;border-radius:var(--radius-lg); }
+.fumadocs-reader-image figcaption { margin-top:10px;color:var(--color-fd-muted-foreground);font-size:.875rem;line-height:1.5; }
+.fumadocs-reader-image figcaption>p { margin:0; }
+.fumadocs-reader-image-actions { display:flex;flex-wrap:wrap;gap:4px;margin-top:8px; }
+
+.fumadocs-reader-media { max-width:100%;margin-block:24px; }
+.fumadocs-reader-media[data-media-alignment='left'] { margin-inline:0 auto; }
+.fumadocs-reader-media[data-media-alignment='center'] { margin-inline:auto; }
+.fumadocs-reader-media[data-media-alignment='right'] { margin-inline:auto 0; }
+.fumadocs-reader-media[data-media-alignment='justify'] { width:100%!important;margin-inline:0; }
+.fumadocs-reader-media video { display:block;width:100%;max-width:100%;height:auto;border-radius:var(--radius-lg);background:#000; }
+.fumadocs-reader-media audio { display:block;width:min(100%,480px); }
+.fumadocs-reader-media figcaption { margin-top:10px;color:var(--color-fd-muted-foreground);font-size:.875rem;line-height:1.5; }
+.fumadocs-reader-media figcaption>p { margin:0; }
+
+/* Fumadocs' official table appearance, applied explicitly because BlockNote's read-only root is intentionally not-prose. */
+.fumadocs-reader-table {
+ width:100%;
+ table-layout:auto;
+ border-collapse:separate;
+ border-spacing:0;
+ overflow:hidden;
+ border:1px solid var(--color-fd-border);
+ border-radius:var(--radius-lg);
+ background:var(--color-fd-card);
+ color:var(--color-fd-card-foreground);
+ font-size:.875em;
+ line-height:1.7142857;
+}
+.fumadocs-reader-table th,
+.fumadocs-reader-table td { padding:calc(var(--spacing) * 2.5);text-align:start; }
+.fumadocs-reader-table th { border-inline-start:1px solid var(--color-fd-border);background:var(--color-fd-muted);font-weight:600; }
+.fumadocs-reader-table td { border-inline-start:1px solid var(--color-fd-border); }
+.fumadocs-reader-table th:first-child,
+.fumadocs-reader-table td:first-child { border-inline-start:none; }
+.fumadocs-reader-table tr:not(:last-child)>th,
+.fumadocs-reader-table tr:not(:last-child)>td { border-bottom:1px solid var(--color-fd-border); }
+
+/* Fumadocs has no searchable or card-view data table. Keep JUYU's existing table behavior while using Fumadocs theme tokens. */
+.fumadocs-reader-data-table {
+ --ink:var(--color-fd-foreground);
+ --muted:var(--color-fd-muted-foreground);
+ --line:var(--color-fd-border);
+ --surface:var(--color-fd-card);
+ --surface-soft:var(--color-fd-muted);
+ color:var(--color-fd-foreground);
+}
+.fumadocs-reader-data-table .reader-data-table-tools input,
+.fumadocs-reader-data-table .reader-data-table-filters select { color-scheme:light dark; }
+
+/* Fumadocs' official prose-link appearance, applied explicitly inside BlockNote's intentional not-prose root. */
+[data-fumadocs-inline-link] {
+ color:var(--color-fd-foreground);
+ font-weight:500;
+ text-decoration:underline;
+ text-underline-offset:3.5px;
+ text-decoration-color:var(--color-fd-primary);
+ text-decoration-thickness:1.5px;
+ transition:opacity .2s;
+}
+[data-fumadocs-inline-link]:hover { opacity:.8; }
+[data-fumadocs-inline-icon] { color:var(--color-fd-primary); }
+[data-fumadocs-inline-math] { color:inherit; }
+[data-fumadocs-inline-image] {
+ display:inline-block;
+ width:auto;
+ max-width:min(180px,50vw);
+ max-height:2.5em;
+ vertical-align:middle;
+ object-fit:contain;
+}
+
+/* Q&A keeps its reviewed search, filter, answer and cache behavior inside the official docs page. */
+.fumadocs-qa-content {
+ --ink:var(--color-fd-foreground);
+ --muted:var(--color-fd-muted-foreground);
+ --line:var(--color-fd-border);
+ --panel:var(--color-fd-card);
+ --surface:var(--color-fd-muted);
+ --brand:var(--color-fd-primary);
+ --accent-soft:color-mix(in oklab,var(--color-fd-primary) 12%,transparent);
+ color:var(--color-fd-foreground);
+}
+.fumadocs-qa-content .qa-independent { max-width:none;margin:0;padding:0; }
+.fumadocs-qa-content .qa-search button { color:var(--color-fd-primary-foreground); }
+
+.fumadocs-favorites-content {
+ --ink:var(--color-fd-foreground);
+ --muted:var(--color-fd-muted-foreground);
+ --line:var(--color-fd-border);
+ --panel:var(--color-fd-card);
+ --surface:var(--color-fd-muted);
+ --brand:var(--color-fd-primary);
+ --accent-soft:color-mix(in oklab,var(--color-fd-primary) 12%,transparent);
+ color:var(--color-fd-foreground);
+}
+.fumadocs-favorites-content .favorites-results { margin-block:16px; }
+.fumadocs-favorite-item { display:grid;min-width:0;gap:8px; }
+.fumadocs-favorite-item [data-card] span { display:block; }
+.fumadocs-favorite-item .favorite-item-actions { padding:0; }
+.fumadocs-favorite-item .favorite-control { margin:0; }
+
+.fumadocs-recent-content {
+ --ink:var(--color-fd-foreground);
+ --muted:var(--color-fd-muted-foreground);
+ --line:var(--color-fd-border);
+ --panel:var(--color-fd-card);
+ --surface:var(--color-fd-muted);
+ --brand:var(--color-fd-primary);
+ --accent-soft:color-mix(in oklab,var(--color-fd-primary) 12%,transparent);
+ color:var(--color-fd-foreground);
+}
+.fumadocs-recent-content .recent-results { margin-block:16px; }
+.fumadocs-recent-content [data-card] span { display:block; }
+
+.fumadocs-forms-content {
+ --ink:var(--color-fd-foreground);
+ --muted:var(--color-fd-muted-foreground);
+ --line:var(--color-fd-border);
+ --panel:var(--color-fd-card);
+ --surface:var(--color-fd-muted);
+ --brand:var(--color-fd-primary);
+ --action:var(--color-fd-primary);
+ --action-text:var(--color-fd-primary-foreground);
+ --accent-soft:color-mix(in oklab,var(--color-fd-primary) 12%,transparent);
+ color:var(--color-fd-foreground);
+}
+.fumadocs-forms-content .forms-section { max-width:none; }
+.fumadocs-forms-content .forms-collection { margin-block:16px; }
+.fumadocs-forms-content [data-card] span { display:block; }
+
+
+/* Fumadocs does not ship formula or Mermaid viewers. Keep the verified JUYU viewers and map their existing tokens into the Fumadocs theme. */
+.fumadocs-reader-science {
+ --line:var(--color-fd-border);
+ --panel:var(--color-fd-card);
+ --ink:var(--color-fd-card-foreground);
+ --muted:var(--color-fd-muted-foreground);
+ --brand:var(--color-fd-primary);
+ margin-block:24px;
+ color:var(--color-fd-foreground);
+}
+.fumadocs-reader-science .science-block { background:var(--color-fd-card);border-color:var(--color-fd-border); }
+.fumadocs-reader-science .science-math { color:inherit; }
+.fumadocs-reader-science .diagram-controls button,
+.fumadocs-reader-science .diagram-expand,
+.fumadocs-reader-science .diagram-dialog-heading button { background:var(--color-fd-card);border-color:var(--color-fd-border);color:var(--color-fd-card-foreground); }
+
+@media (max-width:767px) {
+ .fumadocs-reader-columns,
+ .fumadocs-reader-columns[data-column-count='3'] { grid-template-columns:minmax(0,1fr);gap:0; }
+ .fumadocs-reader-columns>article {
+  padding:16px 0 0;
+  border-inline-start:0;
+  border-top:1px solid var(--color-fd-border);
+ }
+ .fumadocs-reader-columns>article:first-child { padding-top:0;border-top:0; }
+}

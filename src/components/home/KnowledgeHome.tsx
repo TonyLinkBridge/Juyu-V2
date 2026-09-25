@@ -1,4 +1,4 @@
-import {contentPath} from '../../reader/content-path';
+import {articleContentPath,contentPath} from '../../reader/content-path';
 import {NavigationLink as Link} from '../shell/NavigationLink';
 import {FileText,LinkSimple,Chats,Shield,ArrowRight,Clock} from '@phosphor-icons/react/dist/ssr';
 import type {NavigationNode} from '../../reader/tree';
@@ -49,7 +49,7 @@ export function KnowledgeHome({
   );
 
   return (
-    <main id="main-content" className="knowledge-home">
+    <div className="knowledge-home">
       <section className="home-hero">
         <p className="home-eyebrow">
           {english?'JUYU team knowledge and operations':'JUYU 内部知识与运营中心'}
@@ -180,7 +180,7 @@ export function KnowledgeHome({
                   <Link
                     prefetch={false}
                     prefetchOnIntent
-                    href={`/help-centre?article=${encodeURIComponent(item.id)}${english?'&lang=en':''}`}
+                    href={articleContentPath(item.id)}
                   >
                     <span className="update-dot"/>
 
@@ -252,6 +252,6 @@ export function KnowledgeHome({
 
 
       </div>
-    </main>
+    </div>
   );
 }

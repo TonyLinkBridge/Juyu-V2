@@ -98,9 +98,9 @@ test('both palettes keep reader, search highlights and entry text at readable co
  await readerFixture(page);await page.goto('/help-centre');
  for(const mode of ['浅色','深色']){
   await page.getByRole('radio',{name:mode,exact:true}).check();
-  await textContrast(page,['.reader-version','.gitbook-document .paragraph','.reader-announcement p','.footer-copy span','.theme-toggler span','.reader-navigation-label']);
+  await textContrast(page,['.reader-test-meta','.gitbook-document .paragraph','.reader-announcement p','.footer-copy span','.theme-toggler span']);
  }
- await page.getByRole('combobox',{name:'搜索资料'}).fill('示例');await page.getByRole('button',{name:'搜索',exact:true}).click();
+ await page.goto('/help-centre?q='+encodeURIComponent('示例'));
  await expect(page.getByRole('list',{name:'搜索结果列表'})).toBeVisible();
  for(const mode of ['浅色','深色']){
   await page.getByRole('radio',{name:mode,exact:true}).check();

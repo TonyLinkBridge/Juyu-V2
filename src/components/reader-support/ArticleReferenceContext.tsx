@@ -1,6 +1,6 @@
 'use client';
 import {createContext,useContext,type ReactNode} from 'react';
-import type {NavigationPage} from '../../../reader/navigation';
+import type {NavigationPage} from '../../reader/navigation';
 
 const Context=createContext<{pages:Readonly<Record<string,NavigationPage>>;locale:'zh-CN'|'en'}|null>(null);
 export function ArticleReferenceProvider({pages,aliases={},locale='zh-CN',children}:{pages:NavigationPage[];aliases?:Record<string,string>;locale?:'zh-CN'|'en';children:ReactNode}){

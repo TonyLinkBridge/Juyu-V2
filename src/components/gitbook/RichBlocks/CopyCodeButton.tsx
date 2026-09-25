@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useState} from 'react';
-import {useReaderLocale} from '../Media/ArticleReferenceContext';
+import {useReaderLocale} from '../../reader-support/ArticleReferenceContext';
 // Adapted from GitBook CopyCodeButton; only acknowledge a confirmed clipboard write.
 export function CopyCodeButton({code}:{code:string}){
  const english=useReaderLocale()==='en';

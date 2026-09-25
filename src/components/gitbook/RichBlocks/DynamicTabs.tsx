@@ -4,7 +4,7 @@ import type {TextBlock} from '../../../media/model';
 import {decodeTabBody} from '../../../media/tab-body';
 import {ReaderIcon} from '../../../reader/icons';
 import {StructuredDocument} from '../Reading/StructuredDocument';
-import {useReaderLocale} from '../Media/ArticleReferenceContext';
+import {useReaderLocale} from '../../reader-support/ArticleReferenceContext';
 
 type TabsBlock=Extract<TextBlock,{type:'tabs'}>;
 const selectionEvent='juyu:select-tab';

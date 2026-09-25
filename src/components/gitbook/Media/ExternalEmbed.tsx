@@ -2,7 +2,7 @@
 import {useState} from 'react';
 import {externalEmbedSource,externalLinkSource} from '../../../media/external-embed';
 import type {MediaBlock} from '../../../media/model';
-import {useReaderLocale} from './ArticleReferenceContext';
+import {useReaderLocale} from '../../reader-support/ArticleReferenceContext';
 
 export function ExternalEmbed({block}:{block:Extract<MediaBlock,{type:'externalEmbed'}>}){
  const english=useReaderLocale()==='en';

@@ -8,7 +8,7 @@ import {useCallback,useEffect,useRef,useState} from 'react';
 import type {FavoriteState} from '../../favorites/model';
 import {readFavoriteState,setFavoriteState,FavoriteRejected} from '../../favorites/client';
 
-type Props={viewerId?:string;kind?:ContentKind;documentId:string;revision:number;initial?:FavoriteState;onChange?:(state:FavoriteState)=>void;label?:string;locale?:'zh-CN'|'en'};
+type Props={viewerId?:string;kind?:ContentKind;documentId:string;revision:number;initial?:FavoriteState;onChange?:(state:FavoriteState)=>void;label?:string;locale?:'zh-CN'|'en';buttonClassName?:string;recoveryButtonClassName?:string};
 const favoriteCache=createAnswerCache<FavoriteState>(30_000,50);
 // This listener lives as long as the cache, including after all buttons unmount.
 if(typeof window!=='undefined')window.addEventListener('juyu-clear-recovery',()=>favoriteCache.clear());
@@ -21,7 +21,7 @@ export function FavoriteButton(props:Props){
  return <FavoriteControl key={`${scope}:${props.documentId}:${props.revision}`} {...props} initial={props.viewerId===userId?props.initial:undefined} scope={scope}/>;
 }
 
-function FavoriteControl({scope,kind='article',documentId,revision,initial,onChange,label,locale='zh-CN'}:Props&{scope:string}){
+function FavoriteControl({scope,kind='article',documentId,revision,initial,onChange,label,locale='zh-CN',buttonClassName='secondary-link',recoveryButtonClassName='secondary-link'}:Props&{scope:string}){
  const english=locale==='en',accessibleLabel=label??(english?'Save article':'文章收藏');
  const [saved,setSaved]=useState<boolean|null>(initial?.saved??null),[busy,setBusy]=useState<'read'|'write'|''>(initial?'':'read'),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [pending,setPending]=useState<{saved:boolean}|null>(null);
@@ -86,5 +86,5 @@ function FavoriteControl({scope,kind='article',documentId,revision,initial,onCha
   }
  }
 
- return <section className="favorite-control" aria-label={accessibleLabel}><button className="secondary-link" type="button" aria-pressed={saved??false} aria-busy={Boolean(busy)} disabled={Boolean(busy)||(!pending&&saved===null)} onClick={()=>void change()}><BookmarkSimple size={20} aria-hidden="true"/>{english?busy==='write'?'Saving…':busy==='read'?'Save article':pending?(pending.saved?'Retry save':'Retry removal'):saved?'Remove from saved':'Save article':busy==='write'?'正在保存…':busy==='read'?'收藏文章':pending?(pending.saved?'重试收藏':'重试取消收藏'):saved?'取消收藏':'收藏文章'}</button>{notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}{!busy&&!pending&&error&&<div className="favorite-recovery"><button className="secondary-link" type="button" onClick={reload}>{english?'Reload saved status':'重新读取收藏'}</button><a href={contentPath(kind,documentId,locale)}>{english?'Refresh article':'刷新文章'}</a></div>}</section>;
+ return <section className="favorite-control" aria-label={accessibleLabel}><button className={buttonClassName} type="button" aria-pressed={saved??false} aria-busy={Boolean(busy)} disabled={Boolean(busy)||(!pending&&saved===null)} onClick={()=>void change()}><BookmarkSimple size={20} aria-hidden="true"/>{english?busy==='write'?'Saving…':busy==='read'?'Save article':pending?(pending.saved?'Retry save':'Retry removal'):saved?'Remove from saved':'Save article':busy==='write'?'正在保存…':busy==='read'?'收藏文章':pending?(pending.saved?'重试收藏':'重试取消收藏'):saved?'取消收藏':'收藏文章'}</button>{notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}{!busy&&!pending&&error&&<div className="favorite-recovery"><button className={recoveryButtonClassName} type="button" onClick={reload}>{english?'Reload saved status':'重新读取收藏'}</button><a href={contentPath(kind,documentId,locale)}>{english?'Refresh article':'刷新文章'}</a></div>}</section>;
 }

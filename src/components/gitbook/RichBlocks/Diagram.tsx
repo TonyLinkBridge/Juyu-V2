@@ -4,7 +4,7 @@ import {adminDiagramUrl} from '../../../history/paths';
 import {useRef,useState} from 'react';
 import type {PointerEvent} from 'react';
 import type {ScienceBlock} from '../../../media/model';
-import {useReaderLocale} from '../Media/ArticleReferenceContext';
+import {useReaderLocale} from '../../reader-support/ArticleReferenceContext';
 
 function ZoomableDiagram({url,alt,large=false,onError}:{url:string;alt:string;large?:boolean;onError:()=>void}){
  const english=useReaderLocale()==='en';
@@ -19,8 +19,8 @@ function ZoomableDiagram({url,alt,large=false,onError}:{url:string;alt:string;la
 }
 
 // Preserve server-side authorization: even the expanded viewer loads the protected image URL.
-export function Diagram({block,documentId,revision,admin=false}:{block:ScienceBlock;documentId?:string;revision?:number;admin?:boolean}){
- const english=useReaderLocale()==='en';
+export function Diagram({block,documentId,revision,admin=false,locale}:{block:ScienceBlock;documentId?:string;revision?:number;admin?:boolean;locale?:'zh-CN'|'en'}){
+ const contextLocale=useReaderLocale(),english=(locale??contextLocale)==='en';
  const [retry,setRetry]=useState(0),[image,setImage]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[open,setOpen]=useState(false);
  const dialog=useRef<HTMLDialogElement>(null),expand=useRef<HTMLButtonElement>(null);
  const url=admin?image:documentId?`/api/articles/${encodeURIComponent(documentId)}/diagram?revision=${revision}&block=${encodeURIComponent(block.id)}&retry=${retry}`:'';

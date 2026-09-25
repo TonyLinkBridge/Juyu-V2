@@ -35,17 +35,98 @@ test('QA route ignores stale search URL when disabled while retaining server fea
  const calls:unknown[][]=[];
  const {default:page}=loadComponent('src/app/help-centre/qa/page.tsx',{
   'next/navigation':{redirect:(url:string)=>{throw Error('REDIRECT:'+url);}},
-  '../../../components/navigation-settings/ReaderMenu':{ReaderMenu:'ReaderMenu'},
-  '../../../components/entry-shell':{EntryShell:'EntryShell'},
-  '../../../components/qa/QaView':{QaView:'QaView'},
-  '../../../components/employee-sign-out':{EmployeeSignOut:'EmployeeSignOut'},
-  '../../../components/features/FeatureSearch':{FeatureSearch:'FeatureSearch'},
+  '../../../components/fumadocs/FumadocsQaPage':{FumadocsQaPage:'FumadocsQaPage'},
   '../../../config/clerk':{clerkConfiguration:()=> 'configured'},
   '../../../server/authentication/company-clerk':{employeeCompanyAccess:async()=>({status:'verified',userId:'fixture'})},
   '../../../server/enrollment/application':{applicationEnrollment:async()=>({inspect:async()=>({status:'ready'})})},
   '../../../server/members/entry':{bindCurrentMember:async()=>{}},
+  '../../../server/reader-presentation':{readReaderPresentation:async()=>({items:[],features:{search:false}})},
   '../../../server/authorization/application':{applicationAuthorization:async()=>({features:async()=>({search:false}),qa:async(...args:unknown[])=>{calls.push(args);return {items:[],total:0,page:1,pages:1};}})},
  });
  const result=await (page as (props:unknown)=>Promise<unknown>)({searchParams:Promise.resolve({q:'旧搜索',category:'账户'})});
  assert.deepEqual(calls,[[1,'账户',undefined,'zh-CN',undefined]]);assert.match(JSON.stringify(result),/"searchEnabled":false/);
+});
+
+test('favorites route keeps the disabled feature distinct and never reads a disabled list',async()=>{
+ let reads=0;
+ const {default:page}=loadComponent('src/app/help-centre/favorites/page.tsx',{
+  'next/navigation':{redirect:(url:string)=>{throw Error('REDIRECT:'+url);}},
+  '../../../components/fumadocs/FumadocsFavoritesPage':{FumadocsFavoritesPage:'FumadocsFavoritesPage'},
+  '../../../config/clerk':{clerkConfiguration:()=> 'configured'},
+  '../../../server/authentication/company-clerk':{employeeCompanyAccess:async()=>({status:'verified',userId:'fixture'})},
+  '../../../server/enrollment/application':{applicationEnrollment:async()=>({inspect:async()=>({status:'ready'})})},
+  '../../../server/members/entry':{bindCurrentMember:async()=>{}},
+  '../../../server/reader-presentation':{readReaderPresentation:async()=>({items:[],features:{search:true}})},
+  '../../../server/authorization/application':{applicationAuthorization:async()=>({features:async()=>({favorites:false}),favorites:async()=>{reads++;return {items:[],total:0,page:1,pages:1};}})},
+ });
+ const result=await (page as (props:unknown)=>Promise<unknown>)({searchParams:Promise.resolve({page:'1'})});
+ assert.equal(reads,0);assert.match(JSON.stringify(result),/"state":"disabled"/);assert.match(JSON.stringify(result),/"search":true/);
+});
+
+test('recent route keeps the disabled feature distinct and never reads disabled history',async()=>{
+ let reads=0;
+ const {default:page}=loadComponent('src/app/help-centre/recent/page.tsx',{
+  'next/navigation':{redirect:(url:string)=>{throw Error('REDIRECT:'+url);}},
+  '../../../components/fumadocs/FumadocsRecentPage':{FumadocsRecentPage:'FumadocsRecentPage'},
+  '../../../config/clerk':{clerkConfiguration:()=> 'configured'},
+  '../../../server/authentication/company-clerk':{employeeCompanyAccess:async()=>({status:'verified',userId:'fixture'})},
+  '../../../server/enrollment/application':{applicationEnrollment:async()=>({inspect:async()=>({status:'ready'})})},
+  '../../../server/members/entry':{bindCurrentMember:async()=>{}},
+  '../../../server/reader-presentation':{readReaderPresentation:async()=>({items:[],features:{search:true}})},
+  '../../../server/authorization/application':{applicationAuthorization:async()=>({features:async()=>({recent:false}),recent:async()=>{reads++;return {items:[],total:0,page:1,pages:1};}})},
+ });
+ const result=await (page as (props:unknown)=>Promise<unknown>)({searchParams:Promise.resolve({page:'1'})});
+ assert.equal(reads,0);assert.match(JSON.stringify(result),/"state":"disabled"/);assert.match(JSON.stringify(result),/"search":true/);
+});
+
+test('forms route keeps the disabled feature distinct and never reads disabled forms',async()=>{
+ let reads=0;
+ const {default:page}=loadComponent('src/app/help-centre/forms/page.tsx',{
+  '../../../server/forms/entry':{requireFormReaderEntry:async()=>{}},
+  '../../../components/fumadocs/FumadocsFormsPage':{FumadocsFormsPage:'FumadocsFormsPage'},
+  '../../../server/reader-presentation':{readReaderPresentation:async()=>({items:[],features:{search:true}})},
+  '../../../server/authorization/application':{applicationAuthorization:async()=>({features:async()=>({forms:false}),forms:async()=>{reads++;return [];}})},
+ });
+ const result=await (page as ()=>Promise<unknown>)();
+ assert.equal(reads,0);assert.match(JSON.stringify(result),/"state":"disabled"/);assert.match(JSON.stringify(result),/"search":true/);
+});
+
+test('form fill route keeps the disabled feature distinct and never reads a disabled form',async()=>{
+ let reads=0;
+ const {default:page}=loadComponent('src/app/help-centre/forms/[id]/page.tsx',{
+  '../../../../server/forms/entry':{requireFormReaderEntry:async()=>{}},
+  '../../../../components/fumadocs/FumadocsFormFillPage':{FumadocsFormFillPage:'FumadocsFormFillPage'},
+  '../../../../server/reader-presentation':{readReaderPresentation:async()=>({items:[],features:{search:true}})},
+  '../../../../server/authorization/application':{applicationAuthorization:async()=>({features:async()=>({forms:false}),form:async()=>{reads++;throw Error('SHOULD_NOT_READ');}})},
+ });
+ const result=await (page as (props:unknown)=>Promise<unknown>)({params:Promise.resolve({id:'00000000-0000-4000-8000-000000000010'})});
+ assert.equal(reads,0);assert.match(JSON.stringify(result),/"state":"disabled"/);assert.match(JSON.stringify(result),/"search":true/);
+});
+
+test('changelog rejects an invalid page before reading updates and keeps the Fumadocs shell',async()=>{
+ let reads=0;
+ const {default:page}=loadComponent('src/app/help-centre/changelog/page.tsx',{
+  'next/navigation':{redirect:(url:string)=>{throw Error('REDIRECT:'+url);}},
+  '../../../components/fumadocs/FumadocsChangelogPage':{FumadocsChangelogPage:'FumadocsChangelogPage'},
+  '../../../config/clerk':{clerkConfiguration:()=> 'configured'},
+  '../../../server/authentication/company-clerk':{employeeCompanyAccess:async()=>({status:'verified',userId:'fixture'})},
+  '../../../server/enrollment/application':{applicationEnrollment:async()=>({inspect:async()=>({status:'ready'})})},
+  '../../../server/members/entry':{bindCurrentMember:async()=>{}},
+  '../../../server/reader-presentation':{readReaderPresentation:async()=>({items:[],features:{search:true}})},
+  '../../../server/authorization/application':{applicationAuthorization:async()=>({changelog:async()=>{reads++;throw Error('SHOULD_NOT_READ');}})},
+ });
+ const result=await (page as (props:unknown)=>Promise<unknown>)({searchParams:Promise.resolve({page:'0',lang:'en'})});
+ assert.equal(reads,0);assert.match(JSON.stringify(result),/"state":"unavailable"/);assert.match(JSON.stringify(result),/"locale":"en"/);assert.match(JSON.stringify(result),/"search":true/);
+});
+
+test('PDF route keeps a disabled export distinct and does not read protected content',async()=>{
+ let reads=0;
+ const {default:page}=loadComponent('src/app/help-centre/pdf/page.tsx',{
+  'next/navigation':{redirect:(url:string)=>{throw Error('REDIRECT:'+url);}},
+  '../../../components/fumadocs/FumadocsPDFPage':{FumadocsPDFPage:'FumadocsPDFPage'},
+  '../../../server/reader-presentation':{readReaderPresentation:async()=>({items:[],features:{search:true}})},
+  '../../../server/authorization/application':{applicationAuthorization:async()=>({features:async()=>({pdfExport:false}),pdf:async()=>{reads++;throw Error('SHOULD_NOT_READ');}})},
+ });
+ const result=await (page as (props:unknown)=>Promise<unknown>)({searchParams:Promise.resolve({article:'one',revision:'1'})});
+ assert.equal(reads,0);assert.match(JSON.stringify(result),/"state":"disabled"/);assert.match(JSON.stringify(result),/"search":true/);
 });

@@ -31,27 +31,27 @@ test('English reader chrome keeps its language in search and quick links',async(
  await expect(page.getByRole('navigation',{name:'Help Centre quick links'}).getByRole('link',{name:'Help Centre'})).toHaveAttribute('href','/help-centre?lang=en');
 });
 
-test('article and PDF keep their own reading layout instead of gaining an extra sidebar',async({page})=>{
+test('formal article and PDF routes bypass the legacy reader frame',async({page})=>{
  await page.route('**/reader-frame-fixture*',r=>r.fulfill({contentType:'text/html',body:'<html><body><div id="app"></div></body></html>'}));
- for(const query of ['article=test','screen=pdf']){
-  await page.goto('/reader-frame-fixture?'+query);await page.addScriptTag({content:bundle.script});
-  await expect(page.getByRole('heading',{name:'首页'})).toBeVisible();
-  await expect(page.locator('.knowledge-sidebar')).toHaveCount(query==='screen=pdf'?1:0);
-  await expect(page.locator('header')).toHaveCount(1);
- }
+ await page.goto('/reader-frame-fixture?article=test');await page.addScriptTag({content:bundle.script});
+ await expect(page.getByRole('heading',{name:'首页'})).toBeVisible();
+ await expect(page.locator('.entry-frame')).toHaveCount(0);
+ await expect(page.locator('header')).toHaveCount(0);
+ await page.goto('/reader-frame-fixture?screen=pdf');await page.addScriptTag({content:bundle.script});
+ await expect(page.getByRole('heading',{name:'首页'})).toBeVisible();
+ await expect(page.locator('.entry-frame')).toHaveCount(0);
+ await expect(page.locator('.knowledge-sidebar')).toHaveCount(0);
+ await expect(page.locator('header')).toHaveCount(0);
 });
 
-
-test('R01 search uses one persistent sidebar with a usable result column',async({page},info)=>{
- await page.route('**/reader-frame-fixture*',r=>r.fulfill({contentType:'text/html',body:'<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="app"></div></body></html>'}));
- await page.goto('/reader-frame-fixture?q=域名&searchFixture=1');await page.addStyleTag({content:bundle.css});await page.addScriptTag({content:bundle.script});
- await expect(page.locator('.knowledge-sidebar')).toHaveCount(1);await expect(page.locator('[data-gb-table-of-contents]')).toHaveCount(0);await expect(page.getByText('重复目录')).toHaveCount(0);await expect(page.locator('main')).toHaveCount(1);
- await expect(page.getByRole('link',{name:/域名转出流程/})).toBeVisible();const box=await page.locator('.search-main').boundingBox();expect(box!.width).toBeGreaterThan(info.project.name==='mobile'?300:600);
- expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
- await page.screenshot({path:`output/verification/R01-search-${info.project.name}.png`,fullPage:true});
- await page.evaluate(()=>document.documentElement.dataset.theme='dark');await page.screenshot({path:`output/verification/R01-search-dark-${info.project.name}.png`,fullPage:true});
- await page.goto('/reader-frame-fixture?q=域名&searchFixture=1&failed=1');await page.addStyleTag({content:bundle.css});await page.addScriptTag({content:bundle.script});await expect(page.getByRole('alert')).toContainText('搜索暂时无法加载');await expect(page.getByRole('link',{name:/域名转出流程/})).toHaveCount(0);await expect(page.locator('.knowledge-sidebar')).toHaveCount(1);
+test('formal Fumadocs article path is not wrapped in the legacy reader frame',async({page})=>{
+ await page.route('**/help-centre/articles/formal-example',r=>r.fulfill({contentType:'text/html',body:'<html><body><div id="app"></div></body></html>'}));
+ await page.goto('/help-centre/articles/formal-example');
+ await page.addScriptTag({content:bundle.script});
+ await expect(page.getByRole('main')).toBeVisible();
+ await expect(page.locator('.entry-frame')).toHaveCount(0);
 });
+
 
 test('R05 mobile header expands search and keeps theme and admin entry in account menu',async({page},info)=>{
  await page.route('**/reader-frame-fixture*',r=>r.fulfill({contentType:'text/html',body:'<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="app"></div></body></html>'}));
@@ -74,17 +74,10 @@ test('R08 Reference has one active admin navigation entry on desktop and mobile'
 });
 
 
-test('R21 PDF keeps shared account, search and navigation on screen and removes chrome for printing',async({page},info)=>{
+test('R21 PDF no longer receives duplicate legacy account search or navigation chrome',async({page})=>{
  await page.route('**/reader-frame-fixture*',r=>r.fulfill({contentType:'text/html',body:'<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="app"></div></body></html>'}));
  await page.goto('/reader-frame-fixture?screen=pdf');await page.addStyleTag({content:bundle.css});await page.addStyleTag({content:pdfCSS});await page.addScriptTag({content:bundle.script});
- await expect(page.locator('header')).toHaveCount(1);await expect(page.getByText('重复标题栏')).toHaveCount(0);await expect(page.getByText('重复目录')).toHaveCount(0);
- if(info.project.name==='mobile')await page.getByRole('button',{name:'打开搜索'}).click();
- await expect(page.getByRole('combobox',{name:'搜索资料'})).toBeVisible();
- await page.locator('.account-menu>summary').click();await expect(page.getByRole('button',{name:'退出登录',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'退出登录',exact:true})).toBeEnabled();await expect(page.getByRole('button',{name:'账号设置'})).toBeVisible();
- await page.locator(info.project.name==='mobile'?'.mobile-account-appearance':'.account-controls>.theme-toggler').getByLabel('深色',{exact:true}).check();await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
- if(info.project.name==='desktop')await page.locator('.account-menu>summary').click();
- await expect(page.getByRole('button',{name:'退出登录',exact:true})).not.toHaveCSS('background-color','rgb(255, 255, 255)');
- expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
- await page.screenshot({path:`output/verification/R21-pdf-account-${info.project.name}.png`});
- await page.emulateMedia({media:'print'});await expect(page.locator('header')).toBeHidden();await expect(page.locator('.knowledge-sidebar')).toBeHidden();await expect(page.locator('.feature-announcements')).toBeHidden();await expect(page.locator('#main-content')).toBeVisible();await expect(page.locator('.knowledge-body')).toHaveCSS('display','block');
+ await expect(page.locator('.entry-frame')).toHaveCount(0);await expect(page.locator('header')).toHaveCount(0);await expect(page.locator('.knowledge-sidebar')).toHaveCount(0);
+ await expect(page.getByText('重复标题栏')).toHaveCount(0);await expect(page.getByText('重复目录')).toHaveCount(0);
+ await expect(page.getByRole('main')).toBeVisible();
 });

@@ -3,7 +3,7 @@
 // input focus and confirmed success. JUYU stores one editable response/version.
 import {useCallback,useEffect,useId,useRef,useState} from 'react';
 import {ThumbsUp,ThumbsDown} from '@phosphor-icons/react';
-import type {SavedFeedback} from '../../../feedback/model';
+import type {SavedFeedback} from '../../feedback/model';
 export function PageFeedbackForm({documentId,revision,initial,publicationNumber,locale='zh-CN'}:{publicationNumber?:number|null;documentId:string;revision:number;initial?:SavedFeedback|null;locale?:'zh-CN'|'en'}){
  const label=useCallback((zh:string,en:string)=>locale==='en'?en:zh,[locale]);
  const id=useId();

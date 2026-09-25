@@ -18,12 +18,6 @@ test('empty and failed shortcut states retain readable article directory and exp
  await mount(page,{quickLinks:{items:[]}});await expect(page.getByText('暂无快捷入口，可从文章目录查阅资料。')).toBeVisible();await expect(page.locator('.reader-shortcuts a')).toHaveCount(0);await expect(page.locator('.reader-layout')).toContainText('提交审核');
  await mount(page,{quickLinks:{items,unavailable:true}});await expect(page.getByRole('status')).toContainText('快捷入口暂时无法加载');await expect(page.locator('.reader-shortcuts a')).toHaveCount(0);await expect(page.getByRole('button',{name:'重新加载',exact:true})).toBeVisible();
 });
-test('category landing links only supplied publications and keeps pagination and unavailable labels distinct',async({page},info)=>{
- const data={id:id(100),title:'异常处理',ancestors:[{id:id(101),title:'业务流程'}],items:[{id:id(10),title:'提交审核 <script>',href:'/help-centre?article='+id(10)}],total:21,page:1,pages:2};
- await mount(page,{categoryLanding:{data},quickLinks:{items,currentHref:'/help-centre/categories/'+id(100)}});await expect(page.getByRole('heading',{name:'异常处理'})).toBeVisible();await expect(page.getByRole('navigation',{name:'分类面包屑'})).toContainText('业务流程');await expect(page.getByRole('link',{name:'下一页'})).toHaveAttribute('href','/help-centre/categories/'+id(100)+'?page=2');await expect(page.locator('.category-landing-items')).toContainText('提交审核 <script>');
- expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.evaluate(()=>document.documentElement.dataset.theme='dark');await expect.poll(()=>page.getByRole('link',{name:'返回资料库',exact:true}).evaluate(e=>getComputedStyle(e).backgroundColor)).toBe('rgb(34, 34, 41)');await page.screenshot({path:'output/verification/category-landing-dark-'+info.project.name+'.png',fullPage:true});
- await mount(page,{categoryLanding:{data:null}});await expect(page.getByRole('heading',{name:'分类暂不可用'})).toBeVisible();await expect(page.locator('.category-landing')).not.toContainText('异常处理');
-});
 test('actual menu APIs reject forged role and reader/admin destinations require configured login',async({page,request})=>{
  for(const path of ['/api/admin/navigation','/api/reader-menu']){const r=await request.get(path,{headers:{'x-role':'admin'}});expect([403,503]).toContain(r.status());expect(r.headers()['cache-control']).toBe('private, no-store');expect(r.headers()['vary']).toContain('Authorization');}
  const write=await request.put('/api/admin/navigation',{headers:{origin:'http://127.0.0.1:3210','x-role':'admin'},data:{expectedVersion:0,entries:[]}});expect([403,503]).toContain(write.status());expect(write.headers()['cache-control']).toBe('private, no-store');
@@ -31,22 +25,3 @@ test('actual menu APIs reject forged role and reader/admin destinations require 
 });
 
 test('disabled article feedback and PDF controls are absent while the same article remains readable',async({page})=>{await mount(page,{requested:id(10),article:{id:id(10),title:'提交审核',revision:1,body:'仍可阅读的正式内容'},features:{search:false,pdfExport:false,favorites:false,recent:false,feedback:false,analytics:false,forms:false}});await expect(page.getByRole('heading',{name:'提交审核',exact:true})).toBeVisible();await expect(page.getByRole('link',{name:'PDF 阅读／导出'})).toHaveCount(0);await expect(page.locator('.reader-feedback')).toHaveCount(0);await expect(page.getByText('仍可阅读的正式内容')).toBeVisible();});
-
-test('R06 OPS reading uses its own tree and OPS breadcrumb',async({page},info)=>{
- await mount(page,{section:'ops',requested:id(10),article:{id:id(10),title:'提交审核',revision:1,body:'运营流程正文'},quickLinks:undefined});
- await expect(page.getByRole('heading',{name:'提交审核',exact:true})).toBeVisible();await expect(page.getByRole('navigation',{name:'面包屑'}).getByRole('link',{name:'OPS Internal'})).toHaveAttribute('href','/help-centre/ops');
- if(info.project.name==='mobile')await page.getByRole('button',{name:/文章目录/}).click();
- await expect(page.getByRole('heading',{name:'OPS Internal · 文章目录'})).toBeVisible();await expect(page.locator('nav[data-gb-table-of-contents]:visible')).toHaveCount(1);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-});
-test('article breadcrumb offers keyboard-accessible authorized sibling shortcuts',async({page})=>{
- const siblingPages=[
-  {type:'group',id:id(100),title:'账户管理',descendants:[{type:'group',id:id(101),title:'账户安全',descendants:[{type:'document',id:id(10),title:'修改邮箱',href:'/help-centre?article='+id(10)}]},{type:'group',id:id(102),title:'账单',descendants:[{type:'document',id:id(11),title:'查看账单',href:'/help-centre?article='+id(11)}]}]},
-  {type:'group',id:id(103),title:'运营流程',descendants:[{type:'document',id:id(12),title:'交接',href:'/help-centre?article='+id(12)}]}
- ];
- await mount(page,{pages:siblingPages,requested:id(10),article:{id:id(10),title:'修改邮箱',revision:1,body:'正式内容'}});
- const crumbs=page.getByRole('navigation',{name:'面包屑'});
- await crumbs.getByLabel('切换分类：账户安全').focus();await page.keyboard.press('Enter');
- await expect(crumbs.getByRole('link',{name:'查看账单'})).toHaveCount(0);
- await expect(crumbs.getByRole('link',{name:'账单'})).toHaveAttribute('href','/help-centre?article='+id(11));
- await expect(crumbs.getByRole('link',{name:'账户安全'})).toHaveAttribute('aria-current','page');
-});
