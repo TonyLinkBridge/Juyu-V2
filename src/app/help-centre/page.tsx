@@ -22,6 +22,21 @@ import {firstTreePage} from '../../reader/tree';
 import {formalFumadocsPublicationPath} from '../../fumadocs/publication';
 import type {MenuItem} from '../../navigation-settings/model';
 export const dynamic = 'force-dynamic';
+
+function isDefiniteEnrollmentBlock(error: unknown) {
+  const message = error instanceof Error ? error.message : '';
+  return message.startsWith('FORBIDDEN') || message === 'MEMBER_PENDING';
+}
+
+async function inspectEnrollmentWithRetry() {
+  try {
+    return await (await applicationEnrollment()).inspect();
+  } catch (error) {
+    if (isDefiniteEnrollmentBlock(error)) throw error;
+    return (await applicationEnrollment()).inspect();
+  }
+}
+
 export default async function HelpCentre({searchParams,library=false}:{library?:boolean;searchParams:Promise<{article?:string|string[];q?:string|string[];page?:string|string[];scope?:string|string[];lang?:string|string[]}>}) {
   const access = await employeeCompanyAccess();
   if (access.status === 'signed_out') redirect('/sign-in');
@@ -30,18 +45,17 @@ export default async function HelpCentre({searchParams,library=false}:{library?:
   if (clerkConfiguration(process.env) !== 'configured') redirect('/sign-in');
 const adminPromise = adminForCompany(access);
 let memberBlocked = false;
+let enrollmentUnavailable = false;
 let enrollment: EnrollmentResult | null = null;
 if (access.status === 'verified') {
   try {
-    enrollment = await (await applicationEnrollment()).inspect();
+    enrollment = await inspectEnrollmentWithRetry();
     if (enrollment.status === 'ready') {
       await bindCurrentMember();
     }
   } catch (error) {
-    const message = error instanceof Error ? error.message : '';
-    memberBlocked =
-      message.startsWith('FORBIDDEN') ||
-      message === 'MEMBER_PENDING';
+    memberBlocked = isDefiniteEnrollmentBlock(error);
+    enrollmentUnavailable = !memberBlocked;
   }
 }
 const admin = await adminPromise;
@@ -106,9 +120,10 @@ if(params.q!==undefined){
   }
   const opening=enrollment&&enrollment.status!=='ready';
   const denied = access.status === 'denied';
-  const title = opening?'开通资料库访问':memberBlocked ? '资料库访问已暂停' : denied ? '公司账号验证未通过' : enrollment?.status==='ready'?'资料库账号已开通':'资料库访问尚未开通';
+  const title = opening?'开通资料库访问':memberBlocked ? '资料库访问已暂停' : denied ? '公司账号验证未通过' : enrollmentUnavailable ? '资料库暂时无法读取' : enrollment?.status==='ready'?'资料库账号已开通':'资料库访问尚未开通';
   const description = opening?'公司账号验证已通过，正在处理你的资料库权限。':memberBlocked ? '你的资料库权限已停用或正在核对。请联系管理员处理。' : denied
     ? '请使用同一公司的已验证邮箱和指定 Slack Workspace 账号。你可以退出后重新登录，或联系管理员核对账号。'
+    : enrollmentUnavailable ? '系统暂时无法确认你的资料库权限。请重新读取；如果持续失败，请联系管理员。'
     : enrollment?.status==='ready'?'你的账号已开通。文章阅读页面仍在准备中，暂时不能查阅资料。':access.status === 'verified'
       ? '公司账号验证已通过。资料库仍在准备中，请等待管理员完成开通。'
       : '公司账号验证尚未配置，暂时不能查阅内部资料，请等待管理员完成设置。';
@@ -116,6 +131,7 @@ if(params.q!==undefined){
     <div className="entry-icon"><ShieldIcon /></div><p className="card-kicker">TEAM KNOWLEDGE</p>
     <h1>{title}</h1><p className="access-description">{description}</p>
     {opening&&<EnrollmentPanel initial={enrollment!}/>}
+    {enrollmentUnavailable&&<Link className="secondary-link" href="/help-centre">重新读取资料库</Link>}
     {!opening && !memberBlocked && admin.status === 'admin' && <Link className="secondary-link" href="/admin">进入管理后台</Link>}
     <EmployeeSignOut />
   </section></div></FumadocsHomeShell>;
