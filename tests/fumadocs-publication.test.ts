@@ -78,7 +78,6 @@ test('Fumadocs search keeps authorized module destinations and uses formal paths
  ]});
  assert.deepEqual(results.map(item=>[item.id,item.type,item.url]),[
   ['article one','page','/help-centre/articles/article%20one'],
-  ['article one:snippet','text','/help-centre/articles/article%20one'],
   ['qa-one','page','/help-centre/qa?question=qa-one'],
   ['reference-one','page','/help-centre/reference?article=reference-one'],
  ]);

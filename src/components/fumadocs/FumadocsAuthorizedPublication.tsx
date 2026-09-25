@@ -13,6 +13,7 @@ import {ArticleAnalytics} from '../analytics/ArticleAnalytics';
 import {RecentRecorder} from '../recent/RecentRecorder';
 import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
+import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 
 const previewRoot='/design-preview/fumadocs-reader';
 
@@ -48,7 +49,7 @@ export async function FumadocsAuthorizedPublication({articleId,mode='preview'}:{
  const tree=fumadocsPublicationTree(result.pages,locale,mode);
  const destinations=fumadocsPublicationLanguages(article,mode);
  const root=formal?'/help-centre':previewRoot;
- return <FumadocsPublicationI18n locale={locale} destinations={destinations}><DocsLayout tree={tree} links={formal?fumadocsMenuLinks(menu,locale):undefined} nav={{title:'JUYU Help Centre',url:root}} sidebar={formal?{footer:<FumadocsAccountFooter locale={locale}/>}:{}} searchToggle={{enabled:formal&&result.features.search}}>
+ return <FumadocsSearchProvider locale={locale}><FumadocsPublicationI18n locale={locale} destinations={destinations}><DocsLayout tree={tree} links={formal?fumadocsMenuLinks(menu,locale):undefined} nav={{title:'JUYU Help Centre',url:root}} sidebar={formal?{footer:<FumadocsAccountFooter locale={locale}/>}:{}} searchToggle={{enabled:formal&&result.features.search}}>
   <DocsPage
    data-fumadocs-publication=""
    toc={document.toc}
@@ -62,5 +63,5 @@ export async function FumadocsAuthorizedPublication({articleId,mode='preview'}:{
    <DocsBody><FumadocsBlockNoteReader blocks={document.blocks} published locale={locale} documentId={article.id} revision={article.revision} referencePages={referencePages(result.pages,mode)} referenceAliases={result.referenceAliases}/></DocsBody>
    <FumadocsPublicationFeedback article={article} features={result.features}/>
   </DocsPage>
- </DocsLayout></FumadocsPublicationI18n>;
+ </DocsLayout></FumadocsPublicationI18n></FumadocsSearchProvider>;
 }

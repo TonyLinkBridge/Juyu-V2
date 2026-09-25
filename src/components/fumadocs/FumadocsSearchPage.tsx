@@ -1,4 +1,3 @@
-import {RootProvider} from 'fumadocs-ui/provider/next';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {FeatureFlags} from '../../features/model';
@@ -11,6 +10,7 @@ import {SearchAnalytics} from '../analytics/SearchAnalytics';
 import {SearchResultsBody} from '../gitbook/Search/SearchResults';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
+import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import '../../app/fumadocs-reader.css';
 
 export interface FumadocsSearchPageProps {
@@ -42,5 +42,5 @@ export function FumadocsSearchContent({pages,menu=[],features,search,scope,faile
 }
 
 export function FumadocsSearchPage(props:FumadocsSearchPageProps){
- return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsSearchContent {...props}/></RootProvider>;
+ return <FumadocsSearchProvider locale={props.locale}><FumadocsSearchContent {...props}/></FumadocsSearchProvider>;
 }

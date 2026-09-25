@@ -1,5 +1,4 @@
 import type {Root} from 'fumadocs-core/page-tree';
-import {RootProvider} from 'fumadocs-ui/provider/next';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {MenuItem} from '../../navigation-settings/model';
@@ -9,6 +8,7 @@ import {articleContentPath} from '../../reader/content-path';
 import {OpsCollection} from '../ops/OpsCollection';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
+import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import '../../app/fumadocs-reader.css';
 
 interface FumadocsOpsPageProps {
@@ -60,5 +60,5 @@ export function FumadocsOpsContent({data,state,menu=[],search=false,locale='zh-C
 }
 
 export function FumadocsOpsPage(props:FumadocsOpsPageProps){
- return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsOpsContent {...props}/></RootProvider>;
+ return <FumadocsSearchProvider locale={props.locale}><FumadocsOpsContent {...props}/></FumadocsSearchProvider>;
 }

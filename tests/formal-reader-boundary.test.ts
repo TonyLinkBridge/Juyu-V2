@@ -23,7 +23,7 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  for(const legacy of ['EntryShell','ReaderMenu','ReaderQuickLinks','HeaderSearch'])assert.doesNotMatch(search,new RegExp(legacy));
  assert.match(route,/FumadocsSearchPage/);
  const home=await readFile('src/components/fumadocs/FumadocsKnowledgeHome.tsx','utf8');
- for(const official of ['RootProvider','HomeLayout'])assert.match(home,new RegExp(official));
+ for(const official of ['FumadocsSearchProvider','HomeLayout'])assert.match(home,new RegExp(official));
  assert.match(home,/KnowledgeHome/);
  for(const legacy of ['EntryShell','ReaderQuickLinks','HeaderSearch'])assert.doesNotMatch(home,new RegExp(legacy));
  assert.match(route,/FumadocsKnowledgeHome/);
@@ -39,14 +39,15 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  assert.match(knowledgeHome,/home-document-number/);
  assert.match(knowledgeHome,/home-side/);
  assert.doesNotMatch(knowledgeHome,/home-entry-icon/);
- assert.match(home,/fumadocsSearchOptions\(locale\)/);
- assert.match(home,/fumadocsRootI18n\(locale\)/);
- assert.match(home,/SearchDialog:FumadocsScopedSearchDialog/);
+ const searchProvider=await readFile('src/components/fumadocs/FumadocsSearchProvider.tsx','utf8');
+ assert.match(searchProvider,/fumadocsSearchOptions\(locale\)/);
+ assert.match(searchProvider,/fumadocsRootI18n\(locale\)/);
+ assert.match(searchProvider,/SearchDialog:FumadocsScopedSearchDialog/);
  assert.match(home,/juyu-home-brand/);
  assert.match(home,/NewAnnouncements silentFailure/);
  assert.match(home,/searchToggle=\{\{enabled:false\}\}/);
  assert.doesNotMatch(home,/themeSwitch=\{\{enabled:false\}\}/);
- assert.match(home,/theme=\{\{enabled:false\}\}/);
+ assert.match(searchProvider,/theme=\{\{enabled:false\}\}/);
 
  const homeStyles=await readFile('src/app/product-shell.css','utf8');
  assert.match(homeStyles,/--juyu-home-accent:#b3131b/);
@@ -56,7 +57,7 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  const opsPage=await readFile('src/components/fumadocs/FumadocsOpsPage.tsx','utf8');
  assert.match(opsRoute,/FumadocsOpsPage/);
  assert.doesNotMatch(opsRoute,/EntryShell|ReaderMenu|SearchInput|FeatureSearch/);
- for(const official of ['RootProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(opsPage,new RegExp(official));
+ for(const official of ['FumadocsSearchProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(opsPage,new RegExp(official));
  assert.match(opsPage,/OpsCollection/);
  assert.doesNotMatch(opsPage,/EntryShell|ReaderMenu|ReaderQuickLinks|HeaderSearch/);
  assert.match(frame,/help-centre\/ops/);
@@ -65,7 +66,7 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  const referencePage=await readFile('src/components/fumadocs/FumadocsReferencePage.tsx','utf8');
  assert.match(referenceRoute,/FumadocsReferencePage/);
  assert.doesNotMatch(referenceRoute,/EntryShell|ReaderMenu|SearchInput|FeatureSearch/);
- for(const official of ['RootProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(referencePage,new RegExp(official));
+ for(const official of ['FumadocsSearchProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(referencePage,new RegExp(official));
  assert.match(referencePage,/ReferenceView/);
  assert.doesNotMatch(referencePage,/EntryShell|ReaderMenu|ReaderQuickLinks|HeaderSearch/);
  assert.match(frame,/help-centre\/reference/);
@@ -74,7 +75,7 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  const qaPage=await readFile('src/components/fumadocs/FumadocsQaPage.tsx','utf8');
  assert.match(qaRoute,/FumadocsQaPage/);
  assert.doesNotMatch(qaRoute,/EntryShell|ReaderMenu|SearchInput|FeatureSearch/);
- for(const official of ['RootProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(qaPage,new RegExp(official));
+ for(const official of ['FumadocsSearchProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(qaPage,new RegExp(official));
  assert.match(qaPage,/QaView/);
  assert.doesNotMatch(qaPage,/EntryShell|ReaderMenu|ReaderQuickLinks|HeaderSearch/);
  assert.match(frame,/help-centre\/qa/);
@@ -83,7 +84,7 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  const favoritesPage=await readFile('src/components/fumadocs/FumadocsFavoritesPage.tsx','utf8');
  assert.match(favoritesRoute,/FumadocsFavoritesPage/);
  assert.doesNotMatch(favoritesRoute,/EntryShell|ReaderMenu|SearchInput|FeatureSearch|FeaturePage/);
- for(const official of ['RootProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(favoritesPage,new RegExp(official));
+ for(const official of ['FumadocsSearchProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(favoritesPage,new RegExp(official));
  assert.match(favoritesPage,/FavoritesView/);
  assert.doesNotMatch(favoritesPage,/EntryShell|ReaderMenu|ReaderQuickLinks|HeaderSearch/);
  const favoritesView=await readFile('src/components/favorites/FavoritesView.tsx','utf8');
@@ -96,7 +97,7 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  const recentPage=await readFile('src/components/fumadocs/FumadocsRecentPage.tsx','utf8');
  assert.match(recentRoute,/FumadocsRecentPage/);
  assert.doesNotMatch(recentRoute,/EntryShell|ReaderMenu|SearchInput|FeatureSearch|FeaturePage/);
- for(const official of ['RootProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(recentPage,new RegExp(official));
+ for(const official of ['FumadocsSearchProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(recentPage,new RegExp(official));
  assert.match(recentPage,/RecentView/);
  assert.doesNotMatch(recentPage,/EntryShell|ReaderMenu|ReaderQuickLinks|HeaderSearch/);
  const recentView=await readFile('src/components/recent/RecentView.tsx','utf8');
@@ -109,7 +110,7 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  const formsPage=await readFile('src/components/fumadocs/FumadocsFormsPage.tsx','utf8');
  assert.match(formsRoute,/FumadocsFormsPage/);
  assert.doesNotMatch(formsRoute,/EntryShell|ReaderMenu|FeaturePage/);
- for(const official of ['RootProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(formsPage,new RegExp(official));
+ for(const official of ['FumadocsSearchProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(formsPage,new RegExp(official));
  assert.match(formsPage,/FormCollection/);
  assert.doesNotMatch(formsPage,/EntryShell|ReaderMenu|ReaderQuickLinks|HeaderSearch/);
  const formViews=await readFile('src/components/forms/FormViews.tsx','utf8');
@@ -121,7 +122,7 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  const formFillPage=await readFile('src/components/fumadocs/FumadocsFormFillPage.tsx','utf8');
  assert.match(formFillRoute,/FumadocsFormFillPage/);
  assert.doesNotMatch(formFillRoute,/EntryShell|ReaderMenu|FeaturePage/);
- for(const official of ['RootProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(formFillPage,new RegExp(official));
+ for(const official of ['FumadocsSearchProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(formFillPage,new RegExp(official));
  assert.match(formFillPage,/FormFill/);
  assert.doesNotMatch(formFillPage,/EntryShell|ReaderMenu|ReaderQuickLinks|HeaderSearch/);
  assert.match(frame,/startsWith\('\/help-centre\/forms\/'\)/);
@@ -130,7 +131,7 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  const changelogPage=await readFile('src/components/fumadocs/FumadocsChangelogPage.tsx','utf8');
  assert.match(changelogRoute,/FumadocsChangelogPage/);
  assert.doesNotMatch(changelogRoute,/EntryShell|ReaderMenu|SearchInput/);
- for(const official of ['RootProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription','Cards','Card','buttonVariants'])assert.match(changelogPage,new RegExp(official));
+ for(const official of ['FumadocsSearchProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription','Cards','Card','buttonVariants'])assert.match(changelogPage,new RegExp(official));
  assert.doesNotMatch(changelogPage,/EntryShell|ReaderMenu|ReaderQuickLinks|HeaderSearch/);
  assert.match(frame,/help-centre\/changelog/);
 
@@ -138,7 +139,7 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  const pdfPage=await readFile('src/components/fumadocs/FumadocsPDFPage.tsx','utf8');
  assert.match(pdfRoute,/FumadocsPDFPage/);
  assert.doesNotMatch(pdfRoute,/EntryShell|ReaderMenu|FeatureSearch|FeaturePage/);
- for(const official of ['RootProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription','buttonVariants'])assert.match(pdfPage,new RegExp(official));
+ for(const official of ['FumadocsSearchProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription','buttonVariants'])assert.match(pdfPage,new RegExp(official));
  assert.match(pdfPage,/PDFPage/);
  assert.doesNotMatch(pdfPage,/EntryShell|ReaderMenu|ReaderQuickLinks|HeaderSearch/);
  assert.match(frame,/help-centre\/pdf/);

@@ -1,4 +1,3 @@
-import {RootProvider} from 'fumadocs-ui/provider/next';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import {buttonVariants} from 'fumadocs-ui/components/ui/button';
@@ -10,6 +9,7 @@ import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {fumadocsPublicationTree,type FumadocsPublicationLocale} from '../../fumadocs/publication';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
+import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import '../../app/fumadocs-reader.css';
 
 interface DirectoryStateProps {
@@ -60,5 +60,5 @@ export function FumadocsDirectoryContent({pages,menu=[],features,requested,faile
 }
 
 export function FumadocsDirectoryState(props:DirectoryStateProps){
- return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsDirectoryContent {...props}/></RootProvider>;
+ return <FumadocsSearchProvider locale={props.locale}><FumadocsDirectoryContent {...props}/></FumadocsSearchProvider>;
 }

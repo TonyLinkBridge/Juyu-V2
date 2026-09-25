@@ -196,6 +196,7 @@ test('inline annotation saves selected words and opens as a note in the reader p
  await page.reload();await expect(page.locator('.bn-editor')).toContainText('需要说明的词');
 });
 test('inline icon, formula and image keep their meaning after autosave and preview',async({page})=>{
+ await page.addInitScript(()=>localStorage.setItem('theme','dark'));
  const imageId='00000000-0000-4000-8000-000000000081';
  let saved={...structuredClone(editorFixture),assets:[{id:imageId,filename:'verification.png',mime:'image/png',size:'100',status:'ready'}]};
  await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
@@ -223,7 +224,7 @@ test('inline icon, formula and image keep their meaning after autosave and previ
  await page.reload();await expect(page.locator('.editor-canvas .inline-reader-icon svg')).toBeVisible();
  await expect(page.locator('.editor-canvas .inline-reader-math math')).toBeVisible();
  await expect(page.locator('.editor-canvas .inline-reader-image')).toHaveAttribute('alt','验证截图');
- await page.evaluate(()=>document.documentElement.dataset.theme='dark');
+ await expect(page.locator('html')).toHaveClass(/dark/);
  await expect(page.locator('.editor-canvas .bn-container')).toHaveAttribute('data-color-scheme','dark');
  await expect(page.locator('.editor-canvas .inline-reader-math math')).toBeVisible();
 });
@@ -234,12 +235,13 @@ test('real BlockNote edits autosave reload and mixed blocks preview in order',as
  await insertBlockFromRail(page,'提示框');const hint=page.locator('.editor-embedded').last();const nested=hint.locator('xpath=ancestor::div[@data-node-type="blockContainer"][1]').locator('.bn-block-group .bn-inline-content').last();await nested.click();await page.keyboard.insertText('核对二审');await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
  await page.getByRole('button',{name:'预览草稿',exact:true}).click();await expect(page.locator('.editor-preview')).toContainText('中文更新');await expect(page.locator('.editor-preview')).toContainText('核对二审');
  await page.reload();await expect(page.locator('.bn-editor')).toContainText('中文更新');await expect(page.locator('.editor-embedded')).toHaveCount(1);
- expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`output/verification/editor-${info.project.name}.png`,fullPage:true});await page.evaluate(()=>document.documentElement.dataset.theme='dark');await page.locator('.editor-canvas').scrollIntoViewIfNeeded();await page.screenshot({path:`output/verification/editor-dark-${info.project.name}.png`,fullPage:false});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`output/verification/editor-${info.project.name}.png`,fullPage:true});await page.evaluate(()=>document.documentElement.classList.add('dark'));await page.locator('.editor-canvas').scrollIntoViewIfNeeded();await page.screenshot({path:`output/verification/editor-dark-${info.project.name}.png`,fullPage:false});
 });
 test('BlockNote default text follows dark theme while authored emphasis colours remain',async({page})=>{
+ await page.addInitScript(()=>localStorage.setItem('theme','dark'));
  const body=encodeEditorBody([{id:'theme-text',type:'paragraph',props:{textAlignment:'left',textColor:'rgb(0, 0, 0)',backgroundColor:'default'},content:[{type:'text',text:'普通黑字',styles:{textColor:'rgb(0, 0, 0)'}},{type:'text',text:'红色强调',styles:{textColor:'red'}}],children:[]}]);
  await mount(page,()=>({...structuredClone(editorFixture),body}));
- await page.evaluate(()=>document.documentElement.dataset.theme='dark');
+ await expect(page.locator('html')).toHaveClass(/dark/);
  const root=page.locator('.editor-canvas .bn-container');await expect(root).toHaveAttribute('data-color-scheme','dark');
  const colors=await page.locator('.bn-editor').evaluate(editor=>{const walker=document.createTreeWalker(editor,NodeFilter.SHOW_TEXT);let node:Node|null;const result:{normal?:string;emphasis?:string;editor:string}={editor:getComputedStyle(editor).color};while(node=walker.nextNode()){if(node.textContent?.includes('普通黑字'))result.normal=getComputedStyle(node.parentElement!).color;if(node.textContent?.includes('红色强调'))result.emphasis=getComputedStyle(node.parentElement!).color;}return result;});
  expect(colors.normal).toBe(colors.editor);expect(colors.normal).not.toBe('rgb(0, 0, 0)');expect(colors.emphasis).not.toBe(colors.normal);

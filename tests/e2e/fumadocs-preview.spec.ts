@@ -55,19 +55,17 @@ test('directory and unavailable states use the official Fumadocs shell',async({p
 
 test('Help Centre home retains every JUYU entry inside the official Fumadocs home layout',async({page},info)=>{
  const requestedTags:string[]=[];
- await page.route('**/api/fumadocs-search?**',route=>{
+ await page.route('**/api/fumadocs-search?**',async route=>{
   const tag=new URL(route.request().url()).searchParams.get('tag')??'all';
   requestedTags.push(tag);
+  await new Promise(resolve=>setTimeout(resolve,350));
   const results=tag==='qa'?
    [
-    {id:'qa-credit',type:'page',url:'/help-centre/qa?question=credit',content:'什么是 0 元签约店铺？',breadcrumbs:['Q&A 问答']},
-    {id:'qa-credit:snippet',type:'text',url:'/help-centre/qa?question=credit',content:'了解签约店铺和信用额度的使用规则。',breadcrumbs:['Q&A 问答','什么是 0 元签约店铺？']},
+    {id:'qa-credit',type:'page',url:'/help-centre/qa?question=credit',content:'什么是 0 元签约店铺？',title:'什么是 0 元签约店铺？',snippet:'了解签约店铺和信用额度的使用规则。',kind:'qa',breadcrumbs:['Q&A 问答'],total:1},
    ]:
    [
-    {id:'qa-credit',type:'page',url:'/help-centre/qa?question=credit',content:'什么是 0 元签约店铺？',breadcrumbs:['Q&A 问答']},
-    {id:'qa-credit:snippet',type:'text',url:'/help-centre/qa?question=credit',content:'了解签约店铺和信用额度的使用规则。',breadcrumbs:['Q&A 问答','什么是 0 元签约店铺？']},
-    {id:'article-credit',type:'page',url:'/help-centre/articles/credit-article',content:'如何申请信用额度？',breadcrumbs:['知识文章']},
-    {id:'article-credit:snippet',type:'text',url:'/help-centre/articles/credit-article',content:'提交申请前需要准备账户和店铺资料。',breadcrumbs:['知识文章','如何申请信用额度？']},
+    {id:'qa-credit',type:'page',url:'/help-centre/qa?question=credit',content:'什么是 0 元签约店铺？',title:'什么是 0 元签约店铺？',snippet:'了解签约店铺和信用额度的使用规则。',kind:'qa',breadcrumbs:['Q&A 问答'],total:2},
+    {id:'article-credit',type:'page',url:'/help-centre/articles/credit-article',content:'如何申请信用额度？',title:'如何申请信用额度？',snippet:'提交申请前需要准备账户和店铺资料。',kind:'article',breadcrumbs:['知识文章'],total:2},
    ];
   return route.fulfill({json:results});
  });
@@ -110,11 +108,16 @@ test('Help Centre home retains every JUYU entry inside the official Fumadocs hom
  const dialog=page.getByRole('dialog');
  const searchInput=dialog.getByPlaceholder('搜索');
  await searchInput.fill('信用额度');
+ await expect(dialog.getByRole('status')).toHaveText('正在搜索…');
  await expect(dialog.getByText('什么是 0 元签约店铺？',{exact:true})).toBeVisible();
+ await expect(dialog.locator('button[aria-selected]')).toHaveCount(2);
  await expect(dialog.getByText('了解签约店铺和信用额度的使用规则。',{exact:true})).toBeVisible();
  await expect(dialog.getByText('如何申请信用额度？',{exact:true})).toBeVisible();
+ await expect(dialog.getByRole('link',{name:/查看全部结果/})).toHaveAttribute('href','/help-centre?q=%E4%BF%A1%E7%94%A8%E9%A2%9D%E5%BA%A6');
  await page.locator('button[data-active]').filter({hasText:'Q&A 问答'}).click();
+ await expect(dialog.getByRole('status')).toHaveText('正在搜索…');
  await expect(dialog.getByText('如何申请信用额度？',{exact:true})).toHaveCount(0);
+ await expect(dialog.locator('button[aria-selected]')).toHaveCount(1);
  expect(requestedTags).toContain('all');
  expect(requestedTags).toContain('qa');
  await dialog.getByRole('button',{name:'关闭搜索'}).click();

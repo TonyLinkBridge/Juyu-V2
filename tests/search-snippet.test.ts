@@ -25,3 +25,12 @@ test('publication search snippet omits the indexed title and tags before showing
  const answer='这是标准答案的第一句。后面继续说明实际处理方式。';
  assert.equal(publicationSnippet([title,...tags,answer].join('\n'),'0 元签约',title,tags),answer);
 });
+test('publication snippet removes a repeated question answer label and stray image filename',()=>{
+ const title='什么是 0 元签约店铺？';
+ const tags=['签约店铺'];
+ const value=publicationSnippet([title,...tags,title,'A:','0 元签约店铺会先使用信用额度。','image.png','后续收益用于归还额度。'].join('\n'),'0 元',title,tags);
+ assert.match(value,/0 元签约店铺会先使用信用额度/);
+ assert.doesNotMatch(value,/^什么是 0 元签约店铺/);
+ assert.doesNotMatch(value,/\bA:/);
+ assert.doesNotMatch(value,/image\.png/i);
+});

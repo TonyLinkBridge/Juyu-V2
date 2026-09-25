@@ -3,7 +3,6 @@ import {Card,Cards} from 'fumadocs-ui/components/card';
 import {buttonVariants} from 'fumadocs-ui/components/ui/button';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
-import {RootProvider} from 'fumadocs-ui/provider/next';
 import Link from 'next/link';
 import type {ContentKind} from '../../domain/model';
 import type {MenuItem} from '../../navigation-settings/model';
@@ -11,6 +10,7 @@ import {contentPath} from '../../reader/content-path';
 import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
+import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import '../../app/fumadocs-reader.css';
 
 export interface ChangelogPageData {
@@ -83,5 +83,5 @@ export function FumadocsChangelogContent({data,state,menu=[],search=false,locale
 }
 
 export function FumadocsChangelogPage(props:FumadocsChangelogPageProps){
- return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsChangelogContent {...props}/></RootProvider>;
+ return <FumadocsSearchProvider locale={props.locale}><FumadocsChangelogContent {...props}/></FumadocsSearchProvider>;
 }

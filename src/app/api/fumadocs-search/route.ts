@@ -12,7 +12,7 @@ export async function GET(request:Request){
  if(parsed.status==='empty')return Response.json([],{headers});
  try{
   const {search}=await(await applicationAuthorization()).search(parsed.query,undefined,parsed.scope,parsed.locale);
-  return Response.json(fumadocsSearchResults(search),{headers});
+  return Response.json(fumadocsSearchResults(search,parsed.locale),{headers});
  }catch(error){
   const message=error instanceof Error?error.message:'';
   const status=message.startsWith('FORBIDDEN')?403:message==='AUTH_NOT_CONFIGURED'?503:500;

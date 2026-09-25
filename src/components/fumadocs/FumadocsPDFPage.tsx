@@ -2,7 +2,6 @@ import type {Root} from 'fumadocs-core/page-tree';
 import {buttonVariants} from 'fumadocs-ui/components/ui/button';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
-import {RootProvider} from 'fumadocs-ui/provider/next';
 import Link from 'next/link';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {PDFSnapshot} from '../../pdf/model';
@@ -11,6 +10,7 @@ import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {PDFPage} from '../gitbook/PDF/PDFPage';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
+import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import '../../app/fumadocs-reader.css';
 
 interface FumadocsPDFPageProps {
@@ -51,5 +51,5 @@ export function FumadocsPDFContent({snapshot,state,message,menu=[],search=false,
 }
 
 export function FumadocsPDFPage(props:FumadocsPDFPageProps){
- return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsPDFContent {...props}/></RootProvider>;
+ return <FumadocsSearchProvider locale={props.locale}><FumadocsPDFContent {...props}/></FumadocsSearchProvider>;
 }

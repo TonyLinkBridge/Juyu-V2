@@ -1,5 +1,4 @@
 import type {Root} from 'fumadocs-core/page-tree';
-import {RootProvider} from 'fumadocs-ui/provider/next';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {MenuItem} from '../../navigation-settings/model';
@@ -9,6 +8,7 @@ import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {QaView} from '../qa/QaView';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
+import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import '../../app/fumadocs-reader.css';
 
 interface FumadocsQaPageProps {
@@ -71,5 +71,5 @@ export function FumadocsQaContent({data,initialAnswer,viewerId,state,menu=[],sea
 }
 
 export function FumadocsQaPage(props:FumadocsQaPageProps){
- return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsQaContent {...props}/></RootProvider>;
+ return <FumadocsSearchProvider locale={props.locale}><FumadocsQaContent {...props}/></FumadocsSearchProvider>;
 }

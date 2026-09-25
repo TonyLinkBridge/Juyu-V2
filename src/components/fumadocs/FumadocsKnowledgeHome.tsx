@@ -1,4 +1,3 @@
-import {RootProvider} from 'fumadocs-ui/provider/next';
 import {HomeLayout} from 'fumadocs-ui/layouts/home';
 import {Suspense,type ComponentProps,type ReactNode} from 'react';
 import type {ReaderAnnouncement} from '../../config/reader-presentation';
@@ -10,9 +9,7 @@ import {KnowledgeHome} from '../home/KnowledgeHome';
 import {AccountMenu} from '../shell/AdminFrame';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import type {FumadocsPublicationLocale} from '../../fumadocs/publication';
-import {fumadocsSearchOptions} from '../../fumadocs/search-options';
-import {fumadocsRootI18n} from '../../fumadocs/i18n';
-import {FumadocsScopedSearchDialog} from './FumadocsScopedSearchDialog';
+import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import '../../app/fumadocs-reader.css';
 
 interface FumadocsHomeShellProps {
@@ -36,7 +33,7 @@ export function FumadocsHomeContent({children,menu=[],account=false,locale='zh-C
 
 export function FumadocsHomeShell(props:FumadocsHomeShellProps){
  const locale=props.locale??'zh-CN';
- return <RootProvider theme={{enabled:false}} i18n={fumadocsRootI18n(locale)} search={{SearchDialog:FumadocsScopedSearchDialog,options:fumadocsSearchOptions(locale)}}><FumadocsHomeContent {...props}/></RootProvider>;
+ return <FumadocsSearchProvider locale={locale}><FumadocsHomeContent {...props}/></FumadocsSearchProvider>;
 }
 
 type KnowledgeHomeProps=ComponentProps<typeof KnowledgeHome>;
@@ -54,5 +51,5 @@ export function FumadocsKnowledgeHomeContent({announcement,...props}:FumadocsKno
 
 export function FumadocsKnowledgeHome(props:FumadocsKnowledgeHomeProps){
  const locale=props.locale??'zh-CN';
- return <RootProvider theme={{enabled:false}} i18n={fumadocsRootI18n(locale)} search={{SearchDialog:FumadocsScopedSearchDialog,options:fumadocsSearchOptions(locale)}}><FumadocsKnowledgeHomeContent {...props}/></RootProvider>;
+ return <FumadocsSearchProvider locale={locale}><FumadocsKnowledgeHomeContent {...props}/></FumadocsSearchProvider>;
 }

@@ -1,5 +1,4 @@
 import type {Root} from 'fumadocs-core/page-tree';
-import {RootProvider} from 'fumadocs-ui/provider/next';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import {buttonVariants} from 'fumadocs-ui/components/ui/button';
@@ -10,6 +9,7 @@ import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {FormFill} from '../forms/FormViews';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
+import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import '../../app/fumadocs-reader.css';
 import '../../app/forms.css';
 
@@ -51,5 +51,5 @@ export function FumadocsFormFillContent({data,state,menu=[],search=false}:Fumado
 }
 
 export function FumadocsFormFillPage(props:FumadocsFormFillPageProps){
- return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsFormFillContent {...props}/></RootProvider>;
+ return <FumadocsSearchProvider locale="zh-CN"><FumadocsFormFillContent {...props}/></FumadocsSearchProvider>;
 }

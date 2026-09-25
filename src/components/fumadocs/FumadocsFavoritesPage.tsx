@@ -1,6 +1,5 @@
 import type {ReactNode} from 'react';
 import type {Root} from 'fumadocs-core/page-tree';
-import {RootProvider} from 'fumadocs-ui/provider/next';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {FavoritesPage} from '../../favorites/model';
@@ -10,6 +9,7 @@ import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {FavoritesCollection,FavoritesView} from '../favorites/FavoritesView';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
+import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import '../../app/fumadocs-reader.css';
 
 interface FumadocsFavoritesPageProps {
@@ -76,5 +76,5 @@ export function FumadocsFavoritesPreviewContent(props:FumadocsFavoritesPageProps
 }
 
 export function FumadocsFavoritesPage(props:FumadocsFavoritesPageProps){
- return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsFavoritesContent {...props}/></RootProvider>;
+ return <FumadocsSearchProvider locale={props.locale}><FumadocsFavoritesContent {...props}/></FumadocsSearchProvider>;
 }

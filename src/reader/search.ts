@@ -49,16 +49,28 @@ export function searchTitles(nodes:NavigationNode[],raw:string|string[]|undefine
 
 /** Plain text excerpt only. Call after authorization; React escapes it when displayed. */
 export function searchSnippet(text:string,query:string,publication?:{title:string;tags:string[]}):string {
- let source=text;
+ let lines=text.split(/\r?\n/).map(line=>line.replace(/\s+/g,' ').trim()).filter(Boolean);
  if(publication){
-  const lines=source.split(/\r?\n/);const prefix=[publication.title,...publication.tags];let consumed=0;
-  while(consumed<prefix.length&&lines[consumed]?.trim()===prefix[consumed].trim())consumed++;
-  if(consumed===prefix.length)source=lines.slice(consumed).join('\n');
+  const prefix=[publication.title,...publication.tags];let consumed=0;
+  while(consumed<prefix.length&&lines[consumed]===prefix[consumed].trim())consumed++;
+  if(consumed===prefix.length)lines=lines.slice(consumed);
+  const foldedTitle=foldSearchText(publication.title.trim());
+  while(lines.length&&foldSearchText(lines[0])===foldedTitle)lines.shift();
+  if(lines.length&&/^(?:a|answer|答案)\s*[:：]?$/i.test(lines[0]))lines.shift();
  }
- const plain=source.replace(/\s+/g,' ').trim();
+ // Imported image placeholders are not useful prose and should not become a result summary.
+ lines=lines.filter(line=>!/^(?:image|screenshot|截图)(?:[-_ ]?\d+)?\.(?:png|jpe?g|gif|webp|svg)$/i.test(line));
+ const words=foldSearchText(query).split(/\s+/).filter(Boolean);
+ let selected=0;
+ if(words.length){
+  const all=lines.findIndex(line=>words.every(word=>foldSearchText(line).includes(word)));
+  const any=lines.findIndex(line=>words.some(word=>foldSearchText(line).includes(word)));
+  selected=all>=0?all:any>=0?any:0;
+ }
+ const plain=lines.slice(selected).join(' ').trim();
  if(plain.length<=240)return plain;
  const folded=foldSearchText(plain);
- const positions=foldSearchText(query).split(/\s+/).filter(Boolean).map(word=>folded.indexOf(word)).filter(index=>index>=0);
+ const positions=words.map(word=>folded.indexOf(word)).filter(index=>index>=0);
  const match=positions.length?Math.min(...positions):0;
  let start=Math.max(0,match-60);
  // UTF-16 offsets agree with the existing highlighter, but must not bisect emoji.
