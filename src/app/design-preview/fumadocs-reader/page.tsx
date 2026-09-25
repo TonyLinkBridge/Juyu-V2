@@ -129,8 +129,10 @@ const fixtureArticle:Publication={id:'fumadocs-preview',title:'如何修改账�
 const plainFixtureArticle:Publication={id:'fumadocs-preview-plain',title:'没有章节标题的文章',revision:1,body:'',locale:'zh-CN',publicationNumber:1,feedback:{memberId:'preview',value:null}};
 const fixtureLanguages={'zh-CN':path,en:`${path}?lang=en`} as const;
 const directoryPages:NavigationNode[]=[{type:'group',id:'preview-account',title:'账户管理',descendants:[
- {type:'document',id:'fumadocs-preview',title:'如何修改账户邮箱',href:'/help-centre/articles/fumadocs-preview'},
- {type:'document',id:'example-password',title:'如何找回密码',href:'/help-centre/articles/example-password'},
+ {type:'document',id:'fumadocs-preview',title:'普通会员权益说明',description:'详细介绍普通会员的权益范围、使用规则及相关说明，帮助你快速了解会员体系。',href:'/help-centre/articles/fumadocs-preview'},
+ {type:'document',id:'example-customer',title:'大客户权益说明',href:'/help-centre/articles/example-customer'},
+ {type:'document',id:'example-premium',title:'高级会员权益说明',href:'/help-centre/articles/example-premium'},
+ {type:'document',id:'example-gold',title:'金牌会员权益说明',href:'/help-centre/articles/example-gold'},
 ]}];
 const fixtureSearch:TitleSearch={status:'ready',query:'信用',total:2,page:1,pages:1,results:[
  {id:'credit',title:'0 元签约店铺信用额度如何理解？',href:'/help-centre/qa?question=credit',breadcrumbs:['信用额度'],kind:'qa',revision:1,tags:['0 元签约','店铺'],snippet:'了解签约店铺和信用额度的使用规则。'},

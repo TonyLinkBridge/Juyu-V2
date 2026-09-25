@@ -23,13 +23,15 @@ interface FumadocsHomeShellProps {
  locale?:FumadocsPublicationLocale;
 }
 
-export function FumadocsHomeContent({children,menu=[],search=false,account=false,locale='zh-CN'}:FumadocsHomeShellProps){
+export function FumadocsHomeContent({children,menu=[],account=false,locale='zh-CN'}:FumadocsHomeShellProps){
+ const links=[...fumadocsMenuLinks(menu,locale),...(account?[{type:'custom' as const,secondary:true,children:<div className="fumadocs-account"><AccountMenu enabled locale={locale} accountOnly/></div>}]:[])];
  return <FumadocsPublicationI18n locale={locale}><HomeLayout
   id="main-content"
   data-fumadocs-home-page=""
-  links={fumadocsMenuLinks(menu,locale)}
-  nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre',...(account?{children:<div className="fumadocs-account"><AccountMenu enabled locale={locale} accountOnly/></div>}:{})}}
-  searchToggle={{enabled:search}}
+  links={links}
+  nav={{title:<span className="juyu-home-brand"><strong>JUYU</strong><span>Help Centre</span></span>,url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
+  searchToggle={{enabled:false}}
+  themeSwitch={{enabled:false}}
  >{children}</HomeLayout></FumadocsPublicationI18n>;
 }
 
@@ -46,7 +48,7 @@ interface FumadocsKnowledgeHomeProps extends KnowledgeHomeProps {
 export function FumadocsKnowledgeHomeContent({announcement,...props}:FumadocsKnowledgeHomeProps){
  return <FumadocsHomeContent menu={props.menu} search={props.search} account locale={props.locale}>
   {announcement&&announcement.id!=='internal-materials'&&<AnnouncementBanner announcement={announcement}/>}
-  <Suspense fallback={null}><NewAnnouncements/></Suspense>
+  <Suspense fallback={null}><NewAnnouncements silentFailure/></Suspense>
   <KnowledgeHome {...props}/>
  </FumadocsHomeContent>;
 }

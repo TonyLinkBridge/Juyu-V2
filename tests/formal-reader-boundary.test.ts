@@ -33,9 +33,23 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  const knowledgeHome=await readFile('src/components/home/KnowledgeHome.tsx','utf8');
  assert.match(knowledgeHome,/FullSearchTrigger/);
  assert.doesNotMatch(knowledgeHome,/gitbook\/Search\/SearchInput|<SearchInput/);
+ assert.match(knowledgeHome,/knowledge-home--editorial/);
+ assert.match(knowledgeHome,/home-section-tabs/);
+ assert.match(knowledgeHome,/home-featured/);
+ assert.match(knowledgeHome,/home-document-number/);
+ assert.match(knowledgeHome,/home-side/);
+ assert.doesNotMatch(knowledgeHome,/home-entry-icon/);
  assert.match(home,/fumadocsSearchOptions\(locale\)/);
  assert.match(home,/fumadocsRootI18n\(locale\)/);
  assert.match(home,/SearchDialog:FumadocsScopedSearchDialog/);
+ assert.match(home,/juyu-home-brand/);
+ assert.match(home,/NewAnnouncements silentFailure/);
+ assert.match(home,/searchToggle=\{\{enabled:false\}\}/);
+ assert.match(home,/themeSwitch=\{\{enabled:false\}\}/);
+
+ const homeStyles=await readFile('src/app/product-shell.css','utf8');
+ assert.match(homeStyles,/--juyu-home-accent:#b3131b/);
+ assert.match(homeStyles,/home-hero h1 span\{color:var\(--juyu-home-accent\)\}/);
 
  const opsRoute=await readFile('src/app/help-centre/ops/page.tsx','utf8');
  const opsPage=await readFile('src/components/fumadocs/FumadocsOpsPage.tsx','utf8');

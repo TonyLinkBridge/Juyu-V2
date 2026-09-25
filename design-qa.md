@@ -87,3 +87,35 @@ The desktop and mobile screenshots show all inspector controls without clipping.
 - Real authenticated production rendering still requires deployment. This item is locally verified in the controlled editor fixture and production build.
 
 final result: passed
+
+# Help Centre editorial home design QA
+
+- Source visual truth: `/var/folders/by/2103qtln3xd6rsg6nfxqt3yw0000gn/T/codex-clipboard-a42ff925-aee2-4356-baa3-3f894a481360.png`
+- Desktop implementation: `/Users/tony/Documents/ChatGPT/Juyu V2/output/verification/fumadocs-home-desktop-light.png`
+- Mobile implementation: `/Users/tony/Documents/ChatGPT/Juyu V2/output/verification/fumadocs-home-mobile-light.png`
+- Desktop state: light theme, 1440 x 1000 CSS viewport, Help Centre home fixture.
+- Source state: light theme, 1488 x 1058 screenshot.
+
+## Full-view comparison evidence
+
+The selected reference and implementation both use a restrained editorial home: serif JUYU masthead, left-aligned large question, red answer emphasis, one full-width search trigger, horizontal content-type navigation, a pale featured article, numbered article rows, and a separated right column for recent updates and recent reading. Existing article titles, descriptions, routes, permissions, updates, and recent-history data remain live rather than becoming decorative mock data.
+
+## Required fidelity surfaces
+
+- Typography: serif editorial hierarchy and large desktop title preserved, with a responsive mobile scale.
+- Color: JUYU red is explicit for the masthead, answer word, active section, links, and update markers; light and dark themes retain readable body text.
+- Layout: desktop keeps the reference's main/right column split; mobile stacks the same sections and makes the type navigation horizontally scrollable.
+- Search: the visible trigger and dialog remain the official Fumadocs search surface, including type filters, multi-result previews, snippets, and keyboard access.
+- Dynamic states: failed optional announcement loading no longer inserts a large error panel above the home design; real available announcements still render.
+
+## Verification
+
+- Structural reader-boundary suite: 5 passed.
+- Targeted homepage browser suite: 2 passed across desktop and mobile.
+- The browser suite checks official Fumadocs search behavior, every content-type route, red title accent, dark-mode contrast, and horizontal overflow.
+
+## Findings
+
+No actionable P0, P1, or P2 mismatch remains within the selected homepage concept. Production deployment still needs to run before the public URL can display this local implementation.
+
+final result: passed
