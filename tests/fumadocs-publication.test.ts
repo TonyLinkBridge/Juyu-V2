@@ -33,7 +33,7 @@ test('authorized directory becomes canonical Fumadocs paths so native navigation
  assert.equal(tree.name,'资料目录');
  assert.deepEqual(tree.children,[{
   type:'folder',name:'资料目录',root:true,defaultOpen:true,children:[{
-   type:'folder',$id:'account',name:'账户管理',defaultOpen:true,children:[{
+   type:'folder',$id:'account',name:'账户管理',children:[{
     type:'page',$id:'article 1',name:'修改邮箱',url:'/design-preview/fumadocs-reader/article%201',
    }],
   }],

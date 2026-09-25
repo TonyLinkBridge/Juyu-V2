@@ -6,7 +6,7 @@ import type {MenuItem} from '../../navigation-settings/model';
 import type {ReferenceDetail,ReferencePage} from '../../reference/model';
 import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {ReferenceView} from '../reference/ReferenceView';
-import {AccountMenu} from '../shell/AdminFrame';
+import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import '../../app/fumadocs-reader.css';
 
@@ -53,7 +53,8 @@ export function FumadocsReferenceContent({data,detail,state,detailState='idle',m
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={referenceTree(state==='ready'?data:undefined,locale)}
   links={fumadocsMenuLinks(menu,locale)}
-  nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre',children:<div className="fumadocs-account"><AccountMenu enabled locale={locale} accountOnly/></div>}}
+  nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
+  sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}
  >
   <DocsPage data-fumadocs-reference-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

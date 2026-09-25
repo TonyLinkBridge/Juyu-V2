@@ -7,7 +7,7 @@ import type {OpsPage} from '../../ops/model';
 import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {articleContentPath} from '../../reader/content-path';
 import {OpsCollection} from '../ops/OpsCollection';
-import {AccountMenu} from '../shell/AdminFrame';
+import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import '../../app/fumadocs-reader.css';
 
@@ -47,7 +47,8 @@ export function FumadocsOpsContent({data,state,menu=[],search=false,locale='zh-C
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={opsTree(state==='ready'?data:undefined)}
   links={fumadocsMenuLinks(menu,locale)}
-  nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre',children:<div className="fumadocs-account"><AccountMenu enabled locale={locale} accountOnly/></div>}}
+  nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
+  sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}
  >
   <DocsPage data-fumadocs-ops-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

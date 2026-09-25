@@ -32,7 +32,7 @@ const path='/design-preview/fumadocs-reader';
 const tree:Root={
  name:'资料目录',
  children:[{type:'folder',name:'资料目录',root:true,defaultOpen:true,children:[
-  {type:'folder',name:'账户管理',defaultOpen:true,children:[
+  {type:'folder',name:'账户管理',children:[
    {type:'page',name:'如何修改账户邮箱',url:path},
    {type:'page',name:'如何找回密码',url:`${path}/example-password`},
   ]},
@@ -114,7 +114,7 @@ const plainPath=`${path}?fixture=plain`;
 const plainTree:Root={
  name:'资料目录',
  children:[{type:'folder',name:'资料目录',root:true,defaultOpen:true,children:[
-  {type:'folder',name:'示例文章',defaultOpen:true,children:[
+  {type:'folder',name:'示例文章',children:[
    {type:'page',name:'没有章节标题的文章',url:plainPath},
   ]},
  ]}],

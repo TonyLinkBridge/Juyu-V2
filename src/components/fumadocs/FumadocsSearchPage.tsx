@@ -9,7 +9,7 @@ import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {fumadocsPublicationTree,type FumadocsPublicationLocale} from '../../fumadocs/publication';
 import {SearchAnalytics} from '../analytics/SearchAnalytics';
 import {SearchResultsBody} from '../gitbook/Search/SearchResults';
-import {AccountMenu} from '../shell/AdminFrame';
+import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import '../../app/fumadocs-reader.css';
 
@@ -29,7 +29,8 @@ export function FumadocsSearchContent({pages,menu=[],features,search,scope,faile
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={fumadocsPublicationTree(failed?[]:pages,locale,'formal')}
   links={fumadocsMenuLinks(menu,locale)}
-  nav={{title:'JUYU Help Centre',url:'/help-centre',children:<div className="fumadocs-account"><AccountMenu enabled locale={locale} accountOnly/></div>}}
+  nav={{title:'JUYU Help Centre',url:'/help-centre'}}
+  sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:features.search}}
  >
   <DocsPage data-fumadocs-search-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

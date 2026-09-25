@@ -7,7 +7,7 @@ import type {QaPage} from '../../qa/model';
 import type {Publication} from '../../reader/body';
 import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {QaView} from '../qa/QaView';
-import {AccountMenu} from '../shell/AdminFrame';
+import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import '../../app/fumadocs-reader.css';
 
@@ -58,7 +58,8 @@ export function FumadocsQaContent({data,initialAnswer,viewerId,state,menu=[],sea
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={qaTree(state==='ready'?data:undefined,locale)}
   links={fumadocsMenuLinks(menu,locale)}
-  nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre',children:<div className="fumadocs-account"><AccountMenu enabled locale={locale} accountOnly/></div>}}
+  nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
+  sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:searchEnabled}}
  >
   <DocsPage data-fumadocs-qa-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

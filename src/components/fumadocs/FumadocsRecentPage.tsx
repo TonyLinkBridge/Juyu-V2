@@ -7,7 +7,7 @@ import type {RecentPage} from '../../recent/model';
 import {contentPath} from '../../reader/content-path';
 import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {RecentView} from '../recent/RecentView';
-import {AccountMenu} from '../shell/AdminFrame';
+import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import '../../app/fumadocs-reader.css';
 
@@ -52,7 +52,8 @@ export function FumadocsRecentContent({data,state,menu=[],search=false,locale='z
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={recentTree(state==='ready'?data:undefined,locale)}
   links={fumadocsMenuLinks(menu,locale)}
-  nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre',children:<div className="fumadocs-account"><AccountMenu enabled locale={locale} accountOnly/></div>}}
+  nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
+  sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}
  >
   <DocsPage data-fumadocs-recent-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

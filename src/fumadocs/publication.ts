@@ -63,7 +63,6 @@ export function fumadocsPublicationTree(nodes:NavigationNode[],locale:FumadocsPu
   type:'folder' as const,
   $id:node.id,
   name:node.title,
-  defaultOpen:true,
   children:convert(node.descendants),
  }:{
   type:'page' as const,

@@ -8,7 +8,7 @@ import type {MenuItem} from '../../navigation-settings/model';
 import type {NavigationNode} from '../../reader/tree';
 import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {fumadocsPublicationTree,type FumadocsPublicationLocale} from '../../fumadocs/publication';
-import {AccountMenu} from '../shell/AdminFrame';
+import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import '../../app/fumadocs-reader.css';
 
@@ -47,7 +47,8 @@ export function FumadocsDirectoryContent({pages,menu=[],features,requested,faile
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={fumadocsPublicationTree(failed?[]:pages,locale,'formal')}
   links={fumadocsMenuLinks(menu,locale)}
-  nav={{title:'JUYU Help Centre',url:root,children:<div className="fumadocs-account"><AccountMenu enabled locale={locale} accountOnly/></div>}}
+  nav={{title:'JUYU Help Centre',url:root}}
+  sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:Boolean(features?.search)}}
  >
   <DocsPage data-fumadocs-directory-state="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

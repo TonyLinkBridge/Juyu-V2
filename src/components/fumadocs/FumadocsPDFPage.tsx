@@ -9,7 +9,7 @@ import type {PDFSnapshot} from '../../pdf/model';
 import {articleContentPath} from '../../reader/content-path';
 import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {PDFPage} from '../gitbook/PDF/PDFPage';
-import {AccountMenu} from '../shell/AdminFrame';
+import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import '../../app/fumadocs-reader.css';
 
@@ -39,7 +39,8 @@ export function FumadocsPDFContent({snapshot,state,message,menu=[],search=false,
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={pdfTree(ready?snapshot:undefined,locale)}
   links={fumadocsMenuLinks(menu,locale)}
-  nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre',children:<div className="fumadocs-account"><AccountMenu enabled locale={locale} accountOnly/></div>}}
+  nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
+  sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}
  >
   <DocsPage data-fumadocs-pdf-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

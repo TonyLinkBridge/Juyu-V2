@@ -8,7 +8,7 @@ import type {FormDefinition} from '../../forms/model';
 import type {MenuItem} from '../../navigation-settings/model';
 import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {FormFill} from '../forms/FormViews';
-import {AccountMenu} from '../shell/AdminFrame';
+import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import '../../app/fumadocs-reader.css';
 import '../../app/forms.css';
@@ -38,7 +38,8 @@ export function FumadocsFormFillContent({data,state,menu=[],search=false}:Fumado
  return <FumadocsPublicationI18n locale="zh-CN"><DocsLayout
   tree={formTree(state==='ready'?data:undefined)}
   links={fumadocsMenuLinks(menu,'zh-CN')}
-  nav={{title:'JUYU Help Centre',url:'/help-centre',children:<div className="fumadocs-account"><AccountMenu enabled locale="zh-CN" accountOnly/></div>}}
+  nav={{title:'JUYU Help Centre',url:'/help-centre'}}
+  sidebar={{footer:<FumadocsAccountFooter locale="zh-CN"/>}}
   searchToggle={{enabled:search}}
  >
   <DocsPage data-fumadocs-form-fill-page="" toc={[]} breadcrumb={{includeRoot:{url:'/help-centre/forms'},includePage:state==='ready'}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

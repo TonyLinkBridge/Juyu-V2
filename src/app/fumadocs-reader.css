@@ -19,6 +19,20 @@
 .fumadocs-account .account-controls { margin:0; }
 .fumadocs-account .account-menu>summary { background:var(--color-fd-secondary);color:var(--color-fd-secondary-foreground); }
 .fumadocs-account .account-menu>div { background:var(--color-fd-popover);border-color:var(--color-fd-border);color:var(--color-fd-popover-foreground); }
+.fumadocs-sidebar-account { width:100%;min-width:0;margin-top:8px; }
+.fumadocs-sidebar-account .account-controls { width:100%;display:flex;flex-direction:column;align-items:stretch;gap:6px; }
+.fumadocs-sidebar-account .admin-console-button,
+.fumadocs-sidebar-account .account-menu,
+.fumadocs-sidebar-account .account-menu>summary { width:100%; }
+.fumadocs-sidebar-account .admin-console-button { justify-content:center; }
+.fumadocs-sidebar-account .account-menu>summary { min-width:0;justify-content:flex-start; }
+.fumadocs-sidebar-account .account-menu>div { inset-inline:0 auto;top:auto;bottom:calc(100% + 8px); }
+
+[data-fumadocs-blocknote-reader] .bn-editor.bn-default-styles {
+ padding-inline:0;
+ border-radius:0;
+ background:transparent;
+}
 .fumadocs-search-results {
  --ink:var(--color-fd-foreground);
  --muted:var(--color-fd-muted-foreground);

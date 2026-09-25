@@ -8,7 +8,7 @@ import type {MenuItem} from '../../navigation-settings/model';
 import {contentPath} from '../../reader/content-path';
 import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {FavoritesCollection,FavoritesView} from '../favorites/FavoritesView';
-import {AccountMenu} from '../shell/AdminFrame';
+import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import '../../app/fumadocs-reader.css';
 
@@ -54,7 +54,8 @@ function FavoritesShell({data,state,menu=[],search=false,locale='zh-CN',children
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={favoritesTree(state==='ready'?data:undefined,locale)}
   links={fumadocsMenuLinks(menu,locale)}
-  nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre',children:<div className="fumadocs-account"><AccountMenu enabled locale={locale} accountOnly/></div>}}
+  nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
+  sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}
  >
   <DocsPage data-fumadocs-favorites-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

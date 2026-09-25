@@ -11,8 +11,8 @@ import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import {FumadocsPublicationActions,FumadocsPublicationFeedback} from './FumadocsPublicationActions';
 import {ArticleAnalytics} from '../analytics/ArticleAnalytics';
 import {RecentRecorder} from '../recent/RecentRecorder';
-import {AccountMenu} from '../shell/AdminFrame';
 import {fumadocsMenuLinks} from '../../fumadocs/layout';
+import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 
 const previewRoot='/design-preview/fumadocs-reader';
 
@@ -48,7 +48,7 @@ export async function FumadocsAuthorizedPublication({articleId,mode='preview'}:{
  const tree=fumadocsPublicationTree(result.pages,locale,mode);
  const destinations=fumadocsPublicationLanguages(article,mode);
  const root=formal?'/help-centre':previewRoot;
- return <FumadocsPublicationI18n locale={locale} destinations={destinations}><DocsLayout tree={tree} links={formal?fumadocsMenuLinks(menu,locale):undefined} nav={{title:'JUYU Help Centre',url:root,...(formal?{children:<div className="fumadocs-account"><AccountMenu enabled locale={locale} accountOnly/></div>}:{})}} searchToggle={{enabled:formal&&result.features.search}}>
+ return <FumadocsPublicationI18n locale={locale} destinations={destinations}><DocsLayout tree={tree} links={formal?fumadocsMenuLinks(menu,locale):undefined} nav={{title:'JUYU Help Centre',url:root}} sidebar={formal?{footer:<FumadocsAccountFooter locale={locale}/>}:{}} searchToggle={{enabled:formal&&result.features.search}}>
   <DocsPage
    data-fumadocs-publication=""
    toc={document.toc}

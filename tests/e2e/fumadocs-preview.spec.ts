@@ -42,6 +42,8 @@ test('directory and unavailable states use the official Fumadocs shell',async({p
  if((page.viewportSize()?.width??1440)<1280){
   await page.getByRole('button',{name:'开启侧边栏'}).click();
  }
+ const directoryAccountFolder=page.getByRole('button',{name:'账户管理'});
+ if(await directoryAccountFolder.getAttribute('aria-expanded')==='false')await directoryAccountFolder.click();
  await expect(page.getByRole('link',{name:'如何修改账户邮箱'})).toHaveAttribute('href','/help-centre/articles/fumadocs-preview');
  await expect(page.locator('.entry-frame')).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
@@ -87,6 +89,8 @@ test('full search results retain JUYU result behavior inside the official Fumado
  if((page.viewportSize()?.width??1440)<1280){
   await page.getByRole('button',{name:'开启侧边栏'}).click();
  }
+ const searchAccountFolder=page.getByRole('button',{name:'账户管理'});
+ if(await searchAccountFolder.getAttribute('aria-expanded')==='false')await searchAccountFolder.click();
  await expect(page.getByRole('link',{name:'如何修改账户邮箱'})).toHaveAttribute('href','/help-centre/articles/fumadocs-preview');
  await expect(page.locator('.entry-frame')).toHaveCount(0);
  await expect(page.locator('.knowledge-sidebar')).toHaveCount(0);
@@ -285,11 +289,22 @@ test('PDF screen uses the official Fumadocs shell and print keeps only the prote
  await expect(pdf.getByRole('article',{name:'PDF 正文'})).toBeVisible();
  await expect(pdf.getByRole('heading',{name:'PDF 阅读 · 正式资料示例'})).toBeVisible();
  await expect(pdf.getByRole('columnheader',{name:'项目'})).toBeVisible();
- expect(await page.locator('.fumadocs-account .account-menu>summary').evaluateAll(elements=>elements.filter(element=>{
-  const style=getComputedStyle(element);
-  const bounds=element.getBoundingClientRect();
-  return style.visibility!=='hidden'&&style.display!=='none'&&bounds.width>0&&bounds.height>0;
- }).length)).toBe(1);
+ expect(await page.locator('.fumadocs-sidebar-account').count()).toBeGreaterThan(0);
+ if(info.project.name==='desktop'){
+  const sidebarAccount=page.locator('#nd-sidebar .fumadocs-sidebar-account');
+  await expect(sidebarAccount).toBeVisible();
+  await sidebarAccount.locator('.account-menu>summary').click();
+  const accountPopover=sidebarAccount.locator('.account-menu>div');
+  await expect(accountPopover).toBeVisible();
+  const popoverBounds=await accountPopover.boundingBox();
+  const viewport=page.viewportSize();
+  expect(popoverBounds).not.toBeNull();
+  expect(viewport).not.toBeNull();
+  expect(popoverBounds!.y).toBeGreaterThanOrEqual(0);
+  expect(popoverBounds!.y+popoverBounds!.height).toBeLessThanOrEqual(viewport!.height);
+  await sidebarAccount.locator('.account-menu>summary').click();
+ }
+ await expect(page.locator('#nd-sidebar .fumadocs-nav-account')).toHaveCount(0);
  await expect(page.locator('.entry-frame')).toHaveCount(0);
  await expect(page.locator('.knowledge-sidebar')).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
@@ -369,12 +384,22 @@ test('external content connects to approved providers only after the reader choo
  await expect(website).toHaveAttribute('rel','noopener noreferrer');
 });
 
-test('official Fumadocs shell renders the same BlockNote document read only',async({page})=>{
+test('official Fumadocs shell renders the same BlockNote document read only',async({page},info)=>{
  await page.goto('/design-preview/fumadocs-reader');
  await expect(page.getByRole('heading',{name:'如何修改账户邮箱',level:1})).toBeVisible();
  await expect(page.locator('article').filter({has:page.locator('.prose')})).toBeVisible();
  await expect(page.locator('[data-fumadocs-blocknote-reader].not-prose').first()).toBeVisible();
- await expect(page.locator('.bn-editor[contenteditable="false"]').first()).toBeVisible();
+ const readOnlyEditor=page.locator('.bn-editor[contenteditable="false"]').first();
+ await expect(readOnlyEditor).toBeVisible();
+ const readerSurface=await readOnlyEditor.evaluate(element=>{
+  const style=getComputedStyle(element);
+  return {background:style.backgroundColor,paddingInline:style.paddingInline,borderRadius:style.borderRadius};
+ });
+ expect(readerSurface).toEqual({background:'rgba(0, 0, 0, 0)',paddingInline:'0px',borderRadius:'0px'});
+ if(info.project.name==='desktop'){
+  await expect(page.getByRole('button',{name:'账户管理'})).toHaveAttribute('aria-expanded','true');
+  await expect(page.getByRole('button',{name:'交易与订单'})).toHaveAttribute('aria-expanded','false');
+ }
  await expect(page.getByRole('heading',{name:'修改账户邮箱流程'})).toBeVisible();
  await expect(page.getByText('请先准备账户验证资料。',{exact:true})).toBeVisible();
  const inlineLink=page.locator('[data-fumadocs-inline-link]').filter({hasText:'账户安全规则'});
@@ -504,6 +529,8 @@ test('official Fumadocs shell renders the same BlockNote document read only',asy
  await page.getByRole('link',{name:'修改账户邮箱流程',exact:true}).click();
  await expect(page).toHaveURL(/#email-process$/);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.evaluate(()=>scrollTo(0,0));
+ await page.screenshot({path:`output/verification/fumadocs-article-integrated-${info.project.name}.png`,fullPage:true,animations:'disabled'});
 });
 
 test('published neutral black text remains readable in the official dark theme',async({page})=>{
