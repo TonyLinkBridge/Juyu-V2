@@ -155,7 +155,6 @@ test('the Fumadocs reader imports only the reviewed JUYU business adapters',asyn
   '../reader-support/ArticleReferenceContext',
   '../reader-support/InlineAnnotation',
   '../reader-support/PageFeedbackForm',
-  '../reader-support/ReaderAppearance',
   '../reader-support/StructuredInline',
   '../reader-support/TableExplorer',
  ]);
@@ -163,6 +162,21 @@ test('the Fumadocs reader imports only the reviewed JUYU business adapters',asyn
  for(const legacy of ['PageBody','PageAside','PageHeader','TableOfContents','DocumentView','MediaBlocks']){
   assert.equal(imports.some(path=>path.endsWith(`/${legacy}`)),false);
  }
+});
+
+test('Fumadocs docs shells keep navigation and reading presentation inside official layout APIs',async()=>{
+ const shells=[
+  'FumadocsAuthorizedPublication.tsx','FumadocsDirectoryState.tsx','FumadocsSearchPage.tsx',
+  'FumadocsOpsPage.tsx','FumadocsFavoritesPage.tsx','FumadocsRecentPage.tsx',
+  'FumadocsFormFillPage.tsx','FumadocsPDFPage.tsx','FumadocsChangelogPage.tsx',
+  'FumadocsReferencePage.tsx','FumadocsQaPage.tsx','FumadocsFormsPage.tsx',
+ ];
+ for(const file of shells){
+  const source=await readFile(`src/components/fumadocs/${file}`,'utf8');
+  assert.doesNotMatch(source,/fumadocsMenuLinks|links=\{/);
+ }
+ const actions=await readFile('src/components/fumadocs/FumadocsPublicationActions.tsx','utf8');
+ assert.doesNotMatch(actions,/ReaderAppearance|reader-appearance/);
 });
 
 test('legacy article design previews redirect to the Fumadocs preview instead of rendering the old shell',async()=>{

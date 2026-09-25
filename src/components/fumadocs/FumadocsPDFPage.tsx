@@ -6,7 +6,6 @@ import Link from 'next/link';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {PDFSnapshot} from '../../pdf/model';
 import {articleContentPath} from '../../reader/content-path';
-import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {PDFPage} from '../gitbook/PDF/PDFPage';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
@@ -30,7 +29,7 @@ function pdfTree(snapshot:PDFSnapshot|undefined,locale:'zh-CN'|'en'):Root {
  }]};
 }
 
-export function FumadocsPDFContent({snapshot,state,message,menu=[],search=false,locale='zh-CN'}:FumadocsPDFPageProps){
+export function FumadocsPDFContent({snapshot,state,message,search=false,locale='zh-CN'}:FumadocsPDFPageProps){
  const english=locale==='en',ready=state==='ready'&&snapshot!==undefined;
  const title=state==='disabled'?(english?'PDF export is turned off':'PDF 阅读／导出尚未开放'):english?'Read / export PDF':'PDF 阅读／导出';
  const description=ready
@@ -38,7 +37,6 @@ export function FumadocsPDFContent({snapshot,state,message,menu=[],search=false,
   :(message??(english?'The PDF could not be opened. Please try again later.':'PDF 暂时无法读取，请稍后重试。'));
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={pdfTree(ready?snapshot:undefined,locale)}
-  links={fumadocsMenuLinks(menu,locale)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}

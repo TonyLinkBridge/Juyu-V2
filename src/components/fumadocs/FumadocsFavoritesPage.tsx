@@ -5,7 +5,6 @@ import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/d
 import type {FavoritesPage} from '../../favorites/model';
 import type {MenuItem} from '../../navigation-settings/model';
 import {contentPath} from '../../reader/content-path';
-import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {FavoritesCollection,FavoritesView} from '../favorites/FavoritesView';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
@@ -49,11 +48,10 @@ function favoritesCopy(state:FumadocsFavoritesPageProps['state'],locale:'zh-CN'|
  };
 }
 
-function FavoritesShell({data,state,menu=[],search=false,locale='zh-CN',children}:{children:ReactNode}&FumadocsFavoritesPageProps){
+function FavoritesShell({data,state,search=false,locale='zh-CN',children}:{children:ReactNode}&FumadocsFavoritesPageProps){
  const copy=favoritesCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={favoritesTree(state==='ready'?data:undefined,locale)}
-  links={fumadocsMenuLinks(menu,locale)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}

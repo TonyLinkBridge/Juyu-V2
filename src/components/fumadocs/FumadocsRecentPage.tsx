@@ -4,7 +4,6 @@ import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/d
 import type {MenuItem} from '../../navigation-settings/model';
 import type {RecentPage} from '../../recent/model';
 import {contentPath} from '../../reader/content-path';
-import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {RecentView} from '../recent/RecentView';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
@@ -47,11 +46,10 @@ function recentCopy(state:FumadocsRecentPageProps['state'],locale:'zh-CN'|'en'){
  };
 }
 
-export function FumadocsRecentContent({data,state,menu=[],search=false,locale='zh-CN'}:FumadocsRecentPageProps){
+export function FumadocsRecentContent({data,state,search=false,locale='zh-CN'}:FumadocsRecentPageProps){
  const copy=recentCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={recentTree(state==='ready'?data:undefined,locale)}
-  links={fumadocsMenuLinks(menu,locale)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}

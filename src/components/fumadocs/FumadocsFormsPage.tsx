@@ -3,7 +3,6 @@ import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {FormDefinition} from '../../forms/model';
 import type {MenuItem} from '../../navigation-settings/model';
-import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {FormCollection} from '../forms/FormViews';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
@@ -32,11 +31,10 @@ function formsCopy(state:FumadocsFormsPageProps['state']){
  return {title:'内部表单',description:'选择表单，填写后提交给管理员处理。'};
 }
 
-export function FumadocsFormsContent({data,state,menu=[],search=false}:FumadocsFormsPageProps){
+export function FumadocsFormsContent({data,state,search=false}:FumadocsFormsPageProps){
  const copy=formsCopy(state);
  return <FumadocsPublicationI18n locale="zh-CN"><DocsLayout
   tree={formsTree(state==='ready'?data:undefined)}
-  links={fumadocsMenuLinks(menu,'zh-CN')}
   nav={{title:'JUYU Help Centre',url:'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale="zh-CN"/>}}
   searchToggle={{enabled:search}}

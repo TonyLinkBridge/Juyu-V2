@@ -5,13 +5,11 @@ import {applicationAuthorization} from '../../server/authorization/application';
 import {canonicalFumadocsPublicationPath,formalFumadocsPublicationPath,fumadocsPublication,fumadocsPublicationLanguages,fumadocsPublicationTree,type FumadocsReaderMode} from '../../fumadocs/publication';
 import type {NavigationPage} from '../../reader/navigation';
 import type {NavigationNode} from '../../reader/tree';
-import type {MenuItem} from '../../navigation-settings/model';
 import {FumadocsBlockNoteReader} from './FumadocsBlockNoteReader';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import {FumadocsPublicationActions,FumadocsPublicationFeedback} from './FumadocsPublicationActions';
 import {ArticleAnalytics} from '../analytics/ArticleAnalytics';
 import {RecentRecorder} from '../recent/RecentRecorder';
-import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 
@@ -34,12 +32,10 @@ export async function FumadocsAuthorizedPublication({articleId,mode='preview'}:{
  if(!articleId.trim()||articleId.length>200)notFound();
  const formal=mode==='formal';
  let result:Awaited<ReturnType<Awaited<ReturnType<typeof applicationAuthorization>>['reader']>>;
- let menu:MenuItem[]=[];
  try{
   const authorization=await applicationAuthorization();
   if(!formal)await authorization.requireEditorAdmin();
   result=await authorization.reader(articleId);
-  if(formal)try{menu=await authorization.readerMenu();}catch{}
  }catch{notFound();}
  if(result.destination)redirect(result.destination);
  if(!result.article)notFound();
@@ -49,7 +45,7 @@ export async function FumadocsAuthorizedPublication({articleId,mode='preview'}:{
  const tree=fumadocsPublicationTree(result.pages,locale,mode);
  const destinations=fumadocsPublicationLanguages(article,mode);
  const root=formal?'/help-centre':previewRoot;
- return <FumadocsSearchProvider locale={locale}><FumadocsPublicationI18n locale={locale} destinations={destinations}><DocsLayout tree={tree} links={formal?fumadocsMenuLinks(menu,locale):undefined} nav={{title:'JUYU Help Centre',url:root}} sidebar={formal?{footer:<FumadocsAccountFooter locale={locale}/>}:{}} searchToggle={{enabled:formal&&result.features.search}}>
+ return <FumadocsSearchProvider locale={locale}><FumadocsPublicationI18n locale={locale} destinations={destinations}><DocsLayout tree={tree} nav={{title:'JUYU Help Centre',url:root}} sidebar={formal?{footer:<FumadocsAccountFooter locale={locale}/>}:{}} searchToggle={{enabled:formal&&result.features.search}}>
   <DocsPage
    data-fumadocs-publication=""
    toc={document.toc}

@@ -5,7 +5,6 @@ import {buttonVariants} from 'fumadocs-ui/components/ui/button';
 import Link from 'next/link';
 import type {FormDefinition} from '../../forms/model';
 import type {MenuItem} from '../../navigation-settings/model';
-import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {FormFill} from '../forms/FormViews';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
@@ -33,11 +32,10 @@ function formCopy(data:FormDefinition|undefined,state:FumadocsFormFillPageProps[
  return {title:data.title,description:data.description};
 }
 
-export function FumadocsFormFillContent({data,state,menu=[],search=false}:FumadocsFormFillPageProps){
+export function FumadocsFormFillContent({data,state,search=false}:FumadocsFormFillPageProps){
  const copy=formCopy(data,state);
  return <FumadocsPublicationI18n locale="zh-CN"><DocsLayout
   tree={formTree(state==='ready'?data:undefined)}
-  links={fumadocsMenuLinks(menu,'zh-CN')}
   nav={{title:'JUYU Help Centre',url:'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale="zh-CN"/>}}
   searchToggle={{enabled:search}}

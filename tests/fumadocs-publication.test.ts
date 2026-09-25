@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
+import {isValidElement} from 'react';
 import {encodeEditorBody} from '../src/editor/document.ts';
 import {canonicalFumadocsPublicationPath,formalFumadocsPublicationPath,fumadocsMarkdownPath,fumadocsPdfPath,fumadocsPublication,fumadocsPublicationLanguages,fumadocsPublicationTree} from '../src/fumadocs/publication.ts';
 import {fumadocsSearchResults} from '../src/fumadocs/search.ts';
+import {readerIconComponents} from '../src/reader/icon-components.ts';
 
 const body=encodeEditorBody([
  {id:'intro',type:'heading',props:{textAlignment:'left',textColor:'default',backgroundColor:'default',level:1},content:[{type:'text',text:'真实文章标题',styles:{}}],children:[]},
@@ -26,18 +28,27 @@ test('legacy text is rejected instead of being silently simplified',()=>{
 
 test('authorized directory becomes canonical Fumadocs paths so native navigation can identify every page',()=>{
  const tree=fumadocsPublicationTree([
-  {type:'group',id:'account',title:'账户管理',descendants:[
-   {type:'document',id:'article 1',title:'修改邮箱',href:'/help-centre?article=article%201'},
+  {type:'group',id:'account',title:'账户管理',iconKey:'shield',descendants:[
+   {type:'document',id:'article 1',title:'修改邮箱',description:'更新登录邮箱',iconKey:'file',href:'/help-centre?article=article%201'},
   ]},
  ],'zh-CN');
  assert.equal(tree.name,'资料目录');
- assert.deepEqual(tree.children,[{
-  type:'folder',name:'资料目录',root:true,defaultOpen:true,children:[{
-   type:'folder',$id:'account',name:'账户管理',children:[{
-    type:'page',$id:'article 1',name:'修改邮箱',url:'/design-preview/fumadocs-reader/article%201',
-   }],
-  }],
- }]);
+ const root=tree.children[0];
+ assert.equal(root?.type,'folder');
+ if(root?.type!=='folder')throw new Error('missing root folder');
+ const group=root.children[0];
+ assert.equal(group?.type,'folder');
+ if(group?.type!=='folder')throw new Error('missing category folder');
+ assert.equal(group.name,'账户管理');
+ assert.ok(isValidElement(group.icon));
+ assert.equal(group.icon.type,readerIconComponents.shield);
+ const page=group.children[0];
+ assert.equal(page?.type,'page');
+ if(page?.type!=='page')throw new Error('missing article page');
+ assert.equal(page.description,'更新登录邮箱');
+ assert.ok(isValidElement(page.icon));
+ assert.equal(page.icon.type,readerIconComponents.file);
+ assert.equal(page.url,'/design-preview/fumadocs-reader/article%201');
  assert.equal(canonicalFumadocsPublicationPath('article 1'),'/design-preview/fumadocs-reader/article%201');
 });
 

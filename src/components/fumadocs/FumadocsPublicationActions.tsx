@@ -6,10 +6,7 @@ import type {FavoriteState} from '../../favorites/model';
 import type {Publication} from '../../reader/body';
 import {fumadocsMarkdownPath,fumadocsPdfPath} from '../../fumadocs/publication';
 import {FavoriteButton} from '../favorites/FavoriteButton';
-// Reviewed JUYU adapters: Fumadocs provides neither persisted version-bound
-// feedback nor text-size, page-width and font preferences as package APIs.
 import {PageFeedbackForm} from '../reader-support/PageFeedbackForm';
-import {ReaderAppearance} from '../reader-support/ReaderAppearance';
 
 type SharedProps={article:Publication;features:FeatureFlags;viewerId?:string;favorite?:FavoriteState};
 
@@ -24,7 +21,6 @@ export function FumadocsPublicationActions({article,features,viewerId,favorite}:
    <a className={actionClass} href={markdownUrl} target="_blank" rel="noopener noreferrer"><TextT aria-hidden="true"/>{english?'View Markdown':'查看 Markdown'}</a>
    {features.pdfExport&&<a className={actionClass} href={fumadocsPdfPath(article)}><FilePdf aria-hidden="true"/>{english?'Read / export PDF':'PDF 阅读／导出'}</a>}
   </div>
-  <ReaderAppearance locale={article.locale}/>
  </section>;
 }
 

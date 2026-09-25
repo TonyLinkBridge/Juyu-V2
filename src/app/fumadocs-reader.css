@@ -2,14 +2,6 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
-[data-fumadocs-publication-actions] .reader-appearance { margin:0;color:var(--color-fd-muted-foreground);font-size:.8125rem; }
-[data-fumadocs-publication-actions] .reader-appearance>summary { width:max-content;cursor:pointer;padding:4px 0;color:var(--color-fd-foreground); }
-[data-fumadocs-publication-actions] .reader-appearance-panel { display:grid;gap:12px;margin-top:8px;padding:12px;border:1px solid var(--color-fd-border);border-radius:var(--radius-lg);background:var(--color-fd-card); }
-[data-fumadocs-publication-actions] .reader-appearance fieldset { margin:0;padding:0;border:0; }
-[data-fumadocs-publication-actions] .reader-appearance legend { margin-bottom:6px;font-size:.75rem;color:var(--color-fd-muted-foreground); }
-[data-fumadocs-publication-actions] .reader-appearance-options { display:flex;flex-wrap:wrap;gap:6px; }
-[data-fumadocs-publication-actions] .reader-appearance button { cursor:pointer;border:1px solid var(--color-fd-border);border-radius:var(--radius-md);padding:5px 8px;background:var(--color-fd-secondary);color:var(--color-fd-secondary-foreground);font-size:.75rem; }
-[data-fumadocs-publication-actions] .reader-appearance button[aria-pressed='true'] { border-color:var(--color-fd-primary);color:var(--color-fd-primary); }
 .fumadocs-publication-feedback { margin-top:28px;color:var(--color-fd-foreground); }
 .fumadocs-publication-feedback .reader-feedback { margin:0;padding:24px 0;border-color:var(--color-fd-border); }
 .fumadocs-publication-feedback .feedback-rating button,
@@ -64,15 +56,6 @@
  body:has([data-fumadocs-pdf-page]) [data-fumadocs-pdf-page],
  body:has([data-fumadocs-pdf-page]) [data-fumadocs-pdf-content] { width:100%!important;max-width:none!important;margin:0!important;padding:0!important; }
  body:has([data-fumadocs-pdf-page]) .pdf-paper { margin:0!important;box-shadow:none!important; }
-}
-
-html[data-reader-size='compact'] [data-fumadocs-publication] .bn-editor.bn-default-styles { font-size:14px; }
-html[data-reader-size='large'] [data-fumadocs-publication] .bn-editor.bn-default-styles { font-size:19px; }
-html[data-reader-size='compact'] [data-fumadocs-publication] .bn-editor.bn-default-styles .bn-block-content:not([data-content-type='heading']) .bn-inline-content { font-size:14px!important; }
-html[data-reader-size='large'] [data-fumadocs-publication] .bn-editor.bn-default-styles .bn-block-content:not([data-content-type='heading']) .bn-inline-content { font-size:19px!important; }
-html[data-reader-font='serif'] [data-fumadocs-publication] .bn-editor.bn-default-styles { font-family:Georgia,'Noto Serif CJK SC','Songti SC',serif; }
-@media (min-width:1600px) {
- html[data-reader-width='wide'] [data-fumadocs-publication] { max-width:1168px; }
 }
 
 .fumadocs-reader-columns {

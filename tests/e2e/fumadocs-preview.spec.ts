@@ -44,7 +44,7 @@ test('directory and unavailable states use the official Fumadocs shell',async({p
  }
  const directoryAccountFolder=page.getByRole('button',{name:'账户管理'});
  if(await directoryAccountFolder.getAttribute('aria-expanded')==='false')await directoryAccountFolder.click();
- await expect(page.getByRole('link',{name:'如何修改账户邮箱'})).toHaveAttribute('href','/help-centre/articles/fumadocs-preview');
+ await expect(page.getByRole('link',{name:'普通会员权益说明'})).toHaveAttribute('href','/help-centre/articles/fumadocs-preview');
  await expect(page.locator('.entry-frame')).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 
@@ -149,7 +149,7 @@ test('full search results retain JUYU result behavior inside the official Fumado
  }
  const searchAccountFolder=page.getByRole('button',{name:'账户管理'});
  if(await searchAccountFolder.getAttribute('aria-expanded')==='false')await searchAccountFolder.click();
- await expect(page.getByRole('link',{name:'如何修改账户邮箱'})).toHaveAttribute('href','/help-centre/articles/fumadocs-preview');
+ await expect(page.getByRole('link',{name:'普通会员权益说明'})).toHaveAttribute('href','/help-centre/articles/fumadocs-preview');
  await expect(page.locator('.entry-frame')).toHaveCount(0);
  await expect(page.locator('.knowledge-sidebar')).toHaveCount(0);
  const colors=await search.getByRole('heading',{name:'如何申请信用额度？'}).evaluate(element=>({text:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}));
@@ -647,7 +647,7 @@ test('reusable content shows its published children without editor wrapper text'
  await expect(page.getByText('Unsupported custom block')).toHaveCount(0);
 });
 
-test('official page actions preserve protected JUYU operations and reading preferences',async({page,context})=>{
+test('official page actions preserve protected JUYU operations without a second reading presentation system',async({page,context})=>{
  await context.grantPermissions(['clipboard-read','clipboard-write']);
  await page.route('**/api/articles/fumadocs-preview/markdown?revision=1',route=>route.fulfill({contentType:'text/markdown; charset=utf-8',body:'# 如何修改账户邮箱'}));
  await page.goto('/design-preview/fumadocs-reader');
@@ -661,27 +661,10 @@ test('official page actions preserve protected JUYU operations and reading prefe
  await expect.poll(()=>page.evaluate(()=>navigator.clipboard.readText())).toBe('# 如何修改账户邮箱');
  await expect(actions.getByRole('link',{name:'查看 Markdown'})).toHaveAttribute('href','/api/articles/fumadocs-preview/markdown?revision=1');
  await expect(actions.getByRole('link',{name:'PDF 阅读／导出'})).toHaveAttribute('href','/help-centre/pdf?article=fumadocs-preview&revision=1');
- await expect(actions.getByText('阅读外观',{exact:true})).toBeVisible();
- await actions.getByText('阅读外观',{exact:true}).click();
- const paragraph=page.getByText('账户邮箱是登录本站的重要凭证。修改前请先完成身份核对，并确认新邮箱可以正常收信。',{exact:true});
- const before=Number.parseFloat(await paragraph.evaluate(element=>getComputedStyle(element).fontSize));
- await actions.getByRole('button',{name:'大',exact:true}).click();
- await expect(page.locator('html')).toHaveAttribute('data-reader-size','large');
- const after=Number.parseFloat(await paragraph.evaluate(element=>getComputedStyle(element).fontSize));
- expect(after).toBeGreaterThan(before);
- await actions.getByRole('button',{name:'宽',exact:true}).click();
- await actions.getByRole('button',{name:'衬线',exact:true}).click();
- await expect(page.locator('html')).toHaveAttribute('data-reader-width','wide');
- await expect(page.locator('html')).toHaveAttribute('data-reader-font','serif');
- await page.reload();
- await expect(page.locator('html')).toHaveAttribute('data-reader-size','large');
- await expect(page.locator('html')).toHaveAttribute('data-reader-width','wide');
- await expect(page.locator('html')).toHaveAttribute('data-reader-font','serif');
- await page.locator('[data-fumadocs-publication-actions]').getByText('阅读外观',{exact:true}).click();
- await page.locator('[data-fumadocs-publication-actions]').getByRole('button',{name:'恢复默认'}).click();
- await expect(page.locator('html')).toHaveAttribute('data-reader-size','default');
- await expect(page.locator('html')).toHaveAttribute('data-reader-width','comfortable');
- await expect(page.locator('html')).toHaveAttribute('data-reader-font','sans');
+ await expect(actions.getByText('阅读外观',{exact:true})).toHaveCount(0);
+ await expect(page.locator('html')).not.toHaveAttribute('data-reader-size',/.+/);
+ await expect(page.locator('html')).not.toHaveAttribute('data-reader-width',/.+/);
+ await expect(page.locator('html')).not.toHaveAttribute('data-reader-font',/.+/);
  await expect(page.getByRole('region',{name:'文章反馈'})).toBeVisible();
  await expect(page.getByText('这篇文章有帮助吗？',{exact:true})).toBeVisible();
  await page.getByRole('button',{name:'有帮助',exact:true}).click();

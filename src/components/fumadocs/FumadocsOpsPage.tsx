@@ -3,7 +3,6 @@ import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {OpsPage} from '../../ops/model';
-import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {articleContentPath} from '../../reader/content-path';
 import {OpsCollection} from '../ops/OpsCollection';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
@@ -42,11 +41,10 @@ function opsCopy(state:FumadocsOpsPageProps['state'],locale:'zh-CN'|'en'){
  };
 }
 
-export function FumadocsOpsContent({data,state,menu=[],search=false,locale='zh-CN'}:FumadocsOpsPageProps){
+export function FumadocsOpsContent({data,state,search=false,locale='zh-CN'}:FumadocsOpsPageProps){
  const copy=opsCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={opsTree(state==='ready'?data:undefined)}
-  links={fumadocsMenuLinks(menu,locale)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}

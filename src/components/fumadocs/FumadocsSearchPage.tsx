@@ -4,7 +4,6 @@ import type {FeatureFlags} from '../../features/model';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {SearchScope,TitleSearch} from '../../reader/search';
 import type {NavigationNode} from '../../reader/tree';
-import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {fumadocsPublicationTree,type FumadocsPublicationLocale} from '../../fumadocs/publication';
 import {SearchAnalytics} from '../analytics/SearchAnalytics';
 import {SearchResultsBody} from '../gitbook/Search/SearchResults';
@@ -24,11 +23,10 @@ export interface FumadocsSearchPageProps {
  locale?:FumadocsPublicationLocale;
 }
 
-export function FumadocsSearchContent({pages,menu=[],features,search,scope,failed=false,retryHref,locale='zh-CN'}:FumadocsSearchPageProps){
+export function FumadocsSearchContent({pages,features,search,scope,failed=false,retryHref,locale='zh-CN'}:FumadocsSearchPageProps){
  const english=locale==='en';
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={fumadocsPublicationTree(failed?[]:pages,locale,'formal')}
-  links={fumadocsMenuLinks(menu,locale)}
   nav={{title:'JUYU Help Centre',url:'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:features.search}}

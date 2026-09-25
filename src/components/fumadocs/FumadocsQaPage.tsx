@@ -4,7 +4,6 @@ import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/d
 import type {MenuItem} from '../../navigation-settings/model';
 import type {QaPage} from '../../qa/model';
 import type {Publication} from '../../reader/body';
-import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {QaView} from '../qa/QaView';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
@@ -53,11 +52,10 @@ function qaCopy(state:FumadocsQaPageProps['state'],locale:'zh-CN'|'en'){
  };
 }
 
-export function FumadocsQaContent({data,initialAnswer,viewerId,state,menu=[],searchEnabled=true,locale='zh-CN'}:FumadocsQaPageProps){
+export function FumadocsQaContent({data,initialAnswer,viewerId,state,searchEnabled=true,locale='zh-CN'}:FumadocsQaPageProps){
  const copy=qaCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={qaTree(state==='ready'?data:undefined,locale)}
-  links={fumadocsMenuLinks(menu,locale)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:searchEnabled}}

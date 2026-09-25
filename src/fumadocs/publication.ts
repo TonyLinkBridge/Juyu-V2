@@ -1,5 +1,8 @@
 import type {Root} from 'fumadocs-core/page-tree';
+import {createElement} from 'react';
 import {decodeEditorBody,inlineText,type EditorBlock} from '../editor/document.ts';
+import {readerIconComponents} from '../reader/icon-components.ts';
+import type {ReaderIconKey} from '../reader/icon-keys.ts';
 import type {NavigationNode} from '../reader/tree.ts';
 import {articleContentPath} from '../reader/content-path.ts';
 
@@ -59,15 +62,19 @@ export function fumadocsPublication(article:{body:string}):{blocks:EditorBlock[]
 }
 
 export function fumadocsPublicationTree(nodes:NavigationNode[],locale:FumadocsPublicationLocale,mode:FumadocsReaderMode='preview'):Root {
+ const icon=(key:ReaderIconKey)=>createElement(readerIconComponents[key],{size:16,'aria-hidden':true});
  const convert=(items:NavigationNode[]):Root['children']=>items.map(node=>node.type==='group'?{
   type:'folder' as const,
   $id:node.id,
   name:node.title,
+  ...(node.iconKey?{icon:icon(node.iconKey)}:{}),
   children:convert(node.descendants),
  }:{
   type:'page' as const,
   $id:node.id,
   name:node.title,
+  ...(node.description?{description:node.description}:{}),
+  ...(node.iconKey?{icon:icon(node.iconKey)}:{}),
   url:publicationPath(node.id,mode),
  });
  const name=locale==='en'?'Knowledge Base':'资料目录';

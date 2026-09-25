@@ -7,7 +7,6 @@ import Link from 'next/link';
 import type {ContentKind} from '../../domain/model';
 import type {MenuItem} from '../../navigation-settings/model';
 import {contentPath} from '../../reader/content-path';
-import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import {FumadocsSearchProvider} from './FumadocsSearchProvider';
@@ -48,7 +47,7 @@ function itemType(kind:ContentKind,english:boolean){
  return kind==='qa'?'Q&A':kind==='ops'?'OPS Internal':kind==='reference'?'Reference':'知识文章';
 }
 
-export function FumadocsChangelogContent({data,state,menu=[],search=false,locale='zh-CN'}:FumadocsChangelogPageProps){
+export function FumadocsChangelogContent({data,state,search=false,locale='zh-CN'}:FumadocsChangelogPageProps){
  const english=locale==='en',ready=state==='ready'&&data!==undefined;
  const title=english?"What's new":'更新日志';
  const description=english?'Published updates you can currently access, newest first.':'按正式发布时间排列当前可阅读的资料。仅显示你有权限查看的已发布版本。';
@@ -56,7 +55,6 @@ export function FumadocsChangelogContent({data,state,menu=[],search=false,locale
  const currentPage=data?.page??1;
  return <FumadocsPublicationI18n locale={locale} destinations={{'zh-CN':pageHref(currentPage,'zh-CN'),en:pageHref(currentPage,'en')}}><DocsLayout
   tree={changelogTree(ready?data:undefined,locale)}
-  links={fumadocsMenuLinks(menu,locale)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}
