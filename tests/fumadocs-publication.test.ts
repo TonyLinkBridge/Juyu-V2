@@ -26,29 +26,37 @@ test('legacy text is rejected instead of being silently simplified',()=>{
  assert.throws(()=>fumadocsPublication({body:'普通旧正文'}),/BLOCKNOTE_BODY_REQUIRED/);
 });
 
-test('authorized directory becomes canonical Fumadocs paths so native navigation can identify every page',()=>{
+test('top-level categories use official Fumadocs separators while nested categories remain folders',()=>{
  const tree=fumadocsPublicationTree([
   {type:'group',id:'account',title:'账户管理',iconKey:'shield',descendants:[
    {type:'document',id:'article 1',title:'修改邮箱',description:'更新登录邮箱',iconKey:'file',href:'/help-centre?article=article%201'},
+   {type:'group',id:'security',title:'账户安全',descendants:[
+    {type:'document',id:'article 2',title:'修改密码',href:'/help-centre?article=article%202'},
+   ]},
   ]},
  ],'zh-CN');
  assert.equal(tree.name,'资料目录');
  const root=tree.children[0];
  assert.equal(root?.type,'folder');
  if(root?.type!=='folder')throw new Error('missing root folder');
- const group=root.children[0];
- assert.equal(group?.type,'folder');
- if(group?.type!=='folder')throw new Error('missing category folder');
- assert.equal(group.name,'账户管理');
- assert.ok(isValidElement(group.icon));
- assert.equal(group.icon.type,readerIconComponents.shield);
- const page=group.children[0];
+ const section=root.children[0];
+ assert.equal(section?.type,'separator');
+ if(section?.type!=='separator')throw new Error('missing category separator');
+ assert.equal(section.name,'账户管理');
+ assert.ok(isValidElement(section.icon));
+ assert.equal(section.icon.type,readerIconComponents.shield);
+ const page=root.children[1];
  assert.equal(page?.type,'page');
  if(page?.type!=='page')throw new Error('missing article page');
  assert.equal(page.description,'更新登录邮箱');
  assert.ok(isValidElement(page.icon));
  assert.equal(page.icon.type,readerIconComponents.file);
  assert.equal(page.url,'/design-preview/fumadocs-reader/article%201');
+ const nested=root.children[2];
+ assert.equal(nested?.type,'folder');
+ if(nested?.type!=='folder')throw new Error('missing nested category folder');
+ assert.equal(nested.name,'账户安全');
+ assert.equal(nested.children[0]?.type,'page');
  assert.equal(canonicalFumadocsPublicationPath('article 1'),'/design-preview/fumadocs-reader/article%201');
 });
 

@@ -12,6 +12,7 @@ import {ArticleAnalytics} from '../analytics/ArticleAnalytics';
 import {RecentRecorder} from '../recent/RecentRecorder';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsSearchProvider} from './FumadocsSearchProvider';
+import {fumadocsBlockNoteTocSlots} from './FumadocsBlockNoteTocBridge';
 
 const previewRoot='/design-preview/fumadocs-reader';
 
@@ -49,6 +50,7 @@ export async function FumadocsAuthorizedPublication({articleId,mode='preview'}:{
   <DocsPage
    data-fumadocs-publication=""
    toc={document.toc}
+   slots={{toc:fumadocsBlockNoteTocSlots}}
    breadcrumb={{includeRoot:{url:root},includePage:true}}
   >
    <DocsTitle>{article.title}</DocsTitle>

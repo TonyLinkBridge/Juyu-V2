@@ -41,6 +41,7 @@ import {InlineAnnotation} from '../reader-support/InlineAnnotation';
 import {ArticleReferenceProvider,useAuthorizedReference,useReaderLocale} from '../reader-support/ArticleReferenceContext';
 import {TableExplorer} from '../reader-support/TableExplorer';
 import type {NavigationPage} from '../../reader/navigation';
+import {useFumadocsBlockNoteTocReady} from './FumadocsBlockNoteTocBridge';
 
 type ReaderLocale='zh-CN'|'en';
 
@@ -606,6 +607,7 @@ function createReaderSchema(nodes:EditorBlock[]=[]){
 
 function BlockNoteDocument({schemaNodes,initialContent,locale}:{schemaNodes:EditorBlock[];initialContent:unknown[];locale:ReaderLocale}){
  const root=useRef<HTMLDivElement>(null);
+ const markTocReady=useFumadocsBlockNoteTocReady();
  const {resolvedTheme}=useTheme();
  const schema=useMemo(()=>createReaderSchema(schemaNodes),[schemaNodes]);
  const editor=useCreateBlockNote({
@@ -620,7 +622,8 @@ function BlockNoteDocument({schemaNodes,initialContent,locale}:{schemaNodes:Edit
    const title=heading.querySelector<HTMLElement>('h1,h2,h3,h4,h5,h6');
    if(block?.dataset.id&&title)title.id=block.dataset.id;
   }
- },[editor]);
+  markTocReady();
+ },[editor,markTocReady]);
  return <div ref={root} className="not-prose" data-fumadocs-blocknote-reader=""><BlockNoteView editor={editor} editable={false} theme={resolvedTheme==='dark'?'dark':'light'}/></div>;
 }
 

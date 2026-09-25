@@ -3,6 +3,7 @@ import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import {notFound,redirect} from 'next/navigation';
 import {FumadocsBlockNoteReader} from '../../../components/fumadocs/FumadocsBlockNoteReader';
+import {fumadocsBlockNoteTocSlots} from '../../../components/fumadocs/FumadocsBlockNoteTocBridge';
 import {FumadocsPublicationI18n} from '../../../components/fumadocs/FumadocsPublicationI18n';
 import {FumadocsPublicationActions,FumadocsPublicationFeedback} from '../../../components/fumadocs/FumadocsPublicationActions';
 import {canonicalFumadocsPublicationPath} from '../../../fumadocs/publication';
@@ -32,11 +33,13 @@ const path='/design-preview/fumadocs-reader';
 const tree:Root={
  name:'资料目录',
  children:[{type:'folder',name:'资料目录',root:true,defaultOpen:true,children:[
-  {type:'folder',name:'账户管理',children:[
+  {type:'separator',name:'账户管理'},
+  {type:'folder',name:'账户安全',children:[
    {type:'page',name:'如何修改账户邮箱',url:path},
    {type:'page',name:'如何找回密码',url:`${path}/example-password`},
   ]},
-  {type:'folder',name:'交易与订单',children:[{type:'page',name:'订单状态说明',url:`${path}/example-orders`}]},
+  {type:'separator',name:'交易与订单'},
+  {type:'page',name:'订单状态说明',url:`${path}/example-orders`},
  ]}],
 };
 
@@ -114,9 +117,8 @@ const plainPath=`${path}?fixture=plain`;
 const plainTree:Root={
  name:'资料目录',
  children:[{type:'folder',name:'资料目录',root:true,defaultOpen:true,children:[
-  {type:'folder',name:'示例文章',children:[
-   {type:'page',name:'没有章节标题的文章',url:plainPath},
-  ]},
+  {type:'separator',name:'示例文章'},
+  {type:'page',name:'没有章节标题的文章',url:plainPath},
  ]}],
 };
 const plainBlocks:EditorBlock[]=[
@@ -129,10 +131,12 @@ const fixtureArticle:Publication={id:'fumadocs-preview',title:'如何修改账�
 const plainFixtureArticle:Publication={id:'fumadocs-preview-plain',title:'没有章节标题的文章',revision:1,body:'',locale:'zh-CN',publicationNumber:1,feedback:{memberId:'preview',value:null}};
 const fixtureLanguages={'zh-CN':path,en:`${path}?lang=en`} as const;
 const directoryPages:NavigationNode[]=[{type:'group',id:'preview-account',title:'账户管理',descendants:[
- {type:'document',id:'fumadocs-preview',title:'普通会员权益说明',description:'详细介绍普通会员的权益范围、使用规则及相关说明，帮助你快速了解会员体系。',href:'/help-centre/articles/fumadocs-preview'},
- {type:'document',id:'example-customer',title:'大客户权益说明',href:'/help-centre/articles/example-customer'},
- {type:'document',id:'example-premium',title:'高级会员权益说明',href:'/help-centre/articles/example-premium'},
- {type:'document',id:'example-gold',title:'金牌会员权益说明',href:'/help-centre/articles/example-gold'},
+ {type:'group',id:'preview-security',title:'账户安全',descendants:[
+  {type:'document',id:'fumadocs-preview',title:'普通会员权益说明',description:'详细介绍普通会员的权益范围、使用规则及相关说明，帮助你快速了解会员体系。',href:'/help-centre/articles/fumadocs-preview'},
+  {type:'document',id:'example-customer',title:'大客户权益说明',href:'/help-centre/articles/example-customer'},
+  {type:'document',id:'example-premium',title:'高级会员权益说明',href:'/help-centre/articles/example-premium'},
+  {type:'document',id:'example-gold',title:'金牌会员权益说明',href:'/help-centre/articles/example-gold'},
+ ]},
 ]}];
 const fixtureSearch:TitleSearch={status:'ready',query:'信用',total:2,page:1,pages:1,results:[
  {id:'credit',title:'0 元签约店铺信用额度如何理解？',href:'/help-centre/qa?question=credit',breadcrumbs:['信用额度'],kind:'qa',revision:1,tags:['0 元签约','店铺'],snippet:'了解签约店铺和信用额度的使用规则。'},
@@ -185,7 +189,7 @@ function fixture(kind:'default'|'plain'='default'){
  const article=plain?plainFixtureArticle:fixtureArticle;
  const currentPath=plain?plainPath:path;
  return <FumadocsPublicationI18n locale="zh-CN" destinations={plain?{'zh-CN':plainPath}:fixtureLanguages}><DocsLayout tree={plain?plainTree:tree} nav={{title:'JUYU Help Centre',url:currentPath}} searchToggle={{enabled:false}}>
-  <DocsPage data-fumadocs-publication="" toc={plain?[]:toc} breadcrumb={{includeRoot:{url:currentPath},includePage:true}}>
+  <DocsPage data-fumadocs-publication="" toc={plain?[]:toc} slots={{toc:fumadocsBlockNoteTocSlots}} breadcrumb={{includeRoot:{url:currentPath},includePage:true}}>
    <DocsTitle>{article.title}</DocsTitle>
    <DocsDescription>{plain?'正文没有章节标题时，Fumadocs 不会制造本页目录。':'使用 Fumadocs 官方阅读外壳和 BlockNote 官方只读视图显示同一份文章内容。'}</DocsDescription>
    <FumadocsPublicationActions article={article} features={defaultFeatureFlags}/>

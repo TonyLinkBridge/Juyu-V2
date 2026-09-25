@@ -63,7 +63,7 @@ export function fumadocsPublication(article:{body:string}):{blocks:EditorBlock[]
 
 export function fumadocsPublicationTree(nodes:NavigationNode[],locale:FumadocsPublicationLocale,mode:FumadocsReaderMode='preview'):Root {
  const icon=(key:ReaderIconKey)=>createElement(readerIconComponents[key],{size:16,'aria-hidden':true});
- const convert=(items:NavigationNode[]):Root['children']=>items.map(node=>node.type==='group'?{
+ const convertNode=(node:NavigationNode):Root['children'][number]=>node.type==='group'?{
   type:'folder' as const,
   $id:node.id,
   name:node.title,
@@ -76,7 +76,17 @@ export function fumadocsPublicationTree(nodes:NavigationNode[],locale:FumadocsPu
   ...(node.description?{description:node.description}:{}),
   ...(node.iconKey?{icon:icon(node.iconKey)}:{}),
   url:publicationPath(node.id,mode),
- });
+ };
+ const convert=(items:NavigationNode[]):Root['children']=>items.map(convertNode);
+ const sections:Root['children']=nodes.flatMap(node=>node.type==='group'?[
+  {
+   type:'separator' as const,
+   $id:`${node.id}:section`,
+   name:node.title,
+   ...(node.iconKey?{icon:icon(node.iconKey)}:{}),
+  },
+  ...convert(node.descendants),
+ ]:[convertNode(node)]);
  const name=locale==='en'?'Knowledge Base':'资料目录';
- return {name,children:[{type:'folder',name,root:true,defaultOpen:true,children:convert(nodes)}]};
+ return {name,children:[{type:'folder',name,root:true,defaultOpen:true,children:sections}]};
 }

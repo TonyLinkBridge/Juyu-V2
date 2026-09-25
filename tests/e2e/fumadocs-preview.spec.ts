@@ -16,8 +16,8 @@ test('published equations and diagrams use the official BlockNote block specs',a
 test('official Fumadocs navigation exposes the real path, adjacent page and mobile page outline',async({page})=>{
  await page.goto('/design-preview/fumadocs-reader');
  await expect(page.locator('article').getByText('资料目录',{exact:true})).toBeVisible();
- const breadcrumb=page.locator('article').locator('nav, div').filter({hasText:'账户管理'}).first();
- await expect(breadcrumb).toContainText('账户管理');
+ const breadcrumb=page.locator('article').locator('nav, div').filter({hasText:'账户安全'}).first();
+ await expect(breadcrumb).toContainText('账户安全');
  await expect(breadcrumb).toContainText('如何修改账户邮箱');
  await expect(page.getByRole('link',{name:/如何找回密码.*下一页/})).toHaveAttribute('href','/design-preview/fumadocs-reader/example-password');
  if((page.viewportSize()?.width??1440)<1280){
@@ -27,6 +27,23 @@ test('official Fumadocs navigation exposes the real path, adjacent page and mobi
  }else{
   await expect(page.locator('#nd-toc').getByRole('link',{name:'修改账户邮箱流程',exact:true})).toBeVisible();
  }
+});
+
+test('official Fumadocs table of contents tracks BlockNote headings while scrolling',async({page})=>{
+ await page.goto('/design-preview/fumadocs-reader');
+ const mobile=(page.viewportSize()?.width??1440)<1280;
+ if(mobile)await page.locator('[data-toc-popover-trigger]').click();
+ const toc=mobile?page.locator('[data-toc-popover-content]'):page.locator('#nd-toc');
+ const first=toc.getByRole('link',{name:'修改账户邮箱流程',exact:true});
+ const second=toc.getByRole('link',{name:'提交后会发生什么',exact:true});
+ await expect(page.locator('#email-process')).toBeVisible();
+ await expect(first).toHaveAttribute('data-active','true');
+ await expect(second).toHaveAttribute('data-active','false');
+ if(mobile)await page.keyboard.press('Escape');
+ await page.locator('#email-result').scrollIntoViewIfNeeded();
+ if(mobile)await page.locator('[data-toc-popover-trigger]').click();
+ await expect(second).toHaveAttribute('data-active','true');
+ await expect(first).toHaveAttribute('data-active','false');
 });
 
 test('legacy validation links redirect to the canonical per-article path',async({page})=>{
@@ -42,9 +59,12 @@ test('directory and unavailable states use the official Fumadocs shell',async({p
  if((page.viewportSize()?.width??1440)<1280){
   await page.getByRole('button',{name:'开启侧边栏'}).click();
  }
- const directoryAccountFolder=page.getByRole('button',{name:'账户管理'});
- if(await directoryAccountFolder.getAttribute('aria-expanded')==='false')await directoryAccountFolder.click();
- await expect(page.getByRole('link',{name:'普通会员权益说明'})).toHaveAttribute('href','/help-centre/articles/fumadocs-preview');
+ const sidebar=(page.viewportSize()?.width??1440)<1280?page.locator('#nd-sidebar-mobile'):page.locator('#nd-sidebar');
+ await expect(sidebar.locator('p').filter({hasText:/^账户管理$/})).toHaveText('账户管理');
+ await expect(sidebar.getByRole('button',{name:'账户管理'})).toHaveCount(0);
+ const nestedFolder=sidebar.getByRole('button',{name:'账户安全'});
+ if(await nestedFolder.getAttribute('aria-expanded')==='false')await nestedFolder.click();
+ await expect(sidebar.getByRole('link',{name:'普通会员权益说明'})).toHaveAttribute('href','/help-centre/articles/fumadocs-preview');
  await expect(page.locator('.entry-frame')).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 
@@ -147,7 +167,9 @@ test('full search results retain JUYU result behavior inside the official Fumado
  if((page.viewportSize()?.width??1440)<1280){
   await page.getByRole('button',{name:'开启侧边栏'}).click();
  }
- const searchAccountFolder=page.getByRole('button',{name:'账户管理'});
+ const searchSidebar=page.locator((page.viewportSize()?.width??1440)<1280?'#nd-sidebar-mobile':'#nd-sidebar');
+ await expect(searchSidebar.locator('p').filter({hasText:'账户管理'})).toBeVisible();
+ const searchAccountFolder=searchSidebar.getByRole('button',{name:'账户安全'});
  if(await searchAccountFolder.getAttribute('aria-expanded')==='false')await searchAccountFolder.click();
  await expect(page.getByRole('link',{name:'普通会员权益说明'})).toHaveAttribute('href','/help-centre/articles/fumadocs-preview');
  await expect(page.locator('.entry-frame')).toHaveCount(0);
@@ -455,8 +477,10 @@ test('official Fumadocs shell renders the same BlockNote document read only',asy
  });
  expect(readerSurface).toEqual({background:'rgba(0, 0, 0, 0)',paddingInline:'0px',borderRadius:'0px'});
  if(info.project.name==='desktop'){
-  await expect(page.getByRole('button',{name:'账户管理'})).toHaveAttribute('aria-expanded','true');
-  await expect(page.getByRole('button',{name:'交易与订单'})).toHaveAttribute('aria-expanded','false');
+  const sidebar=page.locator('#nd-sidebar');
+  await expect(sidebar.locator('p').filter({hasText:'账户管理'})).toBeVisible();
+  await expect(sidebar.getByRole('button',{name:'账户安全'})).toHaveAttribute('aria-expanded','true');
+  await expect(sidebar.locator('p').filter({hasText:'交易与订单'})).toBeVisible();
  }
  await expect(page.getByRole('heading',{name:'修改账户邮箱流程'})).toBeVisible();
  await expect(page.getByText('请先准备账户验证资料。',{exact:true})).toBeVisible();
