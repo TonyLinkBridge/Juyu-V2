@@ -15,7 +15,7 @@
 .entry-frame:has(.reader-layout) .header-search-panel .gitbook-search-form { width:100%; max-width:none; }
 .entry-frame:has(.reader-layout) .gitbook-search-input { min-height:38px; background:var(--panel); border-radius:12px; }
 .entry-frame:has(.reader-layout) .account-controls { grid-column:5; justify-self:end; gap:0; min-width:0; }
-.entry-frame:has(.reader-layout) .account-controls>.theme-toggler-compact,.entry-frame:has(.reader-layout) .account-controls>.admin-console-button { display:none; }
+.entry-frame:has(.reader-layout) .account-controls>[data-theme-toggle],.entry-frame:has(.reader-layout) .account-controls>.admin-console-button { display:none; }
 .entry-frame:has(.reader-layout) .mobile-account-appearance,.entry-frame:has(.reader-layout) .mobile-account-shortcut { display:block; margin-bottom:14px; }
 .entry-frame:has(.reader-layout) .account-identity>span { display:none; }
 .entry-frame:has(.reader-layout) .account-identity strong { font-size:14px; }

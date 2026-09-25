@@ -31,13 +31,12 @@ export function FumadocsHomeContent({children,menu=[],account=false,locale='zh-C
   links={links}
   nav={{title:<span className="juyu-home-brand"><strong>JUYU</strong><span>Help Centre</span></span>,url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   searchToggle={{enabled:false}}
-  themeSwitch={{enabled:false}}
  >{children}</HomeLayout></FumadocsPublicationI18n>;
 }
 
 export function FumadocsHomeShell(props:FumadocsHomeShellProps){
  const locale=props.locale??'zh-CN';
- return <RootProvider i18n={fumadocsRootI18n(locale)} search={{SearchDialog:FumadocsScopedSearchDialog,options:fumadocsSearchOptions(locale)}}><FumadocsHomeContent {...props}/></RootProvider>;
+ return <RootProvider theme={{enabled:false}} i18n={fumadocsRootI18n(locale)} search={{SearchDialog:FumadocsScopedSearchDialog,options:fumadocsSearchOptions(locale)}}><FumadocsHomeContent {...props}/></RootProvider>;
 }
 
 type KnowledgeHomeProps=ComponentProps<typeof KnowledgeHome>;
@@ -55,5 +54,5 @@ export function FumadocsKnowledgeHomeContent({announcement,...props}:FumadocsKno
 
 export function FumadocsKnowledgeHome(props:FumadocsKnowledgeHomeProps){
  const locale=props.locale??'zh-CN';
- return <RootProvider i18n={fumadocsRootI18n(locale)} search={{SearchDialog:FumadocsScopedSearchDialog,options:fumadocsSearchOptions(locale)}}><FumadocsKnowledgeHomeContent {...props}/></RootProvider>;
+ return <RootProvider theme={{enabled:false}} i18n={fumadocsRootI18n(locale)} search={{SearchDialog:FumadocsScopedSearchDialog,options:fumadocsSearchOptions(locale)}}><FumadocsKnowledgeHomeContent {...props}/></RootProvider>;
 }

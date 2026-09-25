@@ -83,5 +83,5 @@ export function FumadocsChangelogContent({data,state,menu=[],search=false,locale
 }
 
 export function FumadocsChangelogPage(props:FumadocsChangelogPageProps){
- return <RootProvider search={{options:{api:'/api/fumadocs-search'}}}><FumadocsChangelogContent {...props}/></RootProvider>;
+ return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsChangelogContent {...props}/></RootProvider>;
 }

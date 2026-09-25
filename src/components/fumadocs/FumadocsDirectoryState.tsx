@@ -60,5 +60,5 @@ export function FumadocsDirectoryContent({pages,menu=[],features,requested,faile
 }
 
 export function FumadocsDirectoryState(props:DirectoryStateProps){
- return <RootProvider search={{options:{api:'/api/fumadocs-search'}}}><FumadocsDirectoryContent {...props}/></RootProvider>;
+ return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsDirectoryContent {...props}/></RootProvider>;
 }

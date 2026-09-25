@@ -83,6 +83,20 @@ test('Help Centre home retains every JUYU entry inside the official Fumadocs hom
  await expect(brand.locator('strong')).toHaveText('JUYU');
  await expect(brand.locator('span')).toHaveText('Help Centre');
  await expect(page.locator('#nd-nav [data-search-full]')).toHaveCount(0);
+ const mobile=(page.viewportSize()?.width??1440)<1280;
+ const mobileMenu=page.getByRole('button',{name:'Toggle Menu'});
+ if(mobile)await mobileMenu.click();
+ const themeSwitch=page.locator('button[data-theme-toggle]:visible');
+ await expect(themeSwitch).toHaveCount(1);
+ await themeSwitch.click();
+ await expect.poll(()=>page.evaluate(()=>document.documentElement.classList.contains('dark'))).toBe(true);
+ const darkColors=await home.getByRole('heading',{name:'今天需要找什么答案？'}).evaluate(element=>({text:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}));
+ expect(darkColors.text).not.toBe('rgb(0, 0, 0)');
+ expect(darkColors.text).not.toBe(darkColors.background);
+ await page.screenshot({path:`output/verification/fumadocs-home-${info.project.name}-dark.png`,fullPage:true});
+ await page.keyboard.press('d');
+ await expect.poll(()=>page.evaluate(()=>document.documentElement.classList.contains('dark'))).toBe(false);
+ if(mobile)await page.keyboard.press('Escape');
  const tabs=home.locator('.home-section-tabs');
  await expect(tabs).toBeVisible();
  await expect(tabs.getByRole('link',{name:'知识文章'})).toHaveAttribute('aria-current','page');
@@ -113,13 +127,7 @@ test('Help Centre home retains every JUYU entry inside the official Fumadocs hom
  await expect(page.locator('.entry-frame')).toHaveCount(0);
  await expect(page.locator('.knowledge-sidebar')).toHaveCount(0);
  await page.screenshot({path:`output/verification/fumadocs-home-${info.project.name}-light.png`,fullPage:true});
- await page.emulateMedia({colorScheme:'dark'});
- await expect.poll(()=>page.evaluate(()=>document.documentElement.classList.contains('dark'))).toBe(true);
- const colors=await home.getByRole('heading',{name:'今天需要找什么答案？'}).evaluate(element=>({text:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}));
- expect(colors.text).not.toBe('rgb(0, 0, 0)');
- expect(colors.text).not.toBe(colors.background);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
- await page.screenshot({path:`output/verification/fumadocs-home-${info.project.name}-dark.png`,fullPage:true});
 });
 
 test('full search results retain JUYU result behavior inside the official Fumadocs shell',async({page})=>{

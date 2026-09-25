@@ -76,5 +76,5 @@ export function FumadocsFavoritesPreviewContent(props:FumadocsFavoritesPageProps
 }
 
 export function FumadocsFavoritesPage(props:FumadocsFavoritesPageProps){
- return <RootProvider search={{options:{api:'/api/fumadocs-search'}}}><FumadocsFavoritesContent {...props}/></RootProvider>;
+ return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsFavoritesContent {...props}/></RootProvider>;
 }

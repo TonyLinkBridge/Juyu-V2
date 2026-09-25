@@ -45,7 +45,8 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  assert.match(home,/juyu-home-brand/);
  assert.match(home,/NewAnnouncements silentFailure/);
  assert.match(home,/searchToggle=\{\{enabled:false\}\}/);
- assert.match(home,/themeSwitch=\{\{enabled:false\}\}/);
+ assert.doesNotMatch(home,/themeSwitch=\{\{enabled:false\}\}/);
+ assert.match(home,/theme=\{\{enabled:false\}\}/);
 
  const homeStyles=await readFile('src/app/product-shell.css','utf8');
  assert.match(homeStyles,/--juyu-home-accent:#b3131b/);

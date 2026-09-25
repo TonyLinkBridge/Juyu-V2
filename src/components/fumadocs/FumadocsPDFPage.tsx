@@ -51,5 +51,5 @@ export function FumadocsPDFContent({snapshot,state,message,menu=[],search=false,
 }
 
 export function FumadocsPDFPage(props:FumadocsPDFPageProps){
- return <RootProvider search={{options:{api:'/api/fumadocs-search'}}}><FumadocsPDFContent {...props}/></RootProvider>;
+ return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsPDFContent {...props}/></RootProvider>;
 }

@@ -65,5 +65,5 @@ export function FumadocsRecentContent({data,state,menu=[],search=false,locale='z
 }
 
 export function FumadocsRecentPage(props:FumadocsRecentPageProps){
- return <RootProvider search={{options:{api:'/api/fumadocs-search'}}}><FumadocsRecentContent {...props}/></RootProvider>;
+ return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsRecentContent {...props}/></RootProvider>;
 }

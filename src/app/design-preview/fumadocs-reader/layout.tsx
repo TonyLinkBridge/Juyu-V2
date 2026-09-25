@@ -6,5 +6,5 @@ import {FumadocsScopedSearchDialog} from '../../../components/fumadocs/FumadocsS
 import '../../fumadocs-reader.css';
 
 export default function FumadocsReaderPreviewLayout({children}:{children:ReactNode}){
- return <RootProvider i18n={fumadocsRootI18n('zh-CN')} search={{SearchDialog:FumadocsScopedSearchDialog,options:fumadocsSearchOptions('zh-CN')}}>{children}</RootProvider>;
+ return <RootProvider theme={{enabled:false}} i18n={fumadocsRootI18n('zh-CN')} search={{SearchDialog:FumadocsScopedSearchDialog,options:fumadocsSearchOptions('zh-CN')}}>{children}</RootProvider>;
 }

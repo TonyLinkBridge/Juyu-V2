@@ -66,5 +66,5 @@ export function FumadocsReferenceContent({data,detail,state,detailState='idle',m
 }
 
 export function FumadocsReferencePage(props:FumadocsReferencePageProps){
- return <RootProvider search={{options:{api:'/api/fumadocs-search'}}}><FumadocsReferenceContent {...props}/></RootProvider>;
+ return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsReferenceContent {...props}/></RootProvider>;
 }

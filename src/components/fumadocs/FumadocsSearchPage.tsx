@@ -42,5 +42,5 @@ export function FumadocsSearchContent({pages,menu=[],features,search,scope,faile
 }
 
 export function FumadocsSearchPage(props:FumadocsSearchPageProps){
- return <RootProvider search={{options:{api:'/api/fumadocs-search'}}}><FumadocsSearchContent {...props}/></RootProvider>;
+ return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsSearchContent {...props}/></RootProvider>;
 }

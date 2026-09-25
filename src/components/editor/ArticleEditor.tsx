@@ -24,6 +24,7 @@ import {FieldValues} from '../fields/FieldValues';
 import {normalizeQa} from '../../qa/metadata';
 import {useCreateBlockNote} from '@blocknote/react';
 import {BlockNoteView} from '@blocknote/mantine';
+import {useTheme} from 'next-themes';
 import {en,zh} from '@blocknote/core/locales';
 import '@blocknote/mantine/style.css';
 import type {EditorData,SaveDraftInput} from '../../editor/contract';
@@ -71,7 +72,7 @@ function ReadyEditor({recoveryOwner,initial,newReference,newQa,newOps,newTransla
  const [notice,setNotice]=useState<{message:string;tone:'success'|'error';toast:boolean}|null>(null);
  const recoveryRead=useRef<HTMLButtonElement>(null);
  function showNotice(message:string,tone:'success'|'error',toast=true){setNotice({message,tone,toast});if(toast)notify(message,tone);}
- const [validation,setValidation]=useState(()=>{if(initial&&(initial.status==='in_review'||initial.lifecycle!=='active'))return '';try{fieldPayload();return '';}catch{return t('请检查自定义资料的必填项、类型或选项。原有值已保留。','Check the required custom fields, types and choices. Your previous values are still here.');}});const [uploading,setUploading]=useState(false);const [,redraw]=useState(0);const [preview,setPreview]=useState(false);const [theme,setTheme]=useState<'light'|'dark'>('light');
+ const [validation,setValidation]=useState(()=>{if(initial&&(initial.status==='in_review'||initial.lifecycle!=='active'))return '';try{fieldPayload();return '';}catch{return t('请检查自定义资料的必填项、类型或选项。原有值已保留。','Check the required custom fields, types and choices. Your previous values are still here.');}});const [uploading,setUploading]=useState(false);const [,redraw]=useState(0);const [preview,setPreview]=useState(false);const {resolvedTheme}=useTheme();const theme=resolvedTheme==='dark'?'dark':'light';
  const [railPanel,setRailPanel]=useState<'insert'|'hint'|null>(null);
  const [activeHintId,setActiveHintId]=useState<string|null>(null);
  const titleElement=useRef<HTMLTextAreaElement>(null);
@@ -230,7 +231,6 @@ function ReadyEditor({recoveryOwner,initial,newReference,newQa,newOps,newTransla
  useEffect(()=>{if(state.error)notify(saveError(state.error,locale),'error');},[state.error,locale]);
  useEffect(()=>{if(!mustWarn&&!state.busy)return;const warn=(e:BeforeUnloadEvent)=>{if(leaving.current)return;e.preventDefault();e.returnValue='';};const link=async(e:MouseEvent)=>{const a=(e.target as Element).closest?.('a[href]') as HTMLAnchorElement|null;if(!a||e.defaultPrevented||a.closest('.bn-editor[contenteditable="true"]')||a.target==='_blank'||e.metaKey||e.ctrlKey||e.shiftKey)return;e.preventDefault();e.stopPropagation();if(await confirmAction(locale==='en'?'You have unsaved input or a recovery backup on this page. Leave anyway?':'页面有未保存输入或恢复备份，确定离开吗？',locale==='en'?'Leave the editor?':'离开编辑页？')){leaving.current=true;window.location.assign(a.href);}};window.addEventListener('beforeunload',warn);document.addEventListener('click',link,true);return()=>{window.removeEventListener('beforeunload',warn);document.removeEventListener('click',link,true);};},[mustWarn,state.busy,locale]);
  useEffect(()=>{if(recoveryHold||!state.dirty||state.busy||state.blocked||validation||frozen)return;const timer=setTimeout(()=>void saver.save(),1200);return()=>clearTimeout(timer);},[recoveryHold,saver,state.dirty,state.busy,state.blocked,validation,frozen,title,description,releaseNote,tags,kind,audience,cover,qaCategory,qaPosition,fieldInputs,categoryIds,editor.document]);
- useEffect(()=>{const update=()=>setTheme(document.documentElement.dataset.theme==='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light');update();const observer=new MutationObserver(update);observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});const system=matchMedia('(prefers-color-scheme: dark)');system.addEventListener('change',update);return()=>{observer.disconnect();system.removeEventListener('change',update);};},[]);
  function add(type:MediaBlock['type'],advanced=false){
   const cursor=editor.getTextCursorPosition().block;
   if(type==='table'){const headers=[t('项目','Item'),t('说明','Details')];if(advanced){const id=crypto.randomUUID();editor.insertBlocks([{id,type:'juyu',props:{payload:JSON.stringify({id,type:'table',headers,rows:[['','']],view:'grid',searchable:true})}}],cursor,'after');}else editor.insertBlocks([{type:'table',content:{type:'tableContent',rows:[{cells:headers.map(value=>[value])},{cells:[[''],['']]}]}}],cursor,'after');return;}

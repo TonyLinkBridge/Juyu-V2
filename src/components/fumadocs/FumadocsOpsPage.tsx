@@ -60,5 +60,5 @@ export function FumadocsOpsContent({data,state,menu=[],search=false,locale='zh-C
 }
 
 export function FumadocsOpsPage(props:FumadocsOpsPageProps){
- return <RootProvider search={{options:{api:'/api/fumadocs-search'}}}><FumadocsOpsContent {...props}/></RootProvider>;
+ return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsOpsContent {...props}/></RootProvider>;
 }

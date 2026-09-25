@@ -71,5 +71,5 @@ export function FumadocsQaContent({data,initialAnswer,viewerId,state,menu=[],sea
 }
 
 export function FumadocsQaPage(props:FumadocsQaPageProps){
- return <RootProvider search={{options:{api:'/api/fumadocs-search'}}}><FumadocsQaContent {...props}/></RootProvider>;
+ return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsQaContent {...props}/></RootProvider>;
 }

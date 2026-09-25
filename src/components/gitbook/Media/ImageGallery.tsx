@@ -1,5 +1,6 @@
 'use client';
 /* eslint-disable @next/next/no-img-element -- private files must keep session-bound delivery. */
+import {useTheme} from 'next-themes';
 import {useEffect,useRef,useState,type CSSProperties} from 'react';
 import {useReaderLocale} from '../../reader-support/ArticleReferenceContext';
 
@@ -10,16 +11,11 @@ function blockStyle(item:GalleryImage):CSSProperties|undefined{
  return {width:item.width??'fit-content',maxWidth:'100%',justifySelf:item.alignment==='center'?'center':item.alignment==='right'?'end':'start'};
 }
 
-function useDarkTheme(){
- const [dark,setDark]=useState(false);
- useEffect(()=>{const root=document.documentElement;const update=()=>setDark(root.dataset.theme==='dark');update();const observer=new MutationObserver(update);observer.observe(root,{attributes:true,attributeFilter:['data-theme']});return()=>observer.disconnect();},[]);
- return dark;
-}
-
 export function ImageGallery({images}:{images:GalleryImage[]}){
  const english=useReaderLocale()==='en';
  const [active,setActive]=useState<number|null>(null),[failed,setFailed]=useState<string[]>([]),[darkFailed,setDarkFailed]=useState<string[]>([]);
- const dialog=useRef<HTMLDialogElement>(null),trigger=useRef<HTMLButtonElement[]>([]),dark=useDarkTheme();
+ const {resolvedTheme}=useTheme();
+ const dialog=useRef<HTMLDialogElement>(null),trigger=useRef<HTMLButtonElement[]>([]),dark=resolvedTheme==='dark';
  useEffect(()=>{const modal=dialog.current;if(active!==null&&!modal?.open)modal?.showModal();else if(active===null&&modal?.open)modal.close();},[active]);
  function close(){const index=active;setActive(null);if(index!==null)requestAnimationFrame(()=>trigger.current[index]?.focus());}
  const source=(item:GalleryImage)=>dark&&item.darkSrc&&!darkFailed.includes(item.id)?item.darkSrc:item.src;

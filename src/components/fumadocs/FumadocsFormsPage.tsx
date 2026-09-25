@@ -50,5 +50,5 @@ export function FumadocsFormsContent({data,state,menu=[],search=false}:FumadocsF
 }
 
 export function FumadocsFormsPage(props:FumadocsFormsPageProps){
- return <RootProvider search={{options:{api:'/api/fumadocs-search'}}}><FumadocsFormsContent {...props}/></RootProvider>;
+ return <RootProvider theme={{enabled:false}} search={{options:{api:'/api/fumadocs-search'}}}><FumadocsFormsContent {...props}/></RootProvider>;
 }
