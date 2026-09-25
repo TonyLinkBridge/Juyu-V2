@@ -10,6 +10,9 @@ import {KnowledgeHome} from '../home/KnowledgeHome';
 import {AccountMenu} from '../shell/AdminFrame';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import type {FumadocsPublicationLocale} from '../../fumadocs/publication';
+import {fumadocsSearchOptions} from '../../fumadocs/search-options';
+import {fumadocsRootI18n} from '../../fumadocs/i18n';
+import {FumadocsScopedSearchDialog} from './FumadocsScopedSearchDialog';
 import '../../app/fumadocs-reader.css';
 
 interface FumadocsHomeShellProps {
@@ -31,7 +34,8 @@ export function FumadocsHomeContent({children,menu=[],search=false,account=false
 }
 
 export function FumadocsHomeShell(props:FumadocsHomeShellProps){
- return <RootProvider search={{options:{api:'/api/fumadocs-search'}}}><FumadocsHomeContent {...props}/></RootProvider>;
+ const locale=props.locale??'zh-CN';
+ return <RootProvider i18n={fumadocsRootI18n(locale)} search={{SearchDialog:FumadocsScopedSearchDialog,options:fumadocsSearchOptions(locale)}}><FumadocsHomeContent {...props}/></RootProvider>;
 }
 
 type KnowledgeHomeProps=ComponentProps<typeof KnowledgeHome>;
@@ -48,5 +52,6 @@ export function FumadocsKnowledgeHomeContent({announcement,...props}:FumadocsKno
 }
 
 export function FumadocsKnowledgeHome(props:FumadocsKnowledgeHomeProps){
- return <RootProvider search={{options:{api:'/api/fumadocs-search'}}}><FumadocsKnowledgeHomeContent {...props}/></RootProvider>;
+ const locale=props.locale??'zh-CN';
+ return <RootProvider i18n={fumadocsRootI18n(locale)} search={{SearchDialog:FumadocsScopedSearchDialog,options:fumadocsSearchOptions(locale)}}><FumadocsKnowledgeHomeContent {...props}/></RootProvider>;
 }

@@ -111,3 +111,9 @@
 
 .account-menu .session-exit .secondary-link{width:100%;text-align:left;background:var(--panel);color:var(--ink);border:1px solid var(--line)}
 .account-menu .session-exit .secondary-link:hover:not(:disabled){background:var(--hover)}
+
+/* The editorial home uses Fumadocs' official full search trigger. */
+.home-search [data-search-full]{width:100%;min-height:54px;padding:10px 14px;text-align:left;background:var(--panel);border-color:var(--line);color:var(--muted);font-size:15px}
+.home-search [data-search-full]:hover{background:var(--hover);color:var(--ink)}
+.home-search [data-search-full]>svg{width:20px;height:20px}
+.home-search [data-search-full] kbd{color:var(--muted)}

@@ -54,12 +54,42 @@ test('directory and unavailable states use the official Fumadocs shell',async({p
 });
 
 test('Help Centre home retains every JUYU entry inside the official Fumadocs home layout',async({page},info)=>{
+ const requestedTags:string[]=[];
+ await page.route('**/api/fumadocs-search?**',route=>{
+  const tag=new URL(route.request().url()).searchParams.get('tag')??'all';
+  requestedTags.push(tag);
+  const results=tag==='qa'?
+   [
+    {id:'qa-credit',type:'page',url:'/help-centre/qa?question=credit',content:'什么是 0 元签约店铺？',breadcrumbs:['Q&A 问答']},
+    {id:'qa-credit:snippet',type:'text',url:'/help-centre/qa?question=credit',content:'了解签约店铺和信用额度的使用规则。',breadcrumbs:['Q&A 问答','什么是 0 元签约店铺？']},
+   ]:
+   [
+    {id:'qa-credit',type:'page',url:'/help-centre/qa?question=credit',content:'什么是 0 元签约店铺？',breadcrumbs:['Q&A 问答']},
+    {id:'qa-credit:snippet',type:'text',url:'/help-centre/qa?question=credit',content:'了解签约店铺和信用额度的使用规则。',breadcrumbs:['Q&A 问答','什么是 0 元签约店铺？']},
+    {id:'article-credit',type:'page',url:'/help-centre/articles/credit-article',content:'如何申请信用额度？',breadcrumbs:['知识文章']},
+    {id:'article-credit:snippet',type:'text',url:'/help-centre/articles/credit-article',content:'提交申请前需要准备账户和店铺资料。',breadcrumbs:['知识文章','如何申请信用额度？']},
+   ];
+  return route.fulfill({json:results});
+ });
  await page.emulateMedia({colorScheme:'dark'});
  await page.goto('/design-preview/fumadocs-reader?fixture=home');
  const home=page.locator('[data-fumadocs-home-page]');
  await expect(home).toBeVisible();
  await expect(home.getByRole('heading',{name:'今天需要找什么答案？',level:1})).toBeVisible();
- await expect(home.getByRole('combobox',{name:'搜索资料'})).toBeVisible();
+ const searchTrigger=home.locator('.home-search [data-search-full]');
+ await expect(searchTrigger).toBeVisible();
+ await searchTrigger.click();
+ const dialog=page.getByRole('dialog');
+ const searchInput=dialog.getByPlaceholder('搜索');
+ await searchInput.fill('信用额度');
+ await expect(dialog.getByText('什么是 0 元签约店铺？',{exact:true})).toBeVisible();
+ await expect(dialog.getByText('了解签约店铺和信用额度的使用规则。',{exact:true})).toBeVisible();
+ await expect(dialog.getByText('如何申请信用额度？',{exact:true})).toBeVisible();
+ await page.locator('button[data-active]').filter({hasText:'Q&A 问答'}).click();
+ await expect(dialog.getByText('如何申请信用额度？',{exact:true})).toHaveCount(0);
+ expect(requestedTags).toContain('all');
+ expect(requestedTags).toContain('qa');
+ await dialog.getByRole('button',{name:'关闭搜索'}).click();
  await expect(home.getByRole('link',{name:/知识文章/})).toHaveAttribute('href','/help-centre/library');
  await expect(home.getByRole('link',{name:/OPS Internal/})).toHaveAttribute('href','/help-centre/ops');
  await expect(home.getByRole('link',{name:/Reference 速查/})).toHaveAttribute('href','/help-centre/reference');

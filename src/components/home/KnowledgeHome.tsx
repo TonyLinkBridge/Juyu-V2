@@ -4,7 +4,7 @@ import {FileText,LinkSimple,Chats,Shield,ArrowRight,Clock} from '@phosphor-icons
 import type {NavigationNode} from '../../reader/tree';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {RecentItem} from '../../recent/model';
-import {SearchInput} from '../gitbook/Search/SearchInput';
+import {FullSearchTrigger} from 'fumadocs-ui/layouts/shared/slots/search-trigger';
 
 export function KnowledgeHome({
   pages,
@@ -63,7 +63,7 @@ export function KnowledgeHome({
 
         {search&&(
           <div className="home-search">
-            <SearchInput query="" locale={locale}/>
+            <FullSearchTrigger hideIfDisabled/>
           </div>
         )}
 
