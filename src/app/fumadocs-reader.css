@@ -171,12 +171,14 @@
  --line:var(--color-fd-border);
  --panel:var(--color-fd-card);
  --surface:var(--color-fd-muted);
- --brand:var(--color-fd-primary);
- --accent-soft:color-mix(in oklab,var(--color-fd-primary) 12%,transparent);
+ --brand:#bd1928;
+ --accent-soft:color-mix(in oklab,#bd1928 12%,transparent);
  color:var(--color-fd-foreground);
 }
 .fumadocs-qa-content .qa-independent { max-width:none;margin:0;padding:0; }
-.fumadocs-qa-content .qa-search button { color:var(--color-fd-primary-foreground); }
+.fumadocs-qa-content .qa-search button { color:var(--brand); }
+[data-fumadocs-qa-page]>h1 { font-size:clamp(38px,4vw,60px);font-family:ui-serif,Georgia,"Noto Serif SC",serif;letter-spacing:-.035em; }
+[data-fumadocs-qa-page]>p:first-of-type { margin-bottom:6px; }
 
 .fumadocs-favorites-content {
  --ink:var(--color-fd-foreground);

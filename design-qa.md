@@ -88,6 +88,41 @@ The desktop and mobile screenshots show all inspector controls without clipping.
 
 final result: passed
 
+# Q&A editorial knowledge index design QA
+
+- Source visual truth: `/Users/tony/.codex/generated_images/01a07e8f-7d3d-7913-ae5a-b945e4845a98/exec-46e8bece-965c-4ca6-a793-47636ded8b42.png`
+- Desktop implementation: `/Users/tony/Documents/ChatGPT/Juyu V2/output/verification/qa-editorial-desktop.png`
+- Mobile implementation: `/Users/tony/Documents/ChatGPT/Juyu V2/output/verification/qa-editorial-mobile.png`
+- Desktop state: light theme, 1440 x 1000 CSS viewport, four published Q&A fixtures.
+- Mobile state: light theme, 390 px CSS viewport, full-page capture.
+
+## Full-view comparison evidence
+
+The selected fourth concept and implementation share the same editorial structure: a large serif Q&A heading, restrained red accent, horizontal category index, numbered question directory, and one focused answer panel. Rounded answer cards and repeated expanded answers are absent. The production page keeps the official Fumadocs navigation shell and uses its documented `DocsPage full` layout rather than replacing the reader frame.
+
+## Required fidelity surfaces
+
+- Typography: the page title and selected answer use the reference's editorial serif hierarchy; interface labels remain in the product sans-serif stack.
+- Layout: desktop uses a compact numbered index beside one wide answer. Mobile stacks the same index above the answer without horizontal overflow.
+- Color: JUYU red marks the active category, selected question, labels, and actions in light and dark theme tokens.
+- Interaction: selecting a numbered question changes the single answer panel and updates the canonical `question` URL and hash. Search, categories, related topics, independent links, edit permission, answer caching, and access checks remain intact.
+- Fumadocs boundary: the official sidebar, search trigger, theme switch, account footer, `DocsLayout`, `DocsPage`, `DocsTitle`, `DocsDescription`, and `DocsBody` remain in use.
+
+## Findings and fixes
+
+- Initial visual review found the default docs width too narrow for the selected two-column index. Fix: enabled Fumadocs' official `full` page option.
+- Initial visual review found the search action using a foreground token that disappeared on the light background. Fix: mapped the action and selected states to the existing JUYU red accent.
+- The mobile capture contains the Next.js development toolbar badge; it is development-only and is not included in a production build.
+- No actionable P0, P1, or P2 mismatch remains in this scope.
+
+## Verification
+
+- Complete type, lint, 506-unit-test, and production-build command passed.
+- 216 critical browser checks passed across desktop and mobile.
+- Dedicated Q&A checks confirm numbered selection, one answer panel, safe title rendering, filters, pagination, error states, permissions, caching, and no horizontal overflow.
+
+final result: passed
+
 # Help Centre editorial home design QA
 
 - Source visual truth: `/var/folders/by/2103qtln3xd6rsg6nfxqt3yw0000gn/T/codex-clipboard-a42ff925-aee2-4356-baa3-3f894a481360.png`

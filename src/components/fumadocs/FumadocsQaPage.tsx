@@ -19,6 +19,7 @@ interface FumadocsQaPageProps {
  searchEnabled?:boolean;
  locale?:'zh-CN'|'en';
 }
+interface FumadocsQaContentProps extends FumadocsQaPageProps {previewAnswers?:Record<string,Publication>}
 
 function qaHref(id:string,locale:'zh-CN'|'en'){
  return `/help-centre/qa?question=${encodeURIComponent(id)}${locale==='en'?'&lang=en':''}#qa-${encodeURIComponent(id)}`;
@@ -52,7 +53,7 @@ function qaCopy(state:FumadocsQaPageProps['state'],locale:'zh-CN'|'en'){
  };
 }
 
-export function FumadocsQaContent({data,initialAnswer,viewerId,state,searchEnabled=true,locale='zh-CN'}:FumadocsQaPageProps){
+export function FumadocsQaContent({data,initialAnswer,previewAnswers,viewerId,state,searchEnabled=true,locale='zh-CN'}:FumadocsQaContentProps){
  const copy=qaCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={qaTree(state==='ready'?data:undefined,locale)}
@@ -60,10 +61,11 @@ export function FumadocsQaContent({data,initialAnswer,viewerId,state,searchEnabl
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:searchEnabled}}
  >
-  <DocsPage data-fumadocs-qa-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>
+  <DocsPage full data-fumadocs-qa-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>
+   {state==='ready'&&<p className="qa-editorial-kicker">EDITORIAL KNOWLEDGE INDEX</p>}
    <DocsTitle>{copy.title}</DocsTitle>
    <DocsDescription>{copy.description}</DocsDescription>
-   <DocsBody><div className="not-prose fumadocs-qa-content"><QaView searchEnabled={searchEnabled} data={data} state={state} viewerId={viewerId} initialAnswer={initialAnswer} locale={locale} withinDocsPage/></div></DocsBody>
+   <DocsBody><div className="not-prose fumadocs-qa-content"><QaView searchEnabled={searchEnabled} data={data} state={state} viewerId={viewerId} initialAnswer={initialAnswer} previewAnswers={previewAnswers} locale={locale} withinDocsPage/></div></DocsBody>
   </DocsPage>
  </DocsLayout></FumadocsPublicationI18n>;
 }

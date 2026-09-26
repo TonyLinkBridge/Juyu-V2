@@ -16,7 +16,7 @@ test('formal publication labels never display physical revision as publication c
  assert.equal(publicationLabel({revision:22,publishedRevision:19,status:'published'}),'已发布');
 });
 test('QA search disabled hides its form and permission failures have actionable text',()=>{
- const {QaView}=loadComponent('src/components/qa/QaView.tsx',{'./AuthenticatedQaAnswer':{AuthenticatedQaAnswer:()=>null}});
+ const {QaView}=loadComponent('src/components/qa/QaView.tsx',{'./QaEditorialIndex':{QaEditorialIndex:()=>null}});
  const text=html(QaView,{state:'ready',searchEnabled:false,data:{items:[],total:0,page:1,pages:1,categories:[]}});assert.doesNotMatch(text,/<form/);
  const denied=html(QaView,{state:'denied'});assert.match(denied,/权限/);assert.match(denied,/管理员/);
 });
