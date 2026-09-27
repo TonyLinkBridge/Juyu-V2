@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeCategoryDefinitions,normalizeCategoryIds,parseCategoryWrite} from '../src/categories/model.ts';
+import {normalizeCategoryDefinitions,normalizeCategoryDeleteAck,normalizeCategoryIds,parseCategoryDelete,parseCategoryWrite} from '../src/categories/model.ts';
 import {editorInput} from '../src/server/editor/input.ts';
 import {encodeEditorBody} from '../src/editor/document.ts';
 import {recoverySnapshot,recoveryReadable} from '../src/editor/recovery.ts';
@@ -12,6 +12,12 @@ test('category settings reject malformed keys IDs ranges and blank or controlled
  for(const patch of [{name:''},{name:'\u00a0'},{name:'x'.repeat(121)},{name:'A\nB'},{parentId:'bad'},{enabled:'true'},{audience:'support'},{position:1.5},{position:1000000},{position:-1},{extra:true},{expectedVersion:0},{expectedVersion:2147483647}])assert.throws(()=>parseCategoryWrite({...config,expectedVersion:1,...patch}));
  assert.deepEqual(normalizeCategoryDefinitions([{...definition,parentId:second}]),[{id,version:1,...config,parentId:second}]);
  for(const input of [[definition,definition],[{...definition,name:' spaced '}],[{...definition,id:'bad'}],[{...definition,version:null}],null])assert.throws(()=>normalizeCategoryDefinitions(input));
+});
+test('category deletion accepts only an optimistic version and an exact acknowledgement',()=>{
+ assert.deepEqual(parseCategoryDelete({expectedVersion:4}),{expectedVersion:4});
+ assert.deepEqual(normalizeCategoryDeleteAck({id,version:5,deleted:true}),{id,version:5,deleted:true});
+ for(const input of [{expectedVersion:0},{expectedVersion:1,extra:true},{expectedVersion:null},null])assert.throws(()=>parseCategoryDelete(input));
+ for(const ack of [{id,version:5,deleted:false},{id:'bad',version:5,deleted:true},{id,version:5,deleted:true,extra:true}])assert.throws(()=>normalizeCategoryDeleteAck(ack));
 });
 test('article category IDs are strict unique bounded and canonical',()=>{
  assert.deepEqual(normalizeCategoryIds(undefined),[]);assert.deepEqual(normalizeCategoryIds([second,id]),[id,second]);

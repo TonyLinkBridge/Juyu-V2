@@ -10,7 +10,7 @@ import {ScopedDatabase} from '../../src/server/database/scoped.ts';
 import {DocumentRepository} from '../../src/server/database/repository.ts';
 import {AuthorizationService} from '../../src/server/authorization/service.ts';
 import {encodeEditorBody} from '../../src/editor/document.ts';
-import {readCategoryDefinitions,writeCategoryDefinition} from '../../src/server/categories/repository.ts';
+import {deleteCategoryDefinition,readCategoryDefinitions,writeCategoryDefinition} from '../../src/server/categories/repository.ts';
 import type {CategoryWrite} from '../../src/categories/model.ts';
 import type {Viewer,Document} from '../../src/domain/model.ts';
 let fixture:Awaited<ReturnType<typeof temporaryDatabase>>,runtime:Pool,issuer:Pool,db:ScopedDatabase,repo:DocumentRepository;
@@ -18,6 +18,7 @@ const admin:Viewer={id:'a',role:'admin',companyVerified:true},reviewer:Viewer={.
 const service=(v:Viewer=admin)=>new AuthorizationService(db,async()=>v);
 const config:CategoryWrite={expectedVersion:null,name:'分类',parentId:null,position:0,audience:'staff',enabled:true};
 const write=(id:string,value:CategoryWrite=config,v=admin)=>db.run(v,c=>writeCategoryDefinition(c,id,value));
+const remove=(id:string,expectedVersion:number,v=admin)=>db.run(v,c=>deleteCategoryDefinition(c,id,{expectedVersion}));
 const read=(v=admin)=>db.run(v,c=>readCategoryDefinitions(c),true);
 const input={expectedSequence:null,title:'字段文章',body:encodeEditorBody([{id:'p',type:'paragraph',content:[{type:'text',text:'正文',styles:{}}]}]),kind:'article',audience:'staff',tags:[],cover:null};
 async function publish(d:Document){const locale=(await service().editor(d.id)).locale;await service().submitReview(d.id,{expectedSequence:d.sequence,reviewerId:'b'});await service(reviewer).decideReview(d.id,{expectedSequence:d.sequence+1,action:'approve',...(locale==='en'?{englishReviewConfirmed:true}:{})});await service().changePublication(d.id,{expectedSequence:d.sequence+2,action:'queue'});await service().changePublication(d.id,{expectedSequence:d.sequence+3,action:'publish'});return (await repo.getForManagement(d.id,admin))!;}
@@ -47,6 +48,31 @@ test('chosen category icon survives renames and appears only in authorized direc
  const renamed=await write(id,{...config,expectedVersion:1,name:'新版名称',iconKey:'shield'});
  assert.equal(renamed.iconKey,'shield');assert.equal((await read())[0].iconKey,'shield');
  await assert.rejects(write(randomUUID(),{...config,iconKey:'unknown' as 'shield'}),/INVALID_INPUT/);
+});
+test('empty leaf categories can be deleted while history and optimistic retry evidence remain',async()=>{
+ const id=randomUUID(),created=await write(id);
+ const deleted=await remove(id,created.version);assert.deepEqual(deleted,{id,version:2,deleted:true});
+ assert.deepEqual(await remove(id,created.version),deleted);assert.deepEqual(await read(),[]);
+ await assert.rejects(write(id,{...config,expectedVersion:2}),/CATEGORY_DELETED/);
+ await assert.rejects(remove(id,2),/CATEGORY_CONFLICT/);
+ await assert.rejects(repo.saveEditor(randomUUID(),{...input,categoryIds:[id]},admin),/INVALID_INPUT/);
+ await assert.rejects(service().saveNavigationSettings({expectedVersion:0,entries:[{id:randomUUID(),label:'已删除分类',enabled:true,roles:['support','ops','admin'],target:{type:'category',categoryId:id}}]}),/INVALID_INPUT/);
+ const stored=(await fixture.pool.query('SELECT deleted_at IS NOT NULL AS deleted,deleted_by,current_version,enabled FROM juyu.categories WHERE id=$1',[id])).rows[0];
+ assert.deepEqual(stored,{deleted:true,deleted_by:'a',current_version:2,enabled:false});
+ assert.equal((await fixture.pool.query('SELECT count(*)::int n FROM juyu.category_versions WHERE category_id=$1',[id])).rows[0].n,2);
+ const history=await service().settingHistory('category',1);assert.equal(history.items[0].id,id);assert.equal(history.items[0].version,2);
+ const detail=await service().settingHistoryDetail({kind:'category',id,version:1});assert.equal(detail.restorable,false);
+});
+test('category deletion rejects every live dependency and non-admin callers',async()=>{
+ const parent=await write(randomUUID()),child=await write(randomUUID(),{...config,parentId:parent.id});
+ await assert.rejects(remove(parent.id,parent.version),/CATEGORY_HAS_CHILDREN/);
+ const used=await write(randomUUID()),document=randomUUID();await repo.saveEditor(document,{...input,categoryIds:[used.id]},admin);
+ await assert.rejects(remove(used.id,used.version),/CATEGORY_IN_USE/);
+ const indexed=await write(randomUUID());const indexDocument=randomUUID();await repo.saveEditor(indexDocument,{...input,title:'分类首页'},admin);await publish((await repo.getForManagement(indexDocument,admin))!);await fixture.pool.query('INSERT INTO juyu.category_indexes(category_id,document_id) VALUES($1,$2)',[indexed.id,indexDocument]);
+ await assert.rejects(remove(indexed.id,indexed.version),/CATEGORY_HAS_INDEX/);
+ const navigation=await write(randomUUID());await service().saveNavigationSettings({expectedVersion:0,entries:[{id:randomUUID(),label:'导航分类',enabled:true,roles:['support','ops','admin'],target:{type:'category',categoryId:navigation.id}}]});
+ await assert.rejects(remove(navigation.id,navigation.version),/CATEGORY_IN_NAVIGATION/);
+ await assert.rejects(remove(child.id,child.version,support),/FORBIDDEN/);
 });
 test('human-written English category labels appear only in the English directory',async()=>{
  const id=randomUUID(),source=randomUUID(),english=randomUUID();
@@ -144,7 +170,7 @@ test('migration upgrades existing category identities memberships and historical
  for(const {version} of versions){const sql=await readFile(new URL(`../../src/server/database/migrations/${version}.sql`,import.meta.url),'utf8');await old.pool.query(sql);await old.pool.query('INSERT INTO juyu.schema_migrations(version,checksum) VALUES($1,$2)',[version,createHash('sha256').update(sql).digest('hex')]);}
  const category=randomUUID();await old.pool.query("INSERT INTO juyu.members(clerk_user_id,display_name) VALUES('seed','Seed'); INSERT INTO juyu.categories(id,name) VALUES('"+category+"','Existing')");
  const c=await old.pool.connect();try{await c.query('BEGIN');await c.query("INSERT INTO juyu.documents(id,kind,sequence,lifecycle,workflow_revision_id,workflow_state) VALUES('legacy','article',0,'active',1,'draft')");await c.query("INSERT INTO juyu.revisions(document_id,revision_id,title,body,audience,author_id,editor_id,created_at) VALUES('legacy',1,'Legacy','Existing body','staff','seed','seed',now())");await c.query("INSERT INTO juyu.revision_categories VALUES('legacy',1,$1)",[category]);await c.query("INSERT INTO juyu.audit_log(document_id,sequence,action,actor_id,revision_id,at) VALUES('legacy',0,'create','seed',1,now())");await c.query('COMMIT');}finally{c.release();}
- assert.deepEqual(await migrate(old.pool),['0021_categories', '0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements', '0027_native_editor', '0028_qa_search', '0029_shared_revision_config_locks', '0030_publication_number', '0031_scoped_search', '0032_category_icons', '0033_publication_icons', '0034_article_description', '0035_publication_timestamp', '0036_reader_changelog', '0037_reusable_fragments', '0038_reusable_fragment_versions', '0039_release_notes', '0040_document_locales', '0041_english_review_confirmation', '0042_draft_actions', '0043_super_admin_role', '0044_super_admin_direct_publish', '0045_search_relevance', '0046_category_indexes', '0047_category_index_icons', '0048_index_page_icons', '0049_activate_index_icons']);assert.deepEqual(await migrate(old.pool),[]);assert.deepEqual((await old.pool.query("SELECT category_ids FROM juyu.revisions WHERE document_id='legacy'")).rows[0].category_ids,[category]);assert.equal((await old.pool.query('SELECT category_id FROM juyu.category_versions')).rows[0].category_id,category);assert.equal((await old.pool.query("SELECT body FROM juyu.revisions WHERE document_id='legacy'")).rows[0].body,'Existing body');
+ assert.deepEqual(await migrate(old.pool),['0021_categories', '0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements', '0027_native_editor', '0028_qa_search', '0029_shared_revision_config_locks', '0030_publication_number', '0031_scoped_search', '0032_category_icons', '0033_publication_icons', '0034_article_description', '0035_publication_timestamp', '0036_reader_changelog', '0037_reusable_fragments', '0038_reusable_fragment_versions', '0039_release_notes', '0040_document_locales', '0041_english_review_confirmation', '0042_draft_actions', '0043_super_admin_role', '0044_super_admin_direct_publish', '0045_search_relevance', '0046_category_indexes', '0047_category_index_icons', '0048_index_page_icons', '0049_activate_index_icons', '0050_category_deletion', '0051_category_deletion_history']);assert.deepEqual(await migrate(old.pool),[]);assert.deepEqual((await old.pool.query("SELECT category_ids FROM juyu.revisions WHERE document_id='legacy'")).rows[0].category_ids,[category]);assert.equal((await old.pool.query('SELECT category_id FROM juyu.category_versions')).rows[0].category_id,category);assert.equal((await old.pool.query("SELECT body FROM juyu.revisions WHERE document_id='legacy'")).rows[0].body,'Existing body');
  }finally{await old.close();}
 });
 

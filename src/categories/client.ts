@@ -1,8 +1,8 @@
-import {normalizeCategoryDefinitions, parseCategoryWrite, type CategoryDefinition, type CategoryWrite} from './model.ts';
+import {normalizeCategoryDefinitions,normalizeCategoryDeleteAck,parseCategoryDelete, parseCategoryWrite, type CategoryDefinition,type CategoryDelete,type CategoryDeleteAck, type CategoryWrite} from './model.ts';
 
 export class CategoryWriteRejected extends Error {}
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const rejectionCodes = new Set(['CATEGORY_CONFLICT', 'CATEGORY_LIMIT', 'CATEGORY_CYCLE', 'CATEGORY_DEPTH', 'INVALID_INPUT', 'FORBIDDEN']);
+const rejectionCodes = new Set(['CATEGORY_CONFLICT','CATEGORY_DELETED','CATEGORY_LIMIT','CATEGORY_CYCLE','CATEGORY_DEPTH','CATEGORY_HAS_CHILDREN','CATEGORY_IN_USE','CATEGORY_HAS_INDEX','CATEGORY_IN_NAVIGATION','INVALID_INPUT','FORBIDDEN']);
 
 function definitions(value: unknown): CategoryDefinition[] {
   try { return normalizeCategoryDefinitions(value); }
@@ -44,4 +44,16 @@ export async function saveCategory(id: string, input: CategoryWrite): Promise<Ca
     throw new Error('INVALID_ACK');
   }
   return saved;
+}
+export async function deleteCategory(id:string,input:CategoryDelete):Promise<CategoryDeleteAck>{
+ let request:CategoryDelete;
+ try{if(!uuid.test(id))throw new Error('INVALID_INPUT');request=parseCategoryDelete(input);}catch{throw new CategoryWriteRejected('INVALID_INPUT');}
+ const response=await fetch(`/api/admin/categories/${encodeURIComponent(id)}`,{method:'DELETE',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(request),signal:AbortSignal.timeout(20000)});
+ if(!response.ok){
+  if(response.status>=400&&response.status<500){const body=await response.json().catch(()=>null);const fallback=response.status===403?'FORBIDDEN':response.status===409?'CATEGORY_CONFLICT':'WRITE_REJECTED';throw new CategoryWriteRejected(rejectionCodes.has(body?.error)?body.error:fallback);}
+  throw new Error('UNKNOWN_RESULT');
+ }
+ let acknowledged:CategoryDeleteAck;try{acknowledged=normalizeCategoryDeleteAck(await response.json());}catch{throw new Error('INVALID_ACK');}
+ if(acknowledged.id!==id||acknowledged.version!==request.expectedVersion+1)throw new Error('INVALID_ACK');
+ return acknowledged;
 }

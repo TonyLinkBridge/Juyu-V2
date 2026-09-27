@@ -33,7 +33,7 @@ test('creates subcategory, edits order, inherits scope and renders both themes w
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await expect(page.locator('main script')).toHaveCount(0);
  await page.screenshot({path:`output/verification/categories-${info.project.name}.png`,fullPage:true,animations:'disabled'});
- await page.evaluate(()=>document.documentElement.dataset.theme='dark');
+ await page.evaluate(()=>document.documentElement.classList.add('dark'));
  await expect.poll(()=>page.locator('html').evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(25, 25, 31)');
  await page.screenshot({path:`output/verification/categories-dark-${info.project.name}.png`,fullPage:true,animations:'disabled'});
 });
@@ -47,6 +47,23 @@ test('selected category icon is included in the saved settings',async({page})=>{
  await expect(page.getByRole('status')).toContainText('已保存');
  expect(writes[0].iconKey).toBe('shield');
  await expect(page.getByRole('combobox',{name:'目录图标'})).toHaveValue('shield');
+});
+
+test('deletes an existing empty category only after confirmation and removes it from the tree',async({page})=>{
+ const requests:Record<string,unknown>[]=[];
+ await page.route('**/api/admin/categories/*',r=>{requests.push(r.request().postDataJSON());return r.fulfill({json:{id:sibling.id,version:2,deleted:true}});});
+ await mount(page);await page.getByRole('button',{name:/通用说明/}).click();
+ queueConfirmation(page,async dialog=>{expect(dialog.message()).toContain('无法撤销');await dialog.accept();});
+ await page.getByRole('button',{name:'删除分类',exact:true}).click();await settleConfirmation(page);
+ expect(requests).toEqual([{expectedVersion:1}]);await expect(page.getByRole('button',{name:/通用说明/})).toHaveCount(0);
+ await expect(page.getByRole('status')).toContainText('已删除');await expect(page.getByLabel('分类名称',{exact:true})).toHaveCount(0);
+});
+
+test('blocked category deletion explains the dependency and keeps the editor intact',async({page})=>{
+ await page.route('**/api/admin/categories/*',r=>r.fulfill({status:409,json:{error:'CATEGORY_IN_USE'}}));
+ await mount(page);await page.getByRole('button',{name:/通用说明/}).click();queueConfirmation(page,d=>d.accept());
+ await page.getByRole('button',{name:'删除分类',exact:true}).click();await settleConfirmation(page);
+ await expect(page.getByRole('alert')).toContainText('仍被文章使用');await expect(page.getByLabel('分类名称',{exact:true})).toHaveValue('通用说明');
 });
 
 test('parent picker excludes self and descendants; existing policy edits require immediate-access confirmation',async({page})=>{
@@ -161,7 +178,7 @@ test('R10 site confirmation traps focus, cancels safely and preserves native unl
  await page.keyboard.press('Escape');await expect(dialog).toHaveCount(0);await expect(trigger).toBeFocused();
  await expect(page.getByLabel('分类名称',{exact:true})).toHaveValue('未保存的分类');expect(writes).toBe(0);
  expect(await page.evaluate(()=>{const e=new Event('beforeunload',{cancelable:true});window.dispatchEvent(e);return e.defaultPrevented;})).toBe(true);
- await page.evaluate(()=>document.documentElement.dataset.theme='dark');await trigger.click();await expect(dialog).toBeVisible();
+ await page.evaluate(()=>document.documentElement.classList.add('dark'));await trigger.click();await expect(dialog).toBeVisible();
  expect(await dialog.evaluate(e=>e.getBoundingClientRect().right<=innerWidth&&e.getBoundingClientRect().left>=0)).toBe(true);
  await page.screenshot({path:`output/verification/R10-confirm-dark-${info.project.name}.png`,fullPage:true});
  await dialog.getByRole('button',{name:'确认继续',exact:true}).click();await expect(page.getByLabel('分类名称',{exact:true})).toHaveCount(0);expect(writes).toBe(0);

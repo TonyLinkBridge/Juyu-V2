@@ -1,5 +1,5 @@
 import type {PoolClient} from 'pg';
-import {normalizeCategoryDefinitions,parseCategoryWrite,type CategoryDefinition} from '../../categories/model.ts';
+import {normalizeCategoryDefinitions,normalizeCategoryDeleteAck,parseCategoryDelete,parseCategoryWrite,type CategoryDefinition} from '../../categories/model.ts';
 export async function readCategoryDefinitions(c:PoolClient):Promise<CategoryDefinition[]>{
  const definitions=normalizeCategoryDefinitions((await c.query('SELECT juyu.read_category_definitions() AS categories')).rows[0].categories);
  const icons=await c.query<{category_id:string;icon_key:CategoryDefinition['iconKey']}>('SELECT category_id,icon_key FROM juyu.category_icons');
@@ -15,4 +15,9 @@ export async function writeCategoryDefinition(c:PoolClient,id:string,input:unkno
  if(iconKey!==undefined)await c.query('SELECT juyu.set_category_icon($1,$2,$3)',[id,saved.version,iconKey]);
  if(englishName!==undefined)await c.query('SELECT juyu.set_category_english_name($1,$2,$3)',[id,saved.version,englishName]);
  return {...saved,...(iconKey===undefined?{}:{iconKey}),...(englishName===undefined?{}:{englishName})};
+}
+export async function deleteCategoryDefinition(c:PoolClient,id:string,input:unknown){
+ if(typeof id!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id))throw new Error('INVALID_INPUT');
+ const {expectedVersion}=parseCategoryDelete(input);
+ return normalizeCategoryDeleteAck((await c.query('SELECT juyu.delete_category_definition($1,$2) AS result',[id,expectedVersion])).rows[0].result);
 }

@@ -1,6 +1,8 @@
 import {readerIconKey,type ReaderIconKey} from '../reader/icon-keys.ts';
 export interface CategoryDefinition {id:string;version:number;name:string;englishName?:string|null;parentId:string|null;position:number;audience:'staff'|'ops'|'admin';enabled:boolean;iconKey?:ReaderIconKey|null}
 export type CategoryWrite=Omit<CategoryDefinition,'id'|'version'>&{expectedVersion:number|null};
+export interface CategoryDelete {expectedVersion:number}
+export interface CategoryDeleteAck {id:string;version:number;deleted:true}
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 function bad():never{throw new Error('INVALID_INPUT');}
 function config(value:unknown):Omit<CategoryDefinition,'id'|'version'>{
@@ -14,6 +16,16 @@ export function parseCategoryWrite(value:unknown):CategoryWrite{
  if(iconKey!==undefined&&iconKey!==null&&readerIconKey(iconKey)===null)return bad();
  if(englishName!==undefined&&englishName!==null&&(typeof englishName!=='string'||englishName.trim().length>120||/[\u0000-\u001f\u007f-\u009f]/.test(englishName)))return bad();
  if(expectedVersion!==null&&(!Number.isSafeInteger(expectedVersion)||Number(expectedVersion)<1||Number(expectedVersion)>=2147483647))return bad();return {...config(rest),expectedVersion:expectedVersion as number|null,...(iconKey===undefined?{}:{iconKey:iconKey as ReaderIconKey|null}),...(englishName===undefined?{}:{englishName:typeof englishName==='string'?englishName.trim()||null:null})};
+}
+export function parseCategoryDelete(value:unknown):CategoryDelete{
+ if(!value||typeof value!=='object'||Array.isArray(value))return bad();const x=value as Record<string,unknown>;
+ if(Object.keys(x).length!==1||!Object.hasOwn(x,'expectedVersion')||!Number.isSafeInteger(x.expectedVersion)||Number(x.expectedVersion)<1||Number(x.expectedVersion)>=2147483647)return bad();
+ return {expectedVersion:Number(x.expectedVersion)};
+}
+export function normalizeCategoryDeleteAck(value:unknown):CategoryDeleteAck{
+ if(!value||typeof value!=='object'||Array.isArray(value))return bad();const x=value as Record<string,unknown>;
+ if(Object.keys(x).length!==3||!Object.hasOwn(x,'id')||!Object.hasOwn(x,'version')||!Object.hasOwn(x,'deleted')||typeof x.id!=='string'||!uuid.test(x.id)||!Number.isSafeInteger(x.version)||Number(x.version)<2||Number(x.version)>=2147483647||x.deleted!==true)return bad();
+ return {id:x.id,version:Number(x.version),deleted:true};
 }
 export function normalizeCategoryDefinitions(value:unknown):CategoryDefinition[]{
  if(!Array.isArray(value)||value.length>100)return bad();const seen=new Set<string>();

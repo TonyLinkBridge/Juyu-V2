@@ -3,13 +3,14 @@ import {confirmAction} from '../feedback/feedback';
 
 import {useEffect, useRef, useState, type ReactNode, type FormEvent} from 'react';
 import {useRouter} from 'next/navigation';
-import {CategoryWriteRejected, readCategories, saveCategory} from '../../categories/client';
+import {CategoryWriteRejected,deleteCategory, readCategories, saveCategory} from '../../categories/client';
 import {parseCategoryWrite, type CategoryDefinition, type CategoryWrite} from '../../categories/model';
 import {readerIconLabels,type ReaderIconKey} from '../../reader/icon-keys';
 import {ReaderIcon} from '../../reader/icons';
 
 type Draft = CategoryWrite & {id:string};
 type Pending = {id:string; write:CategoryWrite};
+type DeletePending = {id:string;expectedVersion:number;name:string};
 type Notice = {kind:'error'|'success'; text:string};
 const audiences = {staff:'全体员工',ops:'运营和管理员',admin:'仅管理员'};
 const levels = {staff:0,ops:1,admin:2};
@@ -55,6 +56,11 @@ const rejectionText:Record<string,string> = {
   CATEGORY_LIMIT:'分类总数已达到 100 项，停用分类也计入总数。',
   CATEGORY_CYCLE:'不能把分类移动到自己或自己的子分类下。请重新选择父分类。',
   CATEGORY_DEPTH:'分类最多支持 10 层。请调整父分类，避免子分类超过层级上限。',
+  CATEGORY_DELETED:'这个分类已经删除，不能再次修改。请载入最新设置。',
+  CATEGORY_HAS_CHILDREN:'这个分类下面还有子分类。请先移动或删除子分类，再删除此分类。',
+  CATEGORY_IN_USE:'这个分类仍被文章使用（包括历史版本）。请先把相关内容移到其他分类；如果只是暂时不用，可以关闭“启用分类”。',
+  CATEGORY_HAS_INDEX:'这个分类仍设有分类首页。请先移除分类首页，再删除此分类。',
+  CATEGORY_IN_NAVIGATION:'这个分类仍被导航设置使用。请先修改导航设置，再删除此分类。',
   FORBIDDEN:'当前账号没有管理分类的权限。你的输入已保留。',
   INVALID_INPUT:'分类设置未通过校验。请检查名称、父分类、排序和访问范围。',
 };
@@ -66,12 +72,13 @@ export function CategorySettings({initial=[],state='ready'}:{initial?:CategoryDe
   const [draft,setDraft]=useState<Draft|null>(null);
   const [busy,setBusy]=useState(false);
   const [pending,setPending]=useState<Pending|null>(null);
+  const [deletePending,setDeletePending]=useState<DeletePending|null>(null);
   const [conflict,setConflict]=useState(false);
   const [notice,setNotice]=useState<Notice|null>(null);
   const lock=useRef(false);
   const navigationConfirmed=useRef(false);
-  const frozen=busy || pending!==null || availability!=='ready';
-  const navigationLocked=busy || pending!==null;
+  const frozen=busy || pending!==null || deletePending!==null || availability!=='ready';
+  const navigationLocked=busy || pending!==null || deletePending!==null;
   const saved=draft ? categories.find(category=>category.id===draft.id) : undefined;
   const baseline=saved ? fromDefinition(saved) : {name:'',englishName:'',parentId:null,position:0,audience:'staff',enabled:true,iconKey:null};
   const dirty=draft!==null && (draft.name!==baseline.name || (draft.englishName??'')!==baseline.englishName || draft.parentId!==baseline.parentId || draft.position!==baseline.position || draft.audience!==baseline.audience || draft.enabled!==baseline.enabled || draft.iconKey!==baseline.iconKey);
@@ -135,16 +142,40 @@ export function CategorySettings({initial=[],state='ready'}:{initial?:CategoryDe
       }
     }finally{lock.current=false;setBusy(false);}
   }
+  async function remove(){
+    if(lock.current||!draft||!saved||availability!=='ready'||pending)return;
+    let operation=deletePending;
+    const wasUncertain=operation!==null;
+    if(!operation){
+      if(!await confirmAction(`确定删除“${saved.name}”吗？删除后会从分类设置和帮助中心目录移除，且无法撤销。若它仍有子分类、文章、分类首页或导航入口，系统会拒绝删除。`))return;
+      operation={id:saved.id,expectedVersion:saved.version,name:saved.name};
+    }
+    lock.current=true;setBusy(true);setDeletePending(operation);setNotice(null);
+    try{
+      await deleteCategory(operation.id,{expectedVersion:operation.expectedVersion});
+      setCategories(current=>current.filter(category=>category.id!==operation!.id));setDraft(null);setDeletePending(null);setConflict(false);
+      setNotice({kind:'success',text:`分类“${operation.name}”已删除。历史变更记录仍会保留。`});
+    }catch(error){
+      if(error instanceof CategoryWriteRejected&&!wasUncertain){
+        setDeletePending(null);setConflict(error.message==='CATEGORY_CONFLICT'||error.message==='CATEGORY_DELETED');
+        if(error.message==='FORBIDDEN')setAvailability('denied');
+        setNotice({kind:'error',text:rejectionText[error.message]??'删除被拒绝。请检查分类关系后再试。'});
+      }else{
+        setConflict(error instanceof CategoryWriteRejected&&(error.message==='CATEGORY_CONFLICT'||error.message==='CATEGORY_DELETED'));
+        setNotice({kind:'error',text:error instanceof CategoryWriteRejected?'重试仍无法确认原删除请求的结果。可继续重试原请求，或载入最新设置核对。':'暂时无法确认分类是否已删除。原删除请求已锁定；可重试原请求，或载入最新设置核对。'});
+      }
+    }finally{lock.current=false;setBusy(false);}
+  }
   async function reload(){
     if(lock.current)return;
-    if((pending || dirty) && !await confirmAction(pending?'原提交可能已经保存。载入将用服务器当前设置替换本页输入，不会撤销此前的保存。确定载入吗？':'载入将放弃当前输入，并使用服务器最新设置。确定载入吗？'))return;
+    if((pending || deletePending || dirty) && !await confirmAction(pending?'原提交可能已经保存。载入将用服务器当前设置替换本页输入，不会撤销此前的保存。确定载入吗？':deletePending?'原删除请求可能已经成功。载入会读取服务器当前分类，不会恢复已经删除的分类。确定载入吗？':'载入将放弃当前输入，并使用服务器最新设置。确定载入吗？'))return;
     lock.current=true;setBusy(true);setNotice(null);
     try{
       const latest=await readCategories();setCategories(latest);setAvailability('ready');
       if(draft){const current=latest.find(category=>category.id===draft.id);setDraft(current?fromDefinition(current):null);}
-      const uncertain=pending!==null;
-      setPending(null);setConflict(false);
-      setNotice({kind:'success',text:uncertain?'已载入服务器当前分类设置。此前提交是否曾保存仍无法确认，请按当前设置核对。':'已载入最新分类设置。'});
+      const uncertainSave=pending!==null,uncertainDelete=deletePending!==null;
+      setPending(null);setDeletePending(null);setConflict(false);
+      setNotice({kind:'success',text:uncertainSave?'已载入服务器当前分类设置。此前提交是否曾保存仍无法确认，请按当前设置核对。':uncertainDelete?'已载入服务器当前分类设置。请按当前列表核对此前删除请求是否成功。':'已载入最新分类设置。'});
     }catch(error){
       if(!pending && error instanceof Error && error.message==='FORBIDDEN')setAvailability('denied');
       setNotice({kind:'error',text:'暂时无法载入分类设置。当前输入和待确认提交仍保留，请稍后重试。'});
@@ -160,7 +191,7 @@ export function CategorySettings({initial=[],state='ready'}:{initial?:CategoryDe
     <header className="category-settings-heading"><div><h1>分类设置</h1><p>整理文章分类与子分类，为每个分类设置访问范围。</p></div>
       <a className="secondary-link" role="link" href={navigationLocked?undefined:'/admin/settings/history'} aria-disabled={navigationLocked||undefined} tabIndex={navigationLocked?-1:undefined}>设置变更记录</a>
     </header>
-    <details className="category-settings-rules"><summary>分类规则与访问影响</summary><p className="category-settings-note">移动分类、修改范围或停用分类，会立即影响已有正式内容的搜索、阅读、附件和 PDF 访问。分类不删除，历史记录会保留。</p><p className="category-settings-note">子分类继承父分类限制；父分类停用，关联内容也不向员工开放。文章属于多个分类时，需满足全部分类限制。</p></details>
+    <details className="category-settings-rules"><summary>分类规则与访问影响</summary><p className="category-settings-note">移动分类、修改范围或停用分类，会立即影响已有正式内容的搜索、阅读、附件和 PDF 访问。只有没有子分类、文章、分类首页及导航入口的分类可以删除；历史变更记录仍会保留。</p><p className="category-settings-note">子分类继承父分类限制；父分类停用，关联内容也不向员工开放。文章属于多个分类时，需满足全部分类限制。</p></details>
     {availability!=='ready' && <div className="category-settings-unavailable" role="status"><h2>{availability==='denied'?'没有管理权限':'分类设置暂时不可用'}</h2><p>{availability==='denied'?'只有管理员可以创建和修改分类。':'未能连接分类设置，当前无法确认已有分类。'}</p>{availability==='unavailable' && <button type="button" disabled={busy} onClick={()=>void reload()}>{busy?'正在载入…':'重新载入'}</button>}</div>}
     {availability==='ready' && <div className="category-settings-layout">
       <section className="category-settings-list" aria-labelledby="category-list-title">
@@ -180,9 +211,10 @@ export function CategorySettings({initial=[],state='ready'}:{initial?:CategoryDe
           <p className="category-settings-policy">保存后实际访问：{effectivePolicy(categories,draft)}</p>
           {policyChanged && <p className="category-settings-message category-settings-message-error">此修改会立即影响已有正式内容及子分类的访问。保存前需要再次确认。</p>}
         </fieldset><div className="category-settings-actions">
-          {pending?<button type="button" className="category-settings-primary" disabled={busy} onClick={()=>void submit()}>{busy?'正在确认保存…':'重试原提交'}</button>:<button type="submit" className="category-settings-primary" disabled={busy||conflict}>{busy?'正在保存…':'保存分类'}</button>}
+          {pending?<button type="button" className="category-settings-primary" disabled={busy} onClick={()=>void submit()}>{busy?'正在确认保存…':'重试原提交'}</button>:<button type="submit" className="category-settings-primary" disabled={busy||conflict||deletePending!==null}>{busy?'正在保存…':'保存分类'}</button>}
           <button type="button" disabled={frozen} onClick={closeEditor}>关闭编辑</button>
-          {(conflict||pending) && <button type="button" disabled={busy} onClick={()=>void reload()}>载入最新设置（替换当前输入）</button>}
+          {saved && (deletePending?<button type="button" className="category-settings-danger" disabled={busy} onClick={()=>void remove()}>{busy?'正在确认删除…':'重试删除'}</button>:<button type="button" className="category-settings-danger" disabled={busy||pending!==null} onClick={()=>void remove()}>删除分类</button>)}
+          {(conflict||pending||deletePending) && <button type="button" disabled={busy} onClick={()=>void reload()}>载入最新设置（替换当前输入）</button>}
         </div></form>}
       </section>
     </div>}

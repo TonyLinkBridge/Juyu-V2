@@ -4,7 +4,7 @@ import {readHistory as readSettingHistory,readHistoryDetail,restoreSetting} from
 import {readFeatureConfig,writeFeatureConfig,readFeatureFlags,requireFeature} from '../features/repository.ts';
 import {readNavigationSettings,writeNavigationSettings,readReaderMenu} from '../navigation-settings/repository.ts';
 import {readForms,readForm,writeForm,submitForm,readFormRecords,readFormRecord,processFormRecord} from '../forms/repository.ts';
-import {readCategoryDefinitions,writeCategoryDefinition} from '../categories/repository.ts';
+import {deleteCategoryDefinition,readCategoryDefinitions,writeCategoryDefinition} from '../categories/repository.ts';
 import {readReusableFragments,createReusableFragment,updateReusableFragment} from '../fragments/repository.ts';
 import {normalizeFieldSnapshots} from '../../fields/model.ts';
 import type {FieldSnapshot} from '../../fields/model.ts';
@@ -101,6 +101,7 @@ export class AuthorizationService {
   async processFormRecord(id:string,input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>processFormRecord(c,id,input));}
   async categories(){const v=await this.viewer(true);return this.database.run(v,c=>readCategoryDefinitions(c),true);}
   async saveCategory(id:string,input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>writeCategoryDefinition(c,id,input));}
+  async deleteCategory(id:string,input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>deleteCategoryDefinition(c,id,input));}
   async fields(){const v=await this.viewer(true);return this.database.run(v,c=>readFieldDefinitions(c),true);}
   async saveField(id:string,input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>writeFieldDefinition(c,id,input));}
   async analyticsDashboard(days:unknown=30){const v=await this.viewer(true);return this.database.run(v,c=>readAnalyticsDashboard(c,days),true);}

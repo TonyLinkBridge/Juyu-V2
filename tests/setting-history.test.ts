@@ -11,8 +11,8 @@ test('history envelopes reject missing before evidence, inconsistent pagination 
  const entry={...target,label:'功能开关',actor:{id:'a',name:'Admin'},changedAt:'2026-09-10T00:00:00.000Z',restoredFrom:null};
  assert.equal(normalizeHistoryPage({items:[entry],total:1,page:1,pages:1}).items.length,1);
  assert.throws(()=>normalizeHistoryPage({items:[],total:1,page:1,pages:1}));
- const detail={entry,before:{flags:defaultFeatureFlags},after:{flags:{...defaultFeatureFlags,search:false}},current:{version:2,config:{flags:defaultFeatureFlags}}};
- assert.equal(normalizeHistoryDetail(detail).current.version,2);assert.throws(()=>normalizeHistoryDetail({...detail,before:undefined}));
+ const detail={entry,before:{flags:defaultFeatureFlags},after:{flags:{...defaultFeatureFlags,search:false}},current:{version:2,config:{flags:defaultFeatureFlags}},restorable:true};
+ assert.equal(normalizeHistoryDetail(detail).current.version,2);assert.equal(normalizeHistoryDetail(detail).restorable,true);assert.throws(()=>normalizeHistoryDetail({...detail,before:undefined}));assert.throws(()=>normalizeHistoryDetail({...detail,restorable:'yes'}));
  const ack={...input,newVersion:3};assert.deepEqual(normalizeRestoreAck(ack),ack);assert.throws(()=>normalizeRestoreAck({...ack,newVersion:4}));
  assert.ok(configRows('features',detail.after).some(x=>x.label==='资料搜索'&&x.value==='关闭'));
 });
@@ -27,7 +27,7 @@ test('client rejects mismatched detail and write acknowledgements, keeping exact
   globalThis.fetch=async()=>new Response('',{status:503});await assert.rejects(restoreHistory(input),/UNKNOWN_RESULT/);
   globalThis.fetch=async()=>Response.json({result:{items:[],total:0,page:1,pages:1},extra:true});await assert.rejects(loadHistory('all',1));
   const e={...target,id:'00000000-0000-4000-8000-000000000002',label:'功能开关',actor:null,changedAt:'2026-09-10T00:00:00Z',restoredFrom:null};
-  globalThis.fetch=async()=>Response.json({result:{entry:e,before:null,after:{flags:defaultFeatureFlags},current:{version:1,config:{flags:defaultFeatureFlags}}}});await assert.rejects(loadHistoryDetail(target),/INVALID_ACK/);
+  globalThis.fetch=async()=>Response.json({result:{entry:e,before:null,after:{flags:defaultFeatureFlags},current:{version:1,config:{flags:defaultFeatureFlags}},restorable:true}});await assert.rejects(loadHistoryDetail(target),/INVALID_ACK/);
  }finally{globalThis.fetch=original;}
 });
 test('history HTTP keeps unavailable distinct and rejects unsafe or overlong restore payloads',async()=>{

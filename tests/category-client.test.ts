@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readCategories, saveCategory, CategoryWriteRejected} from '../src/categories/client.ts';
+import {deleteCategory,readCategories, saveCategory, CategoryWriteRejected} from '../src/categories/client.ts';
 const id = '11111111-1111-4111-8111-111111111111';
 const write = {expectedVersion:null, name:'项目名称', parentId:null, position:0, audience:'staff' as const, enabled:true};
 const definition = {id, version:1, name:write.name, parentId:null, position:0, audience:write.audience, enabled:true};
@@ -39,4 +39,24 @@ test('child acknowledgement validates independently of its parent and normalizes
 test('category read errors never become successful empty lists',async()=>{
  const original=globalThis.fetch;
  try{for(const status of [403,503]){globalThis.fetch=async()=>Response.json({error:'unavailable'},{status});await assert.rejects(readCategories(),new RegExp(status===403?'FORBIDDEN':'CATEGORIES_UNAVAILABLE'));}}finally{globalThis.fetch=original;}
+});
+test('category deletion sends the optimistic version and validates the exact next-version acknowledgement',async()=>{
+ const original=globalThis.fetch;const calls:{url:string;init?:RequestInit}[]=[];
+ globalThis.fetch=async(url,init)=>{calls.push({url:String(url),init});return Response.json({id,version:2,deleted:true});};
+ try{
+  assert.deepEqual(await deleteCategory(id,{expectedVersion:1}),{id,version:2,deleted:true});
+  assert.equal(calls[0].url,`/api/admin/categories/${id}`);assert.equal(calls[0].init?.method,'DELETE');
+  assert.deepEqual(JSON.parse(String(calls[0].init?.body)),{expectedVersion:1});
+  globalThis.fetch=async()=>Response.json({id,version:1,deleted:true});
+  await assert.rejects(deleteCategory(id,{expectedVersion:1}),/INVALID_ACK/);
+ }finally{globalThis.fetch=original;}
+});
+test('category deletion exposes dependency rejections without turning them into unknown results',async()=>{
+ const original=globalThis.fetch;
+ try{
+  for(const error of ['CATEGORY_HAS_CHILDREN','CATEGORY_IN_USE','CATEGORY_HAS_INDEX','CATEGORY_IN_NAVIGATION']){
+   globalThis.fetch=async()=>Response.json({error},{status:409});
+   await assert.rejects(deleteCategory(id,{expectedVersion:1}),e=>e instanceof CategoryWriteRejected&&e.message===error);
+  }
+ }finally{globalThis.fetch=original;}
 });
