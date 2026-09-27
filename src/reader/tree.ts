@@ -1,8 +1,8 @@
 import {navigationPage,type NavigationPage} from './navigation.ts';
 import type {ReaderIconKey} from './icon-keys.ts';
 export type NavigationNode=(NavigationPage&{type:'document'})|NavigationGroup;
-export interface NavigationGroup {type:'group';id:string;title:string;iconKey?:ReaderIconKey|null;descendants:NavigationNode[]}
-export interface NavigationCategory {id:string;name:string;parent_id:string|null;position:number;icon_key?:ReaderIconKey|null}
+export interface NavigationGroup {type:'group';id:string;title:string;iconKey?:ReaderIconKey|null;indexDocumentId?:string|null;descendants:NavigationNode[]}
+export interface NavigationCategory {id:string;name:string;parent_id:string|null;position:number;icon_key?:ReaderIconKey|null;index_document_id?:string|null}
 export interface NavigationMembership {document_id:string;category_id:string}
 const compareText=(a:string,b:string)=>a<b?-1:a>b?1:0;
 
@@ -21,7 +21,7 @@ export function buildNavigationTree(pages:{id:string;title:string;description?:s
    stack.push(...[...(children.get(category.id)??[])].reverse());
  }
  const rank=new Map(ordered.map((category,index)=>[category.id,index]));
- const nodes=new Map<string,NavigationGroup>(ordered.map(category=>[category.id,{type:'group',id:category.id,title:category.name,...(category.icon_key?{iconKey:category.icon_key}:{}),descendants:[]} ]));
+ const nodes=new Map<string,NavigationGroup>(ordered.map(category=>[category.id,{type:'group',id:category.id,title:category.name,...(category.icon_key?{iconKey:category.icon_key}:{}),...(category.index_document_id?{indexDocumentId:category.index_document_id}:{}),descendants:[]} ]));
  const roots:NavigationNode[]=[];
  for(const category of ordered) {
    const node=nodes.get(category.id)!;
@@ -46,6 +46,11 @@ export function buildNavigationTree(pages:{id:string;title:string;description?:s
  const nonempty=(node:NavigationNode)=>node.type==='document'||node.descendants.length>0;
  for(const category of [...ordered].reverse()) {
    const node=nodes.get(category.id)!;node.descendants=node.descendants.filter(nonempty);
+   if(node.indexDocumentId){
+    const index=node.descendants.findIndex(child=>child.type==='document'&&child.id===node.indexDocumentId);
+    if(index===-1)delete node.indexDocumentId;
+    else if(index>0)node.descendants.unshift(...node.descendants.splice(index,1));
+   }
  }
  return roots.filter(nonempty);
 }

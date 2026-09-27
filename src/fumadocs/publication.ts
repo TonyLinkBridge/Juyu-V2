@@ -1,10 +1,10 @@
 import type {Root} from 'fumadocs-core/page-tree';
 import {createElement} from 'react';
 import {decodeEditorBody,inlineText,type EditorBlock} from '../editor/document.ts';
-import {readerIconComponents} from '../reader/icon-components.ts';
 import type {ReaderIconKey} from '../reader/icon-keys.ts';
 import type {NavigationNode} from '../reader/tree.ts';
 import {articleContentPath,opsContentPath} from '../reader/content-path.ts';
+import {fumadocsIconComponents} from './icons.ts';
 import {fumadocsRootTree} from './tree.ts';
 
 export interface FumadocsTocItem {title:string;url:string;depth:number}
@@ -64,20 +64,26 @@ export function fumadocsPublication(article:{body:string}):{blocks:EditorBlock[]
 }
 
 export function fumadocsPublicationTree(nodes:NavigationNode[],locale:FumadocsPublicationLocale,mode:FumadocsReaderMode='preview',section:FumadocsPublicationSection='article'):Root {
- const icon=(key:ReaderIconKey)=>createElement(readerIconComponents[key],{size:16,'aria-hidden':true});
- const convertNode=(node:NavigationNode):Root['children'][number]=>node.type==='group'?{
-  type:'folder' as const,
-  $id:node.id,
-  name:node.title,
-  ...(node.iconKey?{icon:icon(node.iconKey)}:{}),
-  children:convert(node.descendants),
- }:{
+ const icon=(key:ReaderIconKey)=>createElement(fumadocsIconComponents[key],{size:16,'aria-hidden':true});
+ const convertPage=(node:Extract<NavigationNode,{type:'document'}>)=>({
   type:'page' as const,
   $id:node.id,
   name:node.title,
   ...(node.description?{description:node.description}:{}),
   ...(node.iconKey?{icon:icon(node.iconKey)}:{}),
   url:publicationPath(node.id,mode,section),
+ });
+ const convertNode=(node:NavigationNode):Root['children'][number]=>{
+  if(node.type==='document')return convertPage(node);
+  const index=node.indexDocumentId?node.descendants.find((child):child is Extract<NavigationNode,{type:'document'}>=>child.type==='document'&&child.id===node.indexDocumentId):undefined;
+  return {
+   type:'folder' as const,
+   $id:node.id,
+   name:node.title,
+   ...(node.iconKey?{icon:icon(node.iconKey)}:index?.iconKey?{icon:icon(index.iconKey)}:{}),
+   ...(index?{index:convertPage(index)}:{}),
+   children:convert(node.descendants.filter(child=>child!==index)),
+  };
  };
  const convert=(items:NavigationNode[]):Root['children']=>items.map(convertNode);
  const sections:Root['children']=nodes.flatMap(node=>node.type==='group'?[

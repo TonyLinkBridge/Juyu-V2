@@ -335,8 +335,8 @@ async function readNavigationTree(client:PoolClient,repeatMemberships=false,loca
         'SELECT document_id,category_id FROM juyu.revision_categories WHERE juyu.can_read_revision(document_id,revision_id) AND EXISTS(SELECT 1 FROM juyu.read_publication_language(document_id) l WHERE l.locale=$1)',[locale]);
       const categories=await client.query<NavigationCategory>(
         locale==='en'
-          ? `SELECT c.id,coalesce(n.name,'Other articles') AS name,c.parent_id,c.position,ci.icon_key FROM juyu.categories c LEFT JOIN juyu.category_icons ci ON ci.category_id=c.id LEFT JOIN juyu.read_category_english_names() n ON n.category_id=c.id WHERE juyu.category_allowed(c.id)`
-          : 'SELECT c.id,c.name,c.parent_id,c.position,ci.icon_key FROM juyu.categories c LEFT JOIN juyu.category_icons ci ON ci.category_id=c.id WHERE juyu.category_allowed(c.id)');
+          ? `SELECT c.id,coalesce(n.name,'Other articles') AS name,c.parent_id,c.position,ci.icon_key,cx.document_id AS index_document_id FROM juyu.categories c LEFT JOIN juyu.category_icons ci ON ci.category_id=c.id LEFT JOIN juyu.category_indexes cx ON cx.category_id=c.id LEFT JOIN juyu.read_category_english_names() n ON n.category_id=c.id WHERE juyu.category_allowed(c.id)`
+          : 'SELECT c.id,c.name,c.parent_id,c.position,ci.icon_key,cx.document_id AS index_document_id FROM juyu.categories c LEFT JOIN juyu.category_icons ci ON ci.category_id=c.id LEFT JOIN juyu.category_indexes cx ON cx.category_id=c.id WHERE juyu.category_allowed(c.id)');
       return buildNavigationTree(pages.rows,categories.rows,memberships.rows,{repeatMemberships,locale});
 }
 

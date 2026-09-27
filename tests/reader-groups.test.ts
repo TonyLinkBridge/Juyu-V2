@@ -38,3 +38,14 @@ test('English directory links open the English publication directly',()=>{
  const tree=buildNavigationTree([{id:'guide',title:'Getting started'}],[],[],{locale:'en'});
  assert.equal(selectTreePage(tree,'guide')?.href,'/help-centre/articles/guide');
 });
+test('an explicit category index is kept as the first direct document without guessing from titles',()=>{
+ const tree=buildNavigationTree(
+  [{id:'secondary',title:'甲'},{id:'landing',title:'乙'}],
+  [{id:'section',name:'栏目',parent_id:null,position:0,index_document_id:'landing'}],
+  [{document_id:'secondary',category_id:'section'},{document_id:'landing',category_id:'section'}],
+ );
+ const section=tree[0];assert.equal(section?.type,'group');
+ if(section?.type!=='group')return;
+ assert.equal(section.indexDocumentId,'landing');
+ assert.deepEqual(section.descendants.map(node=>node.id),['landing','secondary']);
+});
