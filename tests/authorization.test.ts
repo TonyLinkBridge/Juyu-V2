@@ -17,14 +17,24 @@ for(const [name,action,status] of [
 });
 
 test('real route entry points ignore forged role headers and remain closed before identity integration',async()=>{
-  const employee=await import('../src/app/api/articles/[id]/route.ts');
-  const admin=await import('../src/app/api/admin/articles/[id]/route.ts');
-  const request=new Request('http://localhost/api/articles/secret',{headers:{'x-role':'admin','Authorization':'Bearer fake','Cookie':'role=admin'}});
-  const asset=await import('../src/app/api/assets/[id]/route.ts');
-  for(const route of [employee,admin,asset]){
-    const response=await route.GET(request,{params:Promise.resolve({id:'secret'})});
-    assert.equal(response.status,503);
-    assert.equal(response.headers.get('cache-control'),'private, no-store');
-    assert.deepEqual(await response.json(),{error:'AUTH_NOT_CONFIGURED'});
+  const original={publishable:process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,secret:process.env.CLERK_SECRET_KEY,origin:process.env.APP_ORIGIN};
+  delete process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  delete process.env.CLERK_SECRET_KEY;
+  delete process.env.APP_ORIGIN;
+  try{
+    const employee=await import('../src/app/api/articles/[id]/route.ts');
+    const admin=await import('../src/app/api/admin/articles/[id]/route.ts');
+    const request=new Request('http://localhost/api/articles/secret',{headers:{'x-role':'admin','Authorization':'Bearer fake','Cookie':'role=admin'}});
+    const asset=await import('../src/app/api/assets/[id]/route.ts');
+    for(const route of [employee,admin,asset]){
+      const response=await route.GET(request,{params:Promise.resolve({id:'secret'})});
+      assert.equal(response.status,503);
+      assert.equal(response.headers.get('cache-control'),'private, no-store');
+      assert.deepEqual(await response.json(),{error:'AUTH_NOT_CONFIGURED'});
+    }
+  }finally{
+    if(original.publishable===undefined)delete process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;else process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=original.publishable;
+    if(original.secret===undefined)delete process.env.CLERK_SECRET_KEY;else process.env.CLERK_SECRET_KEY=original.secret;
+    if(original.origin===undefined)delete process.env.APP_ORIGIN;else process.env.APP_ORIGIN=original.origin;
   }
 });

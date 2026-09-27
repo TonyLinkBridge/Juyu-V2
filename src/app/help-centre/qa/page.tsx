@@ -1,8 +1,4 @@
-import {redirect} from 'next/navigation';
-import {clerkConfiguration} from '../../../config/clerk';
-import {employeeCompanyAccess} from '../../../server/authentication/company-clerk';
-import {applicationEnrollment} from '../../../server/enrollment/application';
-import {bindCurrentMember} from '../../../server/members/entry';
+import {requireReaderAccount} from '../../../server/authentication/navigation';
 import {applicationAuthorization} from '../../../server/authorization/application';
 import {qaQuery} from '../../../server/qa/http';
 import type {Publication} from '../../../reader/body';
@@ -11,9 +7,7 @@ import {FumadocsQaPage} from '../../../components/fumadocs/FumadocsQaPage';
 import {readReaderPresentation} from '../../../server/reader-presentation';
 export const dynamic='force-dynamic';
 export default async function QaCollectionPage({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){
- const access=await employeeCompanyAccess();if(access.status==='signed_out'||clerkConfiguration(process.env)!=='configured')redirect('/sign-in');if(access.status==='unavailable')redirect('/sign-in/error');if(access.status!=='verified')redirect('/help-centre');
- let ready=false;try{const enrollment=await(await applicationEnrollment()).inspect();if(enrollment.status==='ready'){await bindCurrentMember();ready=true;}}catch{}
- if(!ready)redirect('/help-centre');
+ const access=await requireReaderAccount();
  let searchEnabled=false;
  let initialAnswer:Publication|undefined;
  let data:QaPage|undefined,state:'ready'|'denied'|'unavailable'|'invalid'='unavailable';
@@ -22,5 +16,5 @@ export default async function QaCollectionPage({searchParams}:{searchParams:Prom
  catch(error){if(error instanceof Error&&error.message.split(':')[0]==='FORBIDDEN')state='denied';else if(error instanceof Error&&error.message==='INVALID_INPUT')state='invalid';}
  let menu:Awaited<ReturnType<typeof readReaderPresentation>>['items']=[],knowledgeEntry:string|undefined;
  try{const presentation=await readReaderPresentation(locale);menu=presentation.items;knowledgeEntry=presentation.knowledgeEntry;}catch{}
- return <FumadocsQaPage searchEnabled={searchEnabled} data={data} state={state} viewerId={access.userId} initialAnswer={state==='ready'?initialAnswer:undefined} locale={locale} menu={menu} knowledgeEntry={knowledgeEntry}/>;
+ return <FumadocsQaPage searchEnabled={searchEnabled} data={data} state={state} viewerId={access.viewer.id} initialAnswer={state==='ready'?initialAnswer:undefined} locale={locale} menu={menu} knowledgeEntry={knowledgeEntry}/>;
 }

@@ -38,7 +38,7 @@ export function FumadocsPDFContent({snapshot,state,message,search=false,locale='
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={pdfTree(ready?snapshot:undefined,locale)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
-  sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
+  sidebar={{prefetch:true,footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}
  >
   <DocsPage data-fumadocs-pdf-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

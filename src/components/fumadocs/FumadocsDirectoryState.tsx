@@ -48,7 +48,7 @@ export function FumadocsDirectoryContent({pages,menu=[],features,requested,faile
   tree={fumadocsPublicationTree(failed?[]:pages,locale,'formal')}
   tabs={fumadocsContentTabs(menu,locale,undefined,firstTreePage(pages)?.href)}
   nav={{title:'JUYU Help Centre',url:root}}
-  sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
+  sidebar={{prefetch:true,footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:Boolean(features?.search)}}
  >
   <DocsPage data-fumadocs-directory-state="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

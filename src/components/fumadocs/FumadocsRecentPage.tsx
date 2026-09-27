@@ -51,7 +51,7 @@ export function FumadocsRecentContent({data,state,search=false,locale='zh-CN'}:F
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={recentTree(state==='ready'?data:undefined,locale)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
-  sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
+  sidebar={{prefetch:true,footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}
  >
   <DocsPage data-fumadocs-recent-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

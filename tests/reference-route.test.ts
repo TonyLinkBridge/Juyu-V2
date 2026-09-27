@@ -7,6 +7,7 @@ async function route(error='',empty=false){
  if(name==='next/navigation')return {redirect:(href:string)=>{throw new Error('REDIRECT:'+href);}};
  if(name.endsWith('/performance'))return {measured:(_name:string,fn:()=>unknown)=>fn()};
  if(name.endsWith('/config/clerk'))return {clerkConfiguration:()=> 'configured'};
+ if(name.endsWith('/authentication/navigation'))return {requireReaderAccount:async()=>({status:'ready',sessionId:'sess',viewer:{id:'fixture',role:'admin',companyVerified:true}})};
  if(name.endsWith('/company-clerk'))return {employeeCompanyAccess:async()=>({status:'verified'})};
  if(name.endsWith('/enrollment/application'))return {applicationEnrollment:async()=>({inspect:async()=>({status:'ready'})})};
  if(name.endsWith('/members/entry'))return {bindCurrentMember:async()=>{}};

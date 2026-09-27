@@ -1,11 +1,10 @@
 import type {ReactNode} from 'react';
 import {ReaderFrame} from '../../components/shell/ReaderFrame';
 import {readReaderPresentation} from '../../server/reader-presentation';
-import {employeeCompanyAccess} from '../../server/authentication/company-clerk';
-// Only the frame persists. Every page still checks enrollment, identity and permissions.
+import {currentAccountAccess} from '../../server/authentication/account-clerk';
 export default async function ReaderLayout({children}:{children:ReactNode}){
- const access=await employeeCompanyAccess();
- if(access.status!=='verified')return children;
+ const access=await currentAccountAccess();
+ if(access.status!=='ready')return children;
  let frame;
  try{
   frame=await readReaderPresentation();

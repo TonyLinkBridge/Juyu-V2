@@ -33,6 +33,21 @@ export class MemberStore {
   };
   return client?check(client):this.read(check);
  }
+ async account(id:string):Promise<import('../authentication/account.ts').StoredAccount>{
+  if(typeof id!=='string'||!id.trim())return {status:'missing'};
+  return this.read(async c=>{
+   const row=(await c.query(`SELECT observed_role,disabled_at,verified_email,observed_at,
+    EXISTS(SELECT 1 FROM juyu.member_operations WHERE target_id=$1 AND status='pending') AS operation_pending,
+    EXISTS(SELECT 1 FROM juyu.role_enrollments WHERE member_id=$1 AND state='pending') AS enrollment_pending
+    FROM juyu.members WHERE clerk_user_id=$1`,[id])).rows[0];
+   if(!row)return {status:'missing'};
+   if(row.disabled_at)return {status:'disabled'};
+   if(row.operation_pending||row.enrollment_pending)return {status:'pending'};
+   const role=parseRole(row.observed_role);
+   if(!role||!row.verified_email||!row.observed_at)return {status:'missing'};
+   return {status:'ready',viewer:{id,role,companyVerified:true}};
+  });
+ }
  async activeSuperAdminCount(client?:PoolClient):Promise<number>{
   const count=async(c:PoolClient)=>(await c.query(`SELECT count(*)::int AS count FROM juyu.members m
    WHERE m.observed_role='super_admin' AND m.disabled_at IS NULL AND m.verified_email IS NOT NULL AND m.observed_at IS NOT NULL

@@ -1,9 +1,6 @@
 import {measured} from '../../../server/performance';
 import {redirect} from 'next/navigation';
-import {clerkConfiguration} from '../../../config/clerk';
-import {employeeCompanyAccess} from '../../../server/authentication/company-clerk';
-import {applicationEnrollment} from '../../../server/enrollment/application';
-import {bindCurrentMember} from '../../../server/members/entry';
+import {requireReaderAccount} from '../../../server/authentication/navigation';
 import {applicationAuthorization} from '../../../server/authorization/application';
 import type {OpsPage} from '../../../ops/model';
 import {FumadocsOpsPage} from '../../../components/fumadocs/FumadocsOpsPage';
@@ -16,10 +13,7 @@ export default async function OpsCollectionPage({searchParams}:{searchParams:Pro
  return measured('page.ops',async()=>{
   const params=await searchParams,locale=params.lang==='en'?'en':'zh-CN';
   const page=typeof params.page==='string'&&/^[1-9]\d{0,4}$/.test(params.page)?Number(params.page):1;
-  const access=await employeeCompanyAccess();if(access.status==='signed_out'||clerkConfiguration(process.env)!=='configured')redirect('/sign-in');if(access.status==='unavailable')redirect('/sign-in/error');if(access.status!=='verified')redirect('/help-centre');
-
-  let ready=false;try{const enrollment=await(await applicationEnrollment()).inspect();if(enrollment.status==='ready'){await bindCurrentMember();ready=true;}}catch{}
-  if(!ready)redirect('/help-centre');
+  await requireReaderAccount();
 
   let data:OpsPage|undefined,state:'ready'|'denied'|'unavailable'='unavailable';
 

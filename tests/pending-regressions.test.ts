@@ -36,6 +36,7 @@ test('QA route ignores stale search URL when disabled while retaining server fea
  const {default:page}=loadComponent('src/app/help-centre/qa/page.tsx',{
   'next/navigation':{redirect:(url:string)=>{throw Error('REDIRECT:'+url);}},
   '../../../components/fumadocs/FumadocsQaPage':{FumadocsQaPage:'FumadocsQaPage'},
+  '../../../server/authentication/navigation':{requireReaderAccount:async()=>({status:'ready',sessionId:'sess',viewer:{id:'fixture',role:'admin',companyVerified:true}})},
   '../../../config/clerk':{clerkConfiguration:()=> 'configured'},
   '../../../server/authentication/company-clerk':{employeeCompanyAccess:async()=>({status:'verified',userId:'fixture'})},
   '../../../server/enrollment/application':{applicationEnrollment:async()=>({inspect:async()=>({status:'ready'})})},
@@ -52,6 +53,7 @@ test('favorites route keeps the disabled feature distinct and never reads a disa
  const {default:page}=loadComponent('src/app/help-centre/favorites/page.tsx',{
   'next/navigation':{redirect:(url:string)=>{throw Error('REDIRECT:'+url);}},
   '../../../components/fumadocs/FumadocsFavoritesPage':{FumadocsFavoritesPage:'FumadocsFavoritesPage'},
+  '../../../server/authentication/navigation':{requireReaderAccount:async()=>({status:'ready',sessionId:'sess',viewer:{id:'fixture',role:'admin',companyVerified:true}})},
   '../../../config/clerk':{clerkConfiguration:()=> 'configured'},
   '../../../server/authentication/company-clerk':{employeeCompanyAccess:async()=>({status:'verified',userId:'fixture'})},
   '../../../server/enrollment/application':{applicationEnrollment:async()=>({inspect:async()=>({status:'ready'})})},
@@ -68,6 +70,7 @@ test('recent route keeps the disabled feature distinct and never reads disabled 
  const {default:page}=loadComponent('src/app/help-centre/recent/page.tsx',{
   'next/navigation':{redirect:(url:string)=>{throw Error('REDIRECT:'+url);}},
   '../../../components/fumadocs/FumadocsRecentPage':{FumadocsRecentPage:'FumadocsRecentPage'},
+  '../../../server/authentication/navigation':{requireReaderAccount:async()=>({status:'ready',sessionId:'sess',viewer:{id:'fixture',role:'admin',companyVerified:true}})},
   '../../../config/clerk':{clerkConfiguration:()=> 'configured'},
   '../../../server/authentication/company-clerk':{employeeCompanyAccess:async()=>({status:'verified',userId:'fixture'})},
   '../../../server/enrollment/application':{applicationEnrollment:async()=>({inspect:async()=>({status:'ready'})})},
@@ -108,6 +111,7 @@ test('changelog rejects an invalid page before reading updates and keeps the Fum
  const {default:page}=loadComponent('src/app/help-centre/changelog/page.tsx',{
   'next/navigation':{redirect:(url:string)=>{throw Error('REDIRECT:'+url);}},
   '../../../components/fumadocs/FumadocsChangelogPage':{FumadocsChangelogPage:'FumadocsChangelogPage'},
+  '../../../server/authentication/navigation':{requireReaderAccount:async()=>({status:'ready',sessionId:'sess',viewer:{id:'fixture',role:'admin',companyVerified:true}})},
   '../../../config/clerk':{clerkConfiguration:()=> 'configured'},
   '../../../server/authentication/company-clerk':{employeeCompanyAccess:async()=>({status:'verified',userId:'fixture'})},
   '../../../server/enrollment/application':{applicationEnrollment:async()=>({inspect:async()=>({status:'ready'})})},

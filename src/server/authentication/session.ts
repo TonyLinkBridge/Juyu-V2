@@ -4,7 +4,6 @@ export type EmployeeSession =
   | { status: 'signed_in'; sessionId: string; userId: string };
 export interface SessionProvider {
   current(): Promise<{ userId: string | null; sessionId: string | null } | null>;
-  session(id: string): Promise<{ id: string; userId: string; status: string } | null>;
 }
 
 /** Identity only. This never constructs a company-verified Viewer or grants a role. */
@@ -13,9 +12,7 @@ export async function resolveEmployeeSession(configuration: ClerkConfiguration, 
   try {
     const current = await provider.current();
     if (!current?.userId || !current.sessionId) return { status: 'signed_out' };
-    const session = await provider.session(current.sessionId);
-    if (!session || session.status !== 'active' || session.id !== current.sessionId || session.userId !== current.userId) return { status: 'signed_out' };
-    return { status: 'signed_in', userId: session.userId, sessionId: session.id };
+    return { status: 'signed_in', userId: current.userId, sessionId: current.sessionId };
   } catch { return { status: 'unavailable' }; }
 }
 

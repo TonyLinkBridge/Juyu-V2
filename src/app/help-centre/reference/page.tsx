@@ -1,8 +1,4 @@
-import {redirect} from 'next/navigation';
-import {clerkConfiguration} from '../../../config/clerk';
-import {employeeCompanyAccess} from '../../../server/authentication/company-clerk';
-import {applicationEnrollment} from '../../../server/enrollment/application';
-import {bindCurrentMember} from '../../../server/members/entry';
+import {requireReaderAccount} from '../../../server/authentication/navigation';
 import {applicationAuthorization} from '../../../server/authorization/application';
 import {referenceQuery} from '../../../server/reference/http';
 import type {ReferencePage,ReferenceDetail} from '../../../reference/model';
@@ -12,10 +8,7 @@ import {readReaderPresentation} from '../../../server/reader-presentation';
 export const dynamic='force-dynamic';
 
 export default async function ReferenceCollectionPage({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){
- const access=await employeeCompanyAccess();if(access.status==='signed_out'||clerkConfiguration(process.env)!=='configured')redirect('/sign-in');if(access.status==='unavailable')redirect('/sign-in/error');if(access.status!=='verified')redirect('/help-centre');
-
- let ready=false;try{const enrollment=await(await applicationEnrollment()).inspect();if(enrollment.status==='ready'){await bindCurrentMember();ready=true;}}catch{}
- if(!ready)redirect('/help-centre');
+ await requireReaderAccount();
 
  let data:ReferencePage|undefined,detail:ReferenceDetail|undefined,state:'ready'|'denied'|'unavailable'='unavailable',detailState:'idle'|'ready'|'unavailable'='idle';
  const params=await searchParams,locale=params.lang==='en'?'en':'zh-CN';

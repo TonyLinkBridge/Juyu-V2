@@ -55,7 +55,7 @@ export async function FumadocsAuthorizedPublication({articleId,mode='preview',ro
  let menu:Awaited<ReturnType<typeof readReaderPresentation>>['items']=[];
  let knowledgeEntry:string|undefined;
  if(formal)try{const presentation=await readReaderPresentation(locale);menu=presentation.items;knowledgeEntry=presentation.knowledgeEntry;}catch{}
- return <FumadocsSearchProvider locale={locale}><FumadocsPublicationI18n locale={locale} destinations={destinations}><DocsLayout tree={tree} tabs={formal?fumadocsContentTabs(menu,locale,{path:activePath,pathname:formalFumadocsPublicationPath(article.id,section)},knowledgeEntry):false} nav={{title:'JUYU Help Centre',url:navRoot}} sidebar={formal?{footer:<FumadocsAccountFooter locale={locale}/>}:{}} searchToggle={{enabled:formal&&result.features.search}}>
+ return <FumadocsSearchProvider locale={locale}><FumadocsPublicationI18n locale={locale} destinations={destinations}><DocsLayout tree={tree} tabs={formal?fumadocsContentTabs(menu,locale,{path:activePath,pathname:formalFumadocsPublicationPath(article.id,section)},knowledgeEntry):false} nav={{title:'JUYU Help Centre',url:navRoot}} sidebar={formal?{prefetch:true,footer:<FumadocsAccountFooter locale={locale}/>}:{prefetch:true}} searchToggle={{enabled:formal&&result.features.search}}>
   <DocsPage
    data-fumadocs-publication=""
    toc={document.toc}

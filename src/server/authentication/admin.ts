@@ -1,4 +1,5 @@
 import type { CompanyAccess } from './company.ts';
+import type {AccountAccess} from './account.ts';
 import { isAdministratorRole, parseRole } from '../../domain/access.ts';
 import { protectedResponse } from '../authorization/service.ts';
 export type AdminAccess = { status: 'unconfigured' | 'unavailable' | 'signed_out' | 'denied' } | { status: 'admin'; userId: string };
@@ -16,6 +17,11 @@ export async function resolveAdminAccess(company: CompanyAccess, loadUser: (id: 
       || primary?.verification?.status !== 'verified' || primary.emailAddress.toLowerCase() !== company.email) return { status: 'denied' };
     return { status: 'admin', userId: user.id };
   } catch { return { status: 'unavailable' }; }
+}
+export function adminForAccount(access:AccountAccess):AdminAccess{
+ if(access.status==='ready')return isAdministratorRole(access.viewer.role)?{status:'admin',userId:access.viewer.id}:{status:'denied'};
+ if(access.status==='missing'||access.status==='disabled'||access.status==='pending')return {status:'denied'};
+ return {status:access.status};
 }
 export function adminDestination(access: AdminAccess) {
   if (access.status === 'admin') return '/admin';

@@ -13,8 +13,8 @@ import { EnrollmentPanel } from '../../components/enrollment-panel';
 import { bindCurrentMember } from '../../server/members/entry';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { adminForCompany } from '../../server/authentication/admin-clerk';
-import { clerkConfiguration } from '../../config/clerk';
+import { adminForAccount } from '../../server/authentication/admin';
+import { currentAccountAccess } from '../../server/authentication/account-clerk';
 import { employeeCompanyAccess } from '../../server/authentication/company-clerk';
 import {ShieldIcon} from '../../components/entry-shell';
 import { EmployeeSignOut } from '../../components/employee-sign-out';
@@ -38,27 +38,35 @@ async function inspectEnrollmentWithRetry() {
 }
 
 export default async function HelpCentre({searchParams,library=false}:{library?:boolean;searchParams:Promise<{article?:string|string[];q?:string|string[];page?:string|string[];scope?:string|string[];lang?:string|string[]}>}) {
-  const access = await employeeCompanyAccess();
-  if (access.status === 'signed_out') redirect('/sign-in');
-  if (access.status === 'unavailable') redirect('/sign-in/error');
-  // Missing Clerk configuration must still show the existing employee login entry.
-  if (clerkConfiguration(process.env) !== 'configured') redirect('/sign-in');
-const adminPromise = adminForCompany(access);
-let memberBlocked = false;
-let enrollmentUnavailable = false;
-let enrollment: EnrollmentResult | null = null;
-if (access.status === 'verified') {
-  try {
-    enrollment = await inspectEnrollmentWithRetry();
-    if (enrollment.status === 'ready') {
-      await bindCurrentMember();
-    }
-  } catch (error) {
-    memberBlocked = isDefiniteEnrollmentBlock(error);
-    enrollmentUnavailable = !memberBlocked;
+  const account = await currentAccountAccess();
+  if (account.status === 'signed_out' || account.status === 'unconfigured') redirect('/sign-in');
+  if (account.status === 'unavailable') redirect('/sign-in/error');
+  const admin = adminForAccount(account);
+  let access: Awaited<ReturnType<typeof employeeCompanyAccess>> = {status:'unconfigured'};
+  let memberBlocked = account.status === 'disabled' || account.status === 'pending';
+  let enrollmentUnavailable = false;
+  let enrollment: EnrollmentResult | null = account.status === 'ready'
+    ? {status:'ready',role:account.viewer.role,initialAdmin:false}
+    : null;
+  let enrollmentCompleted = false;
+  if (account.status === 'missing') {
+    access = await employeeCompanyAccess();
+    if (access.status === 'signed_out') redirect('/sign-in');
+    if (access.status === 'unavailable') redirect('/sign-in/error');
   }
-}
-const admin = await adminPromise;
+  if (account.status === 'missing' && access.status === 'verified') {
+    try {
+      enrollment = await inspectEnrollmentWithRetry();
+      if (enrollment.status === 'ready') {
+        await bindCurrentMember();
+        enrollmentCompleted = true;
+      }
+    } catch (error) {
+      memberBlocked = isDefiniteEnrollmentBlock(error);
+      enrollmentUnavailable = !memberBlocked;
+    }
+  }
+  if (enrollmentCompleted) redirect('/help-centre');
   if(enrollment?.status==='ready'&&!memberBlocked) {
     const homeParams=await searchParams;
     const homeLocale=homeParams.lang==='en'?'en':'zh-CN';
@@ -119,12 +127,12 @@ if(params.q!==undefined){
     return <FumadocsDirectoryState pages={pages} menu={menu} features={features} requested={requested} failed={failed} locale={locale}/>;
   }
   const opening=enrollment&&enrollment.status!=='ready';
-  const denied = access.status === 'denied';
+  const denied = account.status === 'missing' && access.status === 'denied';
   const title = opening?'开通资料库访问':memberBlocked ? '资料库访问已暂停' : denied ? '公司账号验证未通过' : enrollmentUnavailable ? '资料库暂时无法读取' : enrollment?.status==='ready'?'资料库账号已开通':'资料库访问尚未开通';
   const description = opening?'公司账号验证已通过，正在处理你的资料库权限。':memberBlocked ? '你的资料库权限已停用或正在核对。请联系管理员处理。' : denied
     ? '请使用同一公司的已验证邮箱和指定 Slack Workspace 账号。你可以退出后重新登录，或联系管理员核对账号。'
     : enrollmentUnavailable ? '系统暂时无法确认你的资料库权限。请重新读取；如果持续失败，请联系管理员。'
-    : enrollment?.status==='ready'?'你的账号已开通。文章阅读页面仍在准备中，暂时不能查阅资料。':access.status === 'verified'
+    : enrollment?.status==='ready'?'你的账号已开通。文章阅读页面仍在准备中，暂时不能查阅资料。':account.status === 'missing' && access.status === 'verified'
       ? '公司账号验证已通过。资料库仍在准备中，请等待管理员完成开通。'
       : '公司账号验证尚未配置，暂时不能查阅内部资料，请等待管理员完成设置。';
   return <FumadocsHomeShell><div className="access-main"><section className="access-card">
