@@ -48,7 +48,7 @@ test('R12 a failed list refresh keeps other items and a removed last page adopts
 test('R13 all four content kinds link directly to their reader modules',async({page})=>{
  const items=['article','ops','qa','reference'].map(kind=>({...item,id:kind+' &资料',kind,title:kind}));
  await mount(page,()=>({state:'ready',data:{items,total:4,page:1,pages:1}}),'list');
- for(const kind of ['article','ops','qa','reference']){const encoded=encodeURIComponent(kind+' &资料');const href=kind==='qa'?'/help-centre/qa?question='+encoded+'#qa-'+encoded:kind==='reference'?'/help-centre/reference?article='+encoded:'/help-centre/articles/'+encoded;await expect(page.getByRole('link',{name:'阅读收藏：'+kind,exact:true})).toHaveAttribute('href',href);}
+ for(const kind of ['article','ops','qa','reference']){const encoded=encodeURIComponent(kind+' &资料');const href=kind==='qa'?'/help-centre/qa?question='+encoded+'#qa-'+encoded:kind==='reference'?'/help-centre/reference?article='+encoded:kind==='ops'?'/help-centre/ops/'+encoded:'/help-centre/articles/'+encoded;await expect(page.getByRole('link',{name:'阅读收藏：'+kind,exact:true})).toHaveAttribute('href',href);}
 });
 
 test('favorite state is isolated across sessions and logout clears the previous snapshot',async({page})=>{

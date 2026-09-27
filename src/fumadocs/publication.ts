@@ -4,12 +4,13 @@ import {decodeEditorBody,inlineText,type EditorBlock} from '../editor/document.t
 import {readerIconComponents} from '../reader/icon-components.ts';
 import type {ReaderIconKey} from '../reader/icon-keys.ts';
 import type {NavigationNode} from '../reader/tree.ts';
-import {articleContentPath} from '../reader/content-path.ts';
+import {articleContentPath,opsContentPath} from '../reader/content-path.ts';
 
 export interface FumadocsTocItem {title:string;url:string;depth:number}
 
 const previewRoot='/design-preview/fumadocs-reader';
 export type FumadocsReaderMode='preview'|'formal';
+export type FumadocsPublicationSection='article'|'ops';
 export type FumadocsPublicationLocale='zh-CN'|'en';
 export type FumadocsLanguageDestinations=Partial<Record<FumadocsPublicationLocale,string>>;
 
@@ -22,12 +23,12 @@ export function canonicalFumadocsPublicationPath(id:string):string {
  return `${previewRoot}/${encodeURIComponent(id)}`;
 }
 
-export function formalFumadocsPublicationPath(id:string):string {
- return articleContentPath(id);
+export function formalFumadocsPublicationPath(id:string,section:FumadocsPublicationSection='article'):string {
+ return section==='ops'?opsContentPath(id):articleContentPath(id);
 }
 
-function publicationPath(id:string,mode:FumadocsReaderMode):string {
- return mode==='formal'?formalFumadocsPublicationPath(id):canonicalFumadocsPublicationPath(id);
+function publicationPath(id:string,mode:FumadocsReaderMode,section:FumadocsPublicationSection='article'):string {
+ return mode==='formal'?formalFumadocsPublicationPath(id,section):canonicalFumadocsPublicationPath(id);
 }
 
 export function fumadocsMarkdownPath(id:string,revision:number):string {
@@ -39,13 +40,13 @@ export function fumadocsPdfPath(article:{id:string;revision:number;locale?:Fumad
 }
 
 /** Only offer a locale when an authorized published document ID exists. */
-export function fumadocsPublicationLanguages(article:{id:string;locale?:FumadocsPublicationLocale;sourceId?:string;englishId?:string|null},mode:FumadocsReaderMode='preview'):FumadocsLanguageDestinations {
+export function fumadocsPublicationLanguages(article:{id:string;locale?:FumadocsPublicationLocale;sourceId?:string;englishId?:string|null},mode:FumadocsReaderMode='preview',section:FumadocsPublicationSection='article'):FumadocsLanguageDestinations {
  const locale=article.locale==='en'?'en':'zh-CN';
  const result:FumadocsLanguageDestinations={};
  const sourceId=article.sourceId?.trim()||(locale==='zh-CN'?article.id:'');
  const englishId=article.englishId?.trim()||(locale==='en'?article.id:'');
- if(sourceId)result['zh-CN']=publicationPath(sourceId,mode);
- if(englishId)result.en=publicationPath(englishId,mode);
+ if(sourceId)result['zh-CN']=publicationPath(sourceId,mode,section);
+ if(englishId)result.en=publicationPath(englishId,mode,section);
  return result;
 }
 
@@ -61,7 +62,7 @@ export function fumadocsPublication(article:{body:string}):{blocks:EditorBlock[]
  return {blocks,toc};
 }
 
-export function fumadocsPublicationTree(nodes:NavigationNode[],locale:FumadocsPublicationLocale,mode:FumadocsReaderMode='preview'):Root {
+export function fumadocsPublicationTree(nodes:NavigationNode[],locale:FumadocsPublicationLocale,mode:FumadocsReaderMode='preview',section:FumadocsPublicationSection='article'):Root {
  const icon=(key:ReaderIconKey)=>createElement(readerIconComponents[key],{size:16,'aria-hidden':true});
  const convertNode=(node:NavigationNode):Root['children'][number]=>node.type==='group'?{
   type:'folder' as const,
@@ -75,7 +76,7 @@ export function fumadocsPublicationTree(nodes:NavigationNode[],locale:FumadocsPu
   name:node.title,
   ...(node.description?{description:node.description}:{}),
   ...(node.iconKey?{icon:icon(node.iconKey)}:{}),
-  url:publicationPath(node.id,mode),
+  url:publicationPath(node.id,mode,section),
  };
  const convert=(items:NavigationNode[]):Root['children']=>items.map(convertNode);
  const sections:Root['children']=nodes.flatMap(node=>node.type==='group'?[

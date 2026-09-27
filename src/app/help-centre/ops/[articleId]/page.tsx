@@ -7,7 +7,7 @@ import {bindCurrentMember} from '../../../../server/members/entry';
 
 export const dynamic='force-dynamic';
 
-export default async function FormalArticle({params}:{params:Promise<{articleId:string}>}){
+export default async function FormalOpsArticle({params}:{params:Promise<{articleId:string}>}){
  const access=await employeeCompanyAccess();
  if(access.status==='signed_out'||clerkConfiguration(process.env)!=='configured')redirect('/sign-in');
  if(access.status==='unavailable')redirect('/sign-in/error');
@@ -16,5 +16,5 @@ export default async function FormalArticle({params}:{params:Promise<{articleId:
  try{if((await(await applicationEnrollment()).inspect()).status==='ready'){await bindCurrentMember();ready=true;}}catch{}
  if(!ready)redirect('/help-centre');
  const {articleId}=await params;
- return <FumadocsAuthorizedPublication articleId={articleId} mode="formal" routeSection="article"/>;
+ return <FumadocsAuthorizedPublication articleId={articleId} mode="formal" routeSection="ops"/>;
 }

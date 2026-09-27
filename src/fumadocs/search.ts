@@ -4,7 +4,7 @@ import type {ContentKind} from '../domain/model.ts';
 import {formalFumadocsPublicationPath} from './publication.ts';
 
 function resultUrl(item:TitleSearch['results'][number]):string {
- return !item.kind||item.kind==='article'||item.kind==='ops'?formalFumadocsPublicationPath(item.id):item.href;
+ return !item.kind||item.kind==='article'?formalFumadocsPublicationPath(item.id):item.kind==='ops'?formalFumadocsPublicationPath(item.id,'ops'):item.href;
 }
 
 /** Converts an already authorized JUYU search result into Fumadocs' official search result contract. */

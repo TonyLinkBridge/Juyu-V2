@@ -6,6 +6,7 @@ import type {FeatureFlags} from '../../features/model';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {NavigationNode} from '../../reader/tree';
 import {fumadocsPublicationTree,type FumadocsPublicationLocale} from '../../fumadocs/publication';
+import {fumadocsContentTabs} from '../../fumadocs/tabs';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import {FumadocsSearchProvider} from './FumadocsSearchProvider';
@@ -40,11 +41,12 @@ function directoryCopy({failed,requested,pages,locale,title,description}:{failed
  };
 }
 
-export function FumadocsDirectoryContent({pages,features,requested,failed=false,locale='zh-CN',title,description,retryHref}:DirectoryStateProps){
+export function FumadocsDirectoryContent({pages,menu=[],features,requested,failed=false,locale='zh-CN',title,description,retryHref}:DirectoryStateProps){
  const copy=directoryCopy({failed,requested,pages,locale,title,description});
  const root='/help-centre';
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={fumadocsPublicationTree(failed?[]:pages,locale,'formal')}
+  tabs={fumadocsContentTabs(menu,locale)}
   nav={{title:'JUYU Help Centre',url:root}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:Boolean(features?.search)}}

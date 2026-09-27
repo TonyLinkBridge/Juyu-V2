@@ -187,12 +187,22 @@ test('OPS list retains its protected collection behavior inside the official Fum
  await expect(ops).toBeVisible();
  await expect(ops.getByRole('heading',{name:'OPS Internal',level:1})).toBeVisible();
  await expect(ops.getByRole('status')).toContainText('共 2 篇 · 第 1 / 1 页 · 本页 2 篇');
- await expect(ops.getByRole('link',{name:'阅读：运营异常处理'})).toHaveAttribute('href','/help-centre/articles/ops-procedure');
+ await expect(ops.getByRole('link',{name:'阅读：运营异常处理'})).toHaveAttribute('href','/help-centre/ops/ops-procedure');
  await expect(ops.getByText('内部流程 · 正式资料',{exact:true})).toBeVisible();
- if((page.viewportSize()?.width??1440)<1280){
+ const mobile=(page.viewportSize()?.width??1440)<1280;
+ if(mobile){
   await page.getByRole('button',{name:'开启侧边栏'}).click();
  }
- await expect(page.getByRole('link',{name:'运营异常处理',exact:true})).toHaveAttribute('href','/help-centre/articles/ops-procedure');
+ const opsSidebar=page.locator(mobile?'#nd-sidebar-mobile':'#nd-sidebar');
+ const librarySwitcher=opsSidebar.getByRole('button',{name:mobile?/OPS Internal.*运营流程与升级处理/:/^OPS Internal$/}).first();
+ await expect(librarySwitcher).toBeVisible();
+ await librarySwitcher.click();
+ await expect(page.getByRole('link',{name:/知识文章.*团队正式知识/})).toHaveAttribute('href','/help-centre');
+ await expect(page.getByRole('link',{name:/OPS Internal.*运营流程与升级处理/})).toHaveAttribute('href','/help-centre/ops');
+ await expect(page.getByRole('link',{name:/Reference 速查.*业务规则速查/})).toHaveAttribute('href','/help-centre/reference');
+ await expect(page.getByRole('link',{name:/Q&A 问答.*已审核标准答案/})).toHaveAttribute('href','/help-centre/qa');
+ await page.keyboard.press('Escape');
+ await expect(page.getByRole('link',{name:'运营异常处理',exact:true})).toHaveAttribute('href','/help-centre/ops/ops-procedure');
  await expect(page.locator('.entry-frame')).toHaveCount(0);
  await expect(page.locator('.knowledge-sidebar')).toHaveCount(0);
  const colors=await ops.getByRole('heading',{name:'运营异常处理'}).evaluate(element=>({text:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}));
@@ -237,10 +247,11 @@ test('Q&A keeps its search and topic filters inside the official Fumadocs shell'
  await expect(searchButton).toBeVisible();
  await expect(qa.getByRole('navigation',{name:'问答分类'}).getByRole('link',{name:'信用额度'})).toBeVisible();
  await expect(qa.getByRole('navigation',{name:'相关话题'}).getByRole('link',{name:'签约店铺'})).toBeVisible();
- await expect(qa.getByRole('heading',{name:'暂时没有找到相关答案'})).toBeVisible();
+ await expect(qa.getByRole('status')).toHaveText('标准问答 · 4 个问题');
+ await expect(qa.getByRole('heading',{name:'0 元签约店铺信用额度如何理解？',level:2})).toBeVisible();
  await expect(page.locator('.entry-frame')).toHaveCount(0);
  await expect(page.locator('.knowledge-sidebar')).toHaveCount(0);
- const colors=await qa.getByRole('heading',{name:'暂时没有找到相关答案'}).evaluate(element=>({text:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}));
+ const colors=await qa.getByRole('heading',{name:'0 元签约店铺信用额度如何理解？',level:2}).evaluate(element=>({text:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}));
  expect(colors.text).not.toBe('rgb(0, 0, 0)');
  expect(colors.text).not.toBe(colors.background);
  const buttonColors=await searchButton.evaluate(element=>({text:getComputedStyle(element).color,background:getComputedStyle(element).backgroundColor}));

@@ -3,6 +3,7 @@ import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {QaPage} from '../../qa/model';
+import {fumadocsContentTabs} from '../../fumadocs/tabs';
 import type {Publication} from '../../reader/body';
 import {QaView} from '../qa/QaView';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
@@ -18,6 +19,7 @@ interface FumadocsQaPageProps {
  menu?:MenuItem[];
  searchEnabled?:boolean;
  locale?:'zh-CN'|'en';
+ tabsPathname?:string;
 }
 interface FumadocsQaContentProps extends FumadocsQaPageProps {previewAnswers?:Record<string,Publication>}
 
@@ -53,10 +55,11 @@ function qaCopy(state:FumadocsQaPageProps['state'],locale:'zh-CN'|'en'){
  };
 }
 
-export function FumadocsQaContent({data,initialAnswer,previewAnswers,viewerId,state,searchEnabled=true,locale='zh-CN'}:FumadocsQaContentProps){
+export function FumadocsQaContent({data,initialAnswer,previewAnswers,viewerId,state,menu=[],searchEnabled=true,locale='zh-CN',tabsPathname='/help-centre/qa'}:FumadocsQaContentProps){
  const copy=qaCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={qaTree(state==='ready'?data:undefined,locale)}
+  tabs={fumadocsContentTabs(menu,locale,{path:'/help-centre/qa',pathname:tabsPathname})}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:searchEnabled}}

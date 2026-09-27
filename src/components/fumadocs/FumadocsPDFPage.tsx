@@ -5,7 +5,7 @@ import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/d
 import Link from 'next/link';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {PDFSnapshot} from '../../pdf/model';
-import {articleContentPath} from '../../reader/content-path';
+import {contentPath} from '../../reader/content-path';
 import {PDFPage} from '../gitbook/PDF/PDFPage';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
@@ -25,7 +25,7 @@ function pdfTree(snapshot:PDFSnapshot|undefined,locale:'zh-CN'|'en'):Root {
  const name=locale==='en'?'PDF preview':'PDF 阅读';
  return {name,children:[{
   type:'folder',name,root:true,defaultOpen:true,
-  children:snapshot?[{type:'page' as const,$id:snapshot.article.id,name:snapshot.article.title,url:articleContentPath(snapshot.article.id)}]:[],
+  children:snapshot?[{type:'page' as const,$id:snapshot.article.id,name:snapshot.article.title,url:contentPath(snapshot.article.kind??'article',snapshot.article.id)}]:[],
  }]};
 }
 

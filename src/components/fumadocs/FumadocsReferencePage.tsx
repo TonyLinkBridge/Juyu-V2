@@ -3,6 +3,7 @@ import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {ReferenceDetail,ReferencePage} from '../../reference/model';
+import {fumadocsContentTabs} from '../../fumadocs/tabs';
 import {ReferenceView} from '../reference/ReferenceView';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
@@ -17,6 +18,7 @@ interface FumadocsReferencePageProps {
  menu?:MenuItem[];
  search?:boolean;
  locale?:'zh-CN'|'en';
+ tabsPathname?:string;
 }
 
 function referenceHref(id:string,page:number,locale:'zh-CN'|'en'){
@@ -47,10 +49,11 @@ function referenceCopy(state:FumadocsReferencePageProps['state'],locale:'zh-CN'|
  };
 }
 
-export function FumadocsReferenceContent({data,detail,state,detailState='idle',search=false,locale='zh-CN'}:FumadocsReferencePageProps){
+export function FumadocsReferenceContent({data,detail,state,detailState='idle',menu=[],search=false,locale='zh-CN',tabsPathname='/help-centre/reference'}:FumadocsReferencePageProps){
  const copy=referenceCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={referenceTree(state==='ready'?data:undefined,locale)}
+  tabs={fumadocsContentTabs(menu,locale,{path:'/help-centre/reference',pathname:tabsPathname})}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}

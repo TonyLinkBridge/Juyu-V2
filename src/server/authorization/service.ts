@@ -255,10 +255,10 @@ async reader(requested:string|string[]|undefined):Promise<{viewerId:string;featu
     positiveInteger(revision);const viewer=await this.viewer();
     return this.database.run(viewer,async client=>{
       await requireFeature(client,'pdfExport');
-      const row=(await client.query('SELECT document_id,title,revision_id,body FROM juyu.read_publication($1)',[id])).rows[0];
+      const row=(await client.query('SELECT document_id,kind,title,revision_id,body FROM juyu.read_publication($1)',[id])).rows[0];
       if(!row)throw new Error('NOT_FOUND');if(row.revision_id!==revision)throw new Error('VERSION_CHANGED');
       const files=(await client.query(`SELECT a.id,a.filename,a.byte_size::text AS size FROM juyu.assets a JOIN juyu.revision_assets ra ON ra.asset_id=a.id AND ra.document_id=a.document_id WHERE ra.document_id=$1 AND ra.revision_id=$2 AND a.mime_type='application/pdf' AND juyu.can_read_asset(a.id) ORDER BY a.filename COLLATE "C",a.id`,[id,revision])).rows;
-      return {article:{id:row.document_id,title:row.title,revision:row.revision_id,body:row.body,...await readPresentation(client,id)},files};
+      return {article:{id:row.document_id,kind:row.kind,title:row.title,revision:row.revision_id,body:row.body,...await readPresentation(client,id)},files};
     },true);
   }
   async feedback(id:string,revision:number){const v=await this.viewer();return this.database.run(v,c=>readFeedback(c,id,revision),true);}

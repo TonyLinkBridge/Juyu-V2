@@ -3,7 +3,8 @@ import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {OpsPage} from '../../ops/model';
-import {articleContentPath} from '../../reader/content-path';
+import {fumadocsContentTabs} from '../../fumadocs/tabs';
+import {opsContentPath} from '../../reader/content-path';
 import {OpsCollection} from '../ops/OpsCollection';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
@@ -16,12 +17,13 @@ interface FumadocsOpsPageProps {
  menu?:MenuItem[];
  search?:boolean;
  locale?:'zh-CN'|'en';
+ tabsPathname?:string;
 }
 
 function opsTree(data:OpsPage|undefined):Root {
  return {name:'OPS Internal',children:[{
   type:'folder',name:'OPS Internal',root:true,defaultOpen:true,
-  children:(data?.items??[]).map(item=>({type:'page' as const,$id:item.id,name:item.title,url:articleContentPath(item.id)})),
+  children:(data?.items??[]).map(item=>({type:'page' as const,$id:item.id,name:item.title,url:opsContentPath(item.id)})),
  }]};
 }
 
@@ -41,10 +43,11 @@ function opsCopy(state:FumadocsOpsPageProps['state'],locale:'zh-CN'|'en'){
  };
 }
 
-export function FumadocsOpsContent({data,state,search=false,locale='zh-CN'}:FumadocsOpsPageProps){
+export function FumadocsOpsContent({data,state,menu=[],search=false,locale='zh-CN',tabsPathname='/help-centre/ops'}:FumadocsOpsPageProps){
  const copy=opsCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={opsTree(state==='ready'?data:undefined)}
+  tabs={fumadocsContentTabs(menu,locale,{path:'/help-centre/ops',pathname:tabsPathname})}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}
