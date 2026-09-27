@@ -13,7 +13,7 @@ const menu=[
 test('official Fumadocs layout tabs contain only authorized content libraries',()=>{
  const tabs=fumadocsContentTabs(menu,'zh-CN');
  assert.deepEqual(tabs.map(({title,description,url})=>({title,description,url})),[
-  {title:'知识文章',description:'团队正式知识',url:'/help-centre'},
+  {title:'知识文章',description:'团队正式知识',url:'/help-centre/library'},
   {title:'OPS Internal',description:'运营流程与升级处理',url:'/help-centre/ops'},
   {title:'Reference 速查',description:'业务规则速查',url:'/help-centre/reference'},
   {title:'Q&A 问答',description:'已审核标准答案',url:'/help-centre/qa'},
@@ -24,7 +24,7 @@ test('official Fumadocs layout tabs contain only authorized content libraries',(
 test('official Fumadocs layout tabs preserve authorization and locale',()=>{
  const tabs=fumadocsContentTabs(menu.filter(item=>item.href!=='/help-centre/ops'),'en');
  assert.deepEqual(tabs.map(({title,description,url})=>({title,description,url})),[
-  {title:'Articles',description:'Approved team knowledge',url:'/help-centre?lang=en'},
+  {title:'Articles',description:'Approved team knowledge',url:'/help-centre/library?lang=en'},
   {title:'Reference',description:'Business rules and quick reference',url:'/help-centre/reference?lang=en'},
   {title:'Q&A',description:'Reviewed standard answers',url:'/help-centre/qa?lang=en'},
  ]);
@@ -40,4 +40,16 @@ test('the shared design preview can select the official OPS tab without changing
   '/design-preview/fumadocs-reader',
  ]);
  assert.equal(tabs[0].urls,undefined);
+});
+
+test('a formal knowledge article keeps the independent Articles library selected',()=>{
+ const tabs=fumadocsContentTabs(menu,'zh-CN',{
+  path:'/help-centre/library',
+  pathname:'/help-centre/articles/member-rights',
+ });
+ assert.deepEqual([...tabs[0].urls??[]],[
+  '/help-centre/library',
+  '/help-centre/articles/member-rights',
+ ]);
+ assert.equal(tabs[0].url,'/help-centre/library');
 });

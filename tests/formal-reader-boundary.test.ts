@@ -87,13 +87,14 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  assert.match(qaPage,/tabs=\{fumadocsContentTabs\(menu,locale,\{path:'\/help-centre\/qa',pathname:tabsPathname\}\)\}/);
  assert.doesNotMatch(qaPage,/EntryShell|ReaderMenu|ReaderQuickLinks|HeaderSearch/);
  assert.match(frame,/help-centre\/qa/);
+ await assert.rejects(access('src/app/help-centre/qa/loading.tsx'));
 
  const directoryTabs=await readFile('src/components/fumadocs/FumadocsDirectoryState.tsx','utf8');
  assert.match(directoryTabs,/tabs=\{fumadocsContentTabs\(menu,locale\)\}/);
  const publication=await readFile('src/components/fumadocs/FumadocsAuthorizedPublication.tsx','utf8');
  assert.match(publication,/routeSection/);
  assert.match(publication,/redirect\(formalFumadocsPublicationPath\(article.id,section\)\)/);
- assert.match(publication,/tabs=\{formal\?fumadocsContentTabs\(menu,locale\):false\}/);
+ assert.match(publication,/tabs=\{formal\?fumadocsContentTabs\(menu,locale,\{path:activePath,pathname:formalFumadocsPublicationPath\(article.id,section\)\}\):false\}/);
  const ordinaryRoute=await readFile('src/app/help-centre/articles/[articleId]/page.tsx','utf8');
  const opsArticleRoute=await readFile('src/app/help-centre/ops/[articleId]/page.tsx','utf8');
  assert.match(ordinaryRoute,/routeSection="article"/);
