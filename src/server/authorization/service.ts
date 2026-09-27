@@ -330,8 +330,8 @@ export async function protectedResponse(action:()=>Promise<unknown>):Promise<Res
 }
 
 async function readNavigationTree(client:PoolClient,repeatMemberships=false,locale:'zh-CN'|'en'='zh-CN'):Promise<NavigationNode[]> {
-      const pages=await client.query<{id:string;title:string;description?:string;iconKey?:import('../../reader/icon-keys.ts').ReaderIconKey|null}>(
-        'SELECT document_id AS id,title,description,icon_key AS "iconKey" FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id) AND EXISTS(SELECT 1 FROM juyu.read_publication_language(document_id) l WHERE l.locale=$1)',[locale]);
+      const pages=await client.query<{id:string;title:string;description?:string;iconKey?:import('../../reader/icon-keys.ts').ReaderIconKey|null;position:number|null}>(
+        'SELECT document_id AS id,title,description,icon_key AS "iconKey",juyu.read_publication_navigation_position(document_id) AS position FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id) AND EXISTS(SELECT 1 FROM juyu.read_publication_language(document_id) l WHERE l.locale=$1)',[locale]);
       const memberships=await client.query<NavigationMembership>(
         'SELECT document_id,category_id FROM juyu.revision_categories WHERE juyu.can_read_revision(document_id,revision_id) AND EXISTS(SELECT 1 FROM juyu.read_publication_language(document_id) l WHERE l.locale=$1)',[locale]);
       const categories=await client.query<NavigationCategory>(

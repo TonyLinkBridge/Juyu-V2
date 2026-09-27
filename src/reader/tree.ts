@@ -5,9 +5,10 @@ export interface NavigationGroup {type:'group';id:string;title:string;iconKey?:R
 export interface NavigationCategory {id:string;name:string;parent_id:string|null;position:number;icon_key?:ReaderIconKey|null;index_document_id?:string|null}
 export interface NavigationMembership {document_id:string;category_id:string}
 const compareText=(a:string,b:string)=>a<b?-1:a>b?1:0;
+const pagePosition=(value:number|null|undefined)=>Number.isSafeInteger(value)&&Number(value)>0?Number(value):Number.MAX_SAFE_INTEGER;
 
 /** Input must already be authorized. Never promote invalid category paths to root. */
-export function buildNavigationTree(pages:{id:string;title:string;description?:string;iconKey?:ReaderIconKey|null}[],categories:NavigationCategory[],memberships:NavigationMembership[],options:{repeatMemberships?:boolean;locale?:'zh-CN'|'en'}={}):NavigationNode[] {
+export function buildNavigationTree(pages:{id:string;title:string;description?:string;iconKey?:ReaderIconKey|null;position?:number|null}[],categories:NavigationCategory[],memberships:NavigationMembership[],options:{repeatMemberships?:boolean;locale?:'zh-CN'|'en'}={}):NavigationNode[] {
  const children=new Map<string|null,NavigationCategory[]>();
  for(const category of categories) {
    const siblings=children.get(category.parent_id)??[];siblings.push(category);children.set(category.parent_id,siblings);
@@ -32,7 +33,7 @@ export function buildNavigationTree(pages:{id:string;title:string;description?:s
    const ids=memberCategories.get(membership.document_id)??new Set<string>();ids.add(membership.category_id);memberCategories.set(membership.document_id,ids);
  }
  const seenPages=new Set<string>();
- for(const page of [...pages].sort((a,b)=>compareText(a.title,b.title)||compareText(a.id,b.id))) {
+ for(const page of [...pages].sort((a,b)=>pagePosition(a.position)-pagePosition(b.position)||compareText(a.title,b.title)||compareText(a.id,b.id))) {
    if(seenPages.has(page.id))continue;seenPages.add(page.id);
    const ids=[...(memberCategories.get(page.id)??[])];
    // A missing/invalid membership invalidates the entire page, even if another is valid.

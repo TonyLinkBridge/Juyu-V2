@@ -13,6 +13,23 @@ test('tree follows saved group order and nesting and prunes empty categories',()
  assert.equal(selectTreePage(tree,'missing'),null);
  assert.equal(selectTreePage(tree,['one','two']),null);
 });
+test('documents in one category follow explicit Fumadocs directory order before title fallback',()=>{
+ const tree=buildNavigationTree(
+  [
+   {id:'shop',title:'签约店铺（个人/企业）',position:5},
+   {id:'regular',title:'普通会员',position:1},
+   {id:'gold',title:'金牌会员',position:4},
+   {id:'auction',title:'释放拍卖大客户',position:2},
+   {id:'advanced',title:'高级会员',position:3},
+   {id:'later',title:'其他未排序文章',position:null},
+  ],
+  [{id:'benefits',name:'会员权益',parent_id:null,position:0}],
+  ['shop','regular','gold','auction','advanced','later'].map(document_id=>({document_id,category_id:'benefits'})),
+ );
+ const benefits=tree[0];assert.equal(benefits?.type,'group');
+ if(benefits?.type!=='group')return;
+ assert.deepEqual(benefits.descendants.map(node=>node.id),['regular','auction','advanced','gold','shop','later']);
+});
 test('multiple memberships appear once deterministically and stable IDs survive renaming',()=>{
  const membership=[...links,{document_id:'one',category_id:'c'}];
  const first=buildNavigationTree(pages,groups,membership);
