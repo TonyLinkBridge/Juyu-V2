@@ -1,4 +1,3 @@
-import type {Root} from 'fumadocs-core/page-tree';
 import {buttonVariants} from 'fumadocs-ui/components/ui/button';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
@@ -6,6 +5,7 @@ import Link from 'next/link';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {PDFSnapshot} from '../../pdf/model';
 import {contentPath} from '../../reader/content-path';
+import {fumadocsRootTree} from '../../fumadocs/tree';
 import {PDFPage} from '../gitbook/PDF/PDFPage';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
@@ -21,12 +21,10 @@ interface FumadocsPDFPageProps {
  locale?:'zh-CN'|'en';
 }
 
-function pdfTree(snapshot:PDFSnapshot|undefined,locale:'zh-CN'|'en'):Root {
+function pdfTree(snapshot:PDFSnapshot|undefined,locale:'zh-CN'|'en') {
  const name=locale==='en'?'PDF preview':'PDF 阅读';
- return {name,children:[{
-  type:'folder',name,root:true,defaultOpen:true,
-  children:snapshot?[{type:'page' as const,$id:snapshot.article.id,name:snapshot.article.title,url:contentPath(snapshot.article.kind??'article',snapshot.article.id)}]:[],
- }]};
+ const identity=snapshot?[`${snapshot.article.kind??'article'}:${snapshot.article.id}`]:[];
+ return fumadocsRootTree(`pdf:${locale}`,name,snapshot?[{type:'page' as const,$id:snapshot.article.id,name:snapshot.article.title,url:contentPath(snapshot.article.kind??'article',snapshot.article.id)}]:[],identity);
 }
 
 export function FumadocsPDFContent({snapshot,state,message,search=false,locale='zh-CN'}:FumadocsPDFPageProps){

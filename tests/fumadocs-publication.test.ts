@@ -35,10 +35,15 @@ test('top-level categories use official Fumadocs separators while nested categor
    ]},
   ]},
  ],'zh-CN');
+ assert.equal(tree.type,'root');
+ assert.equal(typeof tree.$id,'string');
+ assert.ok(tree.$id && tree.$id.length>0);
  assert.equal(tree.name,'资料目录');
  const root=tree.children[0];
  assert.equal(root?.type,'folder');
  if(root?.type!=='folder')throw new Error('missing root folder');
+ assert.equal(typeof root.$id,'string');
+ assert.ok(root.$id && root.$id.length>0);
  const section=root.children[0];
  assert.equal(section?.type,'separator');
  if(section?.type!=='separator')throw new Error('missing category separator');
@@ -58,6 +63,22 @@ test('top-level categories use official Fumadocs separators while nested categor
  assert.equal(nested.name,'账户安全');
  assert.equal(nested.children[0]?.type,'page');
  assert.equal(canonicalFumadocsPublicationPath('article 1'),'/design-preview/fumadocs-reader/article%201');
+});
+
+test('Fumadocs tree identity is stable for the same directory and changes with its scope or contents',()=>{
+ const articleNodes:Parameters<typeof fumadocsPublicationTree>[0]=[
+  {type:'document',id:'article-1',title:'修改邮箱',href:'/help-centre?article=article-1'},
+ ];
+ const same=fumadocsPublicationTree(articleNodes,'zh-CN','formal','article');
+ const repeated=fumadocsPublicationTree(articleNodes,'zh-CN','formal','article');
+ const ops=fumadocsPublicationTree(articleNodes,'zh-CN','formal','ops');
+ const changed=fumadocsPublicationTree([
+  ...articleNodes,
+  {type:'document',id:'article-2',title:'修改密码',href:'/help-centre?article=article-2'},
+ ],'zh-CN','formal','article');
+ assert.equal(same.$id,repeated.$id);
+ assert.notEqual(same.$id,ops.$id);
+ assert.notEqual(same.$id,changed.$id);
 });
 
 test('formal reader paths stay under Help Centre and the entire authorized tree uses them',()=>{

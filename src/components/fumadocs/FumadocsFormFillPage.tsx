@@ -1,10 +1,10 @@
-import type {Root} from 'fumadocs-core/page-tree';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import {buttonVariants} from 'fumadocs-ui/components/ui/button';
 import Link from 'next/link';
 import type {FormDefinition} from '../../forms/model';
 import type {MenuItem} from '../../navigation-settings/model';
+import {fumadocsRootTree} from '../../fumadocs/tree';
 import {FormFill} from '../forms/FormViews';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
@@ -19,11 +19,8 @@ interface FumadocsFormFillPageProps {
  search?:boolean;
 }
 
-function formTree(data:FormDefinition|undefined):Root {
- return {name:'内部表单',children:[{
-  type:'folder',name:'内部表单',root:true,defaultOpen:true,
-  children:data?[{type:'page' as const,$id:data.id,name:data.title,url:`/help-centre/forms/${data.id}`}]:[],
- }]};
+function formTree(data:FormDefinition|undefined) {
+ return fumadocsRootTree('form-fill','内部表单',data?[{type:'page' as const,$id:data.id,name:data.title,url:`/help-centre/forms/${data.id}`}]:[],data?[data.id]:[]);
 }
 
 function formCopy(data:FormDefinition|undefined,state:FumadocsFormFillPageProps['state']){

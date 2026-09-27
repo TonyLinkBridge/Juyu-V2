@@ -1,9 +1,9 @@
-import type {Root} from 'fumadocs-core/page-tree';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {QaPage} from '../../qa/model';
 import {fumadocsContentTabs} from '../../fumadocs/tabs';
+import {fumadocsRootTree} from '../../fumadocs/tree';
 import type {Publication} from '../../reader/body';
 import {QaView} from '../qa/QaView';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
@@ -28,12 +28,10 @@ function qaHref(id:string,locale:'zh-CN'|'en'){
  return `/help-centre/qa?question=${encodeURIComponent(id)}${locale==='en'?'&lang=en':''}#qa-${encodeURIComponent(id)}`;
 }
 
-function qaTree(data:QaPage|undefined,locale:'zh-CN'|'en'):Root {
+function qaTree(data:QaPage|undefined,locale:'zh-CN'|'en') {
  const name=locale==='en'?'Q&A':'Q&A 问答';
- return {name,children:[{
-  type:'folder',name,root:true,defaultOpen:true,
-  children:(data?.items??[]).map(item=>({type:'page' as const,$id:item.id,name:item.title,url:qaHref(item.id,locale)})),
- }]};
+ const items=data?.items??[];
+ return fumadocsRootTree(`qa:${locale}`,name,items.map(item=>({type:'page' as const,$id:item.id,name:item.title,url:qaHref(item.id,locale)})),items.map(item=>item.id));
 }
 
 function qaCopy(state:FumadocsQaPageProps['state'],locale:'zh-CN'|'en'){

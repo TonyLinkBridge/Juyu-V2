@@ -5,6 +5,7 @@ import {readerIconComponents} from '../reader/icon-components.ts';
 import type {ReaderIconKey} from '../reader/icon-keys.ts';
 import type {NavigationNode} from '../reader/tree.ts';
 import {articleContentPath,opsContentPath} from '../reader/content-path.ts';
+import {fumadocsRootTree} from './tree.ts';
 
 export interface FumadocsTocItem {title:string;url:string;depth:number}
 
@@ -89,5 +90,11 @@ export function fumadocsPublicationTree(nodes:NavigationNode[],locale:FumadocsPu
   ...convert(node.descendants),
  ]:[convertNode(node)]);
  const name=locale==='en'?'Knowledge Base':'资料目录';
- return {name,children:[{type:'folder',name,root:true,defaultOpen:true,children:sections}]};
+ const identity: string[]=[];
+ const collect=(items:NavigationNode[])=>items.forEach(node=>{
+  identity.push(node.type,node.id);
+  if(node.type==='group')collect(node.descendants);
+ });
+ collect(nodes);
+ return fumadocsRootTree(`publication:${mode}:${section}:${locale}`,name,sections,identity);
 }

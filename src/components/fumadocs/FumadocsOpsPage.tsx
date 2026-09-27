@@ -1,9 +1,9 @@
-import type {Root} from 'fumadocs-core/page-tree';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {OpsPage} from '../../ops/model';
 import {fumadocsContentTabs} from '../../fumadocs/tabs';
+import {fumadocsRootTree} from '../../fumadocs/tree';
 import {opsContentPath} from '../../reader/content-path';
 import {OpsCollection} from '../ops/OpsCollection';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
@@ -21,11 +21,9 @@ interface FumadocsOpsPageProps {
  tabsPathname?:string;
 }
 
-function opsTree(data:OpsPage|undefined):Root {
- return {name:'OPS Internal',children:[{
-  type:'folder',name:'OPS Internal',root:true,defaultOpen:true,
-  children:(data?.items??[]).map(item=>({type:'page' as const,$id:item.id,name:item.title,url:opsContentPath(item.id)})),
- }]};
+function opsTree(data:OpsPage|undefined,locale:'zh-CN'|'en') {
+ const items=data?.items??[];
+ return fumadocsRootTree(`ops:${locale}`,'OPS Internal',items.map(item=>({type:'page' as const,$id:item.id,name:item.title,url:opsContentPath(item.id)})),items.map(item=>item.id));
 }
 
 function opsCopy(state:FumadocsOpsPageProps['state'],locale:'zh-CN'|'en'){
@@ -47,7 +45,7 @@ function opsCopy(state:FumadocsOpsPageProps['state'],locale:'zh-CN'|'en'){
 export function FumadocsOpsContent({data,state,menu=[],knowledgeEntry,search=false,locale='zh-CN',tabsPathname='/help-centre/ops'}:FumadocsOpsPageProps){
  const copy=opsCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
-  tree={opsTree(state==='ready'?data:undefined)}
+  tree={opsTree(state==='ready'?data:undefined,locale)}
   tabs={fumadocsContentTabs(menu,locale,{path:'/help-centre/ops',pathname:tabsPathname},knowledgeEntry)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   sidebar={{prefetch:true,footer:<FumadocsAccountFooter locale={locale}/>}}

@@ -1,9 +1,9 @@
-import type {Root} from 'fumadocs-core/page-tree';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {ReferenceDetail,ReferencePage} from '../../reference/model';
 import {fumadocsContentTabs} from '../../fumadocs/tabs';
+import {fumadocsRootTree} from '../../fumadocs/tree';
 import {ReferenceView} from '../reference/ReferenceView';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
@@ -26,12 +26,10 @@ function referenceHref(id:string,page:number,locale:'zh-CN'|'en'){
  return `/help-centre/reference?page=${page}&article=${encodeURIComponent(id)}${locale==='en'?'&lang=en':''}#reference-detail`;
 }
 
-function referenceTree(data:ReferencePage|undefined,locale:'zh-CN'|'en'):Root {
+function referenceTree(data:ReferencePage|undefined,locale:'zh-CN'|'en') {
  const name=locale==='en'?'Reference':'Reference 速查';
- return {name,children:[{
-  type:'folder',name,root:true,defaultOpen:true,
-  children:(data?.items??[]).map(item=>({type:'page' as const,$id:item.id,name:item.title,url:referenceHref(item.id,data?.page??1,locale)})),
- }]};
+ const items=data?.items??[];
+ return fumadocsRootTree(`reference:${locale}:${data?.page??1}`,name,items.map(item=>({type:'page' as const,$id:item.id,name:item.title,url:referenceHref(item.id,data?.page??1,locale)})),items.map(item=>item.id));
 }
 
 function referenceCopy(state:FumadocsReferencePageProps['state'],locale:'zh-CN'|'en'){

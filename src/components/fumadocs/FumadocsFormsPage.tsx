@@ -1,8 +1,8 @@
-import type {Root} from 'fumadocs-core/page-tree';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {FormDefinition} from '../../forms/model';
 import type {MenuItem} from '../../navigation-settings/model';
+import {fumadocsRootTree} from '../../fumadocs/tree';
 import {FormCollection} from '../forms/FormViews';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
@@ -17,12 +17,10 @@ interface FumadocsFormsPageProps {
  search?:boolean;
 }
 
-function formsTree(data:FormDefinition[]|undefined):Root {
+function formsTree(data:FormDefinition[]|undefined) {
  const name='内部表单';
- return {name,children:[{
-  type:'folder',name,root:true,defaultOpen:true,
-  children:(data??[]).map(form=>({type:'page' as const,$id:form.id,name:form.title,url:`/help-centre/forms/${form.id}`})),
- }]};
+ const forms=data??[];
+ return fumadocsRootTree('forms',name,forms.map(form=>({type:'page' as const,$id:form.id,name:form.title,url:`/help-centre/forms/${form.id}`})),forms.map(form=>form.id));
 }
 
 function formsCopy(state:FumadocsFormsPageProps['state']){

@@ -1,4 +1,3 @@
-import type {Root} from 'fumadocs-core/page-tree';
 import {Card,Cards} from 'fumadocs-ui/components/card';
 import {buttonVariants} from 'fumadocs-ui/components/ui/button';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
@@ -7,6 +6,7 @@ import Link from 'next/link';
 import type {ContentKind} from '../../domain/model';
 import type {MenuItem} from '../../navigation-settings/model';
 import {contentPath} from '../../reader/content-path';
+import {fumadocsRootTree} from '../../fumadocs/tree';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import {FumadocsSearchProvider} from './FumadocsSearchProvider';
@@ -26,12 +26,10 @@ interface FumadocsChangelogPageProps {
  locale?:'zh-CN'|'en';
 }
 
-function changelogTree(data:ChangelogPageData|undefined,locale:'zh-CN'|'en'):Root {
+function changelogTree(data:ChangelogPageData|undefined,locale:'zh-CN'|'en') {
  const name=locale==='en'?"What's new":'更新日志';
- return {name,children:[{
-  type:'folder',name,root:true,defaultOpen:true,
-  children:(data?.items??[]).map(item=>({type:'page' as const,$id:item.id,name:item.title,url:contentPath(item.kind,item.id,locale)})),
- }]};
+ const items=data?.items??[];
+ return fumadocsRootTree(`changelog:${locale}:${data?.page??1}`,name,items.map(item=>({type:'page' as const,$id:item.id,name:item.title,url:contentPath(item.kind,item.id,locale)})),items.map(item=>`${item.kind}:${item.id}`));
 }
 
 function pageHref(page:number,locale:'zh-CN'|'en'){

@@ -1,9 +1,9 @@
-import type {Root} from 'fumadocs-core/page-tree';
 import {DocsLayout} from 'fumadocs-ui/layouts/docs';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {RecentPage} from '../../recent/model';
 import {contentPath} from '../../reader/content-path';
+import {fumadocsRootTree} from '../../fumadocs/tree';
 import {RecentView} from '../recent/RecentView';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
@@ -18,12 +18,10 @@ interface FumadocsRecentPageProps {
  locale?:'zh-CN'|'en';
 }
 
-function recentTree(data:RecentPage|undefined,locale:'zh-CN'|'en'):Root {
+function recentTree(data:RecentPage|undefined,locale:'zh-CN'|'en') {
  const name=locale==='en'?'Recently viewed':'最近浏览';
- return {name,children:[{
-  type:'folder',name,root:true,defaultOpen:true,
-  children:(data?.items??[]).map(item=>({type:'page' as const,$id:item.id,name:item.title,url:contentPath(item.kind,item.id,locale)})),
- }]};
+ const items=data?.items??[];
+ return fumadocsRootTree(`recent:${locale}`,name,items.map(item=>({type:'page' as const,$id:item.id,name:item.title,url:contentPath(item.kind,item.id,locale)})),items.map(item=>`${item.kind}:${item.id}`));
 }
 
 function recentCopy(state:FumadocsRecentPageProps['state'],locale:'zh-CN'|'en'){
