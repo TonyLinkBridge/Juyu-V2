@@ -4,7 +4,7 @@ import {buttonVariants} from 'fumadocs-ui/components/ui/button';
 import Link from 'next/link';
 import type {FeatureFlags} from '../../features/model';
 import type {MenuItem} from '../../navigation-settings/model';
-import type {NavigationNode} from '../../reader/tree';
+import {firstTreePage,type NavigationNode} from '../../reader/tree';
 import {fumadocsPublicationTree,type FumadocsPublicationLocale} from '../../fumadocs/publication';
 import {fumadocsContentTabs} from '../../fumadocs/tabs';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
@@ -46,7 +46,7 @@ export function FumadocsDirectoryContent({pages,menu=[],features,requested,faile
  const root='/help-centre';
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={fumadocsPublicationTree(failed?[]:pages,locale,'formal')}
-  tabs={fumadocsContentTabs(menu,locale)}
+  tabs={fumadocsContentTabs(menu,locale,undefined,firstTreePage(pages)?.href)}
   nav={{title:'JUYU Help Centre',url:root}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:Boolean(features?.search)}}

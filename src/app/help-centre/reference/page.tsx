@@ -35,7 +35,7 @@ export default async function ReferenceCollectionPage({searchParams}:{searchPara
   if(error instanceof Error&&error.message.split(':')[0]==='FORBIDDEN')state='denied';
  }
 
- let menu:Awaited<ReturnType<typeof readReaderPresentation>>['items']=[],search=false;
- try{const presentation=await readReaderPresentation();menu=presentation.items;search=presentation.features.search;}catch{}
- return <FumadocsReferencePage data={data} detail={detail} state={state} detailState={detailState} locale={locale} menu={menu} search={search}/>;
+ let menu:Awaited<ReturnType<typeof readReaderPresentation>>['items']=[],knowledgeEntry:string|undefined,search=false;
+ try{const presentation=await readReaderPresentation(locale);menu=presentation.items;knowledgeEntry=presentation.knowledgeEntry;search=presentation.features.search;}catch{}
+ return <FumadocsReferencePage data={data} detail={detail} state={state} detailState={detailState} locale={locale} menu={menu} knowledgeEntry={knowledgeEntry} search={search}/>;
 }

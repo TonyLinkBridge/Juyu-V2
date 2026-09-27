@@ -197,7 +197,7 @@ test('OPS list retains its protected collection behavior inside the official Fum
  const librarySwitcher=opsSidebar.getByRole('button',{name:mobile?/OPS Internal.*运营流程与升级处理/:/^OPS Internal$/}).first();
  await expect(librarySwitcher).toBeVisible();
  await librarySwitcher.click();
- await expect(page.getByRole('link',{name:/知识文章.*团队正式知识/})).toHaveAttribute('href','/help-centre/library');
+ await expect(page.getByRole('link',{name:/知识文章.*团队正式知识/})).toHaveAttribute('href','/help-centre/articles/fumadocs-preview');
  await expect(page.getByRole('link',{name:/OPS Internal.*运营流程与升级处理/})).toHaveAttribute('href','/help-centre/ops');
  await expect(page.getByRole('link',{name:/Reference 速查.*业务规则速查/})).toHaveAttribute('href','/help-centre/reference');
  await expect(page.getByRole('link',{name:/Q&A 问答.*已审核标准答案/})).toHaveAttribute('href','/help-centre/qa');

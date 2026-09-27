@@ -64,7 +64,7 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  assert.doesNotMatch(opsRoute,/EntryShell|ReaderMenu|SearchInput|FeatureSearch/);
  for(const official of ['FumadocsSearchProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(opsPage,new RegExp(official));
  assert.match(opsPage,/OpsCollection/);
- assert.match(opsPage,/tabs=\{fumadocsContentTabs\(menu,locale,\{path:'\/help-centre\/ops',pathname:tabsPathname\}\)\}/);
+ assert.match(opsPage,/tabs=\{fumadocsContentTabs\(menu,locale,\{path:'\/help-centre\/ops',pathname:tabsPathname\},knowledgeEntry\)\}/);
  assert.doesNotMatch(opsPage,/EntryShell|ReaderMenu|ReaderQuickLinks|HeaderSearch/);
  assert.match(frame,/help-centre\/ops/);
 
@@ -74,7 +74,7 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  assert.doesNotMatch(referenceRoute,/EntryShell|ReaderMenu|SearchInput|FeatureSearch/);
  for(const official of ['FumadocsSearchProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(referencePage,new RegExp(official));
  assert.match(referencePage,/ReferenceView/);
- assert.match(referencePage,/tabs=\{fumadocsContentTabs\(menu,locale,\{path:'\/help-centre\/reference',pathname:tabsPathname\}\)\}/);
+ assert.match(referencePage,/tabs=\{fumadocsContentTabs\(menu,locale,\{path:'\/help-centre\/reference',pathname:tabsPathname\},knowledgeEntry\)\}/);
  assert.doesNotMatch(referencePage,/EntryShell|ReaderMenu|ReaderQuickLinks|HeaderSearch/);
  assert.match(frame,/help-centre\/reference/);
 
@@ -84,17 +84,18 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  assert.doesNotMatch(qaRoute,/EntryShell|ReaderMenu|SearchInput|FeatureSearch/);
  for(const official of ['FumadocsSearchProvider','DocsLayout','DocsPage','DocsTitle','DocsDescription'])assert.match(qaPage,new RegExp(official));
  assert.match(qaPage,/QaView/);
- assert.match(qaPage,/tabs=\{fumadocsContentTabs\(menu,locale,\{path:'\/help-centre\/qa',pathname:tabsPathname\}\)\}/);
+ assert.match(qaPage,/tabs=\{fumadocsContentTabs\(menu,locale,\{path:'\/help-centre\/qa',pathname:tabsPathname\},knowledgeEntry\)\}/);
  assert.doesNotMatch(qaPage,/EntryShell|ReaderMenu|ReaderQuickLinks|HeaderSearch/);
  assert.match(frame,/help-centre\/qa/);
  await assert.rejects(access('src/app/help-centre/qa/loading.tsx'));
 
  const directoryTabs=await readFile('src/components/fumadocs/FumadocsDirectoryState.tsx','utf8');
- assert.match(directoryTabs,/tabs=\{fumadocsContentTabs\(menu,locale\)\}/);
+ assert.match(directoryTabs,/tabs=\{fumadocsContentTabs\(menu,locale,undefined,firstTreePage\(pages\)\?\.href\)\}/);
  const publication=await readFile('src/components/fumadocs/FumadocsAuthorizedPublication.tsx','utf8');
  assert.match(publication,/routeSection/);
  assert.match(publication,/redirect\(formalFumadocsPublicationPath\(article.id,section\)\)/);
- assert.match(publication,/tabs=\{formal\?fumadocsContentTabs\(menu,locale,\{path:activePath,pathname:formalFumadocsPublicationPath\(article.id,section\)\}\):false\}/);
+ assert.match(publication,/readReaderPresentation\(locale\)/);
+ assert.match(publication,/tabs=\{formal\?fumadocsContentTabs\(menu,locale,\{path:activePath,pathname:formalFumadocsPublicationPath\(article.id,section\)\},knowledgeEntry\):false\}/);
  const ordinaryRoute=await readFile('src/app/help-centre/articles/[articleId]/page.tsx','utf8');
  const opsArticleRoute=await readFile('src/app/help-centre/ops/[articleId]/page.tsx','utf8');
  assert.match(ordinaryRoute,/routeSection="article"/);

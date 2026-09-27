@@ -15,6 +15,7 @@ interface FumadocsOpsPageProps {
  data?:OpsPage;
  state:'ready'|'denied'|'unavailable';
  menu?:MenuItem[];
+ knowledgeEntry?:string;
  search?:boolean;
  locale?:'zh-CN'|'en';
  tabsPathname?:string;
@@ -43,11 +44,11 @@ function opsCopy(state:FumadocsOpsPageProps['state'],locale:'zh-CN'|'en'){
  };
 }
 
-export function FumadocsOpsContent({data,state,menu=[],search=false,locale='zh-CN',tabsPathname='/help-centre/ops'}:FumadocsOpsPageProps){
+export function FumadocsOpsContent({data,state,menu=[],knowledgeEntry,search=false,locale='zh-CN',tabsPathname='/help-centre/ops'}:FumadocsOpsPageProps){
  const copy=opsCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={opsTree(state==='ready'?data:undefined)}
-  tabs={fumadocsContentTabs(menu,locale,{path:'/help-centre/ops',pathname:tabsPathname})}
+  tabs={fumadocsContentTabs(menu,locale,{path:'/help-centre/ops',pathname:tabsPathname},knowledgeEntry)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}

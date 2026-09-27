@@ -38,7 +38,7 @@ import type {TitleSearch} from '../../reader/search.ts';
 import {searchPublications} from '../search/repository.ts';
 import type {PoolClient} from 'pg';
 import type {Publication} from '../../reader/body.ts';
-import {selectTreePage} from '../../reader/tree.ts';
+import {firstTreePage,selectTreePage} from '../../reader/tree.ts';
 import {buildNavigationTree,type NavigationNode,type NavigationCategory,type NavigationMembership} from '../../reader/tree.ts';
 import { navigationPage, type NavigationPage } from '../../reader/navigation.ts';
 import type { AssetFile } from '../storage/contract.ts';
@@ -81,7 +81,15 @@ export class AuthorizationService {
   async saveFeatureConfig(input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>writeFeatureConfig(c,input));}
   async navigationSettings(){const v=await this.viewer(true);return this.database.run(v,c=>readNavigationSettings(c),true);}
   async saveNavigationSettings(input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>writeNavigationSettings(c,input));}
-  async readerChrome(){const v=await this.viewer();return this.database.run(v,async c=>({items:await readReaderMenu(c),features:await readFeatureFlags(c)}),true);}
+  async readerChrome(locale:'zh-CN'|'en'='zh-CN'){
+    const v=await this.viewer();
+    return this.database.run(v,async c=>{
+      const items=await readReaderMenu(c);
+      const features=await readFeatureFlags(c);
+      const knowledgeEntry=firstTreePage(await readKnowledgeTree(c,locale))?.href??(locale==='en'?'/help-centre/library?lang=en':'/help-centre/library');
+      return {items,features,knowledgeEntry};
+    },true);
+  }
   async readerMenu(){const v=await this.viewer();return this.database.run(v,c=>readReaderMenu(c),true);}
   async requireFormMember(){await this.viewer();}
   async forms(admin=false){const v=await this.viewer(admin);return this.database.run(v,c=>readForms(c,admin),true);}

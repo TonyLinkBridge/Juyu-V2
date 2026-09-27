@@ -35,8 +35,8 @@ export default async function OpsCollectionPage({searchParams}:{searchParams:Pro
   }
 
   if(firstId)redirect(opsContentPath(firstId));
-  let menu:Awaited<ReturnType<typeof readReaderPresentation>>['items']=[],search=false;
-  try{const presentation=await readReaderPresentation();menu=presentation.items;search=presentation.features.search;}catch{}
-  return <FumadocsOpsPage data={data} state={state} locale={locale} menu={menu} search={search}/>;
+  let menu:Awaited<ReturnType<typeof readReaderPresentation>>['items']=[],knowledgeEntry:string|undefined,search=false;
+  try{const presentation=await readReaderPresentation(locale);menu=presentation.items;knowledgeEntry=presentation.knowledgeEntry;search=presentation.features.search;}catch{}
+  return <FumadocsOpsPage data={data} state={state} locale={locale} menu={menu} knowledgeEntry={knowledgeEntry} search={search}/>;
  });
 }

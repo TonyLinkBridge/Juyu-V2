@@ -30,6 +30,7 @@ export function fumadocsContentTabs(
  items:MenuItem[],
  locale:'zh-CN'|'en',
  active?:{path:ContentPath;pathname:string},
+ knowledgeEntry?:string,
 ):LayoutTab[]{
  const allowed=new Set(items.map(item=>item.href));
  return contentTabs.filter(tab=>allowed.has(tab.permissionPath)).map(({path,icon})=>{
@@ -38,7 +39,7 @@ export function fumadocsContentTabs(
   return {
    title:label.title,
    description:label.description,
-   url:`${path}${suffix}`,
+   url:path==='/help-centre/library'&&knowledgeEntry?knowledgeEntry:`${path}${suffix}`,
    icon:createElement(icon,{size:20,weight:'regular','aria-hidden':true}),
    ...(active?.path===path?{urls:new Set([path,active.pathname])}:{}),
   } satisfies LayoutTab;

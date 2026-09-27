@@ -53,3 +53,14 @@ test('a formal knowledge article keeps the independent Articles library selected
  ]);
  assert.equal(tabs[0].url,'/help-centre/library');
 });
+
+test('the Articles switcher links straight to the first authorized article when known',()=>{
+ const tabs=fumadocsContentTabs(
+  menu,
+  'zh-CN',
+  {path:'/help-centre/reference',pathname:'/help-centre/reference'},
+  '/help-centre/articles/member-rights',
+ );
+ assert.equal(tabs[0].url,'/help-centre/articles/member-rights');
+ assert.equal(tabs[2].url,'/help-centre/reference');
+});

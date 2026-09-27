@@ -16,6 +16,7 @@ interface FumadocsReferencePageProps {
  state:'ready'|'denied'|'unavailable';
  detailState?:'idle'|'ready'|'unavailable';
  menu?:MenuItem[];
+ knowledgeEntry?:string;
  search?:boolean;
  locale?:'zh-CN'|'en';
  tabsPathname?:string;
@@ -49,11 +50,11 @@ function referenceCopy(state:FumadocsReferencePageProps['state'],locale:'zh-CN'|
  };
 }
 
-export function FumadocsReferenceContent({data,detail,state,detailState='idle',menu=[],search=false,locale='zh-CN',tabsPathname='/help-centre/reference'}:FumadocsReferencePageProps){
+export function FumadocsReferenceContent({data,detail,state,detailState='idle',menu=[],knowledgeEntry,search=false,locale='zh-CN',tabsPathname='/help-centre/reference'}:FumadocsReferencePageProps){
  const copy=referenceCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={referenceTree(state==='ready'?data:undefined,locale)}
-  tabs={fumadocsContentTabs(menu,locale,{path:'/help-centre/reference',pathname:tabsPathname})}
+  tabs={fumadocsContentTabs(menu,locale,{path:'/help-centre/reference',pathname:tabsPathname},knowledgeEntry)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}

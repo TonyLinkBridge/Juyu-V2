@@ -17,6 +17,7 @@ interface FumadocsQaPageProps {
  viewerId?:string;
  state:'ready'|'denied'|'unavailable'|'invalid';
  menu?:MenuItem[];
+ knowledgeEntry?:string;
  searchEnabled?:boolean;
  locale?:'zh-CN'|'en';
  tabsPathname?:string;
@@ -55,11 +56,11 @@ function qaCopy(state:FumadocsQaPageProps['state'],locale:'zh-CN'|'en'){
  };
 }
 
-export function FumadocsQaContent({data,initialAnswer,previewAnswers,viewerId,state,menu=[],searchEnabled=true,locale='zh-CN',tabsPathname='/help-centre/qa'}:FumadocsQaContentProps){
+export function FumadocsQaContent({data,initialAnswer,previewAnswers,viewerId,state,menu=[],knowledgeEntry,searchEnabled=true,locale='zh-CN',tabsPathname='/help-centre/qa'}:FumadocsQaContentProps){
  const copy=qaCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={qaTree(state==='ready'?data:undefined,locale)}
-  tabs={fumadocsContentTabs(menu,locale,{path:'/help-centre/qa',pathname:tabsPathname})}
+  tabs={fumadocsContentTabs(menu,locale,{path:'/help-centre/qa',pathname:tabsPathname},knowledgeEntry)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   sidebar={{footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:searchEnabled}}

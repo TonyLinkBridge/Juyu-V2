@@ -215,9 +215,9 @@ export default async function FumadocsReaderPreview({searchParams}:{searchParams
   if(fixtureKind==='directory-error')return <FumadocsDirectoryContent pages={[]} features={{search:true}} failed retryHref={`${path}?fixture=directory-error`}/>;
   if(fixtureKind==='home')return <FumadocsKnowledgeHomeContent pages={directoryPages} menu={homeMenu} latest={[{id:'fumadocs-preview',title:'如何修改账户邮箱',updated:'2026-09-25T01:00:00.000Z'}]} recent={[{id:'fumadocs-preview',title:'如何修改账户邮箱',kind:'article',revision:1,publicationNumber:1,tags:['账户安全'],viewedRevision:1,viewedAt:'2026-09-25T02:00:00.000Z'}]} search showRecent locale="zh-CN"/>;
   if(fixtureKind==='search')return <FumadocsSearchContent pages={directoryPages} features={{search:true,analytics:false}} search={fixtureSearch} scope="all" retryHref={`${path}?fixture=search`}/>;
-  if(fixtureKind==='ops')return <FumadocsOpsContent data={fixtureOps} state="ready" menu={homeMenu} search locale="zh-CN" tabsPathname={path}/>;
-  if(fixtureKind==='reference')return <FumadocsReferenceContent data={fixtureReferenceData} detail={fixtureReferenceDetail} state="ready" detailState="ready" menu={homeMenu} search locale="zh-CN" tabsPathname={path}/>;
-  if(fixtureKind==='qa')return <FumadocsQaContent data={fixtureQaData} previewAnswers={fixtureQaAnswers} state="ready" menu={homeMenu} searchEnabled locale="zh-CN" tabsPathname={path}/>;
+  if(fixtureKind==='ops')return <FumadocsOpsContent data={fixtureOps} state="ready" menu={homeMenu} knowledgeEntry="/help-centre/articles/fumadocs-preview" search locale="zh-CN" tabsPathname={path}/>;
+  if(fixtureKind==='reference')return <FumadocsReferenceContent data={fixtureReferenceData} detail={fixtureReferenceDetail} state="ready" detailState="ready" menu={homeMenu} knowledgeEntry="/help-centre/articles/fumadocs-preview" search locale="zh-CN" tabsPathname={path}/>;
+  if(fixtureKind==='qa')return <FumadocsQaContent data={fixtureQaData} previewAnswers={fixtureQaAnswers} state="ready" menu={homeMenu} knowledgeEntry="/help-centre/articles/fumadocs-preview" searchEnabled locale="zh-CN" tabsPathname={path}/>;
   if(fixtureKind==='favorites')return <FumadocsFavoritesPreviewContent data={fixtureFavoritesData} state="ready" menu={homeMenu} search locale="zh-CN"/>;
   if(fixtureKind==='recent')return <FumadocsRecentContent data={fixtureRecentData} state="ready" menu={homeMenu} search locale="zh-CN"/>;
   if(fixtureKind==='forms')return <FumadocsFormsContent data={fixtureFormsData} state="ready" menu={homeMenu} search/>;
