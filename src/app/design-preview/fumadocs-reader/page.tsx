@@ -1,5 +1,5 @@
 import type {Root} from 'fumadocs-core/page-tree';
-import {DocsLayout} from 'fumadocs-ui/layouts/docs';
+import {FumadocsDocsLayout as DocsLayout} from '../../../components/fumadocs/FumadocsDocsLayout';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import {notFound,redirect} from 'next/navigation';
 import {FumadocsBlockNoteReader} from '../../../components/fumadocs/FumadocsBlockNoteReader';

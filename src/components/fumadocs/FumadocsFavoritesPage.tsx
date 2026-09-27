@@ -1,5 +1,5 @@
 import type {ReactNode} from 'react';
-import {DocsLayout} from 'fumadocs-ui/layouts/docs';
+import {FumadocsDocsLayout as DocsLayout} from './FumadocsDocsLayout';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {FavoritesPage} from '../../favorites/model';
 import type {MenuItem} from '../../navigation-settings/model';

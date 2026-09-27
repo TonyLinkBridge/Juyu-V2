@@ -3,8 +3,8 @@
 @import 'fumadocs-ui/css/preset.css';
 
 /* Match the official Fumadocs docs site's scoped page-tree accent. */
-.nd-docs-layout { --color-fd-primary:#cc8b00;font-family:var(--font-geist-sans),"PingFang SC","Microsoft YaHei",sans-serif; }
-.dark .nd-docs-layout { --color-fd-primary:#fff383; }
+.juyu-fumadocs { --color-fd-primary:#cc8b00;font-family:var(--font-geist-sans),"PingFang SC","Microsoft YaHei",sans-serif; }
+.dark .juyu-fumadocs { --color-fd-primary:#fff383; }
 
 .fumadocs-publication-feedback { margin-top:28px;color:var(--color-fd-foreground); }
 .fumadocs-publication-feedback .reader-feedback { margin:0;padding:24px 0;border-color:var(--color-fd-border); }

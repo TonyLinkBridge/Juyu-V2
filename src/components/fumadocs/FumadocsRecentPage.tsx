@@ -1,4 +1,4 @@
-import {DocsLayout} from 'fumadocs-ui/layouts/docs';
+import {FumadocsDocsLayout as DocsLayout} from './FumadocsDocsLayout';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {RecentPage} from '../../recent/model';

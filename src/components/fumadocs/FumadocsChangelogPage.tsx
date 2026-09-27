@@ -1,6 +1,6 @@
 import {Card,Cards} from 'fumadocs-ui/components/card';
 import {buttonVariants} from 'fumadocs-ui/components/ui/button';
-import {DocsLayout} from 'fumadocs-ui/layouts/docs';
+import {FumadocsDocsLayout as DocsLayout} from './FumadocsDocsLayout';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import Link from 'next/link';
 import type {ContentKind} from '../../domain/model';
