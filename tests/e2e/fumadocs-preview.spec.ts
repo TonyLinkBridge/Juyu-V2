@@ -260,6 +260,21 @@ test('Q&A keeps its search and topic filters inside the official Fumadocs shell'
  await page.screenshot({path:`output/verification/fumadocs-qa-${info.project.name}.png`,fullPage:true});
 });
 
+test('a selected Q&A answer uses the exact shared publication page',async({page},info)=>{
+ await page.route('**/api/articles/qa-credit/feedback?revision=2',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({feedback:null})}));
+ await page.goto('/design-preview/fumadocs-reader?fixture=qa-detail');
+ const article=page.locator('[data-fumadocs-publication]');
+ await expect(article).toBeVisible();
+ await expect(page.locator('[data-fumadocs-qa-page]')).toHaveCount(0);
+ await expect(article.getByRole('heading',{name:'0 元签约店铺信用额度如何理解？',level:1})).toBeVisible();
+ await expect(article.locator('[data-fumadocs-publication-actions]')).toBeVisible();
+ await expect(article.getByText('0 元签约店铺是平台提供的一种签约方式。')).toBeVisible();
+ await expect(article.getByRole('heading',{name:'处理步骤'})).toBeVisible();
+ await expect(page.getByRole('region',{name:'文章反馈'})).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:`output/verification/fumadocs-qa-detail-${info.project.name}.png`,fullPage:true});
+});
+
 test('saved articles use official Fumadocs cards and direct content links',async({page},info)=>{
  await page.emulateMedia({colorScheme:'dark'});
  await page.goto('/design-preview/fumadocs-reader?fixture=favorites');

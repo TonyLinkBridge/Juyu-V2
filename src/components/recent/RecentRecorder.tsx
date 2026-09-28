@@ -2,7 +2,8 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {recordRecentView} from '../../recent/client';
 import {contentPath} from '../../reader/content-path';
-type Props={documentId:string;revision:number;kind?:'article'|'ops'};
+import type {ContentKind} from '../../domain/model';
+type Props={documentId:string;revision:number;kind?:ContentKind};
 export function RecentRecorder(props:Props){return <Recorder key={`${props.documentId}:${props.revision}`} {...props}/>;}
 function Recorder({documentId,revision,kind='article'}:Props){
  const [error,setError]=useState(''),[busy,setBusy]=useState(false);

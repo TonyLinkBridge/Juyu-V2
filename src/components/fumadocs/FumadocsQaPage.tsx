@@ -5,11 +5,14 @@ import type {QaPage} from '../../qa/model';
 import {fumadocsContentTabs} from '../../fumadocs/tabs';
 import {fumadocsRootTree} from '../../fumadocs/tree';
 import type {Publication} from '../../reader/body';
+import type {FeatureFlags} from '../../features/model';
+import {closedFeatureFlags} from '../../features/model';
 import {QaView} from '../qa/QaView';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import '../../app/fumadocs-reader.css';
+import {FumadocsPublicationPage} from './FumadocsPublicationPage';
 
 interface FumadocsQaPageProps {
  data?:QaPage;
@@ -19,10 +22,11 @@ interface FumadocsQaPageProps {
  menu?:MenuItem[];
  knowledgeEntry?:string;
  searchEnabled?:boolean;
+ features?:FeatureFlags;
  locale?:'zh-CN'|'en';
  tabsPathname?:string;
 }
-interface FumadocsQaContentProps extends FumadocsQaPageProps {previewAnswers?:Record<string,Publication>}
+type FumadocsQaContentProps=FumadocsQaPageProps;
 
 function qaHref(id:string,locale:'zh-CN'|'en'){
  return `/help-centre/qa?question=${encodeURIComponent(id)}${locale==='en'?'&lang=en':''}#qa-${encodeURIComponent(id)}`;
@@ -54,21 +58,22 @@ function qaCopy(state:FumadocsQaPageProps['state'],locale:'zh-CN'|'en'){
  };
 }
 
-export function FumadocsQaContent({data,initialAnswer,previewAnswers,viewerId,state,menu=[],knowledgeEntry,searchEnabled=true,locale='zh-CN',tabsPathname='/help-centre/qa'}:FumadocsQaContentProps){
+export function FumadocsQaContent({data,initialAnswer,viewerId,state,menu=[],knowledgeEntry,searchEnabled=true,features=closedFeatureFlags,locale='zh-CN',tabsPathname='/help-centre/qa'}:FumadocsQaContentProps){
  const copy=qaCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={qaTree(state==='ready'?data:undefined,locale)}
   tabs={fumadocsContentTabs(menu,locale,{path:'/help-centre/qa',pathname:tabsPathname},knowledgeEntry)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
   sidebar={{prefetch:true,footer:<FumadocsAccountFooter locale={locale}/>}}
-  searchToggle={{enabled:searchEnabled}}
+ searchToggle={{enabled:searchEnabled}}
  >
-  <DocsPage full data-fumadocs-qa-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>
-   {state==='ready'&&<p className="qa-editorial-kicker">EDITORIAL KNOWLEDGE INDEX</p>}
+  {initialAnswer?<FumadocsPublicationPage article={initialAnswer} features={features} viewerId={viewerId} recentKind="qa" breadcrumbRoot={locale==='en'?'/help-centre/qa?lang=en':'/help-centre/qa'}/>:(
+  <DocsPage data-fumadocs-qa-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>
    <DocsTitle>{copy.title}</DocsTitle>
    <DocsDescription>{copy.description}</DocsDescription>
-   <DocsBody><div className="not-prose fumadocs-qa-content"><QaView searchEnabled={searchEnabled} data={data} state={state} viewerId={viewerId} initialAnswer={initialAnswer} previewAnswers={previewAnswers} locale={locale} withinDocsPage/></div></DocsBody>
+   <DocsBody><div className="not-prose fumadocs-qa-content"><QaView searchEnabled={searchEnabled} data={data} state={state} locale={locale} withinDocsPage/></div></DocsBody>
   </DocsPage>
+  )}
  </DocsLayout></FumadocsPublicationI18n>;
 }
 

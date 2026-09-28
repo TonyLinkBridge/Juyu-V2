@@ -86,12 +86,25 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  assert.match(qaPage,/QaView/);
  assert.match(qaPage,/tabs=\{fumadocsContentTabs\(menu,locale,\{path:'\/help-centre\/qa',pathname:tabsPathname\},knowledgeEntry\)\}/);
  assert.doesNotMatch(qaPage,/EntryShell|ReaderMenu|ReaderQuickLinks|HeaderSearch/);
+ assert.doesNotMatch(qaPage,/<DocsPage full|qa-editorial-kicker/);
+ const qaView=await readFile('src/components/qa/QaView.tsx','utf8');
+ assert.doesNotMatch(qaView,/QaEditorialIndex|editorial/);
+ assert.doesNotMatch(qaView,/AuthenticatedQaAnswer|QaAnswer/);
+ assert.match(qaPage,/FumadocsPublicationPage/);
+ assert.match(qaPage,/initialAnswer\?<FumadocsPublicationPage/);
+ const sharedPublicationPage=await readFile('src/components/fumadocs/FumadocsPublicationPage.tsx','utf8');
+ for(const sharedPublicationPart of ['fumadocsPublication','FumadocsBlockNoteReader','FumadocsPublicationActions','RecentRecorder','ArticleAnalytics','FumadocsPublicationFeedback'])assert.match(sharedPublicationPage,new RegExp(sharedPublicationPart));
+ const readerStyles=await readFile('src/app/fumadocs-reader.css','utf8');
+ const productStyles=await readFile('src/app/product-shell.css','utf8');
+ assert.doesNotMatch(readerStyles,/\[data-fumadocs-qa-page\]>h1/);
+ assert.doesNotMatch(productStyles,/\.qa-editorial-/);
  assert.match(frame,/help-centre\/qa/);
  await assert.rejects(access('src/app/help-centre/qa/loading.tsx'));
 
  const directoryTabs=await readFile('src/components/fumadocs/FumadocsDirectoryState.tsx','utf8');
  assert.match(directoryTabs,/tabs=\{fumadocsContentTabs\(menu,locale,undefined,firstTreePage\(pages\)\?\.href\)\}/);
  const publication=await readFile('src/components/fumadocs/FumadocsAuthorizedPublication.tsx','utf8');
+ assert.match(publication,/FumadocsPublicationPage/);
  assert.match(publication,/routeSection/);
  assert.match(publication,/redirect\(formalFumadocsPublicationPath\(article.id,section\)\)/);
  assert.match(publication,/readReaderPresentation\(locale\)/);

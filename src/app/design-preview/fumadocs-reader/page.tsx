@@ -7,7 +7,7 @@ import {fumadocsBlockNoteTocSlots} from '../../../components/fumadocs/FumadocsBl
 import {FumadocsPublicationI18n} from '../../../components/fumadocs/FumadocsPublicationI18n';
 import {FumadocsPublicationActions,FumadocsPublicationFeedback} from '../../../components/fumadocs/FumadocsPublicationActions';
 import {canonicalFumadocsPublicationPath} from '../../../fumadocs/publication';
-import type {EditorBlock,EditorTextProps} from '../../../editor/document';
+import {encodeEditorBody,type EditorBlock,type EditorTextProps} from '../../../editor/document';
 import {encodeTabBody} from '../../../media/tab-body';
 import {inlineEmbedHref} from '../../../editor/inline-embed';
 import {defaultFeatureFlags} from '../../../features/model';
@@ -176,7 +176,11 @@ const fixtureQaData={
  ],total:4,page:1,pages:1,canEdit:false,q:'',
  categories:['账户管理','信用额度'],topics:['0 元签约','签约店铺'],
 };
-const fixtureQaAnswers:Record<string,Publication>=Object.fromEntries(fixtureQaData.items.map((item,index)=>[item.id,{id:item.id,title:item.title,revision:item.revision,publicationNumber:item.revision,body:index===0?'0 元签约店铺是平台提供的一种签约方式。用户先取得店铺信用额度，再完成店铺签约，无需在签约当下立即支付相关费用。\n\n1. 先确认账户已取得可用信用额度；\n2. 选择需要签约的店铺并提交资料；\n3. 域名出售产生收益后，系统会先结算至账户余额；\n4. 使用账户余额归还店铺信用额度。\n\n请在操作前核对额度有效期、归还规则及账户状态。':'这是已经审核发布的标准答案。请先核对当前账户资料和页面提示，再按照正式流程处理；仍无法完成时，请提交工单由专员核查。'}]));
+const fixtureQaAnswers:Record<string,Publication>=Object.fromEntries(fixtureQaData.items.map((item,index)=>[item.id,{id:item.id,title:item.title,revision:item.revision,publicationNumber:item.revision,locale:'zh-CN' as const,description:'已审核发布的标准答案。',body:encodeEditorBody([
+ {id:`qa-intro-${index}`,type:'paragraph',props:textProps,content:text(index===0?'0 元签约店铺是平台提供的一种签约方式。用户先取得店铺信用额度，再完成店铺签约。':'请先核对当前账户资料和页面提示，再按照正式流程处理。'),children:[]},
+ {id:`qa-steps-${index}`,type:'heading',props:{...textProps,level:2},content:text('处理步骤'),children:[]},
+ {id:`qa-step-${index}`,type:'numberedListItem',props:{...textProps,start:1},content:text('确认账户状态及页面提示；仍无法完成时，请提交工单由专员核查。'),children:[]},
+])}]));
 const fixtureFavoritesData={items:[
  {id:'favorite-account',title:'如何修改账户邮箱',kind:'article' as const,revision:3,tags:['账户安全'],savedAt:'2026-09-25T03:00:00.000Z'},
  {id:'favorite-credit',title:'0 元签约店铺信用额度如何理解？',kind:'qa' as const,revision:1,tags:['信用额度','签约店铺'],savedAt:'2026-09-25T02:00:00.000Z'},
@@ -222,7 +226,8 @@ export default async function FumadocsReaderPreview({searchParams}:{searchParams
   if(fixtureKind==='search')return <FumadocsSearchContent pages={directoryPages} features={{search:true,analytics:false}} search={fixtureSearch} scope="all" retryHref={`${path}?fixture=search`}/>;
   if(fixtureKind==='ops')return <FumadocsOpsContent data={fixtureOps} state="ready" menu={homeMenu} knowledgeEntry="/help-centre/articles/fumadocs-preview" search locale="zh-CN" tabsPathname={path}/>;
   if(fixtureKind==='reference')return <FumadocsReferenceContent data={fixtureReferenceData} detail={fixtureReferenceDetail} state="ready" detailState="ready" menu={homeMenu} knowledgeEntry="/help-centre/articles/fumadocs-preview" search locale="zh-CN" tabsPathname={path}/>;
-  if(fixtureKind==='qa')return <FumadocsQaContent data={fixtureQaData} previewAnswers={fixtureQaAnswers} state="ready" menu={homeMenu} knowledgeEntry="/help-centre/articles/fumadocs-preview" searchEnabled locale="zh-CN" tabsPathname={path}/>;
+  if(fixtureKind==='qa')return <FumadocsQaContent data={fixtureQaData} state="ready" menu={homeMenu} knowledgeEntry="/help-centre/articles/fumadocs-preview" searchEnabled locale="zh-CN" tabsPathname={path}/>;
+  if(fixtureKind==='qa-detail')return <FumadocsQaContent data={{...fixtureQaData,items:[fixtureQaData.items[0]],total:1}} initialAnswer={fixtureQaAnswers[fixtureQaData.items[0].id]} features={{...defaultFeatureFlags,favorites:false,recent:false,analytics:false}} state="ready" menu={homeMenu} knowledgeEntry="/help-centre/articles/fumadocs-preview" searchEnabled locale="zh-CN" tabsPathname={path}/>;
   if(fixtureKind==='favorites')return <FumadocsFavoritesPreviewContent data={fixtureFavoritesData} state="ready" menu={homeMenu} search locale="zh-CN"/>;
   if(fixtureKind==='recent')return <FumadocsRecentContent data={fixtureRecentData} state="ready" menu={homeMenu} search locale="zh-CN"/>;
   if(fixtureKind==='forms')return <FumadocsFormsContent data={fixtureFormsData} state="ready" menu={homeMenu} search/>;

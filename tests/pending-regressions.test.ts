@@ -16,7 +16,7 @@ test('formal publication labels never display physical revision as publication c
  assert.equal(publicationLabel({revision:22,publishedRevision:19,status:'published'}),'已发布');
 });
 test('QA search disabled hides its form and permission failures have actionable text',()=>{
- const {QaView}=loadComponent('src/components/qa/QaView.tsx',{'./QaEditorialIndex':{QaEditorialIndex:()=>null}});
+ const {QaView}=loadComponent('src/components/qa/QaView.tsx',{'./AuthenticatedQaAnswer':{AuthenticatedQaAnswer:()=>null},'./QaAnswer':{QaAnswer:()=>null}});
  const text=html(QaView,{state:'ready',searchEnabled:false,data:{items:[],total:0,page:1,pages:1,categories:[]}});assert.doesNotMatch(text,/<form/);
  const denied=html(QaView,{state:'denied'});assert.match(denied,/权限/);assert.match(denied,/管理员/);
 });
@@ -46,6 +46,18 @@ test('QA route ignores stale search URL when disabled while retaining server fea
  });
  const result=await (page as (props:unknown)=>Promise<unknown>)({searchParams:Promise.resolve({q:'旧搜索',category:'账户'})});
  assert.deepEqual(calls,[[1,'账户',undefined,'zh-CN',undefined]]);assert.match(JSON.stringify(result),/"searchEnabled":false/);
+});
+
+test('QA answer route reads the selected publication without loading the collection first',async()=>{
+ let collectionReads=0;
+ const {default:page}=loadComponent('src/app/help-centre/qa/page.tsx',{
+  '../../../components/fumadocs/FumadocsQaPage':{FumadocsQaPage:'FumadocsQaPage'},
+  '../../../server/authentication/navigation':{requireReaderAccount:async()=>({status:'ready',sessionId:'sess',viewer:{id:'fixture',role:'admin',companyVerified:true}})},
+  '../../../server/reader-presentation':{readReaderPresentation:async()=>({items:[],features:{search:true}})},
+  '../../../server/authorization/application':{applicationAuthorization:async()=>({features:async()=>({search:true}),qa:async()=>{collectionReads++;throw Error('UNEXPECTED_COLLECTION_READ');},qaAnswer:async()=>({id:'qa-one',title:'正式答案',revision:2,body:'structured'})})},
+ });
+ const result=await (page as (props:unknown)=>Promise<unknown>)({searchParams:Promise.resolve({question:'qa-one'})});
+ assert.equal(collectionReads,0);assert.match(JSON.stringify(result),/"initialAnswer"/);assert.match(JSON.stringify(result),/"qa-one"/);
 });
 
 test('favorites route keeps the disabled feature distinct and never reads a disabled list',async()=>{
