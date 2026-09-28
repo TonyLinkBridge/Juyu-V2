@@ -3,7 +3,6 @@ import test from 'node:test';
 import {readFile} from 'node:fs/promises';
 
 const readerEntries=[
- 'src/app/help-centre/layout.tsx',
  'src/app/help-centre/articles/[articleId]/page.tsx',
  'src/app/help-centre/changelog/page.tsx',
  'src/app/help-centre/favorites/page.tsx',
@@ -14,6 +13,12 @@ const readerEntries=[
  'src/app/help-centre/reference/page.tsx',
  'src/server/forms/entry.ts',
 ];
+
+test('the shared Help Centre layout does not duplicate page authorization or database reads',async()=>{
+ const source=await readFile(new URL('../src/app/help-centre/layout.tsx',import.meta.url),'utf8');
+ assert.doesNotMatch(source,/currentAccountAccess|readReaderPresentation|applicationAuthorization/);
+ assert.match(source,/ReaderFrame/);
+});
 
 test('established account navigation does not repeat company enrollment or member binding',async()=>{
  for(const path of readerEntries){

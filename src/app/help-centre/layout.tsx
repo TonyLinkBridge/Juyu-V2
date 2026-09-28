@@ -1,14 +1,9 @@
 import type {ReactNode} from 'react';
 import {ReaderFrame} from '../../components/shell/ReaderFrame';
-import {readReaderPresentation} from '../../server/reader-presentation';
-import {currentAccountAccess} from '../../server/authentication/account-clerk';
-export default async function ReaderLayout({children}:{children:ReactNode}){
- const access=await currentAccountAccess();
- if(access.status!=='ready')return children;
- let frame;
- try{
-  frame=await readReaderPresentation();
- }catch{return children;}
- const {items,features}=frame;
- return <ReaderFrame items={items} searchEnabled={features.search}>{children}</ReaderFrame>;
+
+/** Destination pages own authorization and their Fumadocs chrome. This shared
+ * wrapper only supplies the reader context; reading the database here would
+ * race the destination page during every client-side navigation. */
+export default function ReaderLayout({children}:{children:ReactNode}){
+ return <ReaderFrame items={[]} searchEnabled={false}>{children}</ReaderFrame>;
 }
