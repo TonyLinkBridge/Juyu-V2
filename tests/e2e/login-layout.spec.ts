@@ -10,6 +10,10 @@ for(const audience of ['employee','admin'])test(`${audience}: fixed redirect, em
  await expect(page.locator('.cl-rootBox')).toHaveAttribute('data-signup','false');
  await expect(page.getByRole('link',{name:audience==='admin'?'返回员工登录 ↗':'管理员登录 ↗'})).toHaveAttribute('href',audience==='admin'?'/sign-in':'/admin/sign-in');
  await expect(page.locator('.login-art img')).toHaveAttribute('src',audience==='admin'?'/brand/login-dark.webp':'/brand/juyu-icon.svg');
+ if(info.project.name==='desktop'&&audience==='employee'){
+  const ratio=await page.locator('.login-art img').evaluate(image=>image.getBoundingClientRect().width/image.parentElement!.getBoundingClientRect().width);
+  expect(ratio).toBeCloseTo(.74,2);
+ }
  await expect(page.getByRole('textbox',{name:'公司邮箱'})).toBeHidden();await expect(page.getByRole('alert')).toHaveText('登录失败，请重试');
  await page.getByRole('button',{name:'使用邮箱登录 →'}).click();await expect(page.getByRole('textbox',{name:'公司邮箱'})).toBeVisible();
  await page.getByRole('button',{name:'收起邮箱登录'}).click();await expect(page.getByRole('textbox',{name:'公司邮箱'})).toBeHidden();
