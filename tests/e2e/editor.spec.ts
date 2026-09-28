@@ -476,7 +476,8 @@ test('native slash menu and selection toolbar expose original block and formatti
  const items=menu.locator('.bn-suggestion-menu-item'),count=await items.count();expect(count).toBeGreaterThan(1);await expect(menu).toHaveCSS('overflow-y','auto');
  const remainingScroll=()=>menu.evaluate(element=>Math.round(element.scrollHeight-element.clientHeight-element.scrollTop));
  await items.last().scrollIntoViewIfNeeded();
- await expect.poll(remainingScroll).toBeLessThanOrEqual(1);await expect(items.last()).toBeInViewport();
+ const lastItemIsInsideMenu=()=>menu.evaluate(element=>{const item=element.querySelector('.bn-suggestion-menu-item:last-child');if(!item)return false;const menuRect=element.getBoundingClientRect(),itemRect=item.getBoundingClientRect();return itemRect.top>=menuRect.top-1&&itemRect.bottom<=menuRect.bottom+1;});
+ await expect.poll(remainingScroll).toBeLessThanOrEqual(1);await expect.poll(lastItemIsInsideMenu).toBe(true);
  await page.keyboard.press('Escape');await page.keyboard.press('Backspace');await page.keyboard.insertText('选择文字显示完整工具栏');await page.keyboard.press('Shift+Home');
  await expect(page.locator('.bn-formatting-toolbar')).toBeVisible();await expect(page.locator('.bn-formatting-toolbar button')).not.toHaveCount(6);
  await page.keyboard.press('ArrowRight');await expect(page.locator('.bn-formatting-toolbar')).toBeHidden();
