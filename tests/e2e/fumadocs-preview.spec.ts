@@ -21,6 +21,36 @@ test('published quotes preserve upright text when the author did not add italic 
  await expect(quote).toHaveCSS('font-weight','400');
 });
 
+test('official Fumadocs sidebar keeps section labels distinct from muted folders',async({page})=>{
+ await page.goto('/design-preview/fumadocs-reader?fixture=directory');
+ if((page.viewportSize()?.width??1440)<1280)await page.getByRole('button',{name:'开启侧边栏'}).click();
+ const sidebar=page.locator((page.viewportSize()?.width??1440)<1280?'#nd-sidebar-mobile':'#nd-sidebar');
+ const section=sidebar.locator('p').filter({hasText:/^账户管理$/});
+ const folder=sidebar.getByRole('button',{name:'账户安全'});
+ await expect(section).toBeVisible();
+ await expect(folder).toBeVisible();
+ const sectionColor=await section.evaluate(element=>getComputedStyle(element).color);
+ const folderColor=await folder.evaluate(element=>getComputedStyle(element).color);
+ if(await folder.getAttribute('aria-expanded')==='false')await folder.click();
+ const inactivePage=sidebar.getByRole('link',{name:'普通会员权益说明'});
+ await expect(inactivePage).toBeVisible();
+ const inactivePageColor=await inactivePage.evaluate(element=>getComputedStyle(element).color);
+ expect(folderColor).toBe(inactivePageColor);
+ expect(sectionColor).not.toBe(folderColor);
+});
+
+test('published BlockNote headings use the official Fumadocs anchor control',async({page,context})=>{
+ await context.grantPermissions(['clipboard-read','clipboard-write']);
+ await page.goto('/design-preview/fumadocs-reader');
+ const heading=page.locator('#email-process');
+ await expect(heading).toBeVisible();
+ await expect(heading.locator('a[data-card][href="#email-process"]')).toContainText('修改账户邮箱流程');
+ const copy=heading.locator('button');
+ await expect(copy).toHaveCount(1);
+ await copy.click();
+ await expect.poll(()=>page.evaluate(()=>navigator.clipboard.readText())).toBe(`${page.url()}#email-process`);
+});
+
 test('official Fumadocs navigation exposes the real path, adjacent page and mobile page outline',async({page})=>{
  await page.goto('/design-preview/fumadocs-reader');
  await expect(page.locator('article').getByText('资料目录',{exact:true})).toBeVisible();
@@ -697,7 +727,8 @@ test('official Fumadocs shell renders the same BlockNote document read only',asy
  const mobile=(page.viewportSize()?.width??1440)<1280;
  if(mobile)await page.getByRole('button',{name:/如何修改账户邮箱/}).click();
  else await expect(page.getByRole('heading',{name:'本页目录'})).toBeVisible();
- await page.getByRole('link',{name:'修改账户邮箱流程',exact:true}).click();
+ const toc=mobile?page.locator('[data-toc-popover-content]'):page.locator('#nd-toc');
+ await toc.getByRole('link',{name:'修改账户邮箱流程',exact:true}).click();
  await expect(page).toHaveURL(/#email-process$/);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.evaluate(()=>scrollTo(0,0));

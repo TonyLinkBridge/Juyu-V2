@@ -1,7 +1,7 @@
 'use client';
 /* eslint-disable @next/next/no-img-element -- published inline images use the private session-protected endpoint. */
 
-import {BlockNoteSchema,createCodeBlockSpec,defaultBlockSpecs,defaultInlineContentSpecs,defaultStyleSpecs} from '@blocknote/core';
+import {BlockNoteSchema,createCodeBlockSpec,createHeadingBlockConfig,defaultBlockSpecs,defaultInlineContentSpecs,defaultStyleSpecs} from '@blocknote/core';
 import * as blockNoteLocales from '@blocknote/core/locales';
 import {createReactDiagramBlockSpec,locales as diagramLocales} from '@blocknote/diagram-block';
 import {BlockNoteView} from '@blocknote/mantine';
@@ -12,6 +12,7 @@ import {Callout} from 'fumadocs-ui/components/callout';
 import {Card} from 'fumadocs-ui/components/card';
 import {DynamicCodeBlock} from 'fumadocs-ui/components/dynamic-codeblock';
 import {File,Files} from 'fumadocs-ui/components/files';
+import {Heading} from 'fumadocs-ui/components/heading';
 import {ImageZoom} from 'fumadocs-ui/components/image-zoom';
 import {Step,Steps} from 'fumadocs-ui/components/steps';
 import {Tabs,TabsContent,TabsList,TabsTrigger} from 'fumadocs-ui/components/tabs';
@@ -112,6 +113,11 @@ type AdvancedTable=Extract<MediaBlock,{type:'table'}>;
 
 const OfficialFumadocsTable=defaultMdxComponents.table;
 const OfficialFumadocsLink=defaultMdxComponents.a;
+
+const fumadocsHeading=createReactBlockSpec(createHeadingBlockConfig,{render:({block,contentRef})=>{
+ const as=`h${block.props.level}` as 'h1'|'h2'|'h3'|'h4'|'h5'|'h6';
+ return <Heading as={as} id={block.id}><span ref={contentRef}/></Heading>;
+}});
 
 const supportedCodeLanguages:Record<string,{name:string}>={text:{name:'纯文本'},javascript:{name:'JavaScript'},typescript:{name:'TypeScript'},json:{name:'JSON'},html:{name:'HTML'},css:{name:'CSS'},python:{name:'Python'},sql:{name:'SQL'},bash:{name:'Shell'},yaml:{name:'YAML'},markdown:{name:'Markdown'}};
 
@@ -601,7 +607,7 @@ function createReaderSchema(nodes:EditorBlock[]=[]){
  const visit=(items:EditorBlock[])=>{for(const item of items){if(item.type==='codeBlock'&&item.props.language&&!supportedLanguages[item.props.language])supportedLanguages[item.props.language]={name:item.props.language};visit(item.children);}};
  visit(nodes);
  return BlockNoteSchema.create({
-  blockSpecs:{...defaultBlockSpecs,table:borderTableSpec,codeBlock:createCodeBlockSpec({supportedLanguages}),mathBlock:createReactMathBlockSpec(),diagram:createReactDiagramBlockSpec(),juyu:juyuBlock()},
+  blockSpecs:{...defaultBlockSpecs,heading:fumadocsHeading(),table:borderTableSpec,codeBlock:createCodeBlockSpec({supportedLanguages}),mathBlock:createReactMathBlockSpec(),diagram:createReactDiagramBlockSpec(),juyu:juyuBlock()},
   inlineContentSpecs:{...defaultInlineContentSpecs,juyuInline,fumadocsLink,fumadocsAnnotation},
   styleSpecs:{...defaultStyleSpecs,textColor:nativeTextColor,backgroundColor:nativeBackgroundColor},
  });
@@ -619,12 +625,15 @@ function BlockNoteDocument({schemaNodes,initialContent,locale}:{schemaNodes:Edit
   resolveFileUrl:async url=>url,
  },[schema,initialContent]);
  useEffect(()=>{
-  for(const heading of root.current?.querySelectorAll<HTMLElement>('[data-content-type="heading"]')??[]){
-   const block=heading.closest<HTMLElement>('[data-id]');
-   const title=heading.querySelector<HTMLElement>('h1,h2,h3,h4,h5,h6');
-   if(block?.dataset.id&&title)title.id=block.dataset.id;
-  }
-  markTocReady();
+  const frame=requestAnimationFrame(()=>{
+   for(const heading of root.current?.querySelectorAll<HTMLElement>('[data-content-type="heading"]')??[]){
+    const block=heading.closest<HTMLElement>('[data-id]');
+    const title=heading.querySelector<HTMLElement>('h1,h2,h3,h4,h5,h6');
+    if(block?.dataset.id&&title)title.id=block.dataset.id;
+   }
+   markTocReady();
+  });
+  return ()=>cancelAnimationFrame(frame);
  },[editor,markTocReady]);
  return <div ref={root} className="not-prose" data-fumadocs-blocknote-reader=""><BlockNoteView editor={editor} editable={false} theme={resolvedTheme==='dark'?'dark':'light'}/></div>;
 }
