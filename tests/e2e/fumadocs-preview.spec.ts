@@ -551,7 +551,9 @@ test('BlockNote wrappers preserve the official Fumadocs rhythm for adjacent pros
  expect(await gap('spacing-heading-after-heading','spacing-before-quote')).toBe(12);
  expect(await gap('spacing-before-quote','spacing-quote-one')).toBe(26);
  expect(await gap('spacing-quote-one','spacing-quote-two')).toBe(26);
- expect(await gap('spacing-quote-two','spacing-divider-two')).toBe(48);
+ expect(await gap('spacing-quote-two','spacing-level-four-after-quote')).toBe(26);
+ expect(await gap('spacing-level-four-after-quote','spacing-quote-three')).toBe(8);
+ expect(await gap('spacing-quote-three','spacing-divider-two')).toBe(48);
  expect(await gap('spacing-divider-two','spacing-after-divider')).toBe(48);
  expect(await gap('spacing-after-divider','spacing-level-four')).toBe(24);
  expect(await gap('spacing-level-four','email-before-result')).toBe(8);
