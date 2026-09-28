@@ -1,4 +1,5 @@
 import '../../forms-settings.css';
+import '../../admin/fumadocs-theme.css';
 import {OpsCollection} from '../../../components/ops/OpsCollection';
 import {FormSettings} from '../../../components/forms/FormSettings';
 import {LoginScreen} from '../../../components/login-screen';

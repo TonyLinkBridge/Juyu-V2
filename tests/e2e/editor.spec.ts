@@ -76,7 +76,7 @@ test('editor separates workflow actions from a right-side authoring rail',async(
  page.on('console',message=>{if(message.type()==='error')runtimeErrors.push(message.text());});
  await mount(page,()=>structuredClone(editorFixture));
  const toolbar=page.locator('.editor-toolbar');
- await expect(toolbar.getByRole('button',{name:'预览草稿',exact:true})).toBeVisible();
+ await expect(toolbar.getByRole('button',{name:'预览',exact:true})).toBeVisible();
  await expect(toolbar.getByRole('button',{name:'文章设置',exact:true})).toHaveCount(0);
  const rail=page.getByRole('navigation',{name:'编辑工具'});
  await expect(rail.getByRole('button',{name:'预览',exact:true})).toBeVisible();
@@ -191,7 +191,7 @@ test('inline annotation saves selected words and opens as a note in the reader p
  const blocks=decodeEditorBody(saved.body);expect(blocks).not.toBeNull();if(!blocks)throw new Error('saved body is not structured');
  const link=blocks.flatMap(block=>block.type==='paragraph'?block.content:[]).find(inline=>inline.type==='link'&&inline.content.some(item=>item.text==='需要说明的词'));
  expect(link?.type).toBe('link');if(link?.type==='link')expect(annotationText(link.href)).toBe('员工点击后看到的解释');
- await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ await page.getByRole('button',{name:'预览',exact:true}).click();
  const trigger=page.locator('.editor-preview .inline-annotation-trigger');await expect(trigger).toContainText('需要说明的词');await trigger.click();await expect(page.locator('.editor-preview [role="note"]')).toContainText('员工点击后看到的解释');
  await page.reload();await expect(page.locator('.bn-editor')).toContainText('需要说明的词');
 });
@@ -236,6 +236,18 @@ test('real BlockNote edits autosave reload and mixed blocks preview in order',as
  await page.getByRole('button',{name:'预览草稿',exact:true}).click();await expect(page.locator('.editor-preview')).toContainText('中文更新');await expect(page.locator('.editor-preview')).toContainText('核对二审');
  await page.reload();await expect(page.locator('.bn-editor')).toContainText('中文更新');await expect(page.locator('.editor-embedded')).toHaveCount(1);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`output/verification/editor-${info.project.name}.png`,fullPage:true});await page.evaluate(()=>document.documentElement.classList.add('dark'));await page.locator('.editor-canvas').scrollIntoViewIfNeeded();await page.screenshot({path:`output/verification/editor-dark-${info.project.name}.png`,fullPage:false});
+});
+test('open draft preview reflects typing before autosave reaches the server',async({page})=>{
+ let saved=structuredClone(editorFixture);let writes=0;
+ await page.route('**/api/admin/editor/*',async route=>{writes++;await new Promise(resolve=>setTimeout(resolve,1800));const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};await route.fulfill({json:saved});});
+ await mount(page,()=>saved);
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ const preview=page.locator('.editor-preview');
+ await expect(preview).toContainText('实时预览 · 已保存草稿');
+ await typeText(page,' Instant 1');
+ await expect(preview).toContainText('Instant 1',{timeout:500});
+ await expect(preview).toContainText('实时预览 · 尚未保存',{timeout:500});
+ expect(writes).toBe(0);
 });
 test('BlockNote default text follows dark theme while authored emphasis colours remain',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('theme','dark'));
