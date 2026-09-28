@@ -248,10 +248,15 @@ test('Q&A keeps its search and topic filters inside the official Fumadocs shell'
  await expect(qa.getByRole('navigation',{name:'问答分类'}).getByRole('link',{name:'信用额度'})).toBeVisible();
  await expect(qa.getByRole('navigation',{name:'相关话题'}).getByRole('link',{name:'签约店铺'})).toBeVisible();
  await expect(qa.getByRole('status')).toHaveText('标准问答 · 4 个问题');
- await expect(qa.getByRole('heading',{name:'0 元签约店铺信用额度如何理解？',level:2})).toBeVisible();
+ const firstQuestion=qa.getByRole('button',{name:'0 元签约店铺信用额度如何理解？'});
+ await expect(firstQuestion).toHaveAttribute('aria-expanded','false');
+ const before=page.url();
+ await firstQuestion.click();
+ await expect(qa.getByText('0 元签约店铺是平台提供的一种签约方式。用户先取得店铺信用额度，再完成店铺签约。')).toBeVisible();
+ expect(page.url()).toBe(before);
  await expect(page.locator('.entry-frame')).toHaveCount(0);
  await expect(page.locator('.knowledge-sidebar')).toHaveCount(0);
- const colors=await qa.getByRole('heading',{name:'0 元签约店铺信用额度如何理解？',level:2}).evaluate(element=>({text:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}));
+ const colors=await firstQuestion.evaluate(element=>({text:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}));
  expect(colors.text).not.toBe('rgb(0, 0, 0)');
  expect(colors.text).not.toBe(colors.background);
  const buttonColors=await searchButton.evaluate(element=>({text:getComputedStyle(element).color,background:getComputedStyle(element).backgroundColor}));
@@ -260,17 +265,15 @@ test('Q&A keeps its search and topic filters inside the official Fumadocs shell'
  await page.screenshot({path:`output/verification/fumadocs-qa-${info.project.name}.png`,fullPage:true});
 });
 
-test('a selected Q&A answer uses the exact shared publication page',async({page},info)=>{
- await page.route('**/api/articles/qa-credit/feedback?revision=2',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({feedback:null})}));
+test('a selected Q&A answer opens inside the Q&A directory',async({page},info)=>{
  await page.goto('/design-preview/fumadocs-reader?fixture=qa-detail');
- const article=page.locator('[data-fumadocs-publication]');
- await expect(article).toBeVisible();
- await expect(page.locator('[data-fumadocs-qa-page]')).toHaveCount(0);
- await expect(article.getByRole('heading',{name:'0 元签约店铺信用额度如何理解？',level:1})).toBeVisible();
- await expect(article.locator('[data-fumadocs-publication-actions]')).toBeVisible();
- await expect(article.getByText('0 元签约店铺是平台提供的一种签约方式。')).toBeVisible();
- await expect(article.getByRole('heading',{name:'处理步骤'})).toBeVisible();
- await expect(page.getByRole('region',{name:'文章反馈'})).toBeVisible();
+ const qa=page.locator('[data-fumadocs-qa-page]');
+ await expect(qa).toBeVisible();
+ await expect(page.locator('[data-fumadocs-publication]')).toHaveCount(0);
+ await expect(qa.getByRole('heading',{name:'Q&A 问答',level:1})).toBeVisible();
+ await expect(qa.getByRole('button',{name:'0 元签约店铺信用额度如何理解？'})).toHaveAttribute('aria-expanded','true');
+ await expect(qa.getByText('0 元签约店铺是平台提供的一种签约方式。用户先取得店铺信用额度，再完成店铺签约。')).toBeVisible();
+ await expect(qa.getByRole('heading',{name:'处理步骤'})).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:`output/verification/fumadocs-qa-detail-${info.project.name}.png`,fullPage:true});
 });

@@ -7,11 +7,11 @@ import {createAnswerCache} from '../../qa/answer-cache';
 import {DocumentView} from '../gitbook/Reading/DocumentView';
 import {MediaBlocks} from '../gitbook/Media/MediaBlocks';
 const answerCache=createAnswerCache<Publication>();
-export function QaAnswer({id,title,revision,topics=[],canEdit=false,initial,cacheScope='',locale='zh-CN',editorial=false}:{id:string;title:string;revision?:number;topics?:string[];canEdit?:boolean;initial?:Publication;cacheScope?:string;locale?:'zh-CN'|'en';editorial?:boolean}){
+export function QaAnswer({id,title,revision,topics=[],canEdit=false,initial,cacheScope='',locale='zh-CN',editorial=false,initiallyOpen}:{id:string;title:string;revision?:number;topics?:string[];canEdit?:boolean;initial?:Publication;cacheScope?:string;locale?:'zh-CN'|'en';editorial?:boolean;initiallyOpen?:boolean}){
  const english=locale==='en';
  const localCache=useRef(createAnswerCache<Publication>());
  const initialTime=useRef(0);
- const [open,setOpen]=useState(editorial||Boolean(initial)),[answer,setAnswer]=useState<Publication|null>(initial??null),[failed,setFailed]=useState(''),[retry,setRetry]=useState(0);
+ const [open,setOpen]=useState(editorial||(initiallyOpen??Boolean(initial))),[answer,setAnswer]=useState<Publication|null>(initial??null),[failed,setFailed]=useState(''),[retry,setRetry]=useState(0);
  useEffect(()=>{const locate=()=>{if(window.location.hash==='#qa-'+encodeURIComponent(id))setOpen(true);};locate();window.addEventListener('hashchange',locate);return()=>window.removeEventListener('hashchange',locate);},[id]);
  useEffect(()=>{
   if(!open)return;

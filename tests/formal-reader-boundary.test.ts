@@ -89,9 +89,9 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  assert.doesNotMatch(qaPage,/<DocsPage full|qa-editorial-kicker/);
  const qaView=await readFile('src/components/qa/QaView.tsx','utf8');
  assert.doesNotMatch(qaView,/QaEditorialIndex|editorial/);
- assert.doesNotMatch(qaView,/AuthenticatedQaAnswer|QaAnswer/);
- assert.match(qaPage,/FumadocsPublicationPage/);
- assert.match(qaPage,/initialAnswer\?<FumadocsPublicationPage/);
+ assert.match(qaView,/AuthenticatedQaAnswer/);
+ assert.match(qaView,/QaAnswer/);
+ assert.doesNotMatch(qaPage,/FumadocsPublicationPage/);
  const sharedPublicationPage=await readFile('src/components/fumadocs/FumadocsPublicationPage.tsx','utf8');
  for(const sharedPublicationPart of ['fumadocsPublication','FumadocsBlockNoteReader','FumadocsPublicationActions','RecentRecorder','ArticleAnalytics','FumadocsPublicationFeedback'])assert.match(sharedPublicationPage,new RegExp(sharedPublicationPart));
  const readerStyles=await readFile('src/app/fumadocs-reader.css','utf8');
