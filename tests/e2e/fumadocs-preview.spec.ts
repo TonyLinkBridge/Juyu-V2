@@ -417,8 +417,8 @@ test('the plain article fixture uses Fumadocs without inventing an on-page outli
   text:getComputedStyle(element).color,
   weight:getComputedStyle(element).fontWeight,
  }));
- expect(readerColors.text).not.toBe('rgb(224, 62, 62)');
- expect(readerColors.weight).toBe('500');
+ expect(readerColors.text).toBe('rgb(224, 62, 62)');
+ expect(readerColors.weight).toBe('700');
  await expect(page.locator('#nd-toc a')).toHaveCount(0);
 });
 

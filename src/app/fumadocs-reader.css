@@ -72,12 +72,6 @@
  font-weight:500;
 }
 [data-fumadocs-blocknote-reader] .bn-block-content:is([data-content-type='bulletListItem'],[data-content-type='numberedListItem'],[data-content-type='checkListItem']) { margin-block:.5rem; }
-[data-fumadocs-blocknote-reader] :is([data-style-type='textColor'],[data-text-color]) { color:inherit!important; }
-[data-fumadocs-blocknote-reader] :is([data-style-type='backgroundColor'],[data-background-color]) { background-color:transparent!important; }
-[data-fumadocs-blocknote-reader] strong,
-[data-fumadocs-blocknote-reader] [data-style-type='bold'] { color:var(--tw-prose-bold);font-weight:500; }
-[data-fumadocs-blocknote-reader] .bn-block:has(> .bn-block-content[data-text-color]) { color:inherit; }
-[data-fumadocs-blocknote-reader] .bn-block:has(> .bn-block-content[data-background-color]) { background-color:transparent; }
 .fumadocs-search-results {
  --ink:var(--color-fd-foreground);
  --muted:var(--color-fd-muted-foreground);
