@@ -672,6 +672,9 @@ test('official Fumadocs shell renders the same BlockNote document read only',asy
  await expect(officialHeading).toHaveCSS('font-size','24px');
  await expect(officialHeading).toHaveCSS('font-weight','600');
  await expect(officialHeading).toHaveCSS('line-height','32px');
+ const firstHeadingBox=officialHeading.locator('..');
+ await expect(firstHeadingBox).toHaveCSS('margin-top','0px');
+ await expect(firstHeadingBox).toHaveCSS('margin-bottom','24px');
  const officialParagraph=page.getByText('账户邮箱是登录本站的重要凭证。修改前请先完成身份核对，并确认新邮箱可以正常收信。',{exact:true});
  await expect(officialParagraph).toHaveCSS('font-size','16px');
  await expect(officialParagraph).toHaveCSS('line-height','28px');

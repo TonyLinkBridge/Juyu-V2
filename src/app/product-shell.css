@@ -48,7 +48,7 @@
 .login-main{flex:1;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:4vw;width:100%;max-width:1147px;margin:auto;min-height:660px}
 .login-copy{transform:translateY(-24px);max-width:490px;position:relative;z-index:1;padding:60px 0}.login-eyebrow{font-size:12px;letter-spacing:.15em;color:var(--login-muted);margin:0 0 24px}
 .login-copy h1{font-size:clamp(30px,3.8vw,56px);font-weight:650;line-height:1.3;letter-spacing:-.04em;margin:0 0 20px;color:var(--login-fg)}
-.login-description{font-size:20px;line-height:1.8;color:var(--login-muted);margin:0 0 42px}.login-art{width:100%;max-width:700px;pointer-events:none}.login-art img{display:block;width:100%;height:auto;mask-image:radial-gradient(ellipse at center,#000 50%,transparent 72%)}
+.login-description{font-size:20px;line-height:1.8;color:var(--login-muted);margin:0 0 42px}.login-art{width:100%;max-width:700px;pointer-events:none}.login-art img{display:block;width:100%;height:auto;mask-image:radial-gradient(ellipse at center,#000 50%,transparent 72%)}.login-art--brand img{mask-image:none}
 .login-policy{color:var(--login-muted);font-size:14px;padding:14px 0}.login-auth{max-width:470px;color:var(--login-fg)}
 .login-auth .cl-rootBox,.login-auth .cl-cardBox{max-width:none}.login-auth .cl-cardBox{background:transparent}.login-auth .cl-socialButtonsBlockButton{border-radius:10px;background:#cf2337;color:#fff;border:1px solid transparent;box-shadow:none;font-size:15px;font-weight:600}
 .login-screen--dark .login-auth .cl-socialButtonsBlockButton{background:#f7f7f8;color:#161719}.login-auth .cl-socialButtonsBlockButton:hover{filter:brightness(.94)}

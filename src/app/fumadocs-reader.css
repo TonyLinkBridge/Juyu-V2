@@ -81,6 +81,11 @@
  font-size:1rem!important;
  line-height:1.5rem!important;
 }
+/* Fumadocs removes the top margin from the first prose child. BlockNote's
+ * wrapper prevents that native first-child rule from reaching a first heading. */
+[data-fumadocs-blocknote-reader] .bn-block-group > .bn-block-outer:first-child .bn-block-content[data-content-type='heading'] {
+ margin-top:0;
+}
 [data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='heading'] :is(h1,h2,h3,h4,h5,h6) {
  color:inherit;
  font:inherit;
