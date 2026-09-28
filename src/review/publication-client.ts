@@ -30,6 +30,7 @@ export function publicationError(error:unknown,reading=false,locale:'zh-CN'|'en'
  if(locale==='en'){
   if(reading)return code==='FORBIDDEN'?'This account cannot manage publication.':'Could not load the latest publication status. Publishing is paused until you reload and check it.';
   if(error instanceof PublicationRejected){
+   if(code==='FORBIDDEN')return 'Your sign-in or publication permission has expired. Sign in again, then reload this article.';
    if(code==='ENGLISH_REVIEW_REQUIRED')return 'Confirm that the English reads naturally before publishing.';
    if(code==='INVALID_APPROVAL')return 'This version does not have a valid review approval. Reload and check its review record.';
    if(['INVALID_MEDIA','UPLOAD_IN_PROGRESS'].includes(code))return 'An attachment is still uploading or is unavailable. Fix the file, then reload the publication status.';
@@ -39,6 +40,7 @@ export function publicationError(error:unknown,reading=false,locale:'zh-CN'|'en'
  }
  if(reading)return code==='FORBIDDEN'?'当前账号没有发布管理权限，无法读取最新状态。':'未能读取最新发布状态。已暂停操作，请重新读取后核对。';
  if(error instanceof PublicationRejected){
+  if(code==='FORBIDDEN')return '登录状态或发布权限已失效。请重新登录，再重新载入这篇文章。';
   if(code==='ENGLISH_REVIEW_REQUIRED')return '请先确认英文内容已经按自然英文检查，操作未执行。';
   if(code==='INVALID_APPROVAL')return '当前版本缺少有效的二审批准，操作未执行。请重新读取并核对审核记录。';
   if(['INVALID_MEDIA','UPLOAD_IN_PROGRESS'].includes(code))return '附件尚未就绪或已不可用，操作未执行。请处理附件后重新读取状态。';

@@ -21,3 +21,8 @@ test('publication reads reject stale content, malformed approval/history and imp
  for(const patch of [{article:{...detail.article,sequence:4}},{approval:null},{approval:{...detail.approval,revision:1}},{canPublish:true},{canDirectPublish:true},{canDirectPublish:'yes'},{article:{...detail.article,lifecycle:'trashed'}},{revision:0},{history:[{}]},{historyMore:'yes'},{history:Array.from({length:21},()=>({sequence:5,revision:2,action:'queue',actorId:'a',actorName:'Alex',at:'2026-09-09T01:00:00Z'}))}]){globalThis.fetch=async()=>Response.json({...detail,...patch});await assert.rejects(mod.readPublication('release-local',5));}
  }finally{globalThis.fetch=original;}
 });
+test('publication errors distinguish an expired login or permission from article state changes',async()=>{
+ const mod=await import('../src/review/publication-client.ts');
+ assert.match(mod.publicationError(new mod.PublicationRejected('FORBIDDEN'),false,'zh-CN'),/登录|权限/);
+ assert.match(mod.publicationError(new mod.PublicationRejected('FORBIDDEN'),false,'en'),/sign in|permission/i);
+});
