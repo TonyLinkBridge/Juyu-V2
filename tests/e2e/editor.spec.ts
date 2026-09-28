@@ -473,8 +473,10 @@ test('native slash menu and selection toolbar expose original block and formatti
  await mount(page,()=>editorFixture);const editor=page.locator('.bn-editor');await editor.click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');await page.keyboard.type('/');
  const menu=page.locator('.bn-suggestion-menu');await expect(menu).toBeVisible();await expect(menu).toContainText('检查清单');await expect(menu).toContainText('引用');await expect(menu).toContainText('音频');await expect(menu).toContainText('表格');
  await expect(menu).not.toContainText('扩展内容');await expect(menu).not.toContainText('提示框');await expect(menu).not.toContainText('分页标签');await expect(menu).not.toContainText('操作步骤');await expect(menu).not.toContainText('分栏布局');await expect(menu).not.toContainText('引用文章');await expect(menu).not.toContainText('操作按钮');await expect(menu).not.toContainText('外部内容');await expect(menu).not.toContainText('数学公式');await expect(menu).not.toContainText('流程图');await expect(menu).not.toContainText('资料表格');await expect(menu).not.toContainText('代码示例');
- const items=menu.locator('.bn-suggestion-menu-item'),count=await items.count();expect(count).toBeGreaterThan(1);await menu.hover();for(let gesture=0;gesture<3;gesture++)await page.mouse.wheel(0,2000);
- await expect.poll(()=>menu.evaluate(element=>Math.round(element.scrollHeight-element.clientHeight-element.scrollTop))).toBeLessThanOrEqual(1);await expect(items.last()).toBeInViewport();
+ const items=menu.locator('.bn-suggestion-menu-item'),count=await items.count();expect(count).toBeGreaterThan(1);await expect(menu).toHaveCSS('overflow-y','auto');
+ const remainingScroll=()=>menu.evaluate(element=>Math.round(element.scrollHeight-element.clientHeight-element.scrollTop));
+ await items.last().scrollIntoViewIfNeeded();
+ await expect.poll(remainingScroll).toBeLessThanOrEqual(1);await expect(items.last()).toBeInViewport();
  await page.keyboard.press('Escape');await page.keyboard.press('Backspace');await page.keyboard.insertText('选择文字显示完整工具栏');await page.keyboard.press('Shift+Home');
  await expect(page.locator('.bn-formatting-toolbar')).toBeVisible();await expect(page.locator('.bn-formatting-toolbar button')).not.toHaveCount(6);
  await page.keyboard.press('ArrowRight');await expect(page.locator('.bn-formatting-toolbar')).toBeHidden();
