@@ -1,6 +1,6 @@
 import type {Root} from 'fumadocs-core/page-tree';
 import {FumadocsDocsLayout as DocsLayout} from '../../../components/fumadocs/FumadocsDocsLayout';
-import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
+import {DocsBody,DocsDescription,DocsPage,DocsTitle,PageLastUpdate} from 'fumadocs-ui/layouts/docs/page';
 import {notFound,redirect} from 'next/navigation';
 import {FumadocsBlockNoteReader} from '../../../components/fumadocs/FumadocsBlockNoteReader';
 import {fumadocsBlockNoteTocSlots} from '../../../components/fumadocs/FumadocsBlockNoteTocBridge';
@@ -133,7 +133,7 @@ const plainBlocks:EditorBlock[]=[
  {id:'plain-highlight',type:'paragraph',props:textProps,content:text('这段红色加粗提示保持编辑时的格式。',{textColor:'red',bold:true}),children:[]},
 ];
 
-const fixtureArticle:Publication={id:'fumadocs-preview',title:'如何修改账户邮箱',revision:1,body:'',locale:'zh-CN',publicationNumber:1,feedback:{memberId:'preview',value:null}};
+const fixtureArticle:Publication={id:'fumadocs-preview',title:'如何修改账户邮箱',revision:1,body:'',locale:'zh-CN',publicationNumber:1,publishedAt:'2026-09-23T12:00:00.000Z',feedback:{memberId:'preview',value:null}};
 const plainFixtureArticle:Publication={id:'fumadocs-preview-plain',title:'没有章节标题的文章',revision:1,body:'',locale:'zh-CN',publicationNumber:1,feedback:{memberId:'preview',value:null}};
 const fixtureLanguages={'zh-CN':path,en:`${path}?lang=en`} as const;
 const directoryPages:NavigationNode[]=[{type:'group',id:'preview-account',title:'账户管理',descendants:[
@@ -211,6 +211,7 @@ function fixture(kind:'default'|'plain'='default'){
    <FumadocsPublicationActions article={article} features={defaultFeatureFlags}/>
    <DocsBody><FumadocsBlockNoteReader blocks={plain?plainBlocks:blocks} published locale="zh-CN" documentId={article.id} revision={1} referencePages={plain?[]:fixtureReferencePages}/></DocsBody>
    <FumadocsPublicationFeedback article={article} features={defaultFeatureFlags}/>
+   {article.publishedAt&&<PageLastUpdate data-fumadocs-last-update="" date={new Date(article.publishedAt)}/>}
   </DocsPage>
  </DocsLayout></FumadocsPublicationI18n>;
 }

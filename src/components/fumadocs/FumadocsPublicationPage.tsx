@@ -1,4 +1,4 @@
-import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
+import {DocsBody,DocsDescription,DocsPage,DocsTitle,PageLastUpdate} from 'fumadocs-ui/layouts/docs/page';
 import type {FeatureFlags} from '../../features/model';
 import type {FavoriteState} from '../../favorites/model';
 import type {NavigationPage} from '../../reader/navigation';
@@ -40,5 +40,6 @@ export function FumadocsPublicationPage({article,features,viewerId,favorite,form
   {formal&&features.analytics&&<ArticleAnalytics documentId={article.id} revision={article.revision}/>}
   <DocsBody><FumadocsBlockNoteReader blocks={document.blocks} published locale={locale} documentId={article.id} revision={article.revision} referencePages={referencePages} referenceAliases={referenceAliases}/></DocsBody>
   <FumadocsPublicationFeedback article={article} features={features}/>
+  {article.publishedAt&&<PageLastUpdate data-fumadocs-last-update="" date={new Date(article.publishedAt)}/>}
  </DocsPage>;
 }

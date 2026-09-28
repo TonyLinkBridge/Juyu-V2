@@ -35,6 +35,14 @@
  line-height:1.75rem;
 }
 [data-fumadocs-blocknote-reader] .bn-root { --bn-font-family:var(--font-geist-sans),"PingFang SC","Microsoft YaHei",sans-serif; }
+.fumadocs-blocknote-hydration { position:relative; }
+.fumadocs-blocknote-hydration[data-reader-ready='false']>.fumadocs-blocknote-client { position:absolute;inset:0;visibility:hidden;pointer-events:none; }
+.fumadocs-blocknote-server { color:var(--fd-foreground); }
+.fumadocs-blocknote-server>p { margin:0 0 1.25rem;line-height:1.75rem; }
+.fumadocs-blocknote-server>:is(h2,h3,h4,h5,h6) { scroll-margin-top:calc(var(--fd-nav-height) + 1.5rem);font-weight:600;letter-spacing:-.025em; }
+.fumadocs-blocknote-server>:is(h2,h3) { margin:3rem 0 1.5rem;font-size:1.5rem;line-height:2rem; }
+.fumadocs-blocknote-server>h4 { margin:2rem 0 .75rem;font-size:1.25rem;line-height:2rem; }
+.fumadocs-blocknote-server blockquote { font-style:normal;font-weight:400; }
 [data-fumadocs-blocknote-reader] .bn-block-content { padding-block:0; }
 :is([data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='paragraph'],[data-fumadocs-draft-reader] .gitbook-document.native-document>p) { margin:0 0 1.25rem;padding:0;line-height:1.75rem; }
 [data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='paragraph']>.bn-inline-content { line-height:inherit; }

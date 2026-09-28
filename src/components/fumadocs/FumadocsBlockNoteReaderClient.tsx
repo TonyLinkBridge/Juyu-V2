@@ -613,7 +613,7 @@ function createReaderSchema(nodes:EditorBlock[]=[]){
  });
 }
 
-function BlockNoteDocument({schemaNodes,initialContent,locale}:{schemaNodes:EditorBlock[];initialContent:unknown[];locale:ReaderLocale}){
+function BlockNoteDocument({schemaNodes,initialContent,locale,onReady}:{schemaNodes:EditorBlock[];initialContent:unknown[];locale:ReaderLocale;onReady?:()=>void}){
  const root=useRef<HTMLDivElement>(null);
  const markTocReady=useFumadocsBlockNoteTocReady();
  const {resolvedTheme}=useTheme();
@@ -632,15 +632,16 @@ function BlockNoteDocument({schemaNodes,initialContent,locale}:{schemaNodes:Edit
     if(block?.dataset.id&&title)title.id=block.dataset.id;
    }
    markTocReady();
+   onReady?.();
   });
   return ()=>cancelAnimationFrame(frame);
- },[editor,markTocReady]);
+ },[editor,markTocReady,onReady]);
  return <div ref={root} className="not-prose" data-fumadocs-blocknote-reader=""><BlockNoteView editor={editor} editable={false} theme={resolvedTheme==='dark'?'dark':'light'}/></div>;
 }
 
-function PublishedBlockNote({blocks,locale}:{blocks:EditorBlock[];locale:ReaderLocale}){
+function PublishedBlockNote({blocks,locale,onReady}:{blocks:EditorBlock[];locale:ReaderLocale;onReady?:()=>void}){
  const initialContent=useMemo(()=>publishedBlocks(blocks,locale),[blocks,locale]);
- return <BlockNoteDocument schemaNodes={blocks} initialContent={initialContent} locale={locale}/>;
+ return <BlockNoteDocument schemaNodes={blocks} initialContent={initialContent} locale={locale} onReady={onReady}/>;
 }
 
 function PublishedBlockNoteStatic({blocks,locale}:{blocks:EditorBlock[];locale:ReaderLocale}){
@@ -657,7 +658,7 @@ function PublishedBlockNoteStatic({blocks,locale}:{blocks:EditorBlock[];locale:R
  return <BlockNoteView editor={editor} editable={false} renderEditor={false} theme={resolvedTheme==='dark'?'dark':'light'} data-fumadocs-blocknote-static=""><div dangerouslySetInnerHTML={{__html:html}}/></BlockNoteView>;
 }
 
-export function FumadocsBlockNoteReaderClient({blocks,published=false,locale='zh-CN',referencePages=[],referenceAliases={}}:{blocks:unknown[];published?:boolean;locale?:ReaderLocale;documentId?:string;revision?:number;referencePages?:NavigationPage[];referenceAliases?:Record<string,string>}){
+export function FumadocsBlockNoteReaderClient({blocks,published=false,locale='zh-CN',referencePages=[],referenceAliases={},onReady}:{blocks:unknown[];published?:boolean;locale?:ReaderLocale;documentId?:string;revision?:number;referencePages?:NavigationPage[];referenceAliases?:Record<string,string>;onReady?:()=>void}){
  const stored=useMemo(()=>published?blocks as EditorBlock[]:[],[blocks,published]);
- return <ArticleReferenceProvider pages={referencePages} aliases={referenceAliases} locale={locale}>{published?<PublishedBlockNote blocks={stored} locale={locale}/>:<BlockNoteDocument schemaNodes={stored} initialContent={blocks} locale={locale}/>}</ArticleReferenceProvider>;
+ return <ArticleReferenceProvider pages={referencePages} aliases={referenceAliases} locale={locale}>{published?<PublishedBlockNote blocks={stored} locale={locale} onReady={onReady}/>:<BlockNoteDocument schemaNodes={stored} initialContent={blocks} locale={locale} onReady={onReady}/>}</ArticleReferenceProvider>;
 }

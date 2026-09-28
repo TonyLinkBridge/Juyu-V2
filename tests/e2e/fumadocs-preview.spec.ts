@@ -15,6 +15,7 @@ test('published equations and diagrams use the official BlockNote block specs',a
 
 test('published quotes preserve upright text when the author did not add italic formatting',async({page})=>{
  await page.goto('/design-preview/fumadocs-reader');
+ await expect(page.locator('[data-reader-ready="true"]')).toBeVisible();
  const quote=page.getByText('引用内容保持作者设置，不自动斜体。',{exact:true});
  await expect(quote).toBeVisible();
  await expect(quote).toHaveCSS('font-style','normal');
@@ -51,6 +52,22 @@ test('published BlockNote headings use the official Fumadocs anchor control',asy
  await expect.poll(()=>page.evaluate(()=>navigator.clipboard.readText())).toBe(`${page.url()}#email-process`);
 });
 
+test('published articles show the official Fumadocs last update',async({page})=>{
+ await page.goto('/design-preview/fumadocs-reader');
+ const updated=page.locator('[data-fumadocs-last-update]');
+ await expect(updated).toBeVisible();
+ await expect(updated).toContainText('2026');
+});
+
+test('published BlockNote content is included in the initial page HTML',async({request})=>{
+ const response=await request.get('/design-preview/fumadocs-reader');
+ expect(response.ok()).toBe(true);
+ const html=await response.text();
+ expect(html).toContain('data-fumadocs-blocknote-static');
+ expect(html).toContain('<h2 id="email-process"');
+ expect(html).not.toContain('Loading article preview…');
+});
+
 test('official Fumadocs navigation exposes the real path, adjacent page and mobile page outline',async({page})=>{
  await page.goto('/design-preview/fumadocs-reader');
  await expect(page.locator('article').getByText('资料目录',{exact:true})).toBeVisible();
@@ -69,6 +86,7 @@ test('official Fumadocs navigation exposes the real path, adjacent page and mobi
 
 test('official Fumadocs table of contents tracks BlockNote headings while scrolling',async({page})=>{
  await page.goto('/design-preview/fumadocs-reader');
+ await expect(page.locator('[data-reader-ready="true"]')).toBeVisible();
  const mobile=(page.viewportSize()?.width??1440)<1280;
  if(mobile)await page.locator('[data-toc-popover-trigger]').click();
  const toc=mobile?page.locator('[data-toc-popover-content]'):page.locator('#nd-toc');
@@ -738,6 +756,7 @@ test('official Fumadocs shell renders the same BlockNote document read only',asy
 test('published neutral black text remains readable in the official dark theme',async({page})=>{
  await page.emulateMedia({colorScheme:'dark'});
  await page.goto('/design-preview/fumadocs-reader');
+ await expect(page.locator('[data-reader-ready="true"]')).toBeVisible();
  const paragraph=page.getByText('账户邮箱是登录本站的重要凭证。修改前请先完成身份核对，并确认新邮箱可以正常收信。',{exact:true});
  await expect(paragraph).toBeVisible();
  const colors=await paragraph.evaluate(element=>({text:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}));
