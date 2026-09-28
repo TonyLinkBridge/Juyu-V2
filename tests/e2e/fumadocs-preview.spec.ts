@@ -412,6 +412,13 @@ test('the plain article fixture uses Fumadocs without inventing an on-page outli
  await page.goto('/design-preview/fumadocs-reader?fixture=plain');
  await expect(page.getByRole('heading',{name:'没有章节标题的文章',level:1})).toBeVisible();
  await expect(page.getByText('这是没有章节标题的文章示例，用于检查正文宽度和换行。',{exact:true})).toBeVisible();
+ const styledPrompt=page.getByText('这段红色加粗提示保持编辑时的格式。',{exact:true});
+ const readerColors=await styledPrompt.evaluate(element=>({
+  text:getComputedStyle(element).color,
+  weight:getComputedStyle(element).fontWeight,
+ }));
+ expect(readerColors.text).not.toBe('rgb(224, 62, 62)');
+ expect(readerColors.weight).toBe('500');
  await expect(page.locator('#nd-toc a')).toHaveCount(0);
 });
 
@@ -487,6 +494,10 @@ test('official Fumadocs shell renders the same BlockNote document read only',asy
   return {background:style.backgroundColor,paddingInline:style.paddingInline,borderRadius:style.borderRadius};
  });
  expect(readerSurface).toEqual({background:'rgba(0, 0, 0, 0)',paddingInline:'0px',borderRadius:'0px'});
+ const officialHeading=page.getByRole('heading',{name:'修改账户邮箱流程',level:1});
+ await expect(officialHeading).toHaveCSS('font-size','24px');
+ await expect(officialHeading).toHaveCSS('font-weight','600');
+ await expect(officialHeading).toHaveCSS('line-height','32px');
  if(info.project.name==='desktop'){
   const sidebar=page.locator('#nd-sidebar');
   await expect(sidebar.locator('p').filter({hasText:'账户管理'})).toBeVisible();
@@ -694,8 +705,11 @@ test('official page actions preserve protected JUYU operations without a second 
  await expect(actions.getByRole('button',{name:'复制 Markdown'})).toBeVisible();
  await actions.getByRole('button',{name:'复制 Markdown'}).click();
  await expect.poll(()=>page.evaluate(()=>navigator.clipboard.readText())).toBe('# 如何修改账户邮箱');
- await expect(actions.getByRole('link',{name:'查看 Markdown'})).toHaveAttribute('href','/api/articles/fumadocs-preview/markdown?revision=1');
- await expect(actions.getByRole('link',{name:'PDF 阅读／导出'})).toHaveAttribute('href','/help-centre/pdf?article=fumadocs-preview&revision=1');
+ await expect(actions.getByRole('link',{name:'查看 Markdown'})).toHaveCount(0);
+ await expect(actions.getByRole('link',{name:'PDF 阅读／导出'})).toHaveCount(0);
+ await actions.getByRole('button',{name:'打开'}).click();
+ await expect(page.getByRole('link',{name:'查看 Markdown'})).toHaveAttribute('href','/api/articles/fumadocs-preview/markdown?revision=1');
+ await expect(page.getByRole('link',{name:'PDF 阅读／导出'})).toHaveAttribute('href','/help-centre/pdf?article=fumadocs-preview&revision=1');
  await expect(actions.getByText('阅读外观',{exact:true})).toHaveCount(0);
  await expect(page.locator('html')).not.toHaveAttribute('data-reader-size',/.+/);
  await expect(page.locator('html')).not.toHaveAttribute('data-reader-width',/.+/);

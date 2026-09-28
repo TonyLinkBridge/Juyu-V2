@@ -1,4 +1,3 @@
-import {FilePdf,TextT} from '@phosphor-icons/react/dist/ssr';
 import {MarkdownCopyButton} from 'fumadocs-ui/layouts/docs/page';
 import {buttonVariants} from 'fumadocs-ui/components/ui/button';
 import type {FeatureFlags} from '../../features/model';
@@ -7,19 +6,20 @@ import type {Publication} from '../../reader/body';
 import {fumadocsMarkdownPath,fumadocsPdfPath} from '../../fumadocs/publication';
 import {FavoriteButton} from '../favorites/FavoriteButton';
 import {PageFeedbackForm} from '../reader-support/PageFeedbackForm';
+import {FumadocsPublicationOpenMenu} from './FumadocsPublicationOpenMenu';
 
 type SharedProps={article:Publication;features:FeatureFlags;viewerId?:string;favorite?:FavoriteState};
 
 export function FumadocsPublicationActions({article,features,viewerId,favorite}:SharedProps){
  const english=article.locale==='en';
  const markdownUrl=fumadocsMarkdownPath(article.id,article.revision);
+ const pdfUrl=features.pdfExport?fumadocsPdfPath(article):undefined;
  const actionClass=buttonVariants({variant:'secondary',size:'sm',className:'gap-2 [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground'});
  return <section className="not-prose" data-fumadocs-publication-actions="" aria-label={english?'Article actions':'文章操作'}>
   <div className="mb-4 flex flex-row flex-wrap items-center gap-2 border-b pb-6" data-fumadocs-page-actions="">
    {features.favorites&&viewerId&&<FavoriteButton viewerId={viewerId} documentId={article.id} revision={article.revision} initial={favorite} locale={article.locale} buttonClassName={actionClass} recoveryButtonClassName={actionClass}/>}
    <MarkdownCopyButton markdownUrl={markdownUrl}/>
-   <a className={actionClass} href={markdownUrl} target="_blank" rel="noopener noreferrer"><TextT aria-hidden="true"/>{english?'View Markdown':'查看 Markdown'}</a>
-   {features.pdfExport&&<a className={actionClass} href={fumadocsPdfPath(article)}><FilePdf aria-hidden="true"/>{english?'Read / export PDF':'PDF 阅读／导出'}</a>}
+   <FumadocsPublicationOpenMenu english={english} markdownUrl={markdownUrl} pdfUrl={pdfUrl}/>
   </div>
  </section>;
 }

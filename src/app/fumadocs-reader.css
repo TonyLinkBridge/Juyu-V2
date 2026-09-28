@@ -28,7 +28,56 @@
  padding-inline:0;
  border-radius:0;
  background:transparent;
+ color:var(--tw-prose-body);
+ font-family:inherit;
+ font-size:1rem;
+ font-weight:400;
+ line-height:1.75rem;
 }
+[data-fumadocs-blocknote-reader] .bn-block-content { padding-block:0; }
+[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='paragraph'] { margin-block:1.25rem; }
+[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='heading'] {
+ padding-top:0;
+ color:var(--tw-prose-headings);
+ font-weight:600!important;
+}
+/* A BlockNote level-one chapter sits below DocsTitle, so it uses Fumadocs' h2 rhythm. */
+[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='heading']:has(>h1) {
+ margin-block:3rem 1.5rem;
+ font-size:1.5rem!important;
+ line-height:2rem!important;
+}
+[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='heading']:has(>h2) {
+ margin-block:2rem .75rem;
+ font-size:1.25rem!important;
+ line-height:2rem!important;
+}
+[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='heading']:has(>h3) {
+ margin-block:1.5rem .5rem;
+ font-size:1rem!important;
+ line-height:1.5rem!important;
+}
+[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='heading'] :is(h1,h2,h3,h4,h5,h6) {
+ color:inherit;
+ font:inherit;
+}
+[data-fumadocs-blocknote-reader] .bn-block-outer:has(> .bn-block > .bn-block-content[data-content-type='heading']) + .bn-block-outer > .bn-block > .bn-block-content[data-content-type='paragraph'] { margin-top:0; }
+[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='divider'] { margin-block:3rem; }
+[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='divider'] hr { margin:0;border-color:var(--tw-prose-hr); }
+[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='quote'] { margin-block:1.6rem; }
+[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='quote'] blockquote {
+ border-inline-start:4px solid var(--tw-prose-quote-borders);
+ color:var(--tw-prose-quotes);
+ font-style:italic;
+ font-weight:500;
+}
+[data-fumadocs-blocknote-reader] .bn-block-content:is([data-content-type='bulletListItem'],[data-content-type='numberedListItem'],[data-content-type='checkListItem']) { margin-block:.5rem; }
+[data-fumadocs-blocknote-reader] :is([data-style-type='textColor'],[data-text-color]) { color:inherit!important; }
+[data-fumadocs-blocknote-reader] :is([data-style-type='backgroundColor'],[data-background-color]) { background-color:transparent!important; }
+[data-fumadocs-blocknote-reader] strong,
+[data-fumadocs-blocknote-reader] [data-style-type='bold'] { color:var(--tw-prose-bold);font-weight:500; }
+[data-fumadocs-blocknote-reader] .bn-block:has(> .bn-block-content[data-text-color]) { color:inherit; }
+[data-fumadocs-blocknote-reader] .bn-block:has(> .bn-block-content[data-background-color]) { background-color:transparent; }
 .fumadocs-search-results {
  --ink:var(--color-fd-foreground);
  --muted:var(--color-fd-muted-foreground);

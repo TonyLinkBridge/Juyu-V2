@@ -88,6 +88,50 @@ The desktop and mobile screenshots show all inspector controls without clipping.
 
 final result: passed
 
+# Fumadocs article typography and actions design QA
+
+- Source visual truth: `/var/folders/by/2103qtln3xd6rsg6nfxqt3yw0000gn/T/TemporaryItems/NSIRD_screencaptureui_Q2RRWp/Screenshot 2026-09-28 at 9.16.13 AM.png`
+- Rendered implementation: `/Users/tony/Documents/ChatGPT/Juyu V2/output/verification/fumadocs-article-integrated-desktop.png`
+- Side-by-side comparison: `/private/tmp/juyu-fumadocs-reader-comparison.png`
+- Source pixels: 1924 x 1910, captured at double density and normalized to 962 x 955.
+- Implementation pixels: 1440 x 5479 from a 1440 x 1000 CSS viewport at device scale factor 1. The article column was cropped from the first viewport, resized to 962 px wide, and compared at 962 x 955.
+- State: light theme, article title, description, page actions, first chapter heading, paragraphs, inline links, and content blocks.
+- Scope boundary: the reference and fixture contain different article copy. The comparison therefore covers Fumadocs typography, spacing, colors, action hierarchy, and reader rhythm rather than literal text or block-for-block content equality.
+
+## Full-view comparison evidence
+
+The source and implementation were normalized and placed in one side-by-side image. Both now use the Fumadocs title and description hierarchy, the `Copy Markdown` plus `Open` action pair, a thin divider, 24 px chapter headings with 32 px line height, 16 px body copy with 28 px line height, restrained inline emphasis, and official link underlines. The implementation retains JUYU-only protected features inside official Fumadocs components instead of presenting a second reader style.
+
+## Focused region evidence
+
+The combined comparison is cropped to the article column and first viewport, so the title, description, actions, divider, first chapter heading, paragraph rhythm, links, callout, and tabs remain readable without another crop.
+
+## Required fidelity surfaces
+
+- Fonts and typography: the existing Fumadocs/Geist stack remains active. BlockNote level-one chapters now use the official Fumadocs h2 visual rhythm: 24 px, 600 weight, and 32 px line height. Body copy inherits the official 16 px / 28 px prose rhythm.
+- Spacing and layout rhythm: chapter, paragraph, quote, divider, and list spacing are mapped to Fumadocs prose values. The action row keeps the official compact spacing and divider.
+- Colors and visual tokens: reader text, headings, bold text, dividers, quotes, and links use Fumadocs tokens. Authored red, purple, blue, and background highlight colors are neutralized only in the published reader; the editor data is unchanged.
+- Image and icon fidelity: no new raster asset was required. Existing Phosphor icons are used inside Fumadocs button and popover primitives.
+- Copy and content: article facts and editor content were not rewritten. A description appears only when the article already has description metadata; none is fabricated.
+
+## Interaction and runtime checks
+
+- `Open` reveals the existing Markdown and PDF destinations through the official Fumadocs popover pattern.
+- Favorite, Markdown copy, PDF access, feedback, search, article references, dark theme, and read-only BlockNote behavior remain intact.
+- Desktop and mobile article checks passed. The full Fumadocs browser suite passed 54/54 checks, and no horizontal overflow was introduced.
+
+## Comparison history
+
+- Initial P1: BlockNote chapter headings rendered at 48 px and dominated the page. Fix: scoped the published BlockNote heading levels to Fumadocs h2/h3/h4 rhythm. Post-fix evidence measures the first chapter at 24 px / 32 px / 600.
+- Initial P2: authored inline palette colors made the reader look unrelated to the official docs page. Fix: published text and highlight styles now inherit Fumadocs prose tokens while source content remains unchanged.
+- Initial P2: Markdown and PDF were exposed as separate custom buttons. Fix: they now live in the official-style `Open` popover beside `Copy Markdown`.
+
+## Follow-up polish
+
+- P3: verify the exact authenticated production article after deployment because this visual evidence uses the controlled local fixture. Articles without authored descriptions will continue to omit the description line by design.
+
+final result: passed
+
 # Q&A editorial knowledge index design QA
 
 - Source visual truth: `/Users/tony/.codex/generated_images/01a07e8f-7d3d-7913-ae5a-b945e4845a98/exec-46e8bece-965c-4ca6-a793-47636ded8b42.png`
