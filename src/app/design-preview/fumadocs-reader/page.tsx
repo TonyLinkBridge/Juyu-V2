@@ -205,7 +205,7 @@ function fixture(kind:'default'|'plain'='default'){
  const article=plain?plainFixtureArticle:fixtureArticle;
  const currentPath=plain?plainPath:path;
  return <FumadocsPublicationI18n locale="zh-CN" destinations={plain?{'zh-CN':plainPath}:fixtureLanguages}><DocsLayout tree={plain?plainTree:tree} nav={{title:'JUYU Help Centre',url:currentPath}} searchToggle={{enabled:false}}>
-  <DocsPage data-fumadocs-publication="" toc={plain?[]:toc} slots={{toc:fumadocsBlockNoteTocSlots}} breadcrumb={{includeRoot:{url:currentPath},includePage:true}}>
+  <DocsPage data-fumadocs-publication="" toc={plain?[]:toc} slots={{toc:fumadocsBlockNoteTocSlots}} breadcrumb={{enabled:false}}>
    <DocsTitle>{article.title}</DocsTitle>
    <DocsDescription>{plain?'正文没有章节标题时，Fumadocs 不会制造本页目录。':'使用 Fumadocs 官方阅读外壳和 BlockNote 官方只读视图显示同一份文章内容。'}</DocsDescription>
    <FumadocsPublicationActions article={article} features={defaultFeatureFlags}/>

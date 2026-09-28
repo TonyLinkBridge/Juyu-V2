@@ -94,6 +94,8 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  assert.doesNotMatch(qaPage,/FumadocsPublicationPage/);
  const sharedPublicationPage=await readFile('src/components/fumadocs/FumadocsPublicationPage.tsx','utf8');
  for(const sharedPublicationPart of ['fumadocsPublication','FumadocsBlockNoteReader','FumadocsPublicationActions','RecentRecorder','ArticleAnalytics','FumadocsPublicationFeedback'])assert.match(sharedPublicationPage,new RegExp(sharedPublicationPart));
+ assert.match(sharedPublicationPage,/breadcrumb=\{\{enabled:false\}\}/);
+ assert.doesNotMatch(sharedPublicationPage,/breadcrumbRoot|includeRoot|includePage/);
  const readerStyles=await readFile('src/app/fumadocs-reader.css','utf8');
  const productStyles=await readFile('src/app/product-shell.css','utf8');
  assert.doesNotMatch(readerStyles,/\[data-fumadocs-qa-page\]>h1/);
@@ -110,6 +112,7 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  assert.match(publication,/readReaderPresentation\(locale\)/);
  assert.match(publication,/tabs=\{formal\?fumadocsContentTabs\(menu,locale,\{path:activePath,pathname:formalFumadocsPublicationPath\(article.id,section\)\},knowledgeEntry\):false\}/);
  assert.match(publication,/prefetch:true/);
+ assert.doesNotMatch(publication,/breadcrumbRoot|sectionRoot/);
  const ordinaryRoute=await readFile('src/app/help-centre/articles/[articleId]/page.tsx','utf8');
  const opsArticleRoute=await readFile('src/app/help-centre/ops/[articleId]/page.tsx','utf8');
  assert.match(ordinaryRoute,/routeSection="article"/);

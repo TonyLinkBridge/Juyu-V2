@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {fumadocsSearchOptions,parseFumadocsSearchRequest} from '../src/fumadocs/search-options.ts';
+import {fumadocsSearchOptions,fumadocsSearchScopeDescription,parseFumadocsSearchRequest} from '../src/fumadocs/search-options.ts';
 
 test('Fumadocs search exposes all five JUYU content scopes with localized labels',()=>{
  const zh=fumadocsSearchOptions('zh-CN');
@@ -11,6 +11,10 @@ test('Fumadocs search exposes all five JUYU content scopes with localized labels
  ]);
  const en=fumadocsSearchOptions('en');
  assert.deepEqual(en.tags?.map(tag=>tag.name),['All content','Articles','OPS Internal','Reference','Q&A']);
+ assert.deepEqual(zh.tags?.map(tag=>[tag.value,fumadocsSearchScopeDescription('zh-CN',tag.value as 'all'|'article'|'ops'|'reference'|'qa')]),[
+  ['all',undefined],['article','团队正式知识'],['ops','运营流程与升级处理'],['reference','业务规则速查'],['qa','已审核标准答案'],
+ ]);
+ assert.equal(fumadocsSearchScopeDescription('en','qa'),'Reviewed standard answers');
 });
 
 test('Fumadocs search request accepts one official tag and rejects forged filters',()=>{

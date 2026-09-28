@@ -37,7 +37,7 @@ import type {ArticlePresentation} from '../../domain/presentation.ts';
 import type {TitleSearch} from '../../reader/search.ts';
 import {searchPublications} from '../search/repository.ts';
 import type {PoolClient} from 'pg';
-import type {Publication} from '../../reader/body.ts';
+import {publicationDescription,type Publication} from '../../reader/body.ts';
 import {firstTreePage,selectTreePage} from '../../reader/tree.ts';
 import {buildNavigationTree,type NavigationNode,type NavigationCategory,type NavigationMembership} from '../../reader/tree.ts';
 import { navigationPage, type NavigationPage } from '../../reader/navigation.ts';
@@ -114,7 +114,7 @@ export class AuthorizationService {
   async qaAnswer(id:string,locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,async c=>{
  const allowed=(await c.query('SELECT qa.id FROM juyu.read_qa_publications() qa WHERE qa.id=$1 AND EXISTS(SELECT 1 FROM juyu.read_publication_language(qa.id) l WHERE l.locale=$2)',[id,locale])).rows[0];if(!allowed)throw new Error('FORBIDDEN');
  const row=(await c.query('SELECT document_id,title,revision_id,body FROM juyu.read_publication($1)',[id])).rows[0];if(!row)throw new Error('FORBIDDEN');
- return {id:row.document_id,title:row.title,revision:row.revision_id,body:row.body,...await readPresentation(c,id)};},true);}
+ return {id:row.document_id,title:row.title,revision:row.revision_id,body:row.body,...await readPresentation(c,id,row.body)};},true);}
   async qa(page=1,category?:string,q='',locale:'zh-CN'|'en'='zh-CN',topic?:string){const v=await this.viewer();return this.database.run(v,c=>readQa(c,page,category,q,locale,topic),true);}
   async reference(page=1,locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readReference(c,page,locale),true);}
   async referenceDetail(id:string,locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readReferenceDetail(c,id,locale),true);}
@@ -227,7 +227,7 @@ async reader(requested:string|string[]|undefined):Promise<{viewerId:string;featu
             revision:row.revision_id,
             body:row.body,
             feedback,
-            ...await readPresentation(client,selected.id)
+            ...await readPresentation(client,selected.id,row.body)
           }
         : null
     };
@@ -242,7 +242,7 @@ async reader(requested:string|string[]|undefined):Promise<{viewerId:string;featu
   }
   async article(id:string) {
     const viewer=await this.viewer();
-    return this.database.run(viewer,async client=>{const row=(await client.query('SELECT * FROM juyu.read_publication($1)',[id])).rows[0];return row?{...row,...await readPresentation(client,id)}:null;},true);
+    return this.database.run(viewer,async client=>{const row=(await client.query('SELECT * FROM juyu.read_publication($1)',[id])).rows[0];return row?{...row,...await readPresentation(client,id,row.body)}:null;},true);
   }
   async articleVersion(id:string):Promise<{revision:number}|null> {
     const viewer=await this.viewer();
@@ -267,7 +267,7 @@ async reader(requested:string|string[]|undefined):Promise<{viewerId:string;featu
       const row=(await client.query('SELECT document_id,kind,title,revision_id,body FROM juyu.read_publication($1)',[id])).rows[0];
       if(!row)throw new Error('NOT_FOUND');if(row.revision_id!==revision)throw new Error('VERSION_CHANGED');
       const files=(await client.query(`SELECT a.id,a.filename,a.byte_size::text AS size FROM juyu.assets a JOIN juyu.revision_assets ra ON ra.asset_id=a.id AND ra.document_id=a.document_id WHERE ra.document_id=$1 AND ra.revision_id=$2 AND a.mime_type='application/pdf' AND juyu.can_read_asset(a.id) ORDER BY a.filename COLLATE "C",a.id`,[id,revision])).rows;
-      return {article:{id:row.document_id,kind:row.kind,title:row.title,revision:row.revision_id,body:row.body,...await readPresentation(client,id)},files};
+      return {article:{id:row.document_id,kind:row.kind,title:row.title,revision:row.revision_id,body:row.body,...await readPresentation(client,id,row.body)},files};
     },true);
   }
   async feedback(id:string,revision:number){const v=await this.viewer();return this.database.run(v,c=>readFeedback(c,id,revision),true);}
@@ -330,25 +330,26 @@ export async function protectedResponse(action:()=>Promise<unknown>):Promise<Res
 }
 
 async function readNavigationTree(client:PoolClient,repeatMemberships=false,locale:'zh-CN'|'en'='zh-CN'):Promise<NavigationNode[]> {
-      const pages=await client.query<{id:string;title:string;description?:string;iconKey?:import('../../reader/icon-keys.ts').ReaderIconKey|null;position:number|null}>(
-        'SELECT document_id AS id,title,description,icon_key AS "iconKey",juyu.read_publication_navigation_position(document_id) AS position FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id) AND EXISTS(SELECT 1 FROM juyu.read_publication_language(document_id) l WHERE l.locale=$1)',[locale]);
+      const pages=await client.query<{id:string;title:string;description?:string;body:string;iconKey?:import('../../reader/icon-keys.ts').ReaderIconKey|null;position:number|null}>(
+        'SELECT document_id AS id,title,description,body,icon_key AS "iconKey",juyu.read_publication_navigation_position(document_id) AS position FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id) AND EXISTS(SELECT 1 FROM juyu.read_publication_language(document_id) l WHERE l.locale=$1)',[locale]);
       const memberships=await client.query<NavigationMembership>(
         'SELECT document_id,category_id FROM juyu.revision_categories WHERE juyu.can_read_revision(document_id,revision_id) AND EXISTS(SELECT 1 FROM juyu.read_publication_language(document_id) l WHERE l.locale=$1)',[locale]);
       const categories=await client.query<NavigationCategory>(
         locale==='en'
           ? `SELECT c.id,coalesce(n.name,'Other articles') AS name,c.parent_id,c.position,ci.icon_key,cx.document_id AS index_document_id FROM juyu.categories c LEFT JOIN juyu.category_icons ci ON ci.category_id=c.id LEFT JOIN juyu.category_indexes cx ON cx.category_id=c.id LEFT JOIN juyu.read_category_english_names() n ON n.category_id=c.id WHERE juyu.category_allowed(c.id)`
           : 'SELECT c.id,c.name,c.parent_id,c.position,ci.icon_key,cx.document_id AS index_document_id FROM juyu.categories c LEFT JOIN juyu.category_icons ci ON ci.category_id=c.id LEFT JOIN juyu.category_indexes cx ON cx.category_id=c.id WHERE juyu.category_allowed(c.id)');
-      return buildNavigationTree(pages.rows,categories.rows,memberships.rows,{repeatMemberships,locale});
+      return buildNavigationTree(pages.rows.map(({body,...page})=>({...page,description:publicationDescription(body,page.description)})),categories.rows,memberships.rows,{repeatMemberships,locale});
 }
 
-async function readPresentation(client:PoolClient,id:string):Promise<ArticlePresentation&{locale?:'zh-CN'|'en';sourceId?:string;englishId?:string|null;publicationNumber?:number|null;customFields?:FieldSnapshot[]}> {
+async function readPresentation(client:PoolClient,id:string,body:string):Promise<ArticlePresentation&{locale?:'zh-CN'|'en';sourceId?:string;englishId?:string|null;publicationNumber?:number|null;customFields?:FieldSnapshot[]}> {
  const row=(await client.query<{tags:string[];cover_asset_id:string|null;cover_alt:string;cover_position:number}>('SELECT * FROM juyu.read_publication_presentation($1)',[id])).rows[0];
  if(!row)return {};
  const presentation=(await client.query('SELECT juyu.read_publication_blocks($1) AS blocks,juyu.publication_number($1) AS publication_number,juyu.read_publication_icon($1) AS icon_key,juyu.read_publication_description($1) AS description,juyu.read_publication_timestamp($1) AS published_at',[id])).rows[0];
  const language=(await client.query<{locale:'zh-CN'|'en';sourceId:string;englishId:string|null}>('SELECT locale,source_id AS "sourceId",english_id AS "englishId" FROM juyu.read_publication_language($1)',[id])).rows[0];
  const blocks=presentation?.blocks;
  const customFields=normalizeFieldSnapshots((await client.query('SELECT juyu.read_publication_fields($1) AS fields',[id])).rows[0]?.fields);
- return {locale:language?.locale??'zh-CN',sourceId:language?.sourceId??id,englishId:language?.englishId??null,publicationNumber:presentation?.publication_number??null,...(presentation?.published_at?{publishedAt:(presentation.published_at as Date).toISOString()}:{}),...(presentation?.description?{description:presentation.description}:{}),...(presentation?.icon_key?{iconKey:presentation.icon_key}:{}),...(customFields.length?{customFields}:{}),...(blocks?.length?{blocks:normalizeBlocks(blocks)}:{}),...(row.tags.length?{tags:row.tags}:{}),...(row.cover_asset_id?{cover:{assetId:row.cover_asset_id,alt:row.cover_alt,position:row.cover_position}}:{})};
+ const description=publicationDescription(body,presentation?.description);
+ return {locale:language?.locale??'zh-CN',sourceId:language?.sourceId??id,englishId:language?.englishId??null,publicationNumber:presentation?.publication_number??null,...(presentation?.published_at?{publishedAt:(presentation.published_at as Date).toISOString()}:{}),...(description?{description}:{}),...(presentation?.icon_key?{iconKey:presentation.icon_key}:{}),...(customFields.length?{customFields}:{}),...(blocks?.length?{blocks:normalizeBlocks(blocks)}:{}),...(row.tags.length?{tags:row.tags}:{}),...(row.cover_asset_id?{cover:{assetId:row.cover_asset_id,alt:row.cover_alt,position:row.cover_position}}:{})};
 }
 
 function treeIds(nodes:NavigationNode[]):string[]{return nodes.flatMap(n=>n.type==='group'?treeIds(n.descendants):[n.id]);}

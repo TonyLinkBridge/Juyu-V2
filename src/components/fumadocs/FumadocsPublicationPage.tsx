@@ -18,20 +18,19 @@ interface Props {
  favorite?:FavoriteState;
  formal?:boolean;
  recentKind?:ContentKind;
- breadcrumbRoot:string;
  referencePages?:NavigationPage[];
  referenceAliases?:Record<string,string>;
 }
 
 /** Shared formal reader surface. Knowledge, OPS and Q&A render through this exact component. */
-export function FumadocsPublicationPage({article,features,viewerId,favorite,formal=true,recentKind='article',breadcrumbRoot,referencePages=[],referenceAliases}:Props){
+export function FumadocsPublicationPage({article,features,viewerId,favorite,formal=true,recentKind='article',referencePages=[],referenceAliases}:Props){
  const locale=article.locale==='en'?'en':'zh-CN';
  const document=fumadocsPublication(article);
  return <DocsPage
   data-fumadocs-publication=""
   toc={document.toc}
   slots={{toc:fumadocsBlockNoteTocSlots}}
-  breadcrumb={{includeRoot:{url:breadcrumbRoot},includePage:true}}
+  breadcrumb={{enabled:false}}
  >
   <DocsTitle>{article.title}</DocsTitle>
   {article.description&&<DocsDescription>{article.description}</DocsDescription>}

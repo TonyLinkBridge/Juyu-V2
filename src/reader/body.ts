@@ -9,6 +9,27 @@ export interface DocumentSection {id:string;title:string;depth:1|2|3|4|5|6}
 export type ReaderBlock={type:'table';headers:string[];rows:string[][]}|{type:'heading';id:string;text:string;depth:1|2|3}|{type:'paragraph';text:string}|{type:'list';ordered:boolean;start:number;items:string[]};
 export interface ReaderDocument {blocks:ReaderBlock[];sections:DocumentSection[];editorBlocks?:EditorBlock[]}
 
+/** Use the editor's explicit summary when present. Otherwise reuse the first
+ * paragraph already written in the article, without generating new copy. */
+export function publicationDescription(body:string,description?:string):string|undefined {
+ const explicit=description?.trim();
+ if(explicit)return explicit;
+ const document=parseReaderBody(body);
+ if(document.editorBlocks){
+  const stack=[...document.editorBlocks];
+  while(stack.length){
+   const block=stack.shift()!;
+   if(block.type==='paragraph'){
+    const text=inlineText(block.content).trim();
+    if(text)return text;
+   }
+   stack.unshift(...block.children);
+  }
+  return undefined;
+ }
+ return document.blocks.find((block):block is Extract<ReaderBlock,{type:'paragraph'}>=>block.type==='paragraph'&&Boolean(block.text.trim()))?.text.trim();
+}
+
 /** Temporary text snapshot adapter; never interprets HTML, URLs or remote media.
  * Supports a bounded pipe-table subset for shared reader/PDF output. Richer blocks remain separate tasks. */
 export function parseReaderBody(body:string):ReaderDocument {

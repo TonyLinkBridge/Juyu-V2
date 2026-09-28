@@ -4,6 +4,25 @@ import type {FumadocsPublicationLocale} from './publication.ts';
 
 const scopes:SearchScope[]=['all','article','ops','reference','qa'];
 
+const scopeDescriptions:Record<FumadocsPublicationLocale,Partial<Record<SearchScope,string>>>={
+ 'zh-CN':{
+  article:'团队正式知识',
+  ops:'运营流程与升级处理',
+  reference:'业务规则速查',
+  qa:'已审核标准答案',
+ },
+ en:{
+  article:'Approved team knowledge',
+  ops:'Operations and escalation guidance',
+  reference:'Business rules and quick reference',
+  qa:'Reviewed standard answers',
+ },
+};
+
+export function fumadocsSearchScopeDescription(locale:FumadocsPublicationLocale,scope:SearchScope):string|undefined {
+ return scopeDescriptions[locale][scope];
+}
+
 export function fumadocsSearchOptions(locale:FumadocsPublicationLocale):Partial<DefaultSearchDialogProps> {
  const labels=locale==='en'?englishSearchScopeLabels:searchScopeLabels;
  return {

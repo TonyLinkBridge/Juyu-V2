@@ -68,12 +68,10 @@ test('published BlockNote content is included in the initial page HTML',async({r
  expect(html).not.toContain('Loading article preview…');
 });
 
-test('official Fumadocs navigation exposes the real path, adjacent page and mobile page outline',async({page})=>{
+test('official Fumadocs navigation keeps article headers breadcrumb-free while retaining adjacent pages and the outline',async({page})=>{
  await page.goto('/design-preview/fumadocs-reader');
- await expect(page.locator('article').getByText('资料目录',{exact:true})).toBeVisible();
- const breadcrumb=page.locator('article').locator('nav, div').filter({hasText:'账户安全'}).first();
- await expect(breadcrumb).toContainText('账户安全');
- await expect(breadcrumb).toContainText('如何修改账户邮箱');
+ await expect(page.locator('article').getByText('资料目录',{exact:true})).toHaveCount(0);
+ await expect(page.locator('article').getByText('账户安全',{exact:true})).toHaveCount(0);
  await expect(page.getByRole('link',{name:/如何找回密码.*下一页/})).toHaveAttribute('href','/design-preview/fumadocs-reader/example-password');
  if((page.viewportSize()?.width??1440)<1280){
   await expect(page.locator('[data-toc-popover-trigger]')).toBeVisible();
@@ -190,7 +188,12 @@ test('Help Centre home retains every JUYU entry inside the official Fumadocs hom
  await expect(dialog.getByText('了解签约店铺和信用额度的使用规则。',{exact:true})).toBeVisible();
  await expect(dialog.getByText('如何申请信用额度？',{exact:true})).toBeVisible();
  await expect(dialog.getByRole('link',{name:/查看全部结果/})).toHaveAttribute('href','/help-centre?q=%E4%BF%A1%E7%94%A8%E9%A2%9D%E5%BA%A6');
- await page.locator('button[data-active]').filter({hasText:'Q&A 问答'}).click();
+ const filter=dialog.getByRole('button',{name:/筛选.*全部资料/});
+ await expect(filter).toBeVisible();
+ await filter.click();
+ const qaFilter=page.getByRole('button',{name:'Q&A 问答 已审核标准答案',exact:true});
+ await qaFilter.click();
+ await expect(dialog.getByRole('button',{name:/筛选.*Q&A 问答/})).toBeVisible();
  await expect(dialog.getByRole('status')).toHaveText('正在搜索…');
  await expect(dialog.getByText('如何申请信用额度？',{exact:true})).toHaveCount(0);
  await expect(dialog.locator('button[aria-selected]')).toHaveCount(1);
