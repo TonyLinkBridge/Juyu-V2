@@ -116,6 +116,8 @@ const blocks:EditorBlock[]=[
  {id:'spacing-quote-two',type:'quote',props:textProps,content:text('第二段提示。'),children:[]},
  {id:'spacing-level-four-after-quote',type:'heading',props:{...textProps,level:4},content:text('提示框后的四级标题'),children:[]},
  {id:'spacing-quote-three',type:'quote',props:textProps,content:text('标题后的提示。'),children:[]},
+ {id:'spacing-level-three-after-quote',type:'heading',props:{...textProps,level:3},content:text('提示框后的三级标题'),children:[]},
+ {id:'spacing-quote-four',type:'quote',props:textProps,content:text('分隔线前的提示。'),children:[]},
  {id:'spacing-divider-two',type:'divider',props:{},children:[]},
  {id:'spacing-after-divider',type:'paragraph',props:textProps,content:text('分隔线后的正文。'),children:[]},
  {id:'spacing-level-four',type:'heading',props:{...textProps,level:4},content:text('四级内容标题'),children:[]},
