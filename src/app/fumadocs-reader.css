@@ -36,7 +36,7 @@
 }
 [data-fumadocs-blocknote-reader] .bn-root { --bn-font-family:var(--font-geist-sans),"PingFang SC","Microsoft YaHei",sans-serif; }
 [data-fumadocs-blocknote-reader] .bn-block-content { padding-block:0; }
-[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='paragraph'] { margin:0 0 1.25rem;line-height:1.75rem; }
+:is([data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='paragraph'],[data-fumadocs-draft-reader] .gitbook-document.native-document>p) { margin:0 0 1.25rem;padding:0;line-height:1.75rem; }
 [data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='paragraph']>.bn-inline-content { line-height:inherit; }
 [data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='heading'] {
  padding-top:0;

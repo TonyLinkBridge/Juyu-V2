@@ -5,6 +5,7 @@ import {encodeEditorBody} from '../src/editor/document.ts';
 import {canonicalFumadocsPublicationPath,formalFumadocsPublicationPath,fumadocsMarkdownPath,fumadocsPdfPath,fumadocsPublication,fumadocsPublicationLanguages,fumadocsPublicationTree} from '../src/fumadocs/publication.ts';
 import {fumadocsSearchResults} from '../src/fumadocs/search.ts';
 import {fumadocsIconComponents} from '../src/fumadocs/icons.ts';
+import {withoutEmptyPublishedParagraphs} from '../src/fumadocs/paragraphs.ts';
 
 const body=encodeEditorBody([
  {id:'intro',type:'heading',props:{textAlignment:'left',textColor:'default',backgroundColor:'default',level:1},content:[{type:'text',text:'真实文章标题',styles:{}}],children:[]},
@@ -20,6 +21,20 @@ test('published BlockNote body becomes the Fumadocs document and table of conten
   {title:'真实文章标题',url:'#intro',depth:2},
   {title:'嵌套标题',url:'#nested',depth:3},
  ]);
+});
+
+test('draft and formal readers drop empty paragraphs without dropping nested content',()=>{
+ const blocks=[
+  {id:'empty-top',type:'paragraph' as const,props:{textAlignment:'left' as const,textColor:'default' as const,backgroundColor:'default' as const},content:[],children:[]},
+  {id:'parent',type:'paragraph' as const,props:{textAlignment:'left' as const,textColor:'default' as const,backgroundColor:'default' as const},content:[{type:'text' as const,text:'保留正文',styles:{}}],children:[
+   {id:'empty-nested',type:'paragraph' as const,props:{textAlignment:'left' as const,textColor:'default' as const,backgroundColor:'default' as const},content:[{type:'text' as const,text:'   ',styles:{}}],children:[]},
+   {id:'nested',type:'paragraph' as const,props:{textAlignment:'left' as const,textColor:'default' as const,backgroundColor:'default' as const},content:[{type:'text' as const,text:'保留子段落',styles:{}}],children:[]},
+  ]},
+ ];
+ const result=withoutEmptyPublishedParagraphs(blocks);
+ assert.deepEqual(result.map(block=>block.id),['parent']);
+ assert.deepEqual(result[0]?.children.map(block=>block.id),['nested']);
+ assert.equal(blocks[1]?.children.length,2);
 });
 
 test('legacy text is rejected instead of being silently simplified',()=>{

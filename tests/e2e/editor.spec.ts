@@ -76,7 +76,7 @@ test('editor separates workflow actions from a right-side authoring rail',async(
  page.on('console',message=>{if(message.type()==='error')runtimeErrors.push(message.text());});
  await mount(page,()=>structuredClone(editorFixture));
  const toolbar=page.locator('.editor-toolbar');
- await expect(toolbar.getByRole('button',{name:'预览',exact:true})).toBeVisible();
+ await expect(toolbar.getByRole('button',{name:'预览草稿',exact:true})).toBeVisible();
  await expect(toolbar.getByRole('button',{name:'文章设置',exact:true})).toHaveCount(0);
  const rail=page.getByRole('navigation',{name:'编辑工具'});
  await expect(rail.getByRole('button',{name:'预览',exact:true})).toBeVisible();
@@ -248,6 +248,21 @@ test('open draft preview reflects typing before autosave reaches the server',asy
  await expect(preview).toContainText('Instant 1',{timeout:500});
  await expect(preview).toContainText('实时预览 · 尚未保存',{timeout:500});
  expect(writes).toBe(0);
+});
+test('draft preview uses the formal Fumadocs paragraph rhythm and ignores empty spacing blocks',async({page})=>{
+ const props={textAlignment:'left' as const,textColor:'default' as const,backgroundColor:'default' as const};
+ const text=(id:string,value:string)=>({id,type:'paragraph' as const,props,content:value?[{type:'text' as const,text:value,styles:{}}]:[],children:[]});
+ const saved={...structuredClone(editorFixture),body:encodeEditorBody([text('preview-first','第一段'),text('preview-empty',''),text('preview-second','第二段')])};
+ await mount(page,()=>saved);
+ await page.getByRole('button',{name:'预览',exact:true}).click();
+ const reader=page.locator('.editor-preview [data-fumadocs-draft-reader]');
+ await expect(reader).toBeVisible();
+ const paragraphs=reader.locator('.gitbook-document.native-document>p');
+ await expect(paragraphs).toHaveCount(2);
+ await expect(reader.getByText('第一段',{exact:true})).toBeVisible();
+ await expect(reader.getByText('第二段',{exact:true})).toBeVisible();
+ await expect(paragraphs.first()).toHaveCSS('margin-bottom','20px');
+ await expect(paragraphs.first()).toHaveCSS('line-height','28px');
 });
 test('BlockNote default text follows dark theme while authored emphasis colours remain',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('theme','dark'));

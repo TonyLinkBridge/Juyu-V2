@@ -20,6 +20,7 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import {useTheme} from 'fumadocs-ui/provider/base';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {normalizeEditorBlocks,type EditorBlock,type EditorInline} from '../../editor/document';
+import {isEmptyPublishedParagraph} from '../../fumadocs/paragraphs';
 import {inlineText,screenInlineStyle} from '../../editor/inline';
 import {inlineEmbed} from '../../editor/inline-embed';
 import {annotationText} from '../../editor/annotation';
@@ -551,12 +552,6 @@ function toFumadocsInline(content:EditorInline[]){
   if(note)return {type:'fumadocsAnnotation' as const,props:{note},content:item.content};
   return {type:'fumadocsLink' as const,props:{href:item.href},content:item.content};
  });
-}
-
-function isEmptyPublishedParagraph(block:EditorBlock){
- return block.type==='paragraph'
-  &&block.children.length===0
-  &&block.content.every(item=>item.type==='text'&&!item.text.trim());
 }
 
 function publishedBlocks(nodes:EditorBlock[],locale:ReaderLocale):unknown[]{
