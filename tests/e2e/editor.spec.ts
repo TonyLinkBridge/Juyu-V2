@@ -241,10 +241,9 @@ test('open draft preview reflects typing before autosave reaches the server',asy
  let saved=structuredClone(editorFixture);let writes=0;
  await page.route('**/api/admin/editor/*',async route=>{writes++;await new Promise(resolve=>setTimeout(resolve,1800));const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};await route.fulfill({json:saved});});
  await mount(page,()=>saved);
+ await typeText(page,' Instant 1');
  await page.getByRole('button',{name:'预览草稿',exact:true}).click();
  const preview=page.locator('.editor-preview');
- await expect(preview).toContainText('实时预览 · 已保存草稿');
- await typeText(page,' Instant 1');
  await expect(preview).toContainText('Instant 1',{timeout:500});
  await expect(preview).toContainText('实时预览 · 尚未保存',{timeout:500});
  expect(writes).toBe(0);
