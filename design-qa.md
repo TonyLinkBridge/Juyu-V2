@@ -102,15 +102,17 @@ final result: passed
 
 The source and implementation were normalized and placed in one side-by-side image. Both now use the Fumadocs title and description hierarchy, the `Copy Markdown` plus `Open` action pair, a thin divider, 24 px chapter headings with 32 px line height, 16 px body copy with 28 px line height, restrained inline emphasis, and official link underlines. The implementation retains JUYU-only protected features inside official Fumadocs components instead of presenting a second reader style.
 
+The current official page was rechecked live at `https://www.fumadocs.dev/docs` on 2026-09-28. Its computed desktop values are 16 px for the docs shell, 28 px / 42 px for `DocsTitle`, 24 px / 32 px with 48 px top and 24 px bottom margins for level-two prose headings, 20 px / 32 px with 32 px top and 12 px bottom margins for level-three prose headings, and 16 px / 28 px with a 20 px bottom margin for body paragraphs. The implementation test now asserts these same values directly.
+
 ## Focused region evidence
 
 The combined comparison is cropped to the article column and first viewport, so the title, description, actions, divider, first chapter heading, paragraph rhythm, links, callout, and tabs remain readable without another crop.
 
 ## Required fidelity surfaces
 
-- Fonts and typography: the existing Fumadocs/Geist stack remains active. BlockNote level-one chapters now use the official Fumadocs h2 visual rhythm: 24 px, 600 weight, and 32 px line height. Body copy inherits the official 16 px / 28 px prose rhythm.
+- Fonts and typography: the existing Fumadocs/Geist stack remains active. The shell now uses the official 16 px base and 1.5 line-height. BlockNote level-one and level-two chapters use the official Fumadocs h2 visual rhythm: 24 px, 600 weight, and 32 px line height. BlockNote level-three headings use the official 20 px / 32 px rhythm. Body copy uses the official 16 px / 28 px prose rhythm.
 - Spacing and layout rhythm: chapter, paragraph, quote, divider, and list spacing are mapped to Fumadocs prose values. The action row keeps the official compact spacing and divider.
-- Colors and visual tokens: reader text, headings, bold text, dividers, quotes, and links use Fumadocs tokens. Authored red, purple, blue, and background highlight colors are neutralized only in the published reader; the editor data is unchanged.
+- Colors and visual tokens: default reader text, headings, dividers, quotes, and links use Fumadocs tokens. Authored red, purple, blue, background highlights, and bold styling remain visible in the published reader so the article matches its approved editor content.
 - Image and icon fidelity: no new raster asset was required. Existing Phosphor icons are used inside Fumadocs button and popover primitives.
 - Copy and content: article facts and editor content were not rewritten. A description appears only when the article already has description metadata; none is fabricated.
 
@@ -123,7 +125,10 @@ The combined comparison is cropped to the article column and first viewport, so 
 ## Comparison history
 
 - Initial P1: BlockNote chapter headings rendered at 48 px and dominated the page. Fix: scoped the published BlockNote heading levels to Fumadocs h2/h3/h4 rhythm. Post-fix evidence measures the first chapter at 24 px / 32 px / 600.
-- Initial P2: authored inline palette colors made the reader look unrelated to the official docs page. Fix: published text and highlight styles now inherit Fumadocs prose tokens while source content remains unchanged.
+- Initial P1: consecutive empty BlockNote leaf paragraphs rendered as full paragraphs and accumulated into large blank areas. Fix: the published-reader conversion omits empty and whitespace-only leaf paragraphs while leaving the saved editor document unchanged. The browser fixture stores three consecutive empty paragraphs and verifies that only the three authored paragraphs render, with a normal paragraph gap.
+- Regression caught after the first typography pass: a broad CSS reset removed authored text colors, highlights, and native bold weight. Fix: removed the reset, restored BlockNote's approved inline formatting, and added a browser assertion for the authored red and bold fixture.
+- Current P1: the JUYU shell inherited the application's 15 px base and 1.65 line-height, while the official page uses 16 px and 1.5. Fix: scoped the official values to `.juyu-fumadocs`, preserving the rest of the application.
+- Current P1: stored level-two and level-three BlockNote headings rendered one visual level too small. Fix: mapped their semantic output to the official 24 px h2 and 20 px h3 values with the official margins.
 - Initial P2: Markdown and PDF were exposed as separate custom buttons. Fix: they now live in the official-style `Open` popover beside `Copy Markdown`.
 
 ## Follow-up polish

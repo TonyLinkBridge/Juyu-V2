@@ -104,6 +104,8 @@ const blocks:EditorBlock[]=[
  {id:'email-secondary-button',type:'juyu',props:{payload:JSON.stringify({id:'email-secondary-button',type:'button',label:'查看内部表单',href:'/help-centre/forms',variant:'secondary'})},children:[]},
  {id:'email-youtube-embed',type:'juyu',props:{payload:JSON.stringify({id:'email-youtube-embed',type:'externalEmbed',url:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',caption:'邮箱修改操作影片'})},children:[]},
  {id:'email-external-link',type:'juyu',props:{payload:JSON.stringify({id:'email-external-link',type:'externalEmbed',url:'https://example.com/account-guide',caption:'账户操作补充说明'})},children:[]},
+ {id:'email-level-two',type:'heading',props:{...textProps,level:2},content:text('二级内容标题'),children:[]},
+ {id:'email-level-three',type:'heading',props:{...textProps,level:3},content:text('三级内容标题'),children:[]},
  {id:'email-result',type:'heading',props:{...textProps,level:1},content:text('提交后会发生什么'),children:[]},
  {id:'email-result-body',type:'paragraph',props:textProps,content:text('专员审核后会通过工单回复结果。请不要重复提交相同申请。'),children:[]},
 ];
@@ -123,6 +125,9 @@ const plainTree:Root={
 };
 const plainBlocks:EditorBlock[]=[
  {id:'plain-intro',type:'paragraph',props:textProps,content:text('这是没有章节标题的文章示例，用于检查正文宽度和换行。'),children:[]},
+ {id:'plain-empty-one',type:'paragraph',props:textProps,content:[],children:[]},
+ {id:'plain-empty-two',type:'paragraph',props:textProps,content:text('   '),children:[]},
+ {id:'plain-empty-three',type:'paragraph',props:textProps,content:[],children:[]},
  {id:'plain-detail',type:'paragraph',props:textProps,content:text('资料应让员工快速找到处理步骤，而不是在整块屏幕上横向追踪文字。登录后，请先核对账户资料，并按照已审核发布的流程处理。'),children:[]},
  {id:'plain-highlight',type:'paragraph',props:textProps,content:text('这段红色加粗提示保持编辑时的格式。',{textColor:'red',bold:true}),children:[]},
 ];

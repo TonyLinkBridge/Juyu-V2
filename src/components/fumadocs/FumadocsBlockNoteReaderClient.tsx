@@ -553,8 +553,15 @@ function toFumadocsInline(content:EditorInline[]){
  });
 }
 
+function isEmptyPublishedParagraph(block:EditorBlock){
+ return block.type==='paragraph'
+  &&block.children.length===0
+  &&block.content.every(item=>item.type==='text'&&!item.text.trim());
+}
+
 function publishedBlocks(nodes:EditorBlock[],locale:ReaderLocale):unknown[]{
  return nodes.flatMap(block=>{
+  if(isEmptyPublishedParagraph(block))return [];
  if(block.type==='juyu'){
    if(isReusableContent(block.props.payload,block.id))return publishedBlocks(block.children,locale);
    const hint=readHint(block.props.payload);

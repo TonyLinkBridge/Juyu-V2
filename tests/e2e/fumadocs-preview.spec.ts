@@ -411,7 +411,15 @@ test('PDF screen uses the official Fumadocs shell and print keeps only the prote
 test('the plain article fixture uses Fumadocs without inventing an on-page outline',async({page})=>{
  await page.goto('/design-preview/fumadocs-reader?fixture=plain');
  await expect(page.getByRole('heading',{name:'没有章节标题的文章',level:1})).toBeVisible();
- await expect(page.getByText('这是没有章节标题的文章示例，用于检查正文宽度和换行。',{exact:true})).toBeVisible();
+ const firstParagraph=page.getByText('这是没有章节标题的文章示例，用于检查正文宽度和换行。',{exact:true});
+ const nextParagraph=page.getByText('资料应让员工快速找到处理步骤，而不是在整块屏幕上横向追踪文字。登录后，请先核对账户资料，并按照已审核发布的流程处理。',{exact:true});
+ await expect(firstParagraph).toBeVisible();
+ await expect(nextParagraph).toBeVisible();
+ await expect(page.locator('[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type="paragraph"]')).toHaveCount(3);
+ const paragraphGap=await Promise.all([firstParagraph.boundingBox(),nextParagraph.boundingBox()]);
+ expect(paragraphGap[0]).not.toBeNull();
+ expect(paragraphGap[1]).not.toBeNull();
+ expect(paragraphGap[1]!.y-(paragraphGap[0]!.y+paragraphGap[0]!.height)).toBeLessThanOrEqual(21);
  const styledPrompt=page.getByText('这段红色加粗提示保持编辑时的格式。',{exact:true});
  const readerColors=await styledPrompt.evaluate(element=>({
   text:getComputedStyle(element).color,
@@ -485,6 +493,9 @@ test('external content connects to approved providers only after the reader choo
 test('official Fumadocs shell renders the same BlockNote document read only',async({page},info)=>{
  await page.goto('/design-preview/fumadocs-reader');
  await expect(page.getByRole('heading',{name:'如何修改账户邮箱',level:1})).toBeVisible();
+ await expect(page.locator('.juyu-fumadocs')).toHaveCSS('font-size','16px');
+ await expect(page.getByRole('heading',{name:'如何修改账户邮箱',level:1})).toHaveCSS('font-size','28px');
+ await expect(page.getByRole('heading',{name:'如何修改账户邮箱',level:1})).toHaveCSS('line-height','42px');
  await expect(page.locator('article').filter({has:page.locator('.prose')})).toBeVisible();
  await expect(page.locator('[data-fumadocs-blocknote-reader].not-prose').first()).toBeVisible();
  const readOnlyEditor=page.locator('.bn-editor[contenteditable="false"]').first();
@@ -498,6 +509,21 @@ test('official Fumadocs shell renders the same BlockNote document read only',asy
  await expect(officialHeading).toHaveCSS('font-size','24px');
  await expect(officialHeading).toHaveCSS('font-weight','600');
  await expect(officialHeading).toHaveCSS('line-height','32px');
+ const officialParagraph=page.getByText('账户邮箱是登录本站的重要凭证。修改前请先完成身份核对，并确认新邮箱可以正常收信。',{exact:true});
+ await expect(officialParagraph).toHaveCSS('font-size','16px');
+ await expect(officialParagraph).toHaveCSS('line-height','28px');
+ const levelTwo=page.getByRole('heading',{name:'二级内容标题',level:2});
+ await expect(levelTwo).toHaveCSS('font-size','24px');
+ await expect(levelTwo).toHaveCSS('line-height','32px');
+ const levelTwoBox=levelTwo.locator('..');
+ await expect(levelTwoBox).toHaveCSS('margin-top','48px');
+ await expect(levelTwoBox).toHaveCSS('margin-bottom','24px');
+ const levelThree=page.getByRole('heading',{name:'三级内容标题',level:3});
+ await expect(levelThree).toHaveCSS('font-size','20px');
+ await expect(levelThree).toHaveCSS('line-height','32px');
+ const levelThreeBox=levelThree.locator('..');
+ await expect(levelThreeBox).toHaveCSS('margin-top','32px');
+ await expect(levelThreeBox).toHaveCSS('margin-bottom','12px');
  if(info.project.name==='desktop'){
   const sidebar=page.locator('#nd-sidebar');
   await expect(sidebar.locator('p').filter({hasText:'账户管理'})).toBeVisible();
