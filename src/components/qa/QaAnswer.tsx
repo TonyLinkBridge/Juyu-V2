@@ -12,7 +12,13 @@ export function QaAnswer({id,title,revision,topics=[],canEdit=false,initial,cach
  const localCache=useRef(createAnswerCache<Publication>());
  const initialTime=useRef(0);
  const [open,setOpen]=useState(editorial||(initiallyOpen??Boolean(initial))),[answer,setAnswer]=useState<Publication|null>(initial??null),[failed,setFailed]=useState(''),[retry,setRetry]=useState(0);
- useEffect(()=>{const locate=()=>{if(window.location.hash==='#qa-'+encodeURIComponent(id))setOpen(true);};locate();window.addEventListener('hashchange',locate);return()=>window.removeEventListener('hashchange',locate);},[id]);
+ useEffect(()=>{
+  const hash='#qa-'+encodeURIComponent(id);
+  const locate=()=>{if(window.location.hash===hash)setOpen(true);};
+  const openFromLocalLink=(event:MouseEvent)=>{const target=event.target;const anchor=target instanceof Element?target.closest<HTMLAnchorElement>('a[href]'):null;if(anchor?.getAttribute('href')===hash){window.history.replaceState(window.history.state,'',hash);setOpen(true);}};
+  locate();window.addEventListener('hashchange',locate);window.document.addEventListener('click',openFromLocalLink);
+  return()=>{window.removeEventListener('hashchange',locate);window.document.removeEventListener('click',openFromLocalLink);};
+ },[id]);
  useEffect(()=>{
   if(!open)return;
   let disposed=false,pending=false;

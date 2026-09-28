@@ -70,7 +70,7 @@
  border-inline-start:4px solid var(--tw-prose-quote-borders);
  color:var(--tw-prose-quotes);
  font-style:normal;
- font-weight:500;
+ font-weight:400;
 }
 [data-fumadocs-blocknote-reader] .bn-block-content:is([data-content-type='bulletListItem'],[data-content-type='numberedListItem'],[data-content-type='checkListItem']) { margin-block:.5rem; }
 .fumadocs-search-results {

@@ -18,6 +18,7 @@ test('published quotes preserve upright text when the author did not add italic 
  const quote=page.getByText('引用内容保持作者设置，不自动斜体。',{exact:true});
  await expect(quote).toBeVisible();
  await expect(quote).toHaveCSS('font-style','normal');
+ await expect(quote).toHaveCSS('font-weight','400');
 });
 
 test('official Fumadocs navigation exposes the real path, adjacent page and mobile page outline',async({page})=>{
@@ -270,6 +271,21 @@ test('Q&A keeps its search and topic filters inside the official Fumadocs shell'
  expect(buttonColors.text).not.toBe(buttonColors.background);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:`output/verification/fumadocs-qa-${info.project.name}.png`,fullPage:true});
+});
+
+test('Q&A sidebar opens an answer in place without requesting a different page',async({page})=>{
+ await page.goto('/design-preview/fumadocs-reader?fixture=qa');
+ if((page.viewportSize()?.width??1440)<1280)await page.getByRole('button',{name:'开启侧边栏'}).click();
+ const sidebar=(page.viewportSize()?.width??1440)<1280?page.locator('#nd-sidebar-mobile'):page.locator('#nd-sidebar');
+ const link=sidebar.getByRole('link',{name:'0 元签约店铺信用额度如何理解？'});
+ await expect(link).toHaveAttribute('href','#qa-qa-credit');
+ const before=new URL(page.url());
+ await link.click();
+ await expect(page.getByRole('button',{name:'0 元签约店铺信用额度如何理解？'})).toHaveAttribute('aria-expanded','true');
+ await expect(page.getByText('0 元签约店铺是平台提供的一种签约方式。用户先取得店铺信用额度，再完成店铺签约。')).toBeVisible();
+ const after=new URL(page.url());
+ expect(after.pathname+after.search).toBe(before.pathname+before.search);
+ expect(after.hash).toBe('#qa-qa-credit');
 });
 
 test('a selected Q&A answer opens inside the Q&A directory',async({page},info)=>{
