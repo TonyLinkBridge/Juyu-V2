@@ -46,9 +46,11 @@
 [data-fumadocs-blocknote-reader] .bn-block-content { padding-block:0; }
 :is([data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='paragraph'],[data-fumadocs-draft-reader] .gitbook-document.native-document>p) { margin:0 0 1.25rem;padding:0;line-height:1.75rem; }
 [data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='paragraph']>.bn-inline-content { line-height:inherit; }
-/* Native prose margins collapse between a paragraph and the following heading.
- * BlockNote wraps each block, so remove the paragraph margin at that boundary. */
-[data-fumadocs-blocknote-reader] .bn-block-outer:has(> .bn-block > .bn-block-content[data-content-type='paragraph']):has(+ .bn-block-outer .bn-block-content[data-content-type='heading']) > .bn-block > .bn-block-content[data-content-type='paragraph'] { margin-bottom:0; }
+/* Fumadocs' native prose blocks are direct siblings, while BlockNote wraps every
+ * block. Recreate native margin collapsing and the official heading/hr rhythm. */
+[data-fumadocs-blocknote-reader] .bn-block-outer:has(> .bn-block > .bn-block-content:is([data-content-type='paragraph'],[data-content-type='quote'],[data-content-type='bulletListItem'],[data-content-type='numberedListItem'],[data-content-type='checkListItem'])):has(+ .bn-block-outer .bn-block-content:is([data-content-type='heading'],[data-content-type='divider'],[data-content-type='quote'])) > .bn-block > .bn-block-content { margin-bottom:0; }
+[data-fumadocs-blocknote-reader] .bn-block-outer:has(> .bn-block .bn-block-content:is([data-content-type='heading'],[data-content-type='divider'])) + .bn-block-outer > .bn-block > .bn-block-content,
+[data-fumadocs-blocknote-reader] .bn-block-outer:has(> .bn-block .bn-block-content:is([data-content-type='heading'],[data-content-type='divider'])) + .bn-block-outer > .bn-block > .react-renderer > .bn-block-content { margin-top:0; }
 [data-fumadocs-page-actions]>.favorite-control { margin:0; }
 [data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='heading'] {
  padding-top:0;
@@ -70,6 +72,11 @@
  margin-block:2rem .75rem;
  font-size:1.25rem!important;
  line-height:2rem!important;
+}
+[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='heading']:has(>h4) {
+ margin-block:1.5rem .5rem;
+ font-size:1rem!important;
+ line-height:1.5rem!important;
 }
 [data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='heading'] :is(h1,h2,h3,h4,h5,h6) {
  color:inherit;

@@ -533,6 +533,30 @@ test('a paragraph before a chapter heading keeps the official collapsed 48px sec
  expect(Math.round(headingBox!.y-(paragraphBox!.y+paragraphBox!.height))).toBe(48);
 });
 
+test('BlockNote wrappers preserve the official Fumadocs rhythm for adjacent prose blocks',async({page})=>{
+ await page.goto('/design-preview/fumadocs-reader');
+ await expect(page.locator('[data-reader-ready="true"]')).toBeVisible();
+ const gap=async(from:string,to:string)=>{
+  const [fromBox,toBox]=await Promise.all([
+   page.locator(`[data-id="${from}"] .bn-block-content`).boundingBox(),
+   page.locator(`[data-id="${to}"] .bn-block-content`).boundingBox(),
+  ]);
+  expect(fromBox).not.toBeNull();
+  expect(toBox).not.toBeNull();
+  return Math.round(toBox!.y-(fromBox!.y+fromBox!.height));
+ };
+ expect(await gap('spacing-before-divider','spacing-divider-one')).toBe(48);
+ expect(await gap('spacing-divider-one','spacing-heading-after-divider')).toBe(48);
+ expect(await gap('spacing-heading-after-divider','spacing-heading-after-heading')).toBe(24);
+ expect(await gap('spacing-heading-after-heading','spacing-before-quote')).toBe(12);
+ expect(await gap('spacing-before-quote','spacing-quote-one')).toBe(26);
+ expect(await gap('spacing-quote-one','spacing-quote-two')).toBe(26);
+ expect(await gap('spacing-quote-two','spacing-divider-two')).toBe(48);
+ expect(await gap('spacing-divider-two','spacing-after-divider')).toBe(48);
+ expect(await gap('spacing-after-divider','spacing-level-four')).toBe(24);
+ expect(await gap('spacing-level-four','email-before-result')).toBe(8);
+});
+
 test('article header keeps the official Fumadocs description and action measurements',async({page})=>{
  await page.goto('/design-preview/fumadocs-reader');
  const description=page.getByText('使用 Fumadocs 官方阅读外壳和 BlockNote 官方只读视图显示同一份文章内容。',{exact:true});
@@ -657,7 +681,7 @@ test('official Fumadocs shell renders the same BlockNote document read only',asy
  await expect(levelThree).toHaveCSS('font-size','20px');
  await expect(levelThree).toHaveCSS('line-height','32px');
  const levelThreeBox=levelThree.locator('..');
- await expect(levelThreeBox).toHaveCSS('margin-top','32px');
+ await expect(levelThreeBox).toHaveCSS('margin-top','0px');
  await expect(levelThreeBox).toHaveCSS('margin-bottom','12px');
  if(info.project.name==='desktop'){
   const sidebar=page.locator('#nd-sidebar');
