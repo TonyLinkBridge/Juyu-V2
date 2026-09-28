@@ -33,7 +33,7 @@ export function FumadocsPublicationPage({article,features,viewerId,favorite,form
   breadcrumb={{enabled:false}}
  >
   <DocsTitle>{article.title}</DocsTitle>
-  {article.description&&<DocsDescription>{article.description}</DocsDescription>}
+  {article.description&&<DocsDescription className="mb-2">{article.description}</DocsDescription>}
   <FumadocsPublicationActions article={article} features={features} viewerId={viewerId} favorite={favorite}/>
   {formal&&features.recent&&<RecentRecorder documentId={article.id} revision={article.revision} kind={recentKind}/>}
   {formal&&features.analytics&&<ArticleAnalytics documentId={article.id} revision={article.revision}/>}

@@ -522,6 +522,49 @@ test('the plain article fixture uses Fumadocs without inventing an on-page outli
  await expect(page.locator('#nd-toc a')).toHaveCount(0);
 });
 
+test('a paragraph before a chapter heading keeps the official collapsed 48px section gap',async({page})=>{
+ await page.goto('/design-preview/fumadocs-reader');
+ await expect(page.locator('[data-reader-ready="true"]')).toBeVisible();
+ const paragraph=page.getByText('这是下一个章节标题前的最后一段。',{exact:true});
+ const heading=page.locator('#email-result');
+ const [paragraphBox,headingBox]=await Promise.all([paragraph.boundingBox(),heading.boundingBox()]);
+ expect(paragraphBox).not.toBeNull();
+ expect(headingBox).not.toBeNull();
+ expect(Math.round(headingBox!.y-(paragraphBox!.y+paragraphBox!.height))).toBe(48);
+});
+
+test('article header keeps the official Fumadocs description and action measurements',async({page})=>{
+ await page.goto('/design-preview/fumadocs-reader');
+ const description=page.getByText('使用 Fumadocs 官方阅读外壳和 BlockNote 官方只读视图显示同一份文章内容。',{exact:true});
+ const actions=page.locator('[data-fumadocs-page-actions]');
+ await expect(description).toBeVisible();
+ await expect(actions).toBeVisible();
+ await actions.evaluate(element=>{
+  const source=element.querySelector('button');
+  if(!source)return;
+  const wrapper=document.createElement('section');
+  wrapper.className='favorite-control';
+  const button=source.cloneNode(true) as HTMLButtonElement;
+  button.textContent='收藏文章';
+  wrapper.append(button);
+  element.prepend(wrapper);
+ });
+ const metrics=await page.evaluate(()=>{
+  const description=document.querySelector('main article>p');
+  const actions=document.querySelector<HTMLElement>('[data-fumadocs-page-actions]');
+  const buttons=[...(actions?.querySelectorAll<HTMLElement>('button')??[])];
+  return {
+   descriptionMarginBottom:description?getComputedStyle(description).marginBottom:null,
+   actionsHeight:actions?.getBoundingClientRect().height??null,
+   buttons:buttons.map(button=>({height:button.getBoundingClientRect().height,fontSize:getComputedStyle(button).fontSize})),
+  };
+ });
+ expect(metrics.descriptionMarginBottom).toBe('8px');
+ expect(metrics.actionsHeight).toBe(55);
+ expect(metrics.buttons).toHaveLength(3);
+ expect(metrics.buttons).toEqual(metrics.buttons.map(()=>({height:30,fontSize:'12px'})));
+});
+
 test('old article preview links land on their matching Fumadocs fixture',async({page})=>{
  await page.goto('/design-preview/article');
  await expect(page).toHaveURL(/\/design-preview\/fumadocs-reader$/);

@@ -107,6 +107,7 @@ const blocks:EditorBlock[]=[
  {id:'email-external-link',type:'juyu',props:{payload:JSON.stringify({id:'email-external-link',type:'externalEmbed',url:'https://example.com/account-guide',caption:'账户操作补充说明'})},children:[]},
  {id:'email-level-two',type:'heading',props:{...textProps,level:2},content:text('二级内容标题'),children:[]},
  {id:'email-level-three',type:'heading',props:{...textProps,level:3},content:text('三级内容标题'),children:[]},
+ {id:'email-before-result',type:'paragraph',props:textProps,content:text('这是下一个章节标题前的最后一段。'),children:[]},
  {id:'email-result',type:'heading',props:{...textProps,level:1},content:text('提交后会发生什么'),children:[]},
  {id:'email-result-body',type:'paragraph',props:textProps,content:text('专员审核后会通过工单回复结果。请不要重复提交相同申请。'),children:[]},
 ];
@@ -207,7 +208,7 @@ function fixture(kind:'default'|'plain'='default'){
  return <FumadocsPublicationI18n locale="zh-CN" destinations={plain?{'zh-CN':plainPath}:fixtureLanguages}><DocsLayout tree={plain?plainTree:tree} nav={{title:'JUYU Help Centre',url:currentPath}} searchToggle={{enabled:false}}>
   <DocsPage data-fumadocs-publication="" toc={plain?[]:toc} slots={{toc:fumadocsBlockNoteTocSlots}} breadcrumb={{enabled:false}}>
    <DocsTitle>{article.title}</DocsTitle>
-   <DocsDescription>{plain?'正文没有章节标题时，Fumadocs 不会制造本页目录。':'使用 Fumadocs 官方阅读外壳和 BlockNote 官方只读视图显示同一份文章内容。'}</DocsDescription>
+   <DocsDescription className="mb-2">{plain?'正文没有章节标题时，Fumadocs 不会制造本页目录。':'使用 Fumadocs 官方阅读外壳和 BlockNote 官方只读视图显示同一份文章内容。'}</DocsDescription>
    <FumadocsPublicationActions article={article} features={defaultFeatureFlags}/>
    <DocsBody><FumadocsBlockNoteReader blocks={plain?plainBlocks:blocks} published locale="zh-CN" documentId={article.id} revision={1} referencePages={plain?[]:fixtureReferencePages}/></DocsBody>
    <FumadocsPublicationFeedback article={article} features={defaultFeatureFlags}/>

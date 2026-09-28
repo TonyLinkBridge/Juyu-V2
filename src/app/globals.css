@@ -14,7 +14,7 @@
 html { background: var(--surface); color: var(--ink); }
 body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 15px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
 :where(a:not(.juyu-fumadocs *)) { color: inherit; text-decoration: none; }
-button { font: inherit; }
+button:not(.juyu-fumadocs *) { font: inherit; }
 a, button { -webkit-tap-highlight-color: transparent; }
 a:not(.juyu-fumadocs *):focus-visible, button:not(.juyu-fumadocs *):focus-visible { outline: 3px solid var(--focus); outline-offset: 5px; border-radius: 4px; }
 ::selection { background: var(--selection); }

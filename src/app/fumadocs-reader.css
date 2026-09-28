@@ -46,6 +46,10 @@
 [data-fumadocs-blocknote-reader] .bn-block-content { padding-block:0; }
 :is([data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='paragraph'],[data-fumadocs-draft-reader] .gitbook-document.native-document>p) { margin:0 0 1.25rem;padding:0;line-height:1.75rem; }
 [data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='paragraph']>.bn-inline-content { line-height:inherit; }
+/* Native prose margins collapse between a paragraph and the following heading.
+ * BlockNote wraps each block, so remove the paragraph margin at that boundary. */
+[data-fumadocs-blocknote-reader] .bn-block-outer:has(> .bn-block > .bn-block-content[data-content-type='paragraph']):has(+ .bn-block-outer .bn-block-content[data-content-type='heading']) > .bn-block > .bn-block-content[data-content-type='paragraph'] { margin-bottom:0; }
+[data-fumadocs-page-actions]>.favorite-control { margin:0; }
 [data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='heading'] {
  padding-top:0;
  color:var(--tw-prose-headings);
