@@ -65,6 +65,7 @@ const blocks:EditorBlock[]=[
  {id:'email-callout',type:'juyu',props:{payload:JSON.stringify({id:'email-callout',type:'hint',style:'warning',title:'操作前确认',body:'请先准备账户验证资料。'})},children:[
   {id:'email-callout-detail',type:'paragraph',props:textProps,content:[{type:'text',text:'先核实身份，再查看',styles:{bold:true}},{type:'link',href:'https://example.com/rules',content:text('处理规则')}],children:[]},
  ]},
+ {id:'email-quote',type:'quote',props:textProps,content:text('引用内容保持作者设置，不自动斜体。'),children:[]},
  {id:'email-tabs',type:'juyu',props:{payload:JSON.stringify({id:'email-tabs',type:'tabs',tabs:[
   {id:'self-service',title:'自行处理',body:encodeTabBody([{id:'self-service-body',type:'paragraph',props:textProps,content:[{type:'text',text:'先打开账户设置，再查看',styles:{bold:true}},{type:'link',href:'https://example.com/account',content:text('账户操作说明')}],children:[]}]),iconKey:'book'},
   {id:'staff-support',title:'专员协助',body:'无法登录时，请联系专员核对身份。',iconKey:'users'},

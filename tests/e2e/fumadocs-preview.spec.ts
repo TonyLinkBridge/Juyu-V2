@@ -13,6 +13,13 @@ test('published equations and diagrams use the official BlockNote block specs',a
  await expect(page.locator('[data-content-type="diagram"]')).toBeVisible();
 });
 
+test('published quotes preserve upright text when the author did not add italic formatting',async({page})=>{
+ await page.goto('/design-preview/fumadocs-reader');
+ const quote=page.getByText('引用内容保持作者设置，不自动斜体。',{exact:true});
+ await expect(quote).toBeVisible();
+ await expect(quote).toHaveCSS('font-style','normal');
+});
+
 test('official Fumadocs navigation exposes the real path, adjacent page and mobile page outline',async({page})=>{
  await page.goto('/design-preview/fumadocs-reader');
  await expect(page.locator('article').getByText('资料目录',{exact:true})).toBeVisible();
