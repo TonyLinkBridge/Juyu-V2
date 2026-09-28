@@ -111,7 +111,7 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  assert.match(publication,/redirect\(formalFumadocsPublicationPath\(article.id,section\)\)/);
  assert.match(publication,/readReaderPresentation\(locale\)/);
  assert.match(publication,/tabs=\{formal\?fumadocsContentTabs\(menu,locale,\{path:activePath,pathname:formalFumadocsPublicationPath\(article.id,section\)\},knowledgeEntry\):false\}/);
- assert.match(publication,/prefetch:true/);
+ assert.match(publication,/prefetch:false/);
  assert.doesNotMatch(publication,/breadcrumbRoot|sectionRoot/);
  const ordinaryRoute=await readFile('src/app/help-centre/articles/[articleId]/page.tsx','utf8');
  const opsArticleRoute=await readFile('src/app/help-centre/ops/[articleId]/page.tsx','utf8');
@@ -212,6 +212,8 @@ test('Fumadocs docs shells keep navigation and reading presentation inside offic
  for(const file of shells){
   const source=await readFile(`src/components/fumadocs/${file}`,'utf8');
   assert.doesNotMatch(source,/fumadocsMenuLinks|links=\{/);
+  assert.match(source,/prefetch:false/);
+  assert.doesNotMatch(source,/prefetch:true/);
  }
  const actions=await readFile('src/components/fumadocs/FumadocsPublicationActions.tsx','utf8');
  assert.doesNotMatch(actions,/ReaderAppearance|reader-appearance/);

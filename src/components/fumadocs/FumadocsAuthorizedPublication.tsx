@@ -48,7 +48,7 @@ export async function FumadocsAuthorizedPublication({articleId,mode='preview',ro
  let menu:Awaited<ReturnType<typeof readReaderPresentation>>['items']=[];
  let knowledgeEntry:string|undefined;
  if(formal)try{const presentation=await readReaderPresentation(locale);menu=presentation.items;knowledgeEntry=presentation.knowledgeEntry;}catch{}
- return <FumadocsSearchProvider locale={locale}><FumadocsPublicationI18n locale={locale} destinations={destinations}><DocsLayout tree={tree} tabs={formal?fumadocsContentTabs(menu,locale,{path:activePath,pathname:formalFumadocsPublicationPath(article.id,section)},knowledgeEntry):false} nav={{title:'JUYU Help Centre',url:navRoot}} sidebar={formal?{prefetch:true,footer:<FumadocsAccountFooter locale={locale}/>}:{prefetch:true}} searchToggle={{enabled:formal&&result.features.search}}>
+ return <FumadocsSearchProvider locale={locale}><FumadocsPublicationI18n locale={locale} destinations={destinations}><DocsLayout tree={tree} tabs={formal?fumadocsContentTabs(menu,locale,{path:activePath,pathname:formalFumadocsPublicationPath(article.id,section)},knowledgeEntry):false} nav={{title:'JUYU Help Centre',url:navRoot}} sidebar={formal?{prefetch:false,footer:<FumadocsAccountFooter locale={locale}/>}:{prefetch:false}} searchToggle={{enabled:formal&&result.features.search}}>
   <FumadocsPublicationPage article={article} features={result.features} viewerId={result.viewerId} favorite={result.favorite} formal={formal} recentKind={section} referencePages={referencePages(result.pages,mode,section)} referenceAliases={result.referenceAliases}/>
  </DocsLayout></FumadocsPublicationI18n></FumadocsSearchProvider>;
 }

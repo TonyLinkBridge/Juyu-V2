@@ -34,7 +34,7 @@ export function FumadocsFormFillContent({data,state,search=false}:FumadocsFormFi
  return <FumadocsPublicationI18n locale="zh-CN"><DocsLayout
   tree={formTree(state==='ready'?data:undefined)}
   nav={{title:'JUYU Help Centre',url:'/help-centre'}}
-  sidebar={{prefetch:true,footer:<FumadocsAccountFooter locale="zh-CN"/>}}
+  sidebar={{prefetch:false,footer:<FumadocsAccountFooter locale="zh-CN"/>}}
   searchToggle={{enabled:search}}
  >
   <DocsPage data-fumadocs-form-fill-page="" toc={[]} breadcrumb={{includeRoot:{url:'/help-centre/forms'},includePage:state==='ready'}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

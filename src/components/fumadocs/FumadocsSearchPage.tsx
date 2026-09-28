@@ -28,7 +28,7 @@ export function FumadocsSearchContent({pages,features,search,scope,failed=false,
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={fumadocsPublicationTree(failed?[]:pages,locale,'formal')}
   nav={{title:'JUYU Help Centre',url:'/help-centre'}}
-  sidebar={{prefetch:true,footer:<FumadocsAccountFooter locale={locale}/>}}
+  sidebar={{prefetch:false,footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:features.search}}
  >
   <DocsPage data-fumadocs-search-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

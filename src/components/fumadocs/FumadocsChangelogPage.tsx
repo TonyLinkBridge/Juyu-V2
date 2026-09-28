@@ -54,7 +54,7 @@ export function FumadocsChangelogContent({data,state,search=false,locale='zh-CN'
  return <FumadocsPublicationI18n locale={locale} destinations={{'zh-CN':pageHref(currentPage,'zh-CN'),en:pageHref(currentPage,'en')}}><DocsLayout
   tree={changelogTree(ready?data:undefined,locale)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
-  sidebar={{prefetch:true,footer:<FumadocsAccountFooter locale={locale}/>}}
+  sidebar={{prefetch:false,footer:<FumadocsAccountFooter locale={locale}/>}}
   searchToggle={{enabled:search}}
  >
   <DocsPage data-fumadocs-changelog-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>

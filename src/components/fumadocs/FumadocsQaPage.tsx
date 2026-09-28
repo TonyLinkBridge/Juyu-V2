@@ -61,7 +61,7 @@ export function FumadocsQaContent({data,initialAnswer,previewAnswers,viewerId,st
   tree={qaTree(state==='ready'?data:undefined,locale)}
   tabs={fumadocsContentTabs(menu,locale,{path:'/help-centre/qa',pathname:tabsPathname},knowledgeEntry)}
   nav={{title:'JUYU Help Centre',url:locale==='en'?'/help-centre?lang=en':'/help-centre'}}
-  sidebar={{prefetch:true,footer:<FumadocsAccountFooter locale={locale}/>}}
+  sidebar={{prefetch:false,footer:<FumadocsAccountFooter locale={locale}/>}}
  searchToggle={{enabled:searchEnabled}}
  >
   <DocsPage data-fumadocs-qa-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>
