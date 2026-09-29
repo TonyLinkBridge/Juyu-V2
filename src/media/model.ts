@@ -3,13 +3,13 @@ import {decodeTabBody,normalizeTabBody} from './tab-body.ts';
 import {safeLink} from '../editor/inline.ts';
 import {inlineEmbed} from '../editor/inline-embed.ts';
 import {externalLinkSource} from './external-embed.ts';
-export type TextBlock={id:string;type:'hint';style:'info'|'success'|'warning'|'danger';title:string;body:string;showTitle?:boolean;iconKey?:ReaderIconKey|null}|{id:string;type:'code';language:string;code:string;title?:string;lineNumbers?:boolean;wrap?:boolean;expandable?:boolean;collapsedLines?:number;highlightLines?:string;addedLines?:string;removedLines?:string}|{id:string;type:'tabs';tabs:{id:string;title:string;body:string;iconKey?:ReaderIconKey|null}[]}|{id:string;type:'steps';steps:{id:string;title:string;body:string}[]}|{id:string;type:'columns';columns:{id:string;title:string;body:string}[]};
+export type TextBlock={id:string;type:'hint';style:'info'|'success'|'warning'|'danger';title:string;body:string;showTitle?:boolean;iconKey?:ReaderIconKey|null}|{id:string;type:'code';language:string;code:string;title?:string;lineNumbers?:boolean;wrap?:boolean;expandable?:boolean;collapsedLines?:number;highlightLines?:string;addedLines?:string;removedLines?:string}|{id:string;type:'tabs';tabs:{id:string;title:string;body:string;iconKey?:ReaderIconKey|null}[]}|{id:string;type:'accordion';items:{id:string;title:string;body:string}[]}|{id:string;type:'steps';steps:{id:string;title:string;body:string}[]}|{id:string;type:'columns';columns:{id:string;title:string;body:string}[]};
 export const hintLabels={info:'提示',success:'成功',warning:'注意',danger:'警告'};
 export type ScienceBlock={id:string;type:'math';source:string;caption:string}|{id:string;type:'diagram';source:string;caption:string};
 export type MediaBlock=ScienceBlock|TextBlock|{id:string;type:'articleReference';targetId:string}|{id:string;type:'button';label:string;href:string;variant:'primary'|'secondary'}|{id:string;type:'externalEmbed';url:string;caption:string}|{id:string;type:'image'|'video'|'audio'|'file';assetId:string;caption:string;alt:string;darkAssetId?:string|null}|{id:string;type:'table';headers:string[];rows:string[][];view?:'grid'|'cards';searchable?:boolean;stickyHeader?:boolean;stickyFirstColumn?:boolean};
 export function blockAssetIds(block:MediaBlock):string[]{
  if('assetId' in block)return [block.assetId,...(block.type==='image'&&block.darkAssetId?[block.darkAssetId]:[])];
- const bodies=block.type==='tabs'?block.tabs.map(tab=>tab.body):block.type==='steps'?block.steps.map(step=>step.body):block.type==='columns'?block.columns.map(column=>column.body):[];
+ const bodies=block.type==='tabs'?block.tabs.map(tab=>tab.body):block.type==='accordion'?block.items.map(item=>item.body):block.type==='steps'?block.steps.map(step=>step.body):block.type==='columns'?block.columns.map(column=>column.body):[];
  const result:string[]=[];
  for(const body of bodies){const nodes=decodeTabBody(body);if(!nodes)continue;const visit=(items:typeof nodes)=>{for(const node of items){if(node.type==='image'){const id=node.props.url.match(/^\/api\/assets\/([0-9a-f-]{36})$/i)?.[1];if(id)result.push(id);}const contents=node.type==='table'?node.content.rows.flatMap(row=>row.cells.map(cell=>cell.content)):'content' in node?[node.content]:[];for(const content of contents)for(const inline of content)if(inline.type==='link'){const embed=inlineEmbed(inline.href);if(embed?.type==='image')result.push(embed.assetId);}visit(node.children);}};visit(nodes);}
  return result;
@@ -22,7 +22,7 @@ export function normalizeBlocks(value:unknown):MediaBlock[]{
  if(!Array.isArray(value)||value.length>40)return bad();const ids=new Set<string>();
  const text=(v:unknown,max:number)=>{if(typeof v!=='string'||v.length>max||v.includes('\0'))return bad();return v;};
  const result=value.map(b=>{
-  if(!b||typeof b!=='object'||!['image','video','audio','file','table','hint','code','tabs','steps','columns','math','diagram','articleReference','button','externalEmbed'].includes(b.type)||typeof b.id!=='string'||!/^[-a-zA-Z0-9]{1,64}$/.test(b.id)||ids.has(b.id))return bad();ids.add(b.id);
+  if(!b||typeof b!=='object'||!['image','video','audio','file','table','hint','code','tabs','accordion','steps','columns','math','diagram','articleReference','button','externalEmbed'].includes(b.type)||typeof b.id!=='string'||!/^[-a-zA-Z0-9]{1,64}$/.test(b.id)||ids.has(b.id))return bad();ids.add(b.id);
   if(b.type==='externalEmbed'){
    if(Object.keys(b).some(k=>!['id','type','url','caption'].includes(k))||typeof b.url!=='string'||!externalLinkSource(b.url))return bad();
    return {id:b.id,type:'externalEmbed' as const,url:b.url,caption:text(b.caption,300)};
@@ -48,6 +48,11 @@ export function normalizeBlocks(value:unknown):MediaBlock[]{
    if(Object.keys(b).some(k=>!['id','type','tabs'].includes(k))||!Array.isArray(b.tabs)||b.tabs.length<1||b.tabs.length>8)return bad();
    const tabIds=new Set<string>();const tabs=b.tabs.map((t:Record<string,unknown>)=>{if(!t||typeof t!=='object'||Object.keys(t).some(k=>!['id','title','body','iconKey'].includes(k))||typeof t.id!=='string'||!/^[-a-zA-Z0-9]{1,64}$/.test(t.id)||tabIds.has(t.id)||t.iconKey!==undefined&&t.iconKey!==null&&readerIconKey(t.iconKey)===null)return bad();tabIds.add(t.id);return {id:t.id,title:text(t.title,100),body:normalizeTabBody(text(t.body,20000)),...(t.iconKey===undefined?{}:{iconKey:t.iconKey as ReaderIconKey|null})};});
    return {id:b.id,type:'tabs' as const,tabs};
+  }
+  if(b.type==='accordion'){
+   if(Object.keys(b).some(k=>!['id','type','items'].includes(k))||!Array.isArray(b.items)||b.items.length<1||b.items.length>20)return bad();
+   const itemIds=new Set<string>();const items=b.items.map((item:Record<string,unknown>)=>{if(!item||typeof item!=='object'||Object.keys(item).some(k=>!['id','title','body'].includes(k))||typeof item.id!=='string'||!/^[-a-zA-Z0-9]{1,64}$/.test(item.id)||itemIds.has(item.id))return bad();itemIds.add(item.id);return {id:item.id,title:text(item.title,120),body:normalizeTabBody(text(item.body,20000))};});
+   return {id:b.id,type:'accordion' as const,items};
   }
   if(b.type==='steps'){
    if(Object.keys(b).some(k=>!['id','type','steps'].includes(k))||!Array.isArray(b.steps)||b.steps.length<1||b.steps.length>20)return bad();

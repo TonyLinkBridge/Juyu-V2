@@ -724,6 +724,14 @@ test('official Fumadocs shell renders the same BlockNote document read only',asy
  await tabs.getByRole('tab',{name:'专员协助',exact:true}).click();
  await expect(tabs.getByText('无法登录时，请联系专员核对身份。',{exact:true})).toBeVisible();
  await expect(tabs.getByText('先打开账户设置，再查看',{exact:false})).toBeHidden();
+ const accordion=page.locator('[data-fumadocs-accordion="email-accordion"]');
+ const firstQuestion=accordion.getByRole('button',{name:'修改前需要准备什么？'});
+ await expect(firstQuestion).toHaveAttribute('aria-expanded','false');
+ await firstQuestion.click();
+ await expect(firstQuestion).toHaveAttribute('aria-expanded','true');
+ await expect(accordion.getByText('准备账户 ID、原绑定邮箱和新邮箱。',{exact:true})).toBeVisible();
+ await accordion.getByRole('button',{name:'修改后在哪里确认？'}).click();
+ await expect(accordion.getByRole('link',{name:'处理回执'})).toHaveAttribute('href','https://example.com/receipt');
  const steps=page.locator('[data-fumadocs-steps="email-steps"]');
  await expect(steps.locator('.fd-step')).toHaveCount(2);
  await expect(steps.getByRole('heading').allTextContents()).resolves.toEqual(['核对账户资料','提交修改申请']);

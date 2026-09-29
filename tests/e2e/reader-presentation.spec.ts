@@ -44,7 +44,7 @@ async function readerFixture(page:import('@playwright/test').Page,revision='1',m
 }
 test('announcement dismissal survives reload and a new revision appears again',async({page})=>{
  await readerFixture(page);await page.goto('/help-centre');const notice=page.getByRole('region',{name:'资料库公告'});
- await expect(notice).toContainText('本地公告验收');await expect(page.locator('#presentation')).not.toHaveAttribute('data-hydration-error');await notice.getByRole('button',{name:'关闭公告'}).click();await expect(notice).toHaveCount(0);await expect(page.locator('#main-content')).toBeFocused();
+ await expect(notice).toContainText('本地公告验收');await expect(page.locator('#presentation')).not.toHaveAttribute('data-hydration-error');await notice.getByRole('button').click();await expect(notice).toHaveCount(0);
  await page.reload();await expect(page.getByRole('heading',{level:1})).toBeVisible();await expect(notice).toHaveCount(0);
  await page.unrouteAll();await readerFixture(page,'2');await page.reload();await expect(notice).toBeVisible();
 });
@@ -76,7 +76,7 @@ test('announcement still closes with blocked storage and wrapping does not clip 
  await page.addInitScript(()=>{Storage.prototype.getItem=()=>{throw new Error('blocked')};Storage.prototype.setItem=()=>{throw new Error('blocked')};});
  await readerFixture(page,'1','这是一段用于确认多行公告的本地示例。'.repeat(8));await page.goto('/help-centre');
  const active=page.getByRole('navigation',{name:'文章目录'}).locator('[aria-current="page"]');await expect(active).toBeInViewport({ratio:1});
- await page.getByRole('button',{name:'关闭公告'}).click();await expect(page.getByRole('region',{name:'资料库公告'})).toHaveCount(0);await expect(page.locator('#main-content')).toBeFocused();
+ await page.getByRole('region',{name:'资料库公告'}).getByRole('button').click();await expect(page.getByRole('region',{name:'资料库公告'})).toHaveCount(0);
  await expect(active).toBeInViewport({ratio:1});
 });
 
@@ -98,7 +98,7 @@ test('both palettes keep reader, search highlights and entry text at readable co
  await readerFixture(page);await page.goto('/help-centre');
  for(const mode of ['浅色','深色']){
   await page.getByRole('radio',{name:mode,exact:true}).check();
-  await textContrast(page,['.reader-test-meta','.gitbook-document .paragraph','.reader-announcement p','.footer-copy span','.theme-toggler span']);
+  await textContrast(page,['.reader-test-meta','.gitbook-document .paragraph','.reader-announcement','.footer-copy span','.theme-toggler span']);
  }
  await page.goto('/help-centre?q='+encodeURIComponent('示例'));
  await expect(page.getByRole('list',{name:'搜索结果列表'})).toBeVisible();

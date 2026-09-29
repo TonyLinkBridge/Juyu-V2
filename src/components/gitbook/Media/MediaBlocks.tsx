@@ -5,6 +5,7 @@ import {Diagram} from '../RichBlocks/Diagram';
 import {Hint} from '../RichBlocks/Hint';
 import {CodeBlock} from '../RichBlocks/CodeBlock';
 import {DynamicTabs} from '../RichBlocks/DynamicTabs';
+import {AccordionBlock} from '../RichBlocks/AccordionBlock';
 import {Steps} from '../RichBlocks/Steps';
 import {Columns} from '../RichBlocks/Columns';
 import {ImageGallery} from './ImageGallery';
@@ -25,7 +26,7 @@ export function MediaBlocks({blocks,admin=false,documentId,revision,locale:reque
  for(let i=0;i<items.length;i++){
   const b=items[i];
   if(b.type==='image'){const group:{id:string;assetId:string;alt:string;caption:string;darkAssetId?:string|null}[]=[];while(i<items.length&&items[i].type==='image'){group.push(items[i] as typeof b);i++;}i--;rendered.push(<ImageGallery key={group[0].id} images={group.map(item=>({id:item.id,src:mediaAssetUrl(item.assetId,admin,documentId,revision),darkSrc:item.darkAssetId?mediaAssetUrl(item.darkAssetId,admin,documentId,revision):undefined,alt:item.alt,caption:item.caption}))}/>);continue;}
-  rendered.push(b.type==='math'?<MathFormula key={b.id} block={b} locale={locale}/>:b.type==='diagram'?<Diagram key={b.id+':'+b.source} block={b} documentId={documentId} revision={revision} admin={admin}/>:b.type==='hint'?<Hint key={b.id} block={b}/>:b.type==='code'?<CodeBlock key={b.id} block={b}/>:b.type==='tabs'?<DynamicTabs key={b.id} block={b} documentId={documentId} revision={revision} admin={admin}/>:b.type==='steps'?<Steps key={b.id} block={b} documentId={documentId} revision={revision} admin={admin} locale={locale}/>:b.type==='columns'?<Columns key={b.id} block={b} documentId={documentId} revision={revision} admin={admin} locale={locale}/>:b.type==='table'?<TableExplorer key={b.id} block={b}/>:b.type==='button'?<ActionButton key={b.id} block={b}/>:b.type==='externalEmbed'?<ExternalEmbed key={b.id} block={b}/>:b.type==='articleReference'?<ArticleReference key={b.id} block={b} admin={admin}/>:<Media key={b.id} block={b} admin={admin} documentId={documentId} revision={revision}/>);
+  rendered.push(b.type==='math'?<MathFormula key={b.id} block={b} locale={locale}/>:b.type==='diagram'?<Diagram key={b.id+':'+b.source} block={b} documentId={documentId} revision={revision} admin={admin}/>:b.type==='hint'?<Hint key={b.id} block={b}/>:b.type==='code'?<CodeBlock key={b.id} block={b}/>:b.type==='tabs'?<DynamicTabs key={b.id} block={b} documentId={documentId} revision={revision} admin={admin}/>:b.type==='accordion'?<AccordionBlock key={b.id} block={b} documentId={documentId} revision={revision} admin={admin} locale={locale}/>:b.type==='steps'?<Steps key={b.id} block={b} documentId={documentId} revision={revision} admin={admin} locale={locale}/>:b.type==='columns'?<Columns key={b.id} block={b} documentId={documentId} revision={revision} admin={admin} locale={locale}/>:b.type==='table'?<TableExplorer key={b.id} block={b}/>:b.type==='button'?<ActionButton key={b.id} block={b}/>:b.type==='externalEmbed'?<ExternalEmbed key={b.id} block={b}/>:b.type==='articleReference'?<ArticleReference key={b.id} block={b} admin={admin}/>:<Media key={b.id} block={b} admin={admin} documentId={documentId} revision={revision}/>);
  }
  return <div className="media-blocks">{rendered}</div>;
 }

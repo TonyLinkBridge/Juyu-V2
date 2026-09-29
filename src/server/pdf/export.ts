@@ -16,7 +16,7 @@ async function exportAuthorizedPDF(request:Request,id:string,revision:number,dep
  try{
   positiveInteger(revision);if(request.headers.get('sec-fetch-site')==='cross-site')throw new Error('FORBIDDEN');
   const snapshot=await measured('pdf.snapshot',()=>deps.snapshot(id,revision));if(snapshot.article.id!==id||snapshot.article.revision!==revision)throw new Error('VERSION_CHANGED');
-  const blocks=normalizeBlocks(snapshot.article.blocks);const imageIds=new Set(blocks.flatMap(b=>b.type==='image'?[b.assetId]:b.type==='tabs'||b.type==='steps'||b.type==='columns'?blockAssetIds(b):[]));if(snapshot.article.cover)imageIds.add(snapshot.article.cover.assetId);
+  const blocks=normalizeBlocks(snapshot.article.blocks);const imageIds=new Set(blocks.flatMap(b=>b.type==='image'?[b.assetId]:b.type==='tabs'||b.type==='accordion'||b.type==='steps'||b.type==='columns'?blockAssetIds(b):[]));if(snapshot.article.cover)imageIds.add(snapshot.article.cover.assetId);
   const assetIds=new Set([...imageIds,...blocks.flatMap(blockAssetIds)]);const assets:AssetFile[]=[];
   for(const assetId of assetIds){const asset=await measured('pdf.asset',()=>deps.asset(assetId));if(!asset||asset.id!==assetId||asset.document_id!==id||(imageIds.has(assetId)&&!['image/png','image/jpeg','image/webp','image/gif'].includes(asset.mime_type)))throw new Error('IMAGE_UNAVAILABLE');validateAsset(asset);assets.push(asset);}
   for(const block of blocks)if(block.type==='math')mathMarkup(block.source);

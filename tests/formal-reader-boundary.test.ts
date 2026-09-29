@@ -264,3 +264,19 @@ test('shipped styles do not retain selectors for the retired article shell',asyn
  ];
  for(const selector of retiredSelectors)assert.doesNotMatch(styles,new RegExp(`\\.${selector}(?![a-z-])`),selector);
 });
+
+test('accordion and announcement use the official Fumadocs UI components',async()=>{
+ const [reader,banner,editor]=await Promise.all([
+  readFile('src/components/fumadocs/FumadocsBlockNoteReaderClient.tsx','utf8'),
+  readFile('src/components/gitbook/Announcement/AnnouncementBanner.tsx','utf8'),
+  readFile('src/components/editor/ArticleEditor.tsx','utf8'),
+ ]);
+ assert.match(reader,/from 'fumadocs-ui\/components\/accordion'/);
+ assert.match(reader,/<Accordions/);
+ assert.match(reader,/<Accordion/);
+ assert.match(banner,/from 'fumadocs-ui\/components\/banner'/);
+ assert.match(banner,/<Banner/);
+ assert.match(banner,/announcement\.revision/);
+ assert.doesNotMatch(banner,/useSyncExternalStore|data-gb-announcement-banner/);
+ assert.match(editor,/新增折叠内容/);
+});

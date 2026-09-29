@@ -9,6 +9,7 @@ import '@blocknote/mantine/style.css';
 import {createReactMathBlockSpec,locales as mathLocales} from '@blocknote/math-block';
 import {createReactBlockSpec,createReactInlineContentSpec,useCreateBlockNote} from '@blocknote/react';
 import {Callout} from 'fumadocs-ui/components/callout';
+import {Accordion,Accordions} from 'fumadocs-ui/components/accordion';
 import {Card} from 'fumadocs-ui/components/card';
 import {DynamicCodeBlock} from 'fumadocs-ui/components/dynamic-codeblock';
 import {File,Files} from 'fumadocs-ui/components/files';
@@ -66,6 +67,12 @@ type PreviewTabs={
 type PreviewSteps={
  type:'steps';
  steps:{id:string;title:string;body:string}[];
+ readerLocale?:ReaderLocale;
+};
+
+type PreviewAccordion={
+ type:'accordion';
+ items:{id:string;title:string;body:string}[];
  readerLocale?:ReaderLocale;
 };
 
@@ -182,6 +189,29 @@ function FumadocsTabs({tabs,blockId}:{tabs:PreviewTabs;blockId:string}){
    return <TabsContent key={tab.id} value={tab.id}>{body?<PublishedBlockNoteStatic blocks={body} locale={locale}/>:<p>{tab.body}</p>}</TabsContent>;
   })}
  </Tabs>;
+}
+
+function readAccordion(payload:string):PreviewAccordion|null{
+ try{
+  const value=JSON.parse(payload) as Partial<PreviewAccordion>;
+  if(value.type!=='accordion'||!Array.isArray(value.items)||value.items.length<1||value.items.length>20||value.readerLocale!==undefined&&!['zh-CN','en'].includes(value.readerLocale))return null;
+  const ids=new Set<string>();
+  const items:PreviewAccordion['items']=[];
+  for(const item of value.items){
+   if(!item||typeof item!=='object'||typeof item.id!=='string'||!/^[-a-zA-Z0-9]{1,64}$/.test(item.id)||ids.has(item.id)||typeof item.title!=='string'||item.title.length>120||typeof item.body!=='string'||item.body.length>20000)return null;
+   ids.add(item.id);items.push({id:item.id,title:item.title,body:item.body});
+  }
+  return {type:'accordion',items,...(value.readerLocale?{readerLocale:value.readerLocale}:{})};
+ }catch{return null;}
+}
+
+function FumadocsAccordion({accordion,blockId}:{accordion:PreviewAccordion;blockId:string}){
+ const locale=accordion.readerLocale??'zh-CN';
+ const label=(title:string,index:number)=>title.trim()||(locale==='en'?`Question ${index+1}`:`问题 ${index+1}`);
+ return <div data-fumadocs-accordion={blockId}><Accordions type="single">{accordion.items.map((item,index)=>{
+  const body=decodeTabBody(item.body),id=`${blockId}-${item.id}`;
+  return <Accordion key={item.id} id={id} value={id} title={label(item.title,index)}>{body?<PublishedBlockNoteStatic blocks={body} locale={locale}/>:item.body?<p>{item.body}</p>:null}</Accordion>;
+ })}</Accordions></div>;
 }
 
 function readSteps(payload:string):PreviewSteps|null{
@@ -491,6 +521,8 @@ const juyuBlock=createReactBlockSpec({
   if(hint)return <FumadocsHint hint={hint} blockId={block.id}/>;
   const tabs=readTabs(block.props.payload);
   if(tabs)return <FumadocsTabs tabs={tabs} blockId={block.id}/>;
+  const accordion=readAccordion(block.props.payload);
+  if(accordion)return <FumadocsAccordion accordion={accordion} blockId={block.id}/>;
   const steps=readSteps(block.props.payload);
   if(steps)return <FumadocsSteps steps={steps} blockId={block.id}/>;
   const columns=readColumns(block.props.payload);
@@ -569,6 +601,8 @@ function publishedBlocks(nodes:EditorBlock[],locale:ReaderLocale):unknown[]{
    if(hint)return {...block,props:{payload:JSON.stringify({...hint,readerChildren:block.children,readerLocale:locale})},children:[]};
    const tabs=readTabs(block.props.payload);
    if(tabs)return {...block,props:{payload:JSON.stringify({...tabs,readerLocale:locale})},children:[]};
+   const accordion=readAccordion(block.props.payload);
+   if(accordion)return {...block,props:{payload:JSON.stringify({...accordion,readerLocale:locale})},children:[]};
    const steps=readSteps(block.props.payload);
    if(steps)return {...block,props:{payload:JSON.stringify({...steps,readerLocale:locale})},children:[]};
    const columns=readColumns(block.props.payload);

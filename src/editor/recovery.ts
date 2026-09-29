@@ -33,6 +33,7 @@ export function recoveryReadable(data:EditorData):string {
   else if(b.type==='hint')lines.push(b.title,b.body);
   else if(b.type==='code')lines.push(b.language,b.code);
   else if(b.type==='tabs')for(const tab of b.tabs)lines.push(tab.title,tab.body);
+  else if(b.type==='accordion')for(const item of b.items)lines.push(item.title,item.body);
   else if(b.type==='steps')for(const step of b.steps)lines.push(step.title,step.body);
   else if(b.type==='columns')for(const column of b.columns)lines.push(column.title,column.body);
   else if(b.type==='math'||b.type==='diagram')lines.push(b.caption,b.source);

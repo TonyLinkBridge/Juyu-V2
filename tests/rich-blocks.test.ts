@@ -6,6 +6,19 @@ import {encodeEditorBody} from '../src/editor/document.ts';
 import {decodeTabBody,encodeTabBody} from '../src/media/tab-body.ts';
 import {codeLineNumbers} from '../src/media/code-lines.ts';
 import {buildNavigationTree} from '../src/reader/tree.ts';
+import {publicationMarkdown} from '../src/reader/markdown.ts';
+test('official accordion content validates, preserves rich assets and exports every answer',()=>{
+ const imageId='11111111-1111-4111-8111-111111111111';
+ const rich=encodeTabBody([{id:'answer-image',type:'image',props:{url:`/api/assets/${imageId}`,name:'操作截图',caption:'',showPreview:true,previewWidth:512,textAlignment:'left'},children:[]}]);
+ const accordion:Extract<MediaBlock,{type:'accordion'}>={id:'faq',type:'accordion',items:[{id:'first',title:'如何开始？',body:'先登录账号。'},{id:'second',title:'在哪里查看？',body:rich}]};
+ assert.deepEqual(normalizeBlocks([accordion]),[accordion]);
+ assert.deepEqual(blockAssetIds(accordion),[imageId]);
+ const html=pdfHTML({id:'faq-guide',title:'常见问题',revision:1,body:'',blocks:[accordion]});
+ assert.match(html,/pdf-accordion[\s\S]*如何开始？[\s\S]*先登录账号。[\s\S]*在哪里查看？[\s\S]*操作截图/);
+ const markdown=publicationMarkdown({id:'faq-guide',title:'常见问题',revision:1,body:'',blocks:[accordion]});
+ assert.match(markdown,/### 如何开始？[\s\S]*先登录账号。[\s\S]*### 在哪里查看？[\s\S]*操作截图/);
+ for(const bad of [{...accordion,items:[]},{...accordion,items:[accordion.items[0],{...accordion.items[1],id:'first'}]},{...accordion,items:[{...accordion.items[0],body:'x'.repeat(20001)}]}])assert.throws(()=>normalizeBlocks([bad]),/INVALID_MEDIA/);
+});
 test('ordered steps preserve rich content and appear completely in PDF',()=>{
  const rich=encodeTabBody([{id:'step-line',type:'paragraph',props:{textAlignment:'left',textColor:'default',backgroundColor:'default'},content:[{type:'text',text:'确认身份',styles:{bold:true}}],children:[]}]);
  const steps:Extract<MediaBlock,{type:'steps'}>={id:'steps-one',type:'steps',steps:[{id:'one',title:'核对资料',body:rich},{id:'two',title:'提交结果',body:'保留回执 <script>'}]};

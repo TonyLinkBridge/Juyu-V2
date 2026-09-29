@@ -70,6 +70,10 @@ const blocks:EditorBlock[]=[
   {id:'self-service',title:'自行处理',body:encodeTabBody([{id:'self-service-body',type:'paragraph',props:textProps,content:[{type:'text',text:'先打开账户设置，再查看',styles:{bold:true}},{type:'link',href:'https://example.com/account',content:text('账户操作说明')}],children:[]}]),iconKey:'book'},
   {id:'staff-support',title:'专员协助',body:'无法登录时，请联系专员核对身份。',iconKey:'users'},
  ]})},children:[]},
+ {id:'email-accordion',type:'juyu',props:{payload:JSON.stringify({id:'email-accordion',type:'accordion',items:[
+  {id:'before-change',title:'修改前需要准备什么？',body:'准备账户 ID、原绑定邮箱和新邮箱。'},
+  {id:'after-change',title:'修改后在哪里确认？',body:encodeTabBody([{id:'after-change-body',type:'paragraph',props:textProps,content:[{type:'text',text:'前往账户安全页查看，并保留',styles:{}},{type:'link',href:'https://example.com/receipt',content:text('处理回执')}],children:[]}])},
+ ]})},children:[]},
  {id:'email-steps',type:'juyu',props:{payload:JSON.stringify({id:'email-steps',type:'steps',steps:[
   {id:'verify-profile',title:'核对账户资料',body:encodeTabBody([{id:'verify-profile-body',type:'paragraph',props:textProps,content:[{type:'text',text:'准备账户 ID，并确认',styles:{bold:true}},{type:'link',href:'https://example.com/identity',content:text('身份资料要求')}],children:[]}])},
   {id:'submit-request',title:'提交修改申请',body:'填写新邮箱后提交申请，并等待专员回复。'},

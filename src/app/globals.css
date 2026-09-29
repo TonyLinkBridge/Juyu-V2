@@ -278,12 +278,6 @@ button:not(.juyu-fumadocs *), input:not(.juyu-fumadocs *), select:not(.juyu-fuma
 .site-footer { align-items: center; flex-wrap: wrap; }
 .footer-copy { display: flex; flex-direction: column; gap: 4px; }
 .footer-copy strong { color: var(--ink); font-size: 12px; font-weight: 550; }
-.reader-announcement { position: relative; display: flex; align-items: flex-start; gap: 10px; width: min(1320px, calc(100% - 64px)); margin: 14px auto 0; padding: 12px 52px 12px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--accent-soft); color: var(--ink); font-size: 13px; }
-.reader-announcement > svg { flex-shrink: 0; margin-top: 2px; color: var(--brand); }
-.reader-announcement p { margin: 0; overflow-wrap: anywhere; }
-.reader-announcement button { position: absolute; right: 4px; top: 2px; width: 44px; height: 44px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-size: 24px; cursor: pointer; }
-.reader-announcement button:hover { background: var(--accent-hover); color: var(--ink); }
-@media(max-width: 1023px) { .reader-announcement { width: calc(100% - 40px); } }
 @media(max-width: 640px) { .site-footer { align-items: flex-start; gap: 16px; } }
 
 /* T024: GitBook hero cover and wrapping tags on the published article snapshot. */

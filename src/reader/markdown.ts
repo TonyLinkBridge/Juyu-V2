@@ -34,8 +34,8 @@ function mediaMarkdown(block:MediaBlock):string{
  if(block.type==='button')return `[${escape(block.label)}](${block.href})`;
  if(block.type==='externalEmbed')return `[${escape(block.caption||'打开外部内容')}](${block.url})`;
  if(block.type==='table')return [block.headers.map(tableText).join(' | '),block.headers.map(()=>'---').join(' | '),...block.rows.map(row=>row.map(tableText).join(' | '))].join('\n');
- if(block.type!=='tabs'&&block.type!=='steps'&&block.type!=='columns')return '';
- const items=block.type==='tabs'?block.tabs:block.type==='steps'?block.steps:block.columns;
+ if(block.type!=='tabs'&&block.type!=='accordion'&&block.type!=='steps'&&block.type!=='columns')return '';
+ const items=block.type==='tabs'?block.tabs:block.type==='accordion'?block.items:block.type==='steps'?block.steps:block.columns;
  return items.map((item,index)=>`### ${block.type==='steps'?`${index+1}. `:''}${escape(item.title)}\n\n${decodeTabBody(item.body)?blocksMarkdown(decodeTabBody(item.body)!):escape(item.body)}`).join('\n\n');
 }
 function blocksMarkdown(blocks:EditorBlock[]):string{return blocks.map(block=>{
