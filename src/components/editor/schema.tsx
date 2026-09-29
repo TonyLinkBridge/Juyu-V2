@@ -40,9 +40,15 @@ const juyu=createReactBlockSpec({type:'juyu',propSchema:{payload:{default:''}},c
      <span className="editor-hint-icon" aria-hidden="true">{media.iconKey?<ReaderIcon icon={media.iconKey} size={20}/>:({info:'ⓘ',success:'✓',warning:'!',danger:'⚠'})[media.style]}</span>
      <div className="editor-hint-heading">{media.showTitle!==false&&<input aria-label={t('提示标题','Callout title')} maxLength={200} disabled={context.frozen} value={media.title} placeholder={t('提示标题（选填）','Callout title (optional)')} onFocus={()=>context.selectHint(block.id)} onChange={event=>update({...media,title:event.target.value})}/>}</div>
      <button className="editor-hint-add" type="button" disabled={context.frozen} aria-label={t('在提示框中新增内容','Add content to callout')} title={t('在提示框中新增内容','Add content to callout')} onClick={event=>{event.stopPropagation();context.selectHint(block.id);editor.updateBlock(block,{children:[...block.children,{type:'paragraph',content:''}] as never});}}>+</button>
-    </div>
+   </div>
    </div>;
   }
+  if(media.type==='tabs')return <div className="editor-embedded editor-tabs-shell" data-juyu-type="tabs" contentEditable={false}>
+   <div className="editor-embedded-heading"><strong>{names.tabs}</strong><span>{t('正式页面使用 Fumadocs Tabs，右侧草稿预览会即时同步。','The published page uses Fumadocs Tabs. Draft preview updates instantly.')}</span></div>
+   {invalid&&<p role="alert">{t('此内容块尚未符合保存要求，请修正下方输入。','This block is not ready to save. Check the fields below.')}</p>}
+   <fieldset disabled={context.frozen}><MediaFields block={media} assets={context.assets} documentId={context.documentId} frozen={context.frozen} locale={context.locale} onChange={next=>editor.updateBlock(block,{props:{payload:JSON.stringify(next)}})}/></fieldset>
+   <div className="media-toolbar"><button type="button" disabled={context.frozen} onClick={()=>editor.moveBlocksUp(block)}>{t('上移内容块','Move block up')}</button><button type="button" disabled={context.frozen} onClick={()=>editor.moveBlocksDown(block)}>{t('下移内容块','Move block down')}</button><button type="button" disabled={context.frozen} onClick={()=>editor.removeBlocks([block])}>{t('删除内容块','Delete block')}</button></div>
+  </div>;
   return <div className="editor-embedded" data-juyu-type={media.type} contentEditable={false}><strong>{names[media.type]}</strong>{invalid&&<p role="alert">{t('此内容块尚未符合保存要求，请修正下方输入。','This block is not ready to save. Check the fields below.')}</p>}<details><summary>{t('编辑此内容块','Edit this block')}</summary><fieldset disabled={context.frozen}><MediaFields block={media} assets={context.assets} documentId={context.documentId} frozen={context.frozen} locale={context.locale} onChange={next=>editor.updateBlock(block,{props:{payload:JSON.stringify(next)}})}/></fieldset></details>
    {!invalid&&<details><summary>{t('查看此块预览','Preview this block')}</summary><MediaBlocks blocks={[media]} documentId={context.documentId} locale={context.locale} admin/></details>}
    <div className="media-toolbar"><button type="button" disabled={context.frozen} onClick={()=>editor.moveBlocksUp(block)}>{t('上移内容块','Move block up')}</button><button type="button" disabled={context.frozen} onClick={()=>editor.moveBlocksDown(block)}>{t('下移内容块','Move block down')}</button><button type="button" disabled={context.frozen} onClick={()=>editor.removeBlocks([block])}>{t('删除内容块','Delete block')}</button></div>
