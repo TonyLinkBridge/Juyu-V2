@@ -36,15 +36,14 @@ const juyu=createReactBlockSpec({type:'juyu',propSchema:{payload:{default:''}},c
   if(media.type==='hint'){
    const update=(next:typeof media)=>editor.updateBlock(block,{props:{payload:JSON.stringify(next)}});
    const selected=context.activeHintId===block.id;
-   return <div className={`editor-embedded editor-hint-shell${selected?' is-selected':''}`} data-juyu-type="hint" data-juyu-style={media.style} contentEditable={false} onClick={()=>context.selectHint(block.id)}><div className="editor-hint-layout">
+   return <div className={`editor-embedded editor-hint-shell${selected?' is-selected':''}`} data-juyu-id={block.id} data-juyu-type="hint" data-juyu-style={media.style} contentEditable={false} onClick={()=>context.selectHint(block.id)}><div className="editor-hint-layout">
      <span className="editor-hint-icon" aria-hidden="true">{media.iconKey?<ReaderIcon icon={media.iconKey} size={20}/>:({info:'ⓘ',success:'✓',warning:'!',danger:'⚠'})[media.style]}</span>
      <div className="editor-hint-heading">{media.showTitle!==false&&<input aria-label={t('提示标题','Callout title')} maxLength={200} disabled={context.frozen} value={media.title} placeholder={t('提示标题（选填）','Callout title (optional)')} onFocus={()=>context.selectHint(block.id)} onChange={event=>update({...media,title:event.target.value})}/>}</div>
-     <button className="editor-hint-add" type="button" disabled={context.frozen} aria-label={t('在提示框中新增内容','Add content to callout')} title={t('在提示框中新增内容','Add content to callout')} onClick={event=>{event.stopPropagation();context.selectHint(block.id);editor.updateBlock(block,{children:[...block.children,{type:'paragraph',content:''}] as never});}}>+</button>
    </div>
    </div>;
   }
-  if(media.type==='tabs')return <div className="editor-embedded editor-tabs-shell" data-juyu-type="tabs" contentEditable={false}>
-   <div className="editor-embedded-heading"><strong>{names.tabs}</strong><span>{t('正式页面使用 Fumadocs Tabs，右侧草稿预览会即时同步。','The published page uses Fumadocs Tabs. Draft preview updates instantly.')}</span></div>
+  if(media.type==='tabs'||media.type==='accordion')return <div className={`editor-embedded editor-tabs-shell${media.type==='accordion'?' editor-accordion-shell':''}`} data-juyu-id={block.id} data-juyu-type={media.type} contentEditable={false}>
+   <div className="editor-embedded-heading"><strong>{names[media.type]}</strong><span>{media.type==='tabs'?t('正式页面使用 Fumadocs Tabs，右侧草稿预览会即时同步。','The published page uses Fumadocs Tabs. Draft preview updates instantly.'):t('直接填写标题和内容，右侧会使用 Fumadocs Accordion 即时预览。','Enter the title and content directly. The Fumadocs Accordion preview updates instantly.')}</span></div>
    {invalid&&<p role="alert">{t('此内容块尚未符合保存要求，请修正下方输入。','This block is not ready to save. Check the fields below.')}</p>}
    <fieldset disabled={context.frozen}><MediaFields block={media} assets={context.assets} documentId={context.documentId} frozen={context.frozen} locale={context.locale} onChange={next=>editor.updateBlock(block,{props:{payload:JSON.stringify(next)}})}/></fieldset>
    <div className="media-toolbar"><button type="button" disabled={context.frozen} onClick={()=>editor.moveBlocksUp(block)}>{t('上移内容块','Move block up')}</button><button type="button" disabled={context.frozen} onClick={()=>editor.moveBlocksDown(block)}>{t('下移内容块','Move block down')}</button><button type="button" disabled={context.frozen} onClick={()=>editor.removeBlocks([block])}>{t('删除内容块','Delete block')}</button></div>

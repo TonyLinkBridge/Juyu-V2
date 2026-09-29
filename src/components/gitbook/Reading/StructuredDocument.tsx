@@ -8,13 +8,18 @@ import {Hint} from '../RichBlocks/Hint';
 import {MediaBlocks} from '../Media/MediaBlocks';
 import {ImageGallery,type GalleryImage} from '../Media/ImageGallery';
 import {tableCellBorderStyle,tableCellVerticalAlignStyle} from '../../../editor/table';
+import {isEmptyPublishedParagraph} from '../../../fumadocs/paragraphs';
 /* eslint-disable @next/next/no-img-element -- private assets require session-aware delivery. */
 export function StructuredDocument({blocks,documentId,revision,admin=false,locale='zh-CN'}:{blocks:EditorBlock[];documentId?:string;revision?:number;admin?:boolean;locale?:'zh-CN'|'en'}){
  const render=(nodes:EditorBlock[]):ReactNode[]=>{
   const result:ReactNode[]=[];
   for(let i=0;i<nodes.length;i++){
    const b=nodes[i],children=render(b.children);
-   if(b.type==='juyu'){const media=JSON.parse(b.props.payload);result.push(media.type==='reusableContent'?<section key={b.id} className="reader-reusable-content" aria-label={locale==='en'?`Reusable section: ${media.title}`:`共用片段：${media.title}`}>{children}</section>:media.type==='hint'?<Hint key={b.id} block={media}>{children}</Hint>:<Fragment key={b.id}><MediaBlocks blocks={[media]} documentId={documentId} revision={revision} admin={admin} locale={locale}/>{children}</Fragment>);continue;}
+   if(b.type==='juyu'){
+    const media=JSON.parse(b.props.payload);
+    const hasReadableChildren=b.children.some(child=>!isEmptyPublishedParagraph(child));
+    result.push(media.type==='reusableContent'?<section key={b.id} className="reader-reusable-content" aria-label={locale==='en'?`Reusable section: ${media.title}`:`共用片段：${media.title}`}>{children}</section>:media.type==='hint'?<Hint key={b.id} block={media}>{hasReadableChildren?children:null}</Hint>:<Fragment key={b.id}><MediaBlocks blocks={[media]} documentId={documentId} revision={revision} admin={admin} locale={locale}/>{children}</Fragment>);continue;
+   }
    if(isFileBlock(b)){
     if(b.type==='image'&&b.props.showPreview!==false&&privateAssetId(b.props.url)){
      const group:GalleryImage[]=[];

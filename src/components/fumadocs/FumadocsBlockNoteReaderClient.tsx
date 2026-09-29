@@ -153,8 +153,12 @@ function isReusableContent(payload:string,blockId:string):boolean{
 }
 
 function FumadocsHint({hint,blockId}:{hint:PreviewHint;blockId:string}){
+ const children=hint.readerChildren??[];
+ const hasReadableChildren=children.some(block=>!isEmptyPublishedParagraph(block));
+ const hasVisibleTitle=hint.showTitle!==false&&Boolean(hint.title.trim());
+ if(!hasVisibleTitle&&!hint.body.trim()&&!hasReadableChildren)return null;
  const type=hint.style==='danger'?'error':hint.style;
- return <Callout data-fumadocs-callout={blockId} type={type} title={hint.showTitle===false?undefined:hint.title}>
+ return <Callout data-fumadocs-callout={blockId} type={type} title={hasVisibleTitle?hint.title:undefined}>
   {hint.body&&<p>{hint.body}</p>}
   {hint.readerChildren?.length?<PublishedBlockNoteStatic blocks={hint.readerChildren} locale={hint.readerLocale??'zh-CN'}/>:null}
  </Callout>;
@@ -208,7 +212,13 @@ function readAccordion(payload:string):PreviewAccordion|null{
 function FumadocsAccordion({accordion,blockId}:{accordion:PreviewAccordion;blockId:string}){
  const locale=accordion.readerLocale??'zh-CN';
  const label=(title:string,index:number)=>title.trim()||(locale==='en'?`Question ${index+1}`:`问题 ${index+1}`);
- return <div data-fumadocs-accordion={blockId}><Accordions type="single">{accordion.items.map((item,index)=>{
+ const items=accordion.items.filter(item=>{
+  if(item.title.trim())return true;
+  const rich=decodeTabBody(item.body);
+  return rich?rich.some(block=>!isEmptyPublishedParagraph(block)):Boolean(item.body.trim());
+ });
+ if(!items.length)return null;
+ return <div data-fumadocs-accordion={blockId}><Accordions type="single">{items.map((item,index)=>{
   const body=decodeTabBody(item.body),id=`${blockId}-${item.id}`;
   return <Accordion key={item.id} id={id} value={id} title={label(item.title,index)}>{body?<PublishedBlockNoteStatic blocks={body} locale={locale}/>:item.body?<p>{item.body}</p>:null}</Accordion>;
  })}</Accordions></div>;

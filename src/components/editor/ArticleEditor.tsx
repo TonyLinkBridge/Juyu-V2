@@ -256,10 +256,12 @@ function ReadyEditor({recoveryOwner,initial,newReference,newQa,newOps,newTransla
   if(type==='hint'){
    const block:MediaBlock={id,type,style:'info',title:'',body:'',showTitle:true};
    const [inserted]=editor.insertBlocks([{id,type:'juyu',props:{payload:JSON.stringify(block)},children:[{type:'paragraph',content:''}]}],cursor,'after');
-   setActiveHintId(inserted.id);setRailPanel(null);return;
+   setActiveHintId(inserted.id);setRailPanel(null);
+   requestAnimationFrame(()=>{const child=inserted.children[0];if(child){editor.setTextCursorPosition(child,'start');editor.focus();}});return;
   }
-  const block:MediaBlock=type==='tabs'?{id,type,tabs:[{id:crypto.randomUUID(),title:t('标签 1','Tab 1'),body:''},{id:crypto.randomUUID(),title:t('标签 2','Tab 2'),body:''}]}:type==='accordion'?{id,type,items:[{id:crypto.randomUUID(),title:t('问题 1','Question 1'),body:''}]}:type==='steps'?{id,type,steps:[{id:crypto.randomUUID(),title:t('第一步','Step 1'),body:''}]}:type==='columns'?{id,type,columns:[{id:crypto.randomUUID(),title:t('左栏','Left column'),body:''},{id:crypto.randomUUID(),title:t('右栏','Right column'),body:''}]}:type==='articleReference'?{id,type,targetId:''}:type==='button'?{id,type,label:t('打开资料','Open article'),href:'',variant:'primary'}:type==='externalEmbed'?{id,type,url:'',caption:''}:{id,type,source:type==='math'?'x^2':t('flowchart TD\n A[提交] --> B[审核]','flowchart TD\n A[Submit] --> B[Review]'),caption:''};
-  editor.insertBlocks([{id,type:'juyu',props:{payload:JSON.stringify(block)}}],cursor,'after');
+  const block:MediaBlock=type==='tabs'?{id,type,tabs:[{id:crypto.randomUUID(),title:t('标签 1','Tab 1'),body:''},{id:crypto.randomUUID(),title:t('标签 2','Tab 2'),body:''}]}:type==='accordion'?{id,type,items:[{id:crypto.randomUUID(),title:'',body:''}]}:type==='steps'?{id,type,steps:[{id:crypto.randomUUID(),title:t('第一步','Step 1'),body:''}]}:type==='columns'?{id,type,columns:[{id:crypto.randomUUID(),title:t('左栏','Left column'),body:''},{id:crypto.randomUUID(),title:t('右栏','Right column'),body:''}]}:type==='articleReference'?{id,type,targetId:''}:type==='button'?{id,type,label:t('打开资料','Open article'),href:'',variant:'primary'}:type==='externalEmbed'?{id,type,url:'',caption:''}:{id,type,source:type==='math'?'x^2':t('flowchart TD\n A[提交] --> B[审核]','flowchart TD\n A[Submit] --> B[Review]'),caption:''};
+  const [inserted]=editor.insertBlocks([{id,type:'juyu',props:{payload:JSON.stringify(block)}}],cursor,'after');
+  if(type==='accordion'){setRailPanel(null);requestAnimationFrame(()=>{const input=document.querySelector<HTMLInputElement>(`[data-juyu-id="${inserted.id}"] input`);input?.focus();});}
  }
  async function upload(file:File):Promise<string>{
   if(frozen||!data){showNotice(t('请先填写标题并保存草稿，再上传文件。','Add a title and save the draft before uploading files.'),'error');throw new Error('SAVE_DRAFT_FIRST');}

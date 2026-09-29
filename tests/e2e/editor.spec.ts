@@ -22,7 +22,7 @@ async function insertFromRail(page:Page,name:'添加行内注释'|'插入行内�
  await page.getByRole('navigation',{name:'编辑工具'}).getByRole('button',{name:'内容插入',exact:true}).click();
  await page.getByRole('region',{name:'内容插入'}).getByRole('button',{name:new RegExp(`^${name}`)}).click();
 }
-async function insertBlockFromRail(page:Page,name:'提示框'|'代码块'|'表格'){
+async function insertBlockFromRail(page:Page,name:'提示框'|'代码块'|'表格'|'折叠内容'){
  await page.getByRole('navigation',{name:'编辑工具'}).getByRole('button',{name:'内容插入',exact:true}).click();
  await page.getByRole('region',{name:'内容插入'}).getByRole('button',{name:new RegExp(`^${name}`)}).click();
 }
@@ -333,11 +333,16 @@ test('callout edits in place and uses a focused appearance inspector',async({pag
  await mount(page,()=>saved);
  await insertBlockFromRail(page,'提示框');
  const hint=page.locator('.editor-embedded').last();
- await hint.click();
  await expect(hint.getByText('编辑此内容块',{exact:true})).toHaveCount(0);
+ await expect(hint.getByRole('button',{name:'在提示框中新增内容'})).toHaveCount(0);
+ await expect(page.getByRole('region',{name:'提示框设置'})).toHaveCount(0);
+ const nested=hint.locator('xpath=ancestor::div[@data-node-type="blockContainer"][1]').locator('.bn-block-group .bn-inline-content').last();
+ await page.keyboard.insertText('先核实员工身份');
+ await expect(nested).toContainText('先核实员工身份');
+ await hint.click();
  await hint.getByRole('textbox',{name:'提示标题'}).fill('执行前核对');
- const hintLayout=await hint.evaluate(element=>{const layout=element.querySelector('.editor-hint-layout')!,icon=element.querySelector('.editor-hint-icon')!.getBoundingClientRect(),title=element.querySelector('.editor-hint-heading')!.getBoundingClientRect(),add=element.querySelector('.editor-hint-add')!.getBoundingClientRect();return {display:getComputedStyle(layout).display,iconRight:icon.right,titleLeft:title.left,titleRight:title.right,addLeft:add.left};});
- expect(hintLayout.display).toBe('grid');expect(hintLayout.titleLeft).toBeGreaterThanOrEqual(hintLayout.iconRight);expect(hintLayout.addLeft).toBeGreaterThanOrEqual(hintLayout.titleRight);
+ const hintLayout=await hint.evaluate(element=>{const layout=element.querySelector('.editor-hint-layout')!,icon=element.querySelector('.editor-hint-icon')!.getBoundingClientRect(),title=element.querySelector('.editor-hint-heading')!.getBoundingClientRect();return {display:getComputedStyle(layout).display,iconRight:icon.right,titleLeft:title.left};});
+ expect(hintLayout.display).toBe('grid');expect(hintLayout.titleLeft).toBeGreaterThanOrEqual(hintLayout.iconRight);
  const inspector=page.getByRole('region',{name:'提示框设置'});
  await expect(inspector).toBeVisible();
  await inspector.getByRole('button',{name:'注意'}).click();
@@ -345,15 +350,44 @@ test('callout edits in place and uses a focused appearance inspector',async({pag
  await expect(inspector.getByRole('checkbox',{name:'显示标题'})).toBeChecked();
  await page.screenshot({path:`output/verification/rich-hint-inspector-${test.info().project.name}.png`,fullPage:false});
  await inspector.getByRole('button',{name:'关闭提示框设置'}).click();
- const nested=hint.locator('xpath=ancestor::div[@data-node-type="blockContainer"][1]').locator('.bn-block-group .bn-inline-content').last();
- await nested.click();await page.keyboard.insertText('先核实员工身份');
  await expect.poll(()=>saved.body.startsWith('JUYU_BLOCKNOTE_V1\n')&&JSON.parse(saved.body.split('\n').slice(1).join('\n')).some((block:{type:string;children:{content:{text:string}[]}[]})=>block.type==='juyu'&&block.children.some(child=>child.content.some(text=>text.text==='先核实员工身份'))),{timeout:8000}).toBe(true);
  const payload=JSON.parse(JSON.parse(saved.body.split('\n').slice(1).join('\n')).find((block:{type:string})=>block.type==='juyu').props.payload);
  expect(payload).toMatchObject({style:'warning',title:'执行前核对',iconKey:'shield',showTitle:true});
  await page.getByRole('button',{name:'预览草稿',exact:true}).click();
- await expect(page.locator('.editor-preview .rich-hint-warning')).toContainText('执行前核对');
- await expect(page.locator('.editor-preview .rich-hint-warning')).toContainText('先核实员工身份');
+ await expect(page.locator('.editor-preview [data-fumadocs-callout]')).toContainText('执行前核对');
+ await expect(page.locator('.editor-preview [data-fumadocs-callout]')).toContainText('先核实员工身份');
  await page.screenshot({path:`output/verification/rich-hint-nested-${test.info().project.name}.png`,fullPage:true});
+});
+test('an empty callout stays out of draft preview',async({page})=>{
+ await mount(page,()=>structuredClone(editorFixture));
+ await insertBlockFromRail(page,'提示框');
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ await expect(page.locator('.editor-preview [data-fumadocs-callout]')).toHaveCount(0);
+});
+test('accordion inserts as a direct editor and hides empty output until content exists',async({page})=>{
+ await mount(page,()=>structuredClone(editorFixture));
+ await insertBlockFromRail(page,'折叠内容');
+ const block=page.locator('.editor-embedded[data-juyu-type="accordion"]');
+ await expect(block).toBeVisible();
+ await expect(block.getByText('编辑此内容块',{exact:true})).toHaveCount(0);
+ await expect(block.getByText('查看此块预览',{exact:true})).toHaveCount(0);
+ const title=block.getByLabel('折叠项 1 标题',{exact:true});
+ const body=block.getByLabel('折叠项 1 内容',{exact:true});
+ await expect(title).toBeVisible();
+ await expect(body).toBeVisible();
+ await expect(title).toHaveValue('');
+ await expect(title).toBeFocused();
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ const preview=page.locator('.editor-preview');
+ await expect(preview.locator('[data-fumadocs-accordion]')).toHaveCount(0);
+ await page.getByRole('button',{name:'关闭草稿预览',exact:true}).click();
+ await title.fill('如何修改账号？');
+ await body.fill('进入账号设置后修改。');
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ const trigger=preview.getByRole('button',{name:'如何修改账号？',exact:true});
+ await expect(trigger).toBeVisible();
+ await trigger.click();
+ await expect(preview.getByText('进入账号设置后修改。',{exact:true})).toBeVisible();
 });
 test('typing during an outstanding save is retained and saved with the acknowledged sequence',async({page})=>{
  let release!:()=>void;const pending=new Promise<void>(r=>release=r);const calls:Record<string,unknown>[]=[];let saved=structuredClone(editorFixture);
