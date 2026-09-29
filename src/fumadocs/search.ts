@@ -1,10 +1,9 @@
 import type {SortedResult} from 'fumadocs-core/search';
 import {englishSearchScopeLabels,searchScopeLabels,type TitleSearch} from '../reader/search.ts';
 import type {ContentKind} from '../domain/model.ts';
-import {formalFumadocsPublicationPath} from './publication.ts';
 
 function resultUrl(item:TitleSearch['results'][number]):string {
- return !item.kind||item.kind==='article'?formalFumadocsPublicationPath(item.id):item.kind==='ops'?formalFumadocsPublicationPath(item.id,'ops'):item.href;
+ return item.href;
 }
 
 /** Converts an already authorized JUYU search result into Fumadocs' official search result contract. */

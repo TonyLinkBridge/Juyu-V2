@@ -9,6 +9,12 @@ test('navigation URLs keep opaque identifiers inside the formal article path',()
  assert.deepEqual([...url.searchParams.keys()],[]);
  assert.equal(url.hash,'');
 });
+test('navigation uses the stable Fumadocs slug while selection keeps the database ID',()=>{
+ const page=navigationPage({id:'database-id',slug:'普通会员',title:'普通会员'});
+ assert.equal(page.id,'database-id');
+ assert.equal(page.href,'/help-centre/articles/%E6%99%AE%E9%80%9A%E4%BC%9A%E5%91%98');
+ assert.equal(selectNavigationPage([page],'database-id')?.href,page.href);
+});
 test('selection uses exact authorized IDs and never defaults an unavailable request to another page',()=>{
  const pages=[navigationPage({id:'a',title:'甲'}),navigationPage({id:'a-long',title:'乙'})];
  assert.equal(selectNavigationPage(pages,'a-long')?.id,'a-long');

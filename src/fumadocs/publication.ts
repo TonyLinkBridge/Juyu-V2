@@ -41,13 +41,13 @@ export function fumadocsPdfPath(article:{id:string;revision:number;locale?:Fumad
 }
 
 /** Only offer a locale when an authorized published document ID exists. */
-export function fumadocsPublicationLanguages(article:{id:string;locale?:FumadocsPublicationLocale;sourceId?:string;englishId?:string|null},mode:FumadocsReaderMode='preview',section:FumadocsPublicationSection='article'):FumadocsLanguageDestinations {
+export function fumadocsPublicationLanguages(article:{id:string;slug?:string;locale?:FumadocsPublicationLocale;sourceId?:string;sourceSlug?:string;englishId?:string|null;englishSlug?:string|null},mode:FumadocsReaderMode='preview',section:FumadocsPublicationSection='article'):FumadocsLanguageDestinations {
  const locale=article.locale==='en'?'en':'zh-CN';
  const result:FumadocsLanguageDestinations={};
  const sourceId=article.sourceId?.trim()||(locale==='zh-CN'?article.id:'');
  const englishId=article.englishId?.trim()||(locale==='en'?article.id:'');
- if(sourceId)result['zh-CN']=publicationPath(sourceId,mode,section);
- if(englishId)result.en=publicationPath(englishId,mode,section);
+ if(sourceId)result['zh-CN']=publicationPath(mode==='formal'?(article.sourceSlug??(locale==='zh-CN'?article.slug:undefined)??sourceId):sourceId,mode,section);
+ if(englishId)result.en=publicationPath(mode==='formal'?(article.englishSlug??(locale==='en'?article.slug:undefined)??englishId):englishId,mode,section);
  return result;
 }
 
@@ -71,7 +71,7 @@ export function fumadocsPublicationTree(nodes:NavigationNode[],locale:FumadocsPu
   name:node.title,
   ...(node.description?{description:node.description}:{}),
   ...(node.iconKey?{icon:icon(node.iconKey)}:{}),
-  url:publicationPath(node.id,mode,section),
+  url:publicationPath(mode==='formal'?(node.slug??node.id):node.id,mode,section),
  });
  const convertNode=(node:NavigationNode):Root['children'][number]=>{
   if(node.type==='document')return convertPage(node);

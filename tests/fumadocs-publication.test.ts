@@ -101,21 +101,21 @@ test('Fumadocs tree identity is stable for the same directory and changes with i
 test('formal reader paths stay under Help Centre and the entire authorized tree uses them',()=>{
  assert.equal(formalFumadocsPublicationPath('article 1'),'/help-centre/articles/article%201');
  assert.equal(formalFumadocsPublicationPath('ops 1','ops'),'/help-centre/ops/ops%201');
- const tree=fumadocsPublicationTree([{type:'document',id:'article 1',title:'修改邮箱',href:'/help-centre?article=article%201'}],'zh-CN','formal');
+ const tree=fumadocsPublicationTree([{type:'document',id:'article 1',slug:'修改邮箱',title:'修改邮箱',href:'/help-centre/articles/%E4%BF%AE%E6%94%B9%E9%82%AE%E7%AE%B1'}],'zh-CN','formal');
  assert.equal(tree.children[0]?.type,'folder');
  if(tree.children[0]?.type!=='folder')throw new Error('missing root folder');
- assert.deepEqual(tree.children[0].children,[{type:'page',$id:'article 1',name:'修改邮箱',url:'/help-centre/articles/article%201'}]);
- assert.deepEqual(fumadocsPublicationLanguages({id:'zh',locale:'zh-CN',sourceId:'zh',englishId:'en'},'formal'),{
-  'zh-CN':'/help-centre/articles/zh',
-  en:'/help-centre/articles/en',
+ assert.deepEqual(tree.children[0].children,[{type:'page',$id:'article 1',name:'修改邮箱',url:'/help-centre/articles/%E4%BF%AE%E6%94%B9%E9%82%AE%E7%AE%B1'}]);
+ assert.deepEqual(fumadocsPublicationLanguages({id:'zh',slug:'中文标题',locale:'zh-CN',sourceId:'zh',sourceSlug:'中文标题',englishId:'en',englishSlug:'english-title'},'formal'),{
+  'zh-CN':'/help-centre/articles/%E4%B8%AD%E6%96%87%E6%A0%87%E9%A2%98',
+  en:'/help-centre/articles/english-title',
  });
- const opsTree=fumadocsPublicationTree([{type:'document',id:'ops 1',title:'升级处理',href:'/help-centre/ops'}],'zh-CN','formal','ops');
+ const opsTree=fumadocsPublicationTree([{type:'document',id:'ops 1',slug:'升级处理',title:'升级处理',href:'/help-centre/articles/%E5%8D%87%E7%BA%A7%E5%A4%84%E7%90%86'}],'zh-CN','formal','ops');
  assert.equal(opsTree.children[0]?.type,'folder');
  if(opsTree.children[0]?.type!=='folder')throw new Error('missing OPS root folder');
- assert.deepEqual(opsTree.children[0].children,[{type:'page',$id:'ops 1',name:'升级处理',url:'/help-centre/ops/ops%201'}]);
- assert.deepEqual(fumadocsPublicationLanguages({id:'ops-zh',locale:'zh-CN',sourceId:'ops-zh',englishId:'ops-en'},'formal','ops'),{
-  'zh-CN':'/help-centre/ops/ops-zh',
-  en:'/help-centre/ops/ops-en',
+ assert.deepEqual(opsTree.children[0].children,[{type:'page',$id:'ops 1',name:'升级处理',url:'/help-centre/ops/%E5%8D%87%E7%BA%A7%E5%A4%84%E7%90%86'}]);
+ assert.deepEqual(fumadocsPublicationLanguages({id:'ops-zh',slug:'处理升级',locale:'zh-CN',sourceId:'ops-zh',sourceSlug:'处理升级',englishId:'ops-en',englishSlug:'ops-upgrade'},'formal','ops'),{
+  'zh-CN':'/help-centre/ops/%E5%A4%84%E7%90%86%E5%8D%87%E7%BA%A7',
+  en:'/help-centre/ops/ops-upgrade',
  });
 });
 
@@ -138,14 +138,14 @@ test('language switch exposes only published counterparts and never a coming soo
 
 test('Fumadocs search keeps authorized module destinations and uses separate formal paths for articles and OPS',()=>{
  const results=fumadocsSearchResults({status:'ready',query:'信用',total:4,page:1,pages:1,results:[
-  {id:'article one',title:'信用额度',href:'/help-centre?article=article%20one',breadcrumbs:['账户'],snippet:'查看信用额度',kind:'article'},
-  {id:'ops one',title:'信用额度升级',href:'/help-centre?article=ops%20one',breadcrumbs:['运营'],snippet:'升级信用额度',kind:'ops'},
+  {id:'article one',title:'信用额度',href:'/help-centre/articles/credit-limit',breadcrumbs:['账户'],snippet:'查看信用额度',kind:'article'},
+  {id:'ops one',title:'信用额度升级',href:'/help-centre/ops/credit-limit-upgrade',breadcrumbs:['运营'],snippet:'升级信用额度',kind:'ops'},
   {id:'qa-one',title:'信用额度问答',href:'/help-centre/qa?question=qa-one',breadcrumbs:['Q&A'],kind:'qa'},
   {id:'reference-one',title:'信用额度速查',href:'/help-centre/reference?article=reference-one',breadcrumbs:['Reference'],kind:'reference'},
  ]});
  assert.deepEqual(results.map(item=>[item.id,item.type,item.url]),[
-  ['article one','page','/help-centre/articles/article%20one'],
-  ['ops one','page','/help-centre/ops/ops%20one'],
+  ['article one','page','/help-centre/articles/credit-limit'],
+  ['ops one','page','/help-centre/ops/credit-limit-upgrade'],
   ['qa-one','page','/help-centre/qa?question=qa-one'],
   ['reference-one','page','/help-centre/reference?article=reference-one'],
  ]);

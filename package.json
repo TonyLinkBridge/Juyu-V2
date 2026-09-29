@@ -19,6 +19,7 @@
     "test:scale": "node --experimental-strip-types --test --test-concurrency=1 tests/performance/*.test.ts",
     "check:config": "node --experimental-strip-types scripts/check-test-environment.ts",
     "test:recovery": "node --experimental-strip-types --test --test-concurrency=1 tests/recovery/*.test.ts",
+    "validate:links": "node --experimental-strip-types scripts/validate-links.ts",
     "postbuild": "node scripts/check-built-styles.mjs && node scripts/check-built-browser.mjs",
     "verify:build": "npm run typecheck && npm run lint && npm test && npm run build",
     "test:critical": "playwright test tests/e2e/foundation.spec.ts tests/e2e/editor.spec.ts tests/e2e/favorites.spec.ts tests/e2e/favorites-reader.spec.ts tests/e2e/ops.spec.ts tests/e2e/reference.spec.ts tests/e2e/qa.spec.ts tests/e2e/qa-reuse.spec.ts tests/e2e/pending-ui.spec.ts"
@@ -35,6 +36,7 @@
     "embedded-postgres": "17.10.0-beta.17",
     "eslint": "9.39.4",
     "eslint-config-next": "16.3.4",
+    "next-validate-link": "^1.6.7",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3"
   },

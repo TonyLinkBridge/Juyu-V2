@@ -29,11 +29,14 @@ npm test
 npm run lint
 npm run typecheck
 npm run build
+npm run validate:links
 npm run test:pdf
 npm run test:e2e
 ```
 
 单元测试使用 Node 原生测试功能。Playwright 使用 production build 在 3210 端口启动临时服务，验收完成后关闭；首次环境若没有 Chromium，可使用 `npx playwright install chromium` 安装。
+
+`npm run validate:links` 使用 Fumadocs 的 `next-validate-link` 检查数据库内当前已发布资料的站内链接与标题锚点。运行前必须完成数据库迁移，并在环境中设置 `JUYU_VALIDATE_LINKS_ACTOR_ID` 为一个当前有效的管理员 Clerk user ID；检查过程只读，并沿用该账号的资料权限。
 
 浏览器打开 `http://127.0.0.1:3211`。打开根地址 `/` 或 `/help-centre` 直接进入员工登录入口，不再显示双入口选择；`/admin` 保留独立管理员登录入口；两者当前均明确显示尚未连接。`/api/health` 仅检查网站进程存活，`/api/readiness` 在真实认证与数据库未接入时保持 503。配置格式正确也不等于服务就绪。
 

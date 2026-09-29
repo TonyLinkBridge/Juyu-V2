@@ -108,9 +108,10 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  const publication=await readFile('src/components/fumadocs/FumadocsAuthorizedPublication.tsx','utf8');
  assert.match(publication,/FumadocsPublicationPage/);
  assert.match(publication,/routeSection/);
- assert.match(publication,/redirect\(formalFumadocsPublicationPath\(article.id,section\)\)/);
+ assert.match(publication,/const canonicalPath=formalFumadocsPublicationPath\(article.slug\?\?article.id,section\)/);
+ assert.match(publication,/redirect\(canonicalPath\)/);
  assert.match(publication,/readReaderPresentation\(locale\)/);
- assert.match(publication,/tabs=\{formal\?fumadocsContentTabs\(menu,locale,\{path:activePath,pathname:formalFumadocsPublicationPath\(article.id,section\)\},knowledgeEntry\):false\}/);
+ assert.match(publication,/tabs=\{formal\?fumadocsContentTabs\(menu,locale,\{path:activePath,pathname:canonicalPath\},knowledgeEntry\):false\}/);
  assert.match(publication,/prefetch:false/);
  assert.doesNotMatch(publication,/breadcrumbRoot|sectionRoot/);
  const ordinaryRoute=await readFile('src/app/help-centre/articles/[articleId]/page.tsx','utf8');

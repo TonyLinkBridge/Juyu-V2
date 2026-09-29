@@ -416,10 +416,13 @@ test('reader snapshot joins authorized directory with only the current formal bo
  for(const viewer of [support,a]){
    const snapshot=await new AuthorizationService(db,async()=>viewer).reader(id);
    assert.ok(snapshot.article?.publishedAt);assert.match(snapshot.article.publishedAt,/^\d{4}-\d{2}-\d{2}T/);
-   assert.deepEqual(snapshot.article,{id,title:'title-reader-snapshot',revision:1,locale:'zh-CN',sourceId:id,englishId:null,publicationNumber:1,publishedAt:snapshot.article.publishedAt,body:'body-reader-snapshot',feedback:{memberId:viewer.id,value:null}});
+   assert.deepEqual(snapshot.article,{id,slug:'title-reader-snapshot',title:'title-reader-snapshot',revision:1,locale:'zh-CN',sourceId:id,sourceSlug:'title-reader-snapshot',englishId:null,englishSlug:null,publicationNumber:1,publishedAt:snapshot.article.publishedAt,description:'body-reader-snapshot',body:'body-reader-snapshot',feedback:{memberId:viewer.id,value:null}});
    assert.doesNotMatch(JSON.stringify(snapshot),/private future/);
  }
  const service=new AuthorizationService(db,async()=>support);
+ assert.equal((await service.reader('title-reader-snapshot','article')).article?.id,id);
+ assert.equal((await service.reader(id,'article')).article?.slug,'title-reader-snapshot');
+ assert.equal((await service.reader('title-reader-snapshot','ops')).article,null);
  assert.equal((await service.reader(internal)).article,null);
  assert.equal((await service.reader(draftId)).article,null);
  assert.equal((await service.reader('unknown')).article,null);

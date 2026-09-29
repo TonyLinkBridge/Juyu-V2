@@ -3,6 +3,7 @@ import {readCategoryDefinitions} from '../categories/repository.ts';
 import {normalizeFieldDefinitions,validateFieldSnapshots} from '../../fields/model.ts';
 import {readFieldDefinitions} from '../fields/repository.ts';
 import {normalizeQa} from '../../qa/metadata.ts';
+import {createHash} from 'node:crypto';
 import {isDeepStrictEqual} from 'node:util';
 import {decodeEditorBody,encodeEditorBody,editorMedia} from '../../editor/document.ts';
 import type {EditorData} from '../../editor/contract.ts';
@@ -15,6 +16,7 @@ import { canManage } from '../../domain/access.ts';
 import type { AuditEntry, Document, Revision, Viewer } from '../../domain/model.ts';
 import { createDocument, transition } from '../../domain/workflow.ts';
 import type { Command, DraftInput } from '../../domain/workflow.ts';
+import {publicationSlug} from '../../fumadocs/slugs.ts';
 
 function requireAdmin(viewer: Viewer | null): asserts viewer is Viewer {
   if (!canManage(viewer)) throw new Error('FORBIDDEN: 需要通过公司验证的管理员');
@@ -28,6 +30,26 @@ async function requireActiveMembers(client: PoolClient, ids: string[], lock = tr
   if (rows.rows.length !== unique.length || rows.rows.some((row) => row.disabled_at !== null)) {
     throw new Error('INACTIVE_MEMBER: 成员不存在或已经停用');
   }
+}
+
+async function allocatePublicationSlug(client:PoolClient,kind:Document['kind'],title:string,id:string):Promise<string|null>{
+ if(kind!=='article'&&kind!=='ops')return null;
+ const base=publicationSlug(title);
+ const locked=(await client.query<{locked:boolean}>('SELECT pg_try_advisory_xact_lock(hashtextextended($1,0)) AS locked',[`publication-slug:${kind}:${base}`])).rows[0]?.locked;
+ // A draft with the same title may be held open in another editor transaction.
+ // Give the concurrent draft a deterministic suffix instead of blocking the save.
+ if(!locked){
+  const suffix=createHash('sha256').update(id).digest('hex').slice(0,12);
+  return `${[...base].slice(0,227).join('')}-${suffix}`;
+ }
+ const rows=await client.query<{slug:string}>('SELECT slug FROM juyu.documents WHERE kind=$1 AND (slug=$2 OR slug LIKE $2 || \'-%\')',[kind,base]);
+  const used=new Set(rows.rows.map(row=>row.slug));
+  if(!used.has(base))return base;
+  for(let suffix=2;suffix<=999999;suffix+=1){
+    const candidate=`${base}-${suffix}`;
+    if(!used.has(candidate))return candidate;
+  }
+  throw new Error('SLUG_EXHAUSTED');
 }
 
 // All calls use the same transaction snapshot (and writers first lock the document).
@@ -159,7 +181,8 @@ export class DocumentRepository {
           if(!source||source.locale!=='zh-CN'||source.lifecycle!=='active'||source.kind!==input.kind)throw new Error('INVALID_TRANSLATION_SOURCE');
         }
         const created=createDocument({...input,id,blocks},actor,now);
-        await client.query("INSERT INTO juyu.documents(id,kind,sequence,lifecycle,workflow_revision_id,workflow_state,locale,translation_of) VALUES($1,$2,0,'active',1,'draft',$3,$4)",[id,created.kind,input.locale??'zh-CN',input.translationOf??null]);
+        const slug=await allocatePublicationSlug(client,created.kind,created.revisions[0].title,id);
+        await client.query("INSERT INTO juyu.documents(id,kind,sequence,lifecycle,workflow_revision_id,workflow_state,locale,translation_of,slug) VALUES($1,$2,0,'active',1,'draft',$3,$4,$5)",[id,created.kind,input.locale??'zh-CN',input.translationOf??null,slug]);
         await insertRevision(client,id,created.revisions[0]);await insertAudit(client,id,created.audit[0]);
         return editorSnapshot(client,created);
       }
@@ -196,8 +219,9 @@ export class DocumentRepository {
     const document = createDocument(input, actor, new Date().toISOString());
     return this.database.run(actor, async (client) => {
       await requireActiveMembers(client, [actor.id]);
-      await client.query(`INSERT INTO juyu.documents(id,kind,sequence,lifecycle,workflow_revision_id,workflow_state)
-        VALUES ($1,$2,0,'active',1,'draft')`, [document.id, document.kind]);
+      const slug=await allocatePublicationSlug(client,document.kind,document.revisions[0].title,document.id);
+      await client.query(`INSERT INTO juyu.documents(id,kind,sequence,lifecycle,workflow_revision_id,workflow_state,slug)
+        VALUES ($1,$2,0,'active',1,'draft',$3)`, [document.id, document.kind,slug]);
       await insertRevision(client, document.id, document.revisions[0]);
       await insertAudit(client, document.id, document.audit[0]);
       return document;

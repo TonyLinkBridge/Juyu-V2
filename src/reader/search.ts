@@ -81,7 +81,7 @@ export function searchSnippet(text:string,query:string,publication?:{title:strin
 }
 
 /** Called after server authorization; Q&A opens its independent answer page directly. */
-export function searchResultHref(kind:ContentKind,id:string,articleHref:string,locale:'zh-CN'|'en'='zh-CN'):string {
- void articleHref;
- return contentPath(kind,id,locale);
+export function searchResultHref(kind:ContentKind,id:string,articleHref:string,locale:'zh-CN'|'en'='zh-CN',slug?:string):string {
+ if(kind==='article')return articleHref;
+ return contentPath(kind,kind==='ops'?(slug??id):id,locale);
 }

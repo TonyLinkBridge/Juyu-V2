@@ -11,12 +11,12 @@ export async function searchPublications(client:PoolClient,nodes:NavigationNode[
  const page=validPage?Number(rawPage??1):1;
  const state:TitleSearch={...parsed,status:validPage?parsed.status:'invalid',results:[],total:0,page,pages:0};
  if(state.status!=='ready')return state;
- const paths=new Map<string,{href:string;breadcrumbs:string[]}>();
+ const paths=new Map<string,{href:string;slug?:string;breadcrumbs:string[]}>();
  const stack=nodes.map(node=>({node,breadcrumbs:[] as string[]})).reverse();
  while(stack.length){
   const {node,breadcrumbs}=stack.pop()!;
   if(node.type==='group')for(let i=node.descendants.length-1;i>=0;i--)stack.push({node:node.descendants[i],breadcrumbs:[...breadcrumbs,node.title]});
-  else if(!paths.has(node.id))paths.set(node.id,{href:node.href,breadcrumbs});
+  else if(!paths.has(node.id))paths.set(node.id,{href:node.href,...(node.slug?{slug:node.slug}:{}),breadcrumbs});
  }
  const {rows}=await client.query<{id:string|null;title:string;kind:ContentKind;revision:number;tags:string[];search_text:string;total:string}>(
   'SELECT * FROM juyu.search_publications_locale($1::text[],$2::integer,$3::text,$4::text)',[parsed.query.split(' '),page,scope==='all'?null:scope,locale]);
@@ -26,7 +26,7 @@ export async function searchPublications(client:PoolClient,nodes:NavigationNode[
   // A projection/tree inconsistency is an unavailable result, never a leaked item
   // or a fabricated zero count. Both are read in the same authorized snapshot.
   if(!path)throw new Error('SEARCH_UNAVAILABLE');
-  return {id:row.id!,title:row.title,...path,href:searchResultHref(row.kind,row.id!,path.href,locale),kind:row.kind,revision:row.revision,tags:row.tags,snippet:searchSnippet(row.search_text,parsed.query,{title:row.title,tags:row.tags})};
+  return {id:row.id!,title:row.title,href:searchResultHref(row.kind,row.id!,path.href,locale,path.slug),breadcrumbs:path.breadcrumbs,kind:row.kind,revision:row.revision,tags:row.tags,snippet:searchSnippet(row.search_text,parsed.query,{title:row.title,tags:row.tags})};
  });
  return {...state,total,pages:Math.ceil(total/20),results};
 }

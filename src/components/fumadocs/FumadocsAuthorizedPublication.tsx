@@ -19,7 +19,7 @@ function referencePages(nodes:NavigationNode[],mode:FumadocsReaderMode,section:F
   if(item.type==='group')visit(item.descendants);
   else if(!seen.has(item.id)){
    seen.add(item.id);
-   pages.push({...item,href:mode==='formal'?formalFumadocsPublicationPath(item.id,section):canonicalFumadocsPublicationPath(item.id)});
+   pages.push({...item,href:mode==='formal'?formalFumadocsPublicationPath(item.slug??item.id,section):canonicalFumadocsPublicationPath(item.id)});
   }
  }};
  visit(nodes);
@@ -33,13 +33,14 @@ export async function FumadocsAuthorizedPublication({articleId,mode='preview',ro
  try{
   const authorization=await applicationAuthorization();
   if(!formal)await authorization.requireEditorAdmin();
-  result=await authorization.reader(articleId);
+  result=await authorization.reader(articleId,formal?routeSection:undefined);
  }catch{notFound();}
  if(result.destination)redirect(result.destination);
  if(!result.article)notFound();
  const article=result.article;
  const section:FumadocsPublicationSection=result.section==='ops'?'ops':'article';
- if(formal&&routeSection&&routeSection!==section)redirect(formalFumadocsPublicationPath(article.id,section));
+ const canonicalPath=formalFumadocsPublicationPath(article.slug??article.id,section);
+ if(formal&&((routeSection&&routeSection!==section)||articleId!==(article.slug??article.id)))redirect(canonicalPath);
  const locale=article.locale==='en'?'en':'zh-CN';
  const tree=fumadocsPublicationTree(result.pages,locale,mode,section);
  const destinations=fumadocsPublicationLanguages(article,mode,section);
@@ -48,7 +49,7 @@ export async function FumadocsAuthorizedPublication({articleId,mode='preview',ro
  let menu:Awaited<ReturnType<typeof readReaderPresentation>>['items']=[];
  let knowledgeEntry:string|undefined;
  if(formal)try{const presentation=await readReaderPresentation(locale);menu=presentation.items;knowledgeEntry=presentation.knowledgeEntry;}catch{}
- return <FumadocsSearchProvider locale={locale}><FumadocsPublicationI18n locale={locale} destinations={destinations}><DocsLayout tree={tree} tabs={formal?fumadocsContentTabs(menu,locale,{path:activePath,pathname:formalFumadocsPublicationPath(article.id,section)},knowledgeEntry):false} nav={{title:'JUYU Help Centre',url:navRoot}} sidebar={formal?{prefetch:false,footer:<FumadocsAccountFooter locale={locale}/>}:{prefetch:false}} searchToggle={{enabled:formal&&result.features.search}}>
+ return <FumadocsSearchProvider locale={locale}><FumadocsPublicationI18n locale={locale} destinations={destinations}><DocsLayout tree={tree} tabs={formal?fumadocsContentTabs(menu,locale,{path:activePath,pathname:canonicalPath},knowledgeEntry):false} nav={{title:'JUYU Help Centre',url:navRoot}} sidebar={formal?{prefetch:false,footer:<FumadocsAccountFooter locale={locale}/>}:{prefetch:false}} searchToggle={{enabled:formal&&result.features.search}}>
   <FumadocsPublicationPage article={article} features={result.features} viewerId={result.viewerId} favorite={result.favorite} formal={formal} recentKind={section} referencePages={referencePages(result.pages,mode,section)} referenceAliases={result.referenceAliases}/>
  </DocsLayout></FumadocsPublicationI18n></FumadocsSearchProvider>;
 }
