@@ -89,7 +89,9 @@ test('editor separates workflow actions from a right-side authoring rail',async(
  await expect(panel).toBeVisible();
  await expect(panel.getByRole('button',{name:/^提示框/})).toBeVisible();
  await expect(panel.getByRole('button',{name:/^代码块/})).toBeVisible();
- await expect(panel.getByRole('button',{name:/^表格/})).toBeVisible();
+ await expect(panel.getByRole('button',{name:/^表格/})).toHaveCount(0);
+ await expect(panel.getByRole('button',{name:/^分页标签/})).toBeVisible();
+ await expect(panel.getByRole('button',{name:/^折叠内容/})).toBeVisible();
  await expect(panel.getByRole('button',{name:/^添加行内注释/})).toBeVisible();
  await expect(panel.getByRole('button',{name:/^插入行内元素/})).toBeVisible();
  await page.screenshot({path:`output/verification/editor-authoring-rail-${testInfo.project.name}.png`});
@@ -524,6 +526,7 @@ test('native slash menu and selection toolbar expose original block and formatti
  await page.route('**/api/admin/editor/*',route=>route.fulfill({json:{...editorFixture,...route.request().postDataJSON(),sequence:4}}));
  await mount(page,()=>editorFixture);const editor=page.locator('.bn-editor');await editor.click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');await page.keyboard.type('/');
  const menu=page.locator('.bn-suggestion-menu');await expect(menu).toBeVisible();await expect(menu).toContainText('检查清单');await expect(menu).toContainText('引用');await expect(menu).toContainText('音频');await expect(menu).toContainText('表格');
+ await expect(menu).not.toContainText('可折叠');await expect(menu).not.toContainText('折叠列表');
  await expect(menu).not.toContainText('扩展内容');await expect(menu).not.toContainText('提示框');await expect(menu).not.toContainText('分页标签');await expect(menu).not.toContainText('操作步骤');await expect(menu).not.toContainText('分栏布局');await expect(menu).not.toContainText('引用文章');await expect(menu).not.toContainText('操作按钮');await expect(menu).not.toContainText('外部内容');await expect(menu).not.toContainText('数学公式');await expect(menu).not.toContainText('流程图');await expect(menu).not.toContainText('资料表格');await expect(menu).not.toContainText('代码示例');
  const items=menu.locator('.bn-suggestion-menu-item'),count=await items.count();expect(count).toBeGreaterThan(1);await expect(menu).toHaveCSS('overflow-y','auto');
  const remainingScroll=()=>menu.evaluate(element=>Math.round(element.scrollHeight-element.clientHeight-element.scrollTop));
