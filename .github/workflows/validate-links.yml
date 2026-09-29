@@ -1,0 +1,41 @@
+name: Validate Published Links
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 09:00 Asia/Kuala_Lumpur. Published content can change without a code push.
+    - cron: '0 1 * * *'
+  workflow_run:
+    workflows: [Verify]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-published-links
+  cancel-in-progress: true
+
+jobs:
+  links:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Validate links in published content
+        run: npm run validate:links
+        env:
+          JUYU_DATABASE_RUNTIME_URL: ${{ secrets.JUYU_DATABASE_RUNTIME_URL }}
+          JUYU_DATABASE_ISSUER_URL: ${{ secrets.JUYU_DATABASE_ISSUER_URL }}
+          JUYU_VALIDATE_LINKS_ACTOR_ID: ${{ secrets.JUYU_VALIDATE_LINKS_ACTOR_ID }}
+          JUYU_DATABASE_CA_CERT: ${{ secrets.JUYU_DATABASE_CA_CERT }}
