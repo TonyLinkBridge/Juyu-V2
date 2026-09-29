@@ -97,7 +97,7 @@ test('editor separates workflow actions from a right-side authoring rail',async(
  await expect(page.locator('[data-juyu-type="hint"]')).toBeVisible();
  expect(runtimeErrors).toEqual([]);
 });
-test('content insert creates directly editable Fumadocs tabs with instant preview and persistence',async({page})=>{
+test('content insert creates directly editable Fumadocs tabs with instant preview and persistence',async({page},testInfo)=>{
  let saved=structuredClone(editorFixture);
  await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
  await mount(page,()=>saved);
@@ -122,6 +122,21 @@ test('content insert creates directly editable Fumadocs tabs with instant previe
  await expect(block.getByLabel('标签 1 标题',{exact:true})).toHaveValue('无法登录');
  await block.getByRole('region',{name:'编辑标签 1',exact:true}).getByRole('button',{name:'标签下移',exact:true}).click();
  await expect(block.getByLabel('标签 1 标题',{exact:true})).toHaveValue('可以登录');
+ const firstTab=block.getByRole('region',{name:'编辑标签 1',exact:true});
+ await firstTab.getByRole('button',{name:'使用完整排版编辑',exact:true}).click();
+ const nestedEditor=firstTab.locator('.rich-tab-body-editor .bn-editor');
+ await expect(nestedEditor).toBeVisible();
+ const nestedMetrics=await nestedEditor.evaluate(element=>({height:element.getBoundingClientRect().height,minHeight:getComputedStyle(element).minHeight,maxHeight:getComputedStyle(element).maxHeight}));
+ expect(Number.parseFloat(nestedMetrics.minHeight)).toBeLessThanOrEqual(150);
+ expect(Number.parseFloat(nestedMetrics.maxHeight)).toBeLessThanOrEqual(320);
+ expect(nestedMetrics.height).toBeLessThanOrEqual(340);
+ expect(await firstTab.getByLabel('标签 1 标题',{exact:true}).evaluate(element=>getComputedStyle(element).borderTopStyle)).toBe('solid');
+ await block.scrollIntoViewIfNeeded();
+ await page.screenshot({path:`output/verification/editor-tabs-${testInfo.project.name}.png`});
+ await expect(firstTab.getByRole('button',{name:'完成排版编辑',exact:true})).toBeVisible();
+ await firstTab.getByRole('button',{name:'完成排版编辑',exact:true}).click();
+ await expect(nestedEditor).toHaveCount(0);
+ await expect(firstTab.getByText('自行修改账号资料',{exact:true})).toBeVisible();
  await page.getByRole('button',{name:'预览草稿',exact:true}).click();
  const preview=page.locator('.editor-preview');
  await expect(preview.locator('[data-fumadocs-tabs]')).toBeVisible();
