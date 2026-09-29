@@ -1,5 +1,14 @@
 export type PublicationSlugSection='article'|'ops';
 
+/** Next can expose a dynamic path segment in its percent-encoded form. */
+export function publicationPathValue(value:string):string{
+ try{
+  const decoded=decodeURIComponent(value);
+  if(publicationSlug(decoded)!==decoded)throw new Error('INVALID_PUBLICATION_PATH');
+  return decoded;
+ }catch{throw new Error('INVALID_PUBLICATION_PATH');}
+}
+
 /**
  * Database equivalent of a Fumadocs page filename. It deliberately keeps
  * non-ASCII text so an authored Chinese title remains a Chinese page slug.

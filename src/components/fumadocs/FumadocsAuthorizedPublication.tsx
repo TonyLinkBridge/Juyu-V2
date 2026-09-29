@@ -10,6 +10,7 @@ import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import {fumadocsContentTabs} from '../../fumadocs/tabs';
 import {readReaderPresentation} from '../../server/reader-presentation';
 import {FumadocsPublicationPage} from './FumadocsPublicationPage';
+import {publicationPathValue} from '../../fumadocs/slugs';
 
 const previewRoot='/design-preview/fumadocs-reader';
 
@@ -27,20 +28,22 @@ function referencePages(nodes:NavigationNode[],mode:FumadocsReaderMode,section:F
 }
 
 export async function FumadocsAuthorizedPublication({articleId,mode='preview',routeSection}:{articleId:string;mode?:FumadocsReaderMode;routeSection?:FumadocsPublicationSection}){
- if(!articleId.trim()||articleId.length>200)notFound();
  const formal=mode==='formal';
+ let requestedArticleId=articleId;
+ if(formal)try{requestedArticleId=publicationPathValue(articleId);}catch{notFound();}
+ if(!requestedArticleId.trim()||requestedArticleId.length>(formal?250:200))notFound();
  let result:Awaited<ReturnType<Awaited<ReturnType<typeof applicationAuthorization>>['reader']>>;
  try{
   const authorization=await applicationAuthorization();
   if(!formal)await authorization.requireEditorAdmin();
-  result=await authorization.reader(articleId,formal?routeSection:undefined);
+  result=await authorization.reader(requestedArticleId,formal?routeSection:undefined);
  }catch{notFound();}
  if(result.destination)redirect(result.destination);
  if(!result.article)notFound();
  const article=result.article;
  const section:FumadocsPublicationSection=result.section==='ops'?'ops':'article';
  const canonicalPath=formalFumadocsPublicationPath(article.slug??article.id,section);
- if(formal&&((routeSection&&routeSection!==section)||articleId!==(article.slug??article.id)))redirect(canonicalPath);
+ if(formal&&((routeSection&&routeSection!==section)||requestedArticleId!==(article.slug??article.id)))redirect(canonicalPath);
  const locale=article.locale==='en'?'en':'zh-CN';
  const tree=fumadocsPublicationTree(result.pages,locale,mode,section);
  const destinations=fumadocsPublicationLanguages(article,mode,section);
