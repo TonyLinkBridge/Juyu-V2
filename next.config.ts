@@ -9,14 +9,20 @@ const nextConfig: NextConfig = {
   // Private media is delivered by authorized, no-store routes; never by the shared image optimizer.
   images: { localPatterns: [], remotePatterns: [] },
   serverExternalPackages: ['playwright-core', 'mermaid', '@sparticuz/chromium'],
-  outputFileTracingIncludes: {'/api/**': [
-    './node_modules/mermaid/dist/mermaid.min.js',
+  outputFileTracingIncludes: {
     // Playwright resolves runtime resources dynamically; tracing alone misses browsers.json.
-    './node_modules/playwright-core/**/*',
-  ],
-  // Only browser-rendering endpoints carry the Linux binary and licensed CJK font.
-  '/api/**/pdf': ['./node_modules/@sparticuz/chromium/bin/**', './fonts/**'],
-  '/api/**/diagram': ['./node_modules/@sparticuz/chromium/bin/**', './fonts/**'],
+    // Keep its runtime files and Chromium binary out of unrelated API function bundles.
+    '/api/**/pdf': [
+      './node_modules/playwright-core/**/*',
+      './node_modules/@sparticuz/chromium/bin/**',
+      './fonts/**',
+    ],
+    '/api/**/diagram': [
+      './node_modules/mermaid/dist/mermaid.min.js',
+      './node_modules/playwright-core/**/*',
+      './node_modules/@sparticuz/chromium/bin/**',
+      './fonts/**',
+    ],
   },
   async headers() {
     return [{ source: '/:path*', headers: [
