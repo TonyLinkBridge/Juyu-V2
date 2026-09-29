@@ -110,18 +110,10 @@ test('an in-content button saves and opens a safe destination',async({page})=>{
  await reader(page,[saved!]);
  await expect(page.getByRole('link',{name:'查看申请表'})).toHaveAttribute('href','/help-centre/forms');
 });
-test('tabs provide a shareable deep link and restore the selected tab after navigation',async({page,context})=>{
- await context.grantPermissions(['clipboard-read','clipboard-write']);
+test('tabs use the official Fumadocs interaction and show the selected content',async({page})=>{
  await reader(page);
  const tabs=page.getByRole('region',{name:'分页内容'});
  await tabs.getByRole('tab',{name:'转入'}).click();
- await expect(tabs.getByRole('tab',{name:'转入'})).toHaveAttribute('aria-selected','true');
- expect(new URL(page.url()).searchParams.get('juyuTab')).toBe('转入');
- await tabs.getByRole('button',{name:'复制当前标签链接'}).click();
- await expect(tabs.getByRole('status')).toContainText('链接已复制');
- const copied=await page.evaluate(()=>navigator.clipboard.readText());
- expect(new URL(copied).searchParams.get('juyuTab')).toBe('转入');
- await page.goto(copied);
  await expect(tabs.getByRole('tab',{name:'转入'})).toHaveAttribute('aria-selected','true');
  await expect(tabs.getByText('转入操作内容')).toBeVisible();
 });
@@ -204,29 +196,29 @@ test('tab rich text saves and reopens without showing serialized data',async({pa
  await expect(page.getByRole('tabpanel',{name:'标签 1'})).toContainText('已排版的步骤');
  await expect(page.getByText('JUYU_TAB_BLOCKNOTE_V1')).toHaveCount(0);
 });
-test('tabs support arrows home end click and independent sets with no overflow',async({page})=>{
- await reader(page,[blocks[0],{...(blocks[1] as Extract<MediaBlock,{type:'code'}>),code:code+'a'.repeat(1000)},blocks[2],{...(blocks[2] as Extract<MediaBlock,{type:'tabs'}>),id:'second-tabs'}]);const groups=page.getByRole('tablist',{name:'内容标签'});const first=groups.nth(0);await first.getByRole('tab',{name:'注册',exact:true}).focus();await page.keyboard.press('ArrowLeft');await expect(first.getByRole('tab',{name:'异常',exact:true})).toBeFocused();await expect(first.getByRole('tab',{name:'异常',exact:true})).toHaveAttribute('aria-selected','true');await page.keyboard.press('Home');await page.keyboard.press('ArrowRight');await expect(first.getByRole('tab',{name:'转入',exact:true})).toBeFocused();await page.keyboard.press('End');await expect(first.getByRole('tab',{name:'异常',exact:true})).toBeFocused();await expect(groups.nth(1).getByRole('tab',{name:'异常',exact:true})).toHaveAttribute('aria-selected','true');
- await first.getByRole('tab',{name:'转入',exact:true}).click();await expect(page.getByRole('tabpanel',{name:'转入',exact:true}).first()).toBeVisible();await page.keyboard.press('Tab');await expect(page.getByRole('button',{name:'复制当前标签链接'}).first()).toBeFocused();await page.keyboard.press('Tab');await expect(page.getByRole('tabpanel',{name:'转入',exact:true}).first()).toBeFocused();expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);expect(await page.evaluate(()=>{const ids=[...document.querySelectorAll('[id]')].map(x=>x.id);return ids.length===new Set(ids).size;})).toBe(true);
- await page.emulateMedia({media:'print'});await expect(page.getByText('异常升级内容',{exact:true})).toHaveCount(2);await expect(page.getByText('异常升级内容',{exact:true}).first()).toBeVisible();
+test('official tabs support keyboard and click interaction while sets stay independent',async({page})=>{
+ await reader(page,[blocks[0],{...(blocks[1] as Extract<MediaBlock,{type:'code'}>),code:code+'a'.repeat(1000)},blocks[2],{...(blocks[2] as Extract<MediaBlock,{type:'tabs'}>),id:'second-tabs'}]);const groups=page.getByRole('tablist',{name:'内容标签'});const first=groups.nth(0),second=groups.nth(1);await first.getByRole('tab',{name:'注册',exact:true}).focus();await page.keyboard.press('ArrowRight');await expect(first.getByRole('tab',{name:'转入',exact:true})).toBeFocused();await expect(first.getByRole('tab',{name:'转入',exact:true})).toHaveAttribute('aria-selected','true');await page.keyboard.press('End');await expect(first.getByRole('tab',{name:'异常',exact:true})).toBeFocused();await expect(second.getByRole('tab',{name:'注册',exact:true})).toHaveAttribute('aria-selected','true');
+ await first.getByRole('tab',{name:'转入',exact:true}).click();await expect(page.getByRole('tabpanel',{name:'转入',exact:true}).first()).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);expect(await page.evaluate(()=>{const ids=[...document.querySelectorAll('[id]')].map(x=>x.id);return ids.length===new Set(ids).size;})).toBe(true);
 });
-test('same-named tabs synchronize across groups and long tab rows expose an overflow menu',async({page})=>{
+test('official tab groups stay independent and long rows scroll horizontally',async({page})=>{
  const two={...(blocks[2] as Extract<MediaBlock,{type:'tabs'}>),id:'second-tabs'};
  await reader(page,[blocks[2],two]);
  const groups=page.getByRole('tablist',{name:'内容标签'});
  await groups.nth(0).getByRole('tab',{name:'转入',exact:true}).click();
- await expect(groups.nth(1).getByRole('tab',{name:'转入',exact:true})).toHaveAttribute('aria-selected','true');
+ await expect(groups.nth(1).getByRole('tab',{name:'注册',exact:true})).toHaveAttribute('aria-selected','true');
  await page.setViewportSize({width:390,height:760});
  const long={id:'long-tabs',type:'tabs' as const,tabs:Array.from({length:8},(_,index)=>({id:`long-${index}`,title:`第 ${index+1} 个详细操作说明`,body:`内容 ${index+1}`,iconKey:index===0?'book' as const:null}))};
  await reader(page,[long]);
- await expect(page.locator('.rich-tabs-more summary')).toHaveText('更多标签');
- await page.getByText('更多标签',{exact:true}).click();
- await page.getByRole('group',{name:'全部内容标签'}).getByRole('button',{name:'第 8 个详细操作说明'}).click();
+ const list=page.getByRole('tablist',{name:'内容标签'});
+ await expect.poll(()=>list.evaluate(element=>element.scrollWidth>element.clientWidth)).toBe(true);
+ await list.getByRole('tab',{name:'第 8 个详细操作说明'}).click();
  await expect(page.getByRole('tab',{name:'第 8 个详细操作说明'})).toHaveAttribute('aria-selected','true');
- await expect(page.locator('svg.rich-tab-icon').first()).toBeVisible();
+ await expect(page.getByRole('tabpanel',{name:'第 8 个详细操作说明'})).toContainText('内容 8');
+ await expect(list.locator('svg').first()).toBeVisible();
 });
 test('copy preserves actual clipboard bytes and literal code never runs in either theme',async({page,context},info)=>{
  await context.grantPermissions(['clipboard-read','clipboard-write']);await reader(page);await page.getByRole('button',{name:'复制代码',exact:true}).click();await expect(page.getByText('已复制',{exact:true})).toBeVisible();expect(await page.evaluate(()=>navigator.clipboard.readText())).toBe(code);expect(await page.evaluate(()=>Object.hasOwn(window,'richInjected'))).toBe(false);
- for(const theme of ['浅色','深色']){await page.getByRole('radio',{name:theme,exact:true}).check();await expect(page.locator('html')).toHaveAttribute('data-theme',theme==='浅色'?'light':'dark');await expect(page.getByRole('link',{name:'PDF 阅读／导出'})).toBeVisible();await page.screenshot({path:`output/verification/rich-reader-${info.project.name}-${theme==='浅色'?'light':'dark'}.png`,fullPage:true});}
+ for(const theme of ['Light','Dark']){await page.getByRole('button',{name:theme,exact:true}).click();await expect(page.locator('html')).toHaveClass(new RegExp(`(^|\\s)${theme.toLowerCase()}(\\s|$)`));await expect(page.getByRole('link',{name:'PDF 阅读／导出'})).toBeVisible();await page.screenshot({path:`output/verification/rich-reader-${info.project.name}-${theme.toLowerCase()}.png`,fullPage:true});}
 });
 test('clipboard rejection never reports success and retry succeeds',async({page})=>{
  await page.addInitScript(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('DENIED');}}});});await reader(page);await page.getByRole('button',{name:'复制代码',exact:true}).click();await expect(page.getByText('复制失败，请选中代码后手动复制。',{exact:true})).toBeVisible();await expect(page.getByText('已复制',{exact:true})).toHaveCount(0);await page.evaluate(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{}}});});await page.getByRole('button',{name:'复制代码',exact:true}).click();await expect(page.getByText('已复制',{exact:true})).toBeVisible();
