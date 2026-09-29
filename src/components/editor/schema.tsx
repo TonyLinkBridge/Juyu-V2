@@ -42,6 +42,12 @@ const juyu=createReactBlockSpec({type:'juyu',propSchema:{payload:{default:''}},c
    </div>
    </div>;
   }
+  if(media.type==='code')return <div className="editor-embedded editor-code-shell" data-juyu-id={block.id} data-juyu-type="code" contentEditable={false}>
+   <div className="editor-embedded-heading"><strong>{names.code}</strong><span>{t('直接输入代码和显示设置；右侧使用 Fumadocs Dynamic Code Block 即时预览。','Enter code and display settings directly. The Fumadocs Dynamic Code Block preview updates instantly.')}</span></div>
+   {invalid&&<p role="alert">{t('请填写有效的代码设置。','Check the code block settings.')}</p>}
+   <fieldset disabled={context.frozen}><MediaFields block={media} assets={context.assets} documentId={context.documentId} frozen={context.frozen} locale={context.locale} onChange={next=>editor.updateBlock(block,{props:{payload:JSON.stringify(next)}})}/></fieldset>
+   <div className="media-toolbar"><button type="button" disabled={context.frozen} onClick={()=>editor.moveBlocksUp(block)}>{t('上移内容块','Move block up')}</button><button type="button" disabled={context.frozen} onClick={()=>editor.moveBlocksDown(block)}>{t('下移内容块','Move block down')}</button><button type="button" disabled={context.frozen} onClick={()=>editor.removeBlocks([block])}>{t('删除内容块','Delete block')}</button></div>
+  </div>;
   if(media.type==='tabs'||media.type==='accordion')return <div className={`editor-embedded editor-tabs-shell${media.type==='accordion'?' editor-accordion-shell':''}`} data-juyu-id={block.id} data-juyu-type={media.type} contentEditable={false}>
    <div className="editor-embedded-heading"><strong>{names[media.type]}</strong><span>{media.type==='tabs'?t('正式页面使用 Fumadocs Tabs，右侧草稿预览会即时同步。','The published page uses Fumadocs Tabs. Draft preview updates instantly.'):t('直接填写标题和内容，右侧会使用 Fumadocs Accordion 即时预览。','Enter the title and content directly. The Fumadocs Accordion preview updates instantly.')}</span></div>
    {invalid&&<p role="alert">{t('此内容块尚未符合保存要求，请修正下方输入。','This block is not ready to save. Check the fields below.')}</p>}

@@ -337,6 +337,8 @@ test('callout edits in place and uses a focused appearance inspector',async({pag
  await expect(hint.getByRole('button',{name:'在提示框中新增内容'})).toHaveCount(0);
  await expect(page.getByRole('region',{name:'提示框设置'})).toHaveCount(0);
  const nested=hint.locator('xpath=ancestor::div[@data-node-type="blockContainer"][1]').locator('.bn-block-group .bn-inline-content').last();
+ const nestedOuter=hint.locator('xpath=ancestor::div[@data-node-type="blockContainer"][1]').locator(':scope > .bn-block-group > .bn-block-outer').first();
+ await expect.poll(()=>nestedOuter.evaluate(element=>getComputedStyle(element,'::before').content)).toBe('none');
  await page.keyboard.insertText('先核实员工身份');
  await expect(nested).toContainText('先核实员工身份');
  await hint.click();
@@ -357,6 +359,31 @@ test('callout edits in place and uses a focused appearance inspector',async({pag
  await expect(page.locator('.editor-preview [data-fumadocs-callout]')).toContainText('执行前核对');
  await expect(page.locator('.editor-preview [data-fumadocs-callout]')).toContainText('先核实员工身份');
  await page.screenshot({path:`output/verification/rich-hint-nested-${test.info().project.name}.png`,fullPage:true});
+});
+test('advanced code block edits directly and uses only the global Fumadocs preview',async({page},testInfo)=>{
+ await mount(page,()=>structuredClone(editorFixture));
+ await insertBlockFromRail(page,'代码块');
+ const block=page.locator('.editor-embedded[data-juyu-type="code"]');
+ await expect(block).toBeVisible();
+ await expect(block.getByText('编辑此内容块',{exact:true})).toHaveCount(0);
+ await expect(block.getByText('查看此块预览',{exact:true})).toHaveCount(0);
+ const code=block.getByLabel('代码内容',{exact:true});
+ await expect(code).toBeVisible();
+ await expect(code).toBeFocused();
+ const language=block.getByLabel('代码语言',{exact:true});
+ const title=block.getByLabel('文件名或标题（可选）',{exact:true});
+ const [languageBox,titleBox,codeStyle]=await Promise.all([language.boundingBox(),title.boundingBox(),code.evaluate(element=>({background:getComputedStyle(element).backgroundColor,border:getComputedStyle(element).borderStyle}))]);
+ if(testInfo.project.name==='mobile')expect(titleBox!.y).toBeGreaterThan(languageBox!.y);else expect(languageBox?.y).toBe(titleBox?.y);
+ expect(codeStyle).toEqual({background:'rgb(17, 24, 39)',border:'solid'});
+ await language.fill('javascript');
+ await title.fill('config.js');
+ await code.fill('console.log("hello");');
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ const preview=page.locator('.editor-preview [data-fumadocs-code]');
+ await expect(preview).toBeVisible();
+ await expect(preview).toContainText('config.js');
+ await expect(preview).toContainText('console.log');
+ await page.screenshot({path:`output/verification/rich-code-direct-${testInfo.project.name}.png`,fullPage:true});
 });
 test('an empty callout stays out of draft preview',async({page})=>{
  await mount(page,()=>structuredClone(editorFixture));

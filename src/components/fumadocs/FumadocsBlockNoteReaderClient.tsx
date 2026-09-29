@@ -54,6 +54,7 @@ type PreviewHint={
  title:string;
  body:string;
  showTitle?:boolean;
+ iconKey?:ReaderIconKey|null;
  readerChildren?:EditorBlock[];
  readerLocale?:ReaderLocale;
 };
@@ -132,7 +133,9 @@ function readHint(payload:string):PreviewHint|null{
  try{
   const value=JSON.parse(payload) as Partial<PreviewHint>;
   if(value.type!=='hint'||!['info','success','warning','danger'].includes(String(value.style))||typeof value.title!=='string'||typeof value.body!=='string'||(value.readerChildren!==undefined&&!Array.isArray(value.readerChildren)))return null;
-  return value as PreviewHint;
+  const iconKey=value.iconKey===undefined||value.iconKey===null?value.iconKey:readerIconKey(value.iconKey);
+  if(value.iconKey!==undefined&&value.iconKey!==null&&iconKey===null)return null;
+  return {...value,...(iconKey===undefined?{}:{iconKey})} as PreviewHint;
  }catch{return null;}
 }
 
@@ -158,7 +161,7 @@ function FumadocsHint({hint,blockId}:{hint:PreviewHint;blockId:string}){
  const hasVisibleTitle=hint.showTitle!==false&&Boolean(hint.title.trim());
  if(!hasVisibleTitle&&!hint.body.trim()&&!hasReadableChildren)return null;
  const type=hint.style==='danger'?'error':hint.style;
- return <Callout data-fumadocs-callout={blockId} type={type} title={hasVisibleTitle?hint.title:undefined}>
+ return <Callout data-fumadocs-callout={blockId} type={type} title={hasVisibleTitle?hint.title:undefined} icon={hint.iconKey?<ReaderIcon icon={hint.iconKey} size={20}/>:undefined}>
   {hint.body&&<p>{hint.body}</p>}
   {hint.readerChildren?.length?<PublishedBlockNoteStatic blocks={hint.readerChildren} locale={hint.readerLocale??'zh-CN'}/>:null}
  </Callout>;
