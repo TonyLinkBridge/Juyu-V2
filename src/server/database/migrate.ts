@@ -2,10 +2,11 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import type { Pool } from 'pg';
 
-const migrations = ['0001_core', '0002_supporting_data', '0003_authorization', '0004_members', '0005_enrollment', '0006_article_presentation', '0007_feedback', '0008_media', '0009_document_lifecycle', '0010_review_submission', '0011_document_availability', '0012_version_history', '0013_ops_collection', '0014_publication_search', '0015_reference', '0016_qa', '0017_favorites', '0018_recent_views', '0019_analytics', '0020_custom_fields', '0021_categories', '0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements', '0027_native_editor', '0028_qa_search', '0029_shared_revision_config_locks', '0030_publication_number', '0031_scoped_search', '0032_category_icons', '0033_publication_icons', '0034_article_description', '0035_publication_timestamp', '0036_reader_changelog', '0037_reusable_fragments', '0038_reusable_fragment_versions', '0039_release_notes', '0040_document_locales', '0041_english_review_confirmation', '0042_draft_actions', '0043_super_admin_role', '0044_super_admin_direct_publish', '0045_search_relevance', '0046_category_indexes', '0047_category_index_icons', '0048_index_page_icons', '0049_activate_index_icons', '0050_category_deletion', '0051_category_deletion_history', '0052_document_navigation_positions', '0053_fumadocs_page_slugs', '0054_slack_outbox'] as const;
+const migrations = ['0001_core', '0002_supporting_data', '0003_authorization', '0004_members', '0005_enrollment', '0006_article_presentation', '0007_feedback', '0008_media', '0009_document_lifecycle', '0010_review_submission', '0011_document_availability', '0012_version_history', '0013_ops_collection', '0014_publication_search', '0015_reference', '0016_qa', '0017_favorites', '0018_recent_views', '0019_analytics', '0020_custom_fields', '0021_categories', '0022_forms', '0023_navigation_settings', '0024_feature_flags', '0025_setting_history', '0026_announcements', '0027_native_editor', '0028_qa_search', '0029_shared_revision_config_locks', '0030_publication_number', '0031_scoped_search', '0032_category_icons', '0033_publication_icons', '0034_article_description', '0035_publication_timestamp', '0036_reader_changelog', '0037_reusable_fragments', '0038_reusable_fragment_versions', '0039_release_notes', '0040_document_locales', '0041_english_review_confirmation', '0042_draft_actions', '0043_super_admin_role', '0044_super_admin_direct_publish', '0045_search_relevance', '0046_category_indexes', '0047_category_index_icons', '0048_index_page_icons', '0049_activate_index_icons', '0050_category_deletion', '0051_category_deletion_history', '0052_document_navigation_positions', '0053_fumadocs_page_slugs', '0054_slack_outbox', '0055_analytics_visible_time'] as const;
 
 // Explicit operator entry point. Never invoked by page rendering or startup.
-export async function migrate(pool: Pool): Promise<string[]> {
+export async function migrate(pool: Pool,options:{through?:typeof migrations[number]}={}): Promise<string[]> {
+  if(options.through!==undefined&&!migrations.includes(options.through))throw new Error('INVALID_MIGRATION_BOUNDARY');
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -19,6 +20,7 @@ export async function migrate(pool: Pool): Promise<string[]> {
       REVOKE ALL ON juyu.schema_migrations FROM PUBLIC;`);
     const applied: string[] = [];
     for (const version of migrations) {
+      if(options.through!==undefined&&version>options.through)break;
       const sql = await readFile(new URL(`./migrations/${version}.sql`, import.meta.url), 'utf8');
       const checksum = createHash('sha256').update(sql).digest('hex');
       const existing = await client.query<{ checksum: string }>('SELECT checksum FROM juyu.schema_migrations WHERE version=$1', [version]);

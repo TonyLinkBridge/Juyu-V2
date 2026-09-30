@@ -37,7 +37,7 @@ after(async () => { if (fixture) await fixture.close(); });
 test('empty database migration is replayable without losing data', async () => {
   assert.deepEqual(await migrate(fixture.pool), []);
   assert.equal((await fixture.pool.query('SELECT count(*)::int AS n FROM juyu.members')).rows[0].n, 4);
-  assert.equal((await fixture.pool.query('SELECT count(*)::int AS n FROM juyu.schema_migrations')).rows[0].n, 54);
+  assert.equal((await fixture.pool.query('SELECT count(*)::int AS n FROM juyu.schema_migrations')).rows[0].n, 55);
 });
 
 test('complete review/publish cycle persists old publication while new draft waits', async () => {
@@ -171,10 +171,10 @@ test('untrusted SQL role cannot read private data even if table SELECT was accid
 test('migration rollback and reapply is exercised only on a separate disposable cluster', async () => {
   const isolated = await temporaryDatabase();
   try {
-    assert.equal((await migrate(isolated.pool)).length, 54);
+    assert.equal((await migrate(isolated.pool)).length, 55);
     // This pool is created above, never obtained from DATABASE_URL or a real Supabase project.
     await isolated.pool.query('DROP SCHEMA juyu CASCADE');
-    assert.equal((await migrate(isolated.pool)).length, 54);
+    assert.equal((await migrate(isolated.pool)).length, 55);
     assert.equal((await isolated.pool.query('SELECT count(*)::int AS n FROM juyu.documents')).rows[0].n, 0);
   } finally { await isolated.close(); }
 });
@@ -196,4 +196,14 @@ test('migration checksum mismatch fails without modifying business records', asy
   } finally {
     await fixture.pool.query("UPDATE juyu.schema_migrations SET checksum=$1 WHERE version='0001_core'", [checksum]);
   }
+});
+
+test('operator migration boundary cannot accidentally install a later feature',async()=>{
+ const isolated=await temporaryDatabase();
+ try{
+  const earlier=await migrate(isolated.pool,{through:'0054_slack_outbox'});assert.equal(earlier.length,54);
+  assert.equal((await isolated.pool.query("SELECT to_regclass('juyu.analytics_visible_time') installed")).rows[0].installed,null);
+  assert.deepEqual(await migrate(isolated.pool),['0055_analytics_visible_time']);
+  assert.deepEqual(await migrate(isolated.pool,{through:'0054_slack_outbox'}),[]);
+ }finally{await isolated.close();}
 });

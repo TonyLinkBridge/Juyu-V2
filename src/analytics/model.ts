@@ -2,6 +2,7 @@ import {positiveInteger} from '../feedback/model.ts';
 import {parseSearchQuery} from '../reader/search.ts';
 export interface AnalyticsSearchSnapshot {eventId:string;query:string;page:number;total:number;results:{documentId:string;revision:number}[]}
 export type AnalyticsInput = {kind:'view';eventId:string;documentId:string;revision:number}
+ | {kind:'view_time';eventId:string;viewId:string;documentId:string;revision:number;visibleMs:number}
  | ({kind:'search'}&AnalyticsSearchSnapshot)
  | {kind:'search_click';eventId:string;documentId:string;revision:number;position:number;search:AnalyticsSearchSnapshot};
 export interface AnalyticsReceipt {eventId:string;kind:AnalyticsInput['kind']}
@@ -20,6 +21,7 @@ export function analyticsInput(value:unknown):AnalyticsInput {
  if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('INVALID_INPUT');const kind=(value as Record<string,unknown>).kind;
  if(kind==='search'){const x=object(value,['kind','eventId','query','page','total','results']);const rest={...x};delete rest.kind;return {kind,...snapshot(rest)};}
  if(kind==='view'){const x=object(value,['kind','eventId','documentId','revision']);return {kind,eventId:uuid(x.eventId),documentId:documentId(x.documentId),revision:positiveInteger(x.revision)};}
+ if(kind==='view_time'){const x=object(value,['kind','eventId','viewId','documentId','revision','visibleMs']);if(typeof x.visibleMs!=='number'||!Number.isInteger(x.visibleMs)||x.visibleMs<0||x.visibleMs>43200000)throw new Error('INVALID_INPUT');return {kind,eventId:uuid(x.eventId),viewId:uuid(x.viewId),documentId:documentId(x.documentId),revision:positiveInteger(x.revision),visibleMs:x.visibleMs};}
  if(kind==='search_click'){const x=object(value,['kind','eventId','documentId','revision','position','search']);return {kind,eventId:uuid(x.eventId),documentId:documentId(x.documentId),revision:positiveInteger(x.revision),position:positiveInteger(x.position),search:snapshot(x.search)};}
  throw new Error('INVALID_INPUT');
 }

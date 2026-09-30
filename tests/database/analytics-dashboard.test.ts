@@ -106,3 +106,43 @@ test('article and negative feedback totals cover all eligible rows while top ten
 test('pending role enrollment denies access even with otherwise valid admin observation',async()=>{
  await fixture.pool.query("INSERT INTO juyu.role_enrollments(member_id,requested_role,purpose) VALUES('a','admin','bootstrap')");try{await assert.rejects(read(),/FORBIDDEN/);}finally{await fixture.pool.query("UPDATE juyu.role_enrollments SET state='complete',confirmed_at=now() WHERE member_id='a'");}
 });
+
+test('measured visits stay separate from opens; retries keep greatest time and admin sees per-person counts',async()=>{
+ const d=await publish(await draft('Measured')),viewId=randomUUID();
+ await db.run(support,c=>captureAnalytics(c,{kind:'view',eventId:viewId,documentId:d.id,revision:1}));
+ await fixture.pool.query("UPDATE juyu.analytics_events SET occurred_at=now()-interval '2 minutes' WHERE id=$1",[viewId]);
+ const report={kind:'view_time',eventId:randomUUID(),viewId,documentId:d.id,revision:1,visibleMs:60000};
+ await db.run(support,c=>captureAnalytics(c,report));await db.run(support,c=>captureAnalytics(c,report));
+ await db.run(support,c=>captureAnalytics(c,{...report,eventId:randomUUID(),visibleMs:10000}));
+ const data=await read();assert.ok(data.usage);assert.equal(data.summary.views,1);assert.equal(data.usage.readers,1);assert.equal(data.usage.measuredViews,1);assert.equal(data.usage.averageVisibleMs,60000);
+ assert.equal(data.usage.articles[0].readers,1);assert.equal(data.usage.trend.reduce((n,x)=>n+x.views,0),1);
+ const people=await service(admin).analyticsPeople({days:30,documentId:d.id});assert.equal(people.items[0].displayName,'Private Support');assert.equal(people.items[0].views,1);assert.equal(people.items[0].averageVisibleMs,60000);
+ await assert.rejects(service(support).analyticsPeople({days:30}),/FORBIDDEN/);
+ await assert.rejects(db.run(ops,c=>captureAnalytics(c,{...report,eventId:randomUUID()})),/NOT_FOUND|FORBIDDEN/);
+ await assert.rejects(db.run(support,c=>captureAnalytics(c,{...report,eventId:randomUUID(),documentId:'different'})),/NOT_FOUND/);
+ await fixture.pool.query("UPDATE juyu.documents SET lifecycle='archived' WHERE id=$1",[d.id]);assert.equal((await service(admin).analyticsPeople({days:30})).total,0);
+});
+test('old opens have no invented time and people pagination is bounded and stable',async()=>{
+ const d=await publish(await draft('Untimed'));await event(d.id);
+ const data=await read();assert.ok(data.usage);assert.equal(data.usage.averageVisibleMs,null);assert.equal(data.usage.measuredViews,0);
+ const people=await service(admin).analyticsPeople({days:30,page:999});assert.equal(people.page,1);assert.equal(people.items[0].averageVisibleMs,null);
+ await assert.rejects(service(admin).analyticsPeople({days:30,page:0}),/INVALID_INPUT/);
+});
+
+test('asset library searches files literally, filters ready active assets, shows usage and limits upload targets',async()=>{
+ const d=await draft('Current draft'),formal=await publish(await draft('Formal owner')),hidden=await draft('Archived owner');
+ const insert=async(documentId:string,filename:string,mime:string,status='ready')=>{const id=randomUUID();await fixture.pool.query('INSERT INTO juyu.assets(id,document_id,uploaded_by,filename,mime_type,byte_size,object_key,status) VALUES($1::uuid,$2,\'a\',$3,$4,100,$1::text,$5)',[id,documentId,filename,mime,status]);return id;};
+ const image=await insert(d.id,'操作_100%.png','image/png'),pdf=await insert(formal.id,'规则.pdf','application/pdf');
+ await insert(d.id,'还没上传.png','image/png','pending');await insert(hidden.id,'归档.png','image/png');
+ await fixture.pool.query("UPDATE juyu.documents SET lifecycle='archived' WHERE id=$1",[hidden.id]);
+ await fixture.pool.query("INSERT INTO juyu.revision_assets(document_id,revision_id,asset_id,usage) VALUES($1,1,$2,'inline'),($3,1,$4,'attachment')",[d.id,image,formal.id,pdf]);
+ const data=await service(admin).mediaLibrary({file:image});assert.equal(data.total,2);assert.deepEqual(data.counts,{all:2,image:1,video:0,audio:0,file:1});assert.deepEqual(data.selected?.usages,[{state:'draft',usage:'inline'}]);assert.equal(data.selected?.uploadedBy,'Private Admin');
+ assert.equal((await service(admin).mediaLibrary({q:'100%'})).total,1);assert.equal((await service(admin).mediaLibrary({q:'_'})).total,1);assert.equal((await service(admin).mediaLibrary({type:'file',file:pdf})).selected?.usages[0].state,'published');
+ const filtered=await service(admin).mediaLibrary({type:'image',page:'999'});assert.equal(filtered.page,1);assert.equal(filtered.items[0].id,image);
+ await fixture.pool.query("UPDATE juyu.assets SET status='quarantined' WHERE document_id=$1 AND status='pending'",[d.id]);
+ await service(admin).submitReview(d.id,{expectedSequence:d.sequence,reviewerId:'b'});
+ assert.equal((await service(admin).mediaLibrary({file:image})).selected?.canUpload,false);
+ const targets=await service(admin).uploadTargets({});assert.deepEqual(targets.items.map(x=>x.id),[formal.id]);
+ await assert.rejects(service(support).mediaLibrary({}),/FORBIDDEN/);await assert.rejects(service(support).uploadTargets({}),/FORBIDDEN/);
+ await assert.rejects(service(admin).mediaLibrary({q:['a']}),/INVALID_INPUT/);
+});

@@ -31,12 +31,27 @@ export async function readAnalyticsDashboard(c:PoolClient,days:unknown=30):Promi
   JOIN juyu.analytics_events e ON e.document_id=r."documentId" CROSS JOIN bounds b
   WHERE e.kind='view' AND e.occurred_at>=b."from" AND e.occurred_at<=b."asOf"
   GROUP BY r."documentId",r.title,r.kind,r.revision
+ ), visit_records AS MATERIALIZED (
+  SELECT e.id,e.document_id,e.member_id,e.occurred_at,t.visible_ms
+  FROM readable r JOIN juyu.analytics_events e ON e.document_id=r."documentId"
+  LEFT JOIN juyu.analytics_visible_time t ON t.view_id=e.id CROSS JOIN bounds b
+  WHERE e.kind='view' AND e.occurred_at>=b."from" AND e.occurred_at<=b."asOf"
+ ), usage_articles AS MATERIALIZED (
+  SELECT document_id AS "documentId",count(DISTINCT member_id)::integer AS readers,count(visible_ms)::integer AS "measuredViews",round(avg(visible_ms))::integer AS "averageVisibleMs"
+  FROM visit_records GROUP BY document_id
+ ), trend AS MATERIALIZED (
+  SELECT to_char(day,'YYYY-MM-DD') AS date,count(v.id)::integer AS views
+  FROM bounds b CROSS JOIN LATERAL generate_series(date_trunc('day',b."from" AT TIME ZONE 'Asia/Kuala_Lumpur'),date_trunc('day',b."asOf" AT TIME ZONE 'Asia/Kuala_Lumpur'),interval '1 day') day
+  LEFT JOIN visit_records v ON date_trunc('day',v.occurred_at AT TIME ZONE 'Asia/Kuala_Lumpur')=day GROUP BY day
  ), feedback AS MATERIALIZED (
   SELECT r."documentId",r.title,r.kind,r.revision,count(*)::integer AS total,count(*) FILTER(WHERE NOT f.helpful)::integer AS negative
   FROM readable r JOIN juyu.feedback f ON f.document_id=r."documentId" AND f.revision_id=r.revision CROSS JOIN bounds b
   WHERE f.updated_at>=b."from" AND f.updated_at<=b."asOf" GROUP BY r."documentId",r.title,r.kind,r.revision
  ) SELECT jsonb_build_object(
   'days',$1::integer,'from',b."from",'asOf',b."asOf",
+  'usage',jsonb_build_object('readers',(SELECT count(DISTINCT member_id) FROM visit_records),'measuredViews',(SELECT count(visible_ms) FROM visit_records),'averageVisibleMs',(SELECT round(avg(visible_ms)) FROM visit_records),
+   'articles',coalesce((SELECT jsonb_agg(to_jsonb(u)) FROM usage_articles u JOIN (SELECT "documentId" FROM views ORDER BY views DESC,"documentId" COLLATE "C" LIMIT 10) top ON top."documentId"=u."documentId"),'[]'::jsonb),
+   'trend',coalesce((SELECT jsonb_agg(to_jsonb(t) ORDER BY date) FROM trend t),'[]'::jsonb)),
   'summary',jsonb_build_object('searches',(SELECT count(*) FROM searches),'zeroResults',(SELECT count(*) FROM searches WHERE result_count=0),
    'clickedSearches',(SELECT count(DISTINCT search_id) FROM clicks),'searchClicks',(SELECT count(*) FROM clicks),
    'views',coalesce((SELECT sum(views) FROM views),0),'feedbackTotal',coalesce((SELECT sum(total) FROM feedback),0),'feedbackNegative',coalesce((SELECT sum(negative) FROM feedback),0)),

@@ -1,3 +1,4 @@
+import {readMediaLibrary,readUploadTargets} from '../media/library.ts';
 import {measured} from '../performance.ts';
 import {readAnnouncements,writeAnnouncement,recordReceipt as recordAnnouncementReceipt} from '../announcements/repository.ts';
 import {readHistory as readSettingHistory,readHistoryDetail,restoreSetting} from '../setting-history/repository.ts';
@@ -9,6 +10,7 @@ import {readReusableFragments,createReusableFragment,updateReusableFragment} fro
 import {normalizeFieldSnapshots} from '../../fields/model.ts';
 import type {FieldSnapshot} from '../../fields/model.ts';
 import {readFieldDefinitions,writeFieldDefinition} from '../fields/repository.ts';
+import {readAnalyticsPeople} from '../analytics/people.ts';
 import {readAnalyticsDashboard} from '../analytics/dashboard.ts';
 import {captureAnalytics} from '../analytics/repository.ts';
 import {readRecent,recordRecent} from '../recent/repository.ts';
@@ -104,6 +106,7 @@ export class AuthorizationService {
   async deleteCategory(id:string,input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>deleteCategoryDefinition(c,id,input));}
   async fields(){const v=await this.viewer(true);return this.database.run(v,c=>readFieldDefinitions(c),true);}
   async saveField(id:string,input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>writeFieldDefinition(c,id,input));}
+  async analyticsPeople(input:Record<string,unknown>){const v=await this.viewer(true);return this.database.run(v,c=>readAnalyticsPeople(c,input),true);}
   async analyticsDashboard(days:unknown=30){const v=await this.viewer(true);return this.database.run(v,c=>readAnalyticsDashboard(c,days),true);}
   async captureAnalytics(input:unknown){const v=await this.viewer();return this.database.run(v,c=>captureAnalytics(c,input));}
   async recent(page=1,locale:'zh-CN'|'en'='zh-CN'){const v=await this.viewer();return this.database.run(v,c=>readRecent(c,page,locale),true);}
@@ -280,6 +283,8 @@ async reader(requested:string|string[]|undefined,requestedSection?:'article'|'op
   async feedbackOverview(page:unknown=1){const v=await this.viewer(true);return this.database.run(v,c=>feedbackOverview(c,page),true);}
   async feedbackDetails(id:string,revision:number,page:unknown=1){const v=await this.viewer(true);return this.database.run(v,c=>feedbackDetails(c,id,revision,page),true);}
   async workspace(input:QueryInput={}){const v=await this.viewer(true);return this.database.run(v,c=>readWorkspace(c,v.id,input),true);}
+  async mediaLibrary(input:Record<string,unknown>={}){const v=await this.viewer(true);return this.database.run(v,c=>readMediaLibrary(c,input),true);}
+  async uploadTargets(input:Record<string,unknown>={}){const v=await this.viewer(true);return this.database.run(v,c=>readUploadTargets(c,input),true);}
   async mediaDocuments(page=1){
     const viewer=await this.viewer(true);positiveInteger(page);
     return this.database.run(viewer,async c=>{
