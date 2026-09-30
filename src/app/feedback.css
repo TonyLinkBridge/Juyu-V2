@@ -35,7 +35,7 @@
 .editor-settings-group>button:hover,.editor-settings-group>button:focus-visible{background:var(--hover)}
 .editor-settings-group>button>span:first-child{display:grid;gap:4px;min-width:0}
 .editor-settings-group>button strong{font-size:14px;font-weight:650}
-.editor-settings-group>button small{font-size:11px;line-height:1.5;color:var(--muted);font-weight:400}
+.editor-settings-group>button small{font-size:12px;line-height:1.5;color:var(--muted);font-weight:400}
 .editor-settings-group>button>span:last-child{flex:none;color:var(--muted);font-size:18px}
 .editor-settings-group-body{display:grid;gap:20px;padding:4px 24px 26px}
 .editor-settings-subsection{display:grid;gap:12px;padding-top:20px;border-top:1px solid var(--line)}
@@ -43,11 +43,11 @@
 .editor-settings-subsection>h3,.editor-outline-settings>h3{margin:0;font-size:13px;font-weight:650}
 .editor-settings-content fieldset{display:grid;gap:12px;border:0;padding:0;margin:0;min-width:0}
 .editor-settings-content fieldset+fieldset{padding-top:20px;border-top:1px solid var(--line)}
-.editor-settings-content legend{font-size:13px;font-weight:600;margin-bottom:2px}
-.editor-settings-content label{display:grid;gap:8px;font-size:12px;margin:0}
+.editor-focused .editor-settings-group-body legend{position:static;width:auto;height:auto;overflow:visible;clip-path:none;font-size:14px;font-weight:650;color:var(--ink);margin-bottom:4px}
+.editor-focused .editor-settings-group-body label{display:grid;gap:8px;font-size:13px!important;color:var(--ink);margin:0}
 .editor-settings-content .editor-metadata{display:grid;grid-template-columns:1fr;gap:12px}
 .editor-settings-content input:not([type=checkbox]):not([type=range]):not([type=file]),.editor-settings-content select,.editor-settings-content textarea{width:100%;min-height:42px;padding:10px 12px;border:1px solid var(--border,#dedee3);border-radius:9px;background:var(--surface);color:inherit;font:inherit;box-sizing:border-box}
-.editor-settings-content p,.editor-settings-content small{font-size:12px;line-height:1.65;color:var(--muted,#71717a)}
+.editor-settings-content p,.editor-settings-content small{font-size:13px;line-height:1.65;color:var(--muted,#71717a)}
 .editor-settings-content p{margin:0}
 .editor-outline-settings details{font-size:12px;color:var(--muted)}
 .editor-outline-settings summary{cursor:pointer;width:fit-content;padding:4px 0;color:var(--ink)}
@@ -60,7 +60,7 @@
 .editor-settings-content .editor-upload-control{position:relative;border:1px dashed #c6a1a7;border-radius:10px;text-align:center;padding:22px 14px;background:rgba(180,40,55,.035);overflow:hidden}
 .editor-upload-control input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .editor-upload-control:focus-within{outline:2px solid #b52b40;outline-offset:2px}
-.editor-upload-control:has(input:disabled){opacity:.5;cursor:not-allowed}
+.editor-upload-control:has(input:disabled){opacity:1;border-style:solid;background:var(--surface);color:var(--muted);cursor:not-allowed}
 .editor-settings-actions>button{display:block;width:100%;min-height:42px;margin:0 0 8px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);text-align:left;cursor:pointer}
 .editor-settings-actions>button:hover:not(:disabled){background:var(--hover)}
 .editor-settings-actions>button:disabled{opacity:.5;cursor:not-allowed}

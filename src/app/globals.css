@@ -586,7 +586,6 @@ button:not(.juyu-fumadocs *), input:not(.juyu-fumadocs *), select:not(.juyu-fuma
 
 /* Compact drawer fields retain readable help and native disclosure affordances. */
 .editor-focused .editor-settings-content fieldset{gap:12px}
-.editor-focused .editor-settings-content legend{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 .editor-focused .editor-settings-content label{margin:0}
 .editor-focused .editor-settings-content .article-category-options label{display:flex;flex-direction:row;align-items:center;gap:10px;padding:10px}
 .editor-focused .editor-settings-content input[type=checkbox]{width:16px;min-height:16px;height:16px;flex:0 0 16px;margin:0}

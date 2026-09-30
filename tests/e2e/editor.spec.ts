@@ -111,10 +111,16 @@ test('compact workspace exposes one preview action and three complete settings g
  await expect(dialog.getByRole('button',{name:/^内容与访问/})).toBeVisible();
  await expect(dialog.getByRole('button',{name:/^封面与附件/})).toBeVisible();
  await expect(dialog.getByRole('button',{name:/^发布与管理/})).toBeVisible();
+ await expect.poll(()=>dialog.locator('legend').first().evaluate(element=>element.getBoundingClientRect().height)).toBeGreaterThan(10);
+ await expect.poll(()=>dialog.locator('label').filter({hasText:'资料类型'}).first().evaluate(element=>Number.parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(13);
  await expect(dialog.getByRole('button',{name:/^阅读范围与资料/})).toHaveCount(0);
  await expect(dialog.getByText('更新说明',{exact:true})).toHaveCount(0);
  await expect(dialog.getByText('自定义字段',{exact:true})).toHaveCount(0);
  await page.screenshot({path:`output/verification/editor-compact-settings-${testInfo.project.name}.png`,fullPage:false,animations:'disabled'});
+ await dialog.getByRole('button',{name:/^封面与附件/}).click();
+ await expect(dialog.getByText('填写标题并等候草稿保存后，即可上传文件。')).toBeVisible();
+ await expect(dialog.getByLabel('上传文件',{exact:true})).toBeDisabled();
+ await expect.poll(()=>dialog.locator('.editor-upload-control').evaluate(element=>getComputedStyle(element).opacity)).toBe('1');
  await dialog.getByRole('button',{name:/^发布与管理/}).click();
  await expect(dialog.getByRole('button',{name:'复制当前输入',exact:true})).toBeVisible();
  await expect(dialog.getByRole('button',{name:'重新载入',exact:true})).toBeVisible();
