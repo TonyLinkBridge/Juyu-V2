@@ -40,3 +40,5 @@ npm test 覆盖身份校验与退出参数；其中身份供应商和退出 SDK 
 官方参考：[Next.js 接入](https://clerk.com/docs/nextjs/getting-started/quickstart)、[自定义登录页面](https://clerk.com/docs/nextjs/guides/development/custom-sign-in-or-up-page)、[middleware 配置](https://clerk.com/docs/reference/nextjs/clerk-middleware)。具体接口参数另与已安装 SDK 类型和实现核对。
 
 T013 更新：公司准入本地实现已接入，详见 COMPANY.md；上文 T012 的“公司校验尚未完成”现对应真实项目验收及后续业务角色/数据库绑定尚未完成。
+
+- 登录错误恢复页提供“退出并重新登录”，使用官方 Clerk `signOut`。能读取会话时仅退出该会话；不能读取时退出当前浏览器客户端的会话，固定返回员工或后台登录入口。恢复请求超过 10 秒会提示未确认退出，允许重试；服务加载失败不伪造退出成功，并提供仅清理本站数据的备用说明。此按钮不是身份服务故障的根因修复。

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { clerkConfiguration } from '../src/config/clerk.ts';
 import { resolveEmployeeSession, employeeDestination } from '../src/server/authentication/session.ts';
-import { signOutCurrentSession } from '../src/authentication/sign-out.ts';
+import { signOutCurrentSession, signOutForRecovery } from '../src/authentication/sign-out.ts';
 
 const env = { APP_ORIGIN: 'http://127.0.0.1:3211', NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: `pk_test_${Buffer.from('local-fixture.clerk.accounts.dev$').toString('base64')}`, CLERK_SECRET_KEY: 'sk_test_localfixture' };
 const active = { id: 'sess_fixture', userId: 'user_fixture', status: 'active' };
@@ -63,4 +63,20 @@ test('admin logout uses the same current-session operation and returns to the ad
   let received: unknown;
   await signOutCurrentSession(async options => { received = options; }, 'sess_admin', 'admin');
   assert.deepEqual(received, { sessionId: 'sess_admin', redirectUrl: '/admin/sign-in' });
+});
+
+
+test('login recovery signs out even when no active session can be read and uses a fixed audience destination', async () => {
+  for (const audience of ['employee', 'admin'] as const) {
+    let received: unknown;
+    await signOutForRecovery(async options => { received = options; }, null, audience);
+    assert.deepEqual(received, { redirectUrl: audience === 'admin' ? '/admin/sign-in' : '/sign-in' });
+    await signOutForRecovery(async options => { received = options; }, 'sess_current', audience);
+    assert.deepEqual(received, { sessionId: 'sess_current', redirectUrl: audience === 'admin' ? '/admin/sign-in' : '/sign-in' });
+  }
+});
+
+test('login recovery never treats sign-out rejection or a stalled provider as successful', async () => {
+  await assert.rejects(signOutForRecovery(async () => { throw Error('offline'); }, null), /offline/);
+  await assert.rejects(signOutForRecovery(() => new Promise<void>(() => {}), null, 'employee', 5), /SIGN_OUT_UNCONFIRMED/);
 });

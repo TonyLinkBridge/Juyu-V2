@@ -673,3 +673,10 @@ input:not(.juyu-fumadocs *), select:not(.juyu-fumadocs *) { color: inherit; }
 @media (max-width: 700px) {
  .reader-search-layout { width: calc(100% - 32px); }
 }
+
+/* Login recovery stays usable independently of the reader/admin account menus. */
+.login-recovery-exit { margin: 16px 0; }
+.login-recovery-exit .session-exit { margin-top: 0; }
+.login-recovery-exit button { min-height: 46px; }
+.login-recovery-help { margin-top: 20px; font-size: 13px; color: var(--muted); }
+.login-recovery-help summary { cursor: pointer; }
