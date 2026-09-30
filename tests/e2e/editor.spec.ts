@@ -3,8 +3,6 @@ import {test,expect,type Page} from '@playwright/test';
 import {editorBrowserBundle,editorFixture} from '../helpers/editor-browser';
 import type {EditorData} from '../../src/editor/contract';
 import {decodeEditorBody,encodeEditorBody,editorMedia} from '../../src/editor/document';
-import {annotationText} from '../../src/editor/annotation';
-import {inlineEmbed} from '../../src/editor/inline-embed';
 let bundle:Awaited<ReturnType<typeof editorBrowserBundle>>;
 test.beforeAll(async()=>{bundle=await editorBrowserBundle();});
 async function mount(page:Page,initial:()=>EditorData|null,newReference:boolean|'qa'=false){
@@ -18,10 +16,6 @@ async function settings(page:Page,section='保存与管理'){
  await page.getByRole('dialog',{name:'文章设置',exact:true}).getByRole('button',{name:new RegExp('^'+section)}).click();
 }
 async function closeSettings(page:Page){await page.getByRole('button',{name:'关闭文章设置',exact:true}).click();}
-async function insertFromRail(page:Page,name:'添加行内注释'|'插入行内元素'){
- await page.getByRole('navigation',{name:'编辑工具'}).getByRole('button',{name:'内容插入',exact:true}).click();
- await page.getByRole('region',{name:'内容插入'}).getByRole('button',{name:new RegExp(`^${name}`)}).click();
-}
 async function insertBlockFromRail(page:Page,name:'提示框'|'代码块'|'表格'|'折叠内容'){
  await page.getByRole('navigation',{name:'编辑工具'}).getByRole('button',{name:'内容插入',exact:true}).click();
  await page.getByRole('region',{name:'内容插入'}).getByRole('button',{name:new RegExp(`^${name}`)}).click();
@@ -92,8 +86,8 @@ test('editor separates workflow actions from a right-side authoring rail',async(
  await expect(panel.getByRole('button',{name:/^表格/})).toHaveCount(0);
  await expect(panel.getByRole('button',{name:/^分页标签/})).toBeVisible();
  await expect(panel.getByRole('button',{name:/^折叠内容/})).toBeVisible();
- await expect(panel.getByRole('button',{name:/^添加行内注释/})).toBeVisible();
- await expect(panel.getByRole('button',{name:/^插入行内元素/})).toBeVisible();
+ await expect(panel.getByRole('button',{name:/^添加行内注释/})).toHaveCount(0);
+ await expect(panel.getByRole('button',{name:/^插入行内元素/})).toHaveCount(0);
  await page.screenshot({path:`output/verification/editor-authoring-rail-${testInfo.project.name}.png`});
  await panel.getByRole('button',{name:/^提示框/}).click();
  await expect(page.locator('[data-juyu-type="hint"]')).toBeVisible();
@@ -233,56 +227,6 @@ function assertFragmentCopy(blocks:ReturnType<typeof decodeEditorBody>,source:un
  expect(blocks).not.toBeNull();expect(blocks!.length).toBeGreaterThan(1);
  const wrapper=blocks!.find(block=>block.type==='juyu'&&JSON.parse(block.props.payload).type==='reusableContent');expect(wrapper).toBeTruthy();expect(wrapper!.children[0].id).not.toBe((source[0] as {id:string}).id);
 }
-test('inline annotation saves selected words and opens as a note in the reader preview',async({page})=>{
- let saved=structuredClone(editorFixture);
- await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
- await mount(page,()=>saved);
- await page.locator('.bn-editor').click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');await page.keyboard.insertText('需要说明的词');
- for(let index=0;index<'需要说明的词'.length;index++)await page.keyboard.press('Shift+ArrowLeft');
- await insertFromRail(page,'添加行内注释');
- const dialog=page.getByRole('dialog',{name:'添加行内注释'});
- await expect(dialog).toBeVisible();await dialog.getByRole('textbox',{name:'注释内容'}).fill('员工点击后看到的解释');await dialog.getByRole('button',{name:'插入注释'}).click();
- await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
- const blocks=decodeEditorBody(saved.body);expect(blocks).not.toBeNull();if(!blocks)throw new Error('saved body is not structured');
- const link=blocks.flatMap(block=>block.type==='paragraph'?block.content:[]).find(inline=>inline.type==='link'&&inline.content.some(item=>item.text==='需要说明的词'));
- expect(link?.type).toBe('link');if(link?.type==='link')expect(annotationText(link.href)).toBe('员工点击后看到的解释');
- await page.getByRole('button',{name:'预览',exact:true}).click();
- const trigger=page.locator('.editor-preview .inline-annotation-trigger');await expect(trigger).toContainText('需要说明的词');await trigger.click();await expect(page.locator('.editor-preview [role="note"]')).toContainText('员工点击后看到的解释');
- await page.reload();await expect(page.locator('.bn-editor')).toContainText('需要说明的词');
-});
-test('inline icon, formula and image keep their meaning after autosave and preview',async({page})=>{
- await page.addInitScript(()=>localStorage.setItem('theme','dark'));
- const imageId='00000000-0000-4000-8000-000000000081';
- let saved={...structuredClone(editorFixture),assets:[{id:imageId,filename:'verification.png',mime:'image/png',size:'100',status:'ready'}]};
- await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
- await mount(page,()=>saved);
- await page.locator('.bn-editor').click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');
- for(const kind of ['icon','math','image'] as const){
-  await insertFromRail(page,'插入行内元素');
-  const dialog=page.getByRole('dialog',{name:'插入行内元素'});await dialog.getByRole('combobox',{name:'行内元素类型'}).selectOption(kind);
-  if(kind==='icon')await dialog.getByRole('combobox',{name:'行内图标'}).selectOption('shield');
-  if(kind==='math')await dialog.getByRole('textbox',{name:'行内公式'}).fill('x^2');
-  if(kind==='image'){await dialog.getByRole('combobox',{name:'行内图片',exact:true}).selectOption(imageId);await dialog.getByRole('textbox',{name:'行内图片说明'}).fill('验证截图');}
-  await dialog.getByRole('button',{name:'插入正文'}).click();
-  await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});
- }
- const blocks=decodeEditorBody(saved.body);expect(blocks).not.toBeNull();if(!blocks)throw new Error('missing inline body');
- const embeds=blocks.flatMap(block=>block.type==='paragraph'?block.content:[]).filter(item=>item.type==='link').map(item=>inlineEmbed(item.href)).filter(Boolean);
- expect(embeds).toEqual([{type:'icon',icon:'shield'},{type:'math',source:'x^2'},{type:'image',assetId:imageId}]);
- await expect(page.locator('.editor-canvas .inline-reader-icon svg')).toBeVisible();
- await expect(page.locator('.editor-canvas .inline-reader-math math')).toBeVisible();
- await expect(page.locator('.editor-canvas .inline-reader-image')).toHaveAttribute('alt','验证截图');
- await page.getByRole('button',{name:'预览草稿',exact:true}).click();
- await expect(page.locator('.editor-preview .inline-reader-icon')).toBeVisible();
- await expect(page.locator('.editor-preview .inline-reader-math')).toBeVisible();
- await expect(page.locator('.editor-preview .inline-reader-image')).toHaveAttribute('alt','验证截图');
- await page.reload();await expect(page.locator('.editor-canvas .inline-reader-icon svg')).toBeVisible();
- await expect(page.locator('.editor-canvas .inline-reader-math math')).toBeVisible();
- await expect(page.locator('.editor-canvas .inline-reader-image')).toHaveAttribute('alt','验证截图');
- await expect(page.locator('html')).toHaveClass(/dark/);
- await expect(page.locator('.editor-canvas .bn-container')).toHaveAttribute('data-color-scheme','dark');
- await expect(page.locator('.editor-canvas .inline-reader-math math')).toBeVisible();
-});
 test('real BlockNote edits autosave reload and mixed blocks preview in order',async({page},info)=>{
  let saved=structuredClone(editorFixture);let writes=0;
  await page.route('**/api/admin/editor/*',async route=>{const value=route.request().postDataJSON();expect(value.expectedSequence).toBe(saved.sequence);saved={...saved,...value,sequence:saved.sequence+1};writes++;await route.fulfill({json:saved});});
