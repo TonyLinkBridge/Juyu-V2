@@ -127,6 +127,23 @@ test('compact workspace exposes one preview action and three complete settings g
  await expect(dialog.getByRole('link',{name:'历史记录与版本',exact:true})).toHaveCount(0);
 });
 
+test('settings group minus control collapses the active group and can reopen it',async({page})=>{
+ await mount(page,()=>null);
+ await page.getByRole('button',{name:'文章设置',exact:true}).click();
+ const dialog=page.getByRole('dialog',{name:'文章设置',exact:true});
+ for(const name of ['内容与访问','封面与附件','发布与管理']){
+  const toggle=dialog.getByRole('button',{name:new RegExp(`^${name}`)});
+  if(await toggle.getAttribute('aria-expanded')!=='true')await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded','true');
+  await toggle.locator(':scope > span:last-child').click();
+  await expect(toggle).toHaveAttribute('aria-expanded','false');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded','true');
+ }
+ await dialog.getByRole('button',{name:/^发布与管理/}).locator(':scope > span:last-child').click();
+ await expect(dialog.locator('.editor-settings-group-body:visible')).toHaveCount(0);
+});
+
 test('article settings keep form rows and category choices closely grouped',async({page},testInfo)=>{
  const categoryOptions=[
   {id:'00000000-0000-4000-8000-000000000201',version:1,name:'会员',parentId:null,position:0,audience:'staff' as const,enabled:true},
