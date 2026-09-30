@@ -8,6 +8,10 @@ export function categoryState(definitions:CategoryDefinition[],id:string,locale:
  }
  return {path:names.reverse().join(' / '),enabled,audience};
 }
+export function visibleCategoryOptions(definitions:CategoryDefinition[],ids:string[],locale:'zh-CN'|'en'='zh-CN'):CategoryDefinition[]{
+ const selected=new Set(ids);
+ return [...definitions].filter(category=>selected.has(category.id)||categoryState(definitions,category.id,locale).enabled).sort((a,b)=>a.position-b.position||a.id.localeCompare(b.id));
+}
 export function categorySelection(definitions:CategoryDefinition[],ids:unknown,previous:unknown=[]):string[]{
  const selected=normalizeCategoryIds(ids),saved=new Set(normalizeCategoryIds(previous));
  if(selected.some(id=>!definitions.some(c=>c.id===id)||(!categoryState(definitions,id).enabled&&!saved.has(id))))throw new Error('INVALID_INPUT: 请选择可用分类');

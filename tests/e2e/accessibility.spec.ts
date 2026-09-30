@@ -28,8 +28,8 @@ for(const surface of ['login','reader','workspace','workspace-tools','workspace-
  test.setTimeout(60000);await mount(page,surface);await page.emulateMedia({reducedMotion:'reduce'});
  await page.addScriptTag({content:await readFile('node_modules/axe-core/axe.min.js','utf8')});
  for(const theme of ['light','dark']){
- await page.evaluate(t=>{document.documentElement.dataset.theme=t;},theme);
- await expect(page.locator('body')).toHaveCSS('color',theme==='light'?'rgb(34, 36, 42)':'rgb(238, 237, 241)');
+ await page.evaluate(t=>{document.documentElement.classList.toggle('dark',t==='dark');document.documentElement.style.colorScheme=t;},theme);
+ await expect.poll(()=>page.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--ink').trim())).toBe(theme==='light'?'#22242a':'#eeedf1');
  const result=await page.evaluate(async()=>await (window as unknown as {axe:{run(options:unknown):Promise<AxeResults>}}).axe.run({runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
  await mkdir('output/verification/T057',{recursive:true});
  await writeFile(`output/verification/T057/${surface}-${theme}-${info.project.name}.json`,JSON.stringify({surface,theme,project:info.project.name,at:new Date().toISOString(),...result},null,2));

@@ -11,9 +11,15 @@ async function mount(page:Page,initial:()=>EditorData|null,newReference:boolean|
  await page.goto('/__editor_fixture'+(newReference==='qa'?'?kind=qa':newReference?'?kind=reference':''));await expect(page.locator('.bn-editor')).toBeVisible();
 }
 async function typeText(page:Page,text:string){const area=page.locator('.bn-editor[contenteditable="true"]');await area.click();await area.press('ControlOrMeta+End');await page.keyboard.insertText(text);}
-async function settings(page:Page,section='保存与管理'){
+const settingGroup:Record<string,string>={
+ '阅读范围与资料':'内容与访问','选择文章分类':'内容与访问','自定义字段':'内容与访问',
+ '封面与附件':'封面与附件','更新说明':'发布与管理','保存与管理':'发布与管理',
+};
+async function settings(page:Page,section='发布与管理'){
  await page.getByRole('button',{name:/^(文章设置|问答设置)$/}).click();
- await page.getByRole('dialog',{name:'文章设置',exact:true}).getByRole('button',{name:new RegExp('^'+section)}).click();
+ const dialog=page.getByRole('dialog',{name:/^(文章设置|问答设置)$/});
+ const group=settingGroup[section]??section;const toggle=dialog.getByRole('button',{name:new RegExp('^'+group)});
+ if(await toggle.getAttribute('aria-expanded')!=='true')await toggle.click();
 }
 async function closeSettings(page:Page){await page.getByRole('button',{name:'关闭文章设置',exact:true}).click();}
 async function insertBlockFromRail(page:Page,name:'提示框'|'代码块'|'表格'|'折叠内容'){
@@ -24,7 +30,7 @@ async function insertNativeSlashBlock(page:Page,name:'代码块'){
  await page.locator('.bn-editor').click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');await page.keyboard.type('/');await page.locator('.bn-suggestion-menu').getByText(name,{exact:true}).click();
 }
 test('release note autosaves, survives reload, and stays editable only before review',async({page})=>{
- let saved=structuredClone(editorFixture);
+ let saved={...structuredClone(editorFixture),publishedRevision:1,publicationNumber:1};
  await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
  await mount(page,()=>saved);
  await settings(page,'更新说明');
@@ -48,7 +54,7 @@ test('English article editor uses English for its main actions and settings',asy
  await expect(page.getByRole('textbox',{name:'Article title'})).toHaveValue('How to update your email');
  await expect(page.getByRole('button',{name:'Categories: Account security'})).toBeVisible();
  await page.getByRole('button',{name:'Article settings',exact:true}).click();
- await expect(page.getByRole('dialog',{name:'Article settings'}).getByRole('button',{name:'Save and manage'})).toBeVisible();
+ await expect(page.getByRole('dialog',{name:'Article settings'}).getByRole('button',{name:/^Publishing and management/})).toBeVisible();
 });
 test('server-authorized Super Admin can directly publish the exact saved draft without a reason field',async({page})=>{
  const article={...structuredClone(editorFixture),canDirectPublish:true};const writes:unknown[]=[];
@@ -74,7 +80,7 @@ test('editor separates workflow actions from a right-side authoring rail',async(
  await expect(toolbar.getByRole('button',{name:'预览草稿',exact:true})).toBeVisible();
  await expect(toolbar.getByRole('button',{name:'文章设置',exact:true})).toHaveCount(0);
  const rail=page.getByRole('navigation',{name:'编辑工具'});
- await expect(rail.getByRole('button',{name:'预览',exact:true})).toBeVisible();
+ await expect(rail.getByRole('button',{name:'预览',exact:true})).toHaveCount(0);
  await expect(rail.getByRole('button',{name:'内容插入',exact:true})).toBeVisible();
  await expect(rail.getByRole('button',{name:'共用片段',exact:true})).toBeVisible();
  await expect(rail.getByRole('button',{name:'文章设置',exact:true})).toBeVisible();
@@ -93,6 +99,39 @@ test('editor separates workflow actions from a right-side authoring rail',async(
  await expect(page.locator('[data-juyu-type="hint"]')).toBeVisible();
  expect(runtimeErrors).toEqual([]);
 });
+test('compact workspace exposes one preview action and three complete settings groups',async({page},testInfo)=>{
+ await mount(page,()=>null);
+ const rail=page.getByRole('navigation',{name:'编辑工具'});
+ await expect(rail.getByRole('button',{name:'预览',exact:true})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'预览草稿',exact:true})).toHaveCount(1);
+ await expect(page.locator('.editor-outline-guidance')).toHaveCount(0);
+ await expect(page.locator('.editor-save-status').getByText(/草稿 · 自动保存/)).toBeVisible();
+ await page.getByRole('button',{name:'文章设置',exact:true}).click();
+ const dialog=page.getByRole('dialog',{name:'文章设置',exact:true});
+ await expect(dialog.getByRole('button',{name:/^内容与访问/})).toBeVisible();
+ await expect(dialog.getByRole('button',{name:/^封面与附件/})).toBeVisible();
+ await expect(dialog.getByRole('button',{name:/^发布与管理/})).toBeVisible();
+ await expect(dialog.getByRole('button',{name:/^阅读范围与资料/})).toHaveCount(0);
+ await expect(dialog.getByText('更新说明',{exact:true})).toHaveCount(0);
+ await expect(dialog.getByText('自定义字段',{exact:true})).toHaveCount(0);
+ await page.screenshot({path:`output/verification/editor-compact-settings-${testInfo.project.name}.png`,fullPage:false,animations:'disabled'});
+ await dialog.getByRole('button',{name:/^发布与管理/}).click();
+ await expect(dialog.getByRole('button',{name:'复制当前输入',exact:true})).toBeVisible();
+ await expect(dialog.getByRole('button',{name:'重新载入',exact:true})).toBeVisible();
+ await expect(dialog.getByRole('link',{name:'历史记录与版本',exact:true})).toHaveCount(0);
+});
+
+test('published article settings expose update note history and lifecycle actions',async({page})=>{
+ const published={...structuredClone(editorFixture),status:'published' as const,publishedRevision:2,publicationNumber:1};
+ await mount(page,()=>published);
+ await settings(page,'更新说明');
+ const dialog=page.getByRole('dialog',{name:'文章设置',exact:true});
+ await expect(dialog.getByRole('textbox',{name:'更新说明',exact:true})).toBeVisible();
+ await expect(dialog.getByRole('link',{name:'历史记录与版本',exact:true})).toBeVisible();
+ await expect(dialog.getByRole('link',{name:'归档与下线',exact:true})).toBeVisible();
+ await expect(dialog.getByRole('button',{name:'删除文章',exact:true})).toBeVisible();
+});
+
 test('content insert creates directly editable Fumadocs tabs with instant preview and persistence',async({page},testInfo)=>{
  let saved=structuredClone(editorFixture);
  await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
@@ -252,7 +291,7 @@ test('draft preview uses the formal Fumadocs paragraph rhythm and ignores empty 
  const text=(id:string,value:string)=>({id,type:'paragraph' as const,props,content:value?[{type:'text' as const,text:value,styles:{}}]:[],children:[]});
  const saved={...structuredClone(editorFixture),body:encodeEditorBody([text('preview-first','第一段'),text('preview-empty',''),text('preview-second','第二段')])};
  await mount(page,()=>saved);
- await page.getByRole('button',{name:'预览',exact:true}).click();
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();
  const reader=page.locator('.editor-preview [data-fumadocs-draft-reader]');
  await expect(reader).toBeVisible();
  const paragraphs=reader.locator('.gitbook-document.native-document>p');
@@ -458,9 +497,9 @@ test('Q&A shortcut saves classification and order as draft metadata and preserve
  let saved:EditorData|null=null;
  await page.route('**/api/admin/editor/*',async r=>{const v=r.request().postDataJSON();saved={...editorFixture,...v,documentId:new URL(r.request().url()).pathname.split('/').pop()!,sequence:saved?saved.sequence+1:0};return r.fulfill({json:saved});});
  await mount(page,()=>saved,'qa');await settings(page,'阅读范围与资料');await expect(page.getByRole('combobox',{name:'资料类型',exact:true})).toHaveValue('qa');
- await expect(page.getByRole('dialog',{name:'阅读范围与资料',exact:true}).getByRole('textbox',{name:'问答分类',exact:true})).toHaveAttribute('maxlength','80');await page.getByRole('dialog',{name:'阅读范围与资料',exact:true}).getByRole('textbox',{name:'问答分类',exact:true}).fill('账户问题');await page.getByRole('textbox',{name:'相关话题（最多 5 个）',exact:true}).fill('信用额度，签约店铺');await page.getByLabel('问答排序',{exact:true}).fill('12');await closeSettings(page);await page.getByRole('textbox',{name:/^(文章标题|问题)$/}).fill('如何核对账户？');
+ await expect(page.getByRole('dialog',{name:/^(文章设置|问答设置)$/}).getByRole('textbox',{name:'问答分类',exact:true})).toHaveAttribute('maxlength','80');await page.getByRole('dialog',{name:/^(文章设置|问答设置)$/}).getByRole('textbox',{name:'问答分类',exact:true}).fill('账户问题');await page.getByRole('textbox',{name:'相关话题（最多 5 个）',exact:true}).fill('信用额度，签约店铺');await page.getByLabel('问答排序',{exact:true}).fill('12');await closeSettings(page);await page.getByRole('textbox',{name:/^(文章标题|问题)$/}).fill('如何核对账户？');
  await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});expect(saved).toMatchObject({kind:'qa',tags:['信用额度','签约店铺'],qa:{category:'账户问题',position:12}});
- await page.reload();await settings(page,'阅读范围与资料');await expect(page.getByRole('dialog',{name:'阅读范围与资料',exact:true}).getByRole('textbox',{name:'问答分类',exact:true})).toHaveValue('账户问题');await expect(page.getByLabel('问答排序',{exact:true})).toHaveValue('12');
+ await page.reload();await settings(page,'阅读范围与资料');await expect(page.getByRole('dialog',{name:/^(文章设置|问答设置)$/}).getByRole('textbox',{name:'问答分类',exact:true})).toHaveValue('账户问题');await expect(page.getByLabel('问答排序',{exact:true})).toHaveValue('12');
  await page.getByLabel('问答排序',{exact:true}).fill('-1');await closeSettings(page);await expect(page.getByRole('alert')).toContainText('问答排序须为');await settings(page);await expect(page.getByRole('button',{name:'立即保存',exact:true})).toBeDisabled();await closeSettings(page);await settings(page,'阅读范围与资料');
  await page.getByLabel('问答排序',{exact:true}).fill('5');await closeSettings(page);await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});expect(saved).toMatchObject({qa:{category:'账户问题',position:5}});
  await page.screenshot({path:`output/verification/qa-editor-${info.project.name}.png`,fullPage:true});
@@ -474,26 +513,26 @@ test('Q&A metadata row uses an aligned category summary that opens the category 
  await expect(controls).toHaveCount(3);
  expect(new Set(await controls.evaluateAll(items=>items.map(item=>item.getBoundingClientRect().height))).size).toBe(1);
  await summary.click();
- const dialog=page.getByRole('dialog',{name:'阅读范围与资料',exact:true});
+ const dialog=page.getByRole('dialog',{name:/^(文章设置|问答设置)$/});
  await expect(dialog).toBeVisible();
  await expect(dialog.getByRole('textbox',{name:'问答分类',exact:true})).toHaveValue('账户问题');
 });
 test('Q&A classification freezes in review and the shortcut never changes an existing kind',async({page})=>{
- await mount(page,()=>({...editorFixture,kind:'qa',qa:{category:'既有分类',position:4},status:'in_review'}),'qa');await expect(page.getByRole('button',{name:'问答分类：既有分类',exact:true})).toBeVisible();await settings(page,'阅读范围与资料');await expect(page.getByRole('dialog',{name:'阅读范围与资料',exact:true}).getByRole('textbox',{name:'问答分类',exact:true})).toBeDisabled();await expect(page.getByLabel('问答排序',{exact:true})).toBeDisabled();await closeSettings(page);
+ await mount(page,()=>({...editorFixture,kind:'qa',qa:{category:'既有分类',position:4},status:'in_review'}),'qa');await expect(page.getByRole('button',{name:'问答分类：既有分类',exact:true})).toBeVisible();await settings(page,'阅读范围与资料');await expect(page.getByRole('dialog',{name:/^(文章设置|问答设置)$/}).getByRole('textbox',{name:'问答分类',exact:true})).toBeDisabled();await expect(page.getByLabel('问答排序',{exact:true})).toBeDisabled();await closeSettings(page);
  await page.unrouteAll();await mount(page,()=>editorFixture,'qa');await settings(page,'阅读范围与资料');await expect(page.getByRole('combobox',{name:'资料类型',exact:true})).toHaveValue('article');await expect(page.getByRole('textbox',{name:'问答分类',exact:true})).toHaveCount(0);
 });
 
 test('Q&A recovery keeps classification input and displays the server version before explicit replacement',async({page})=>{
  const initial:EditorData={...editorFixture,kind:'qa',qa:{category:'原分类',position:1}};const latest:EditorData={...initial,sequence:4,qa:{category:'服务器分类',position:6}};
  await page.route('**/api/admin/editor/*',r=>r.request().method()==='GET'?r.fulfill({json:latest}):r.fulfill({status:409,json:{error:'CONFLICT'}}));await mount(page,()=>initial);
- await page.getByRole('button',{name:'问答分类：原分类',exact:true}).click();await page.getByRole('dialog',{name:'阅读范围与资料',exact:true}).getByRole('textbox',{name:'问答分类',exact:true}).fill('本地分类');await closeSettings(page);await expect(page.getByRole('region',{name:'保存恢复'})).toBeVisible();await page.getByRole('button',{name:'读取服务器最新版本'}).click();await expect(page.getByRole('region',{name:'服务器版本'})).toContainText('服务器分类');await expect(page.getByRole('button',{name:'问答分类：本地分类',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'问答分类：原分类',exact:true}).click();await page.getByRole('dialog',{name:/^(文章设置|问答设置)$/}).getByRole('textbox',{name:'问答分类',exact:true}).fill('本地分类');await closeSettings(page);await expect(page.getByRole('region',{name:'保存恢复'})).toBeVisible();await page.getByRole('button',{name:'读取服务器最新版本'}).click();await expect(page.getByRole('region',{name:'服务器版本'})).toContainText('服务器分类');await expect(page.getByRole('button',{name:'问答分类：本地分类',exact:true})).toBeVisible();
  await page.getByRole('button',{name:'保留备份并载入此版本'}).click();await page.getByRole('dialog').getByRole('button',{name:'确认继续',exact:true}).click();await expect(page.getByRole('button',{name:'问答分类：服务器分类',exact:true})).toBeVisible();await settings(page,'阅读范围与资料');await expect(page.getByLabel('问答排序',{exact:true})).toHaveValue('6');await closeSettings(page);await page.getByText('载入前的输入备份 1',{exact:true}).click();await expect(page.getByLabel('载入前的输入备份 1',{exact:true})).toContainText('本地分类');
 });
 
 test('Q&A mismatched save metadata is not acknowledged and exact retry preserves the submitted values',async({page})=>{
  const initial:EditorData={...editorFixture,kind:'qa',qa:{category:'原分类',position:1}};const writes:Record<string,unknown>[]=[];
  await page.route('**/api/admin/editor/*',r=>{const v=r.request().postDataJSON();writes.push(v);return r.fulfill({json:{...initial,...v,sequence:4,qa:writes.length===1?{category:'错误回执',position:99}:v.qa}});});await mount(page,()=>initial);
- await page.getByRole('button',{name:'问答分类：原分类',exact:true}).click();await page.getByRole('dialog',{name:'阅读范围与资料',exact:true}).getByRole('textbox',{name:'问答分类',exact:true}).fill('新的分类');await closeSettings(page);await expect(page.getByRole('status')).toContainText('保存尚未确认',{timeout:8000});expect(writes).toHaveLength(1);await expect(page.getByRole('button',{name:'问答分类：新的分类',exact:true})).toBeVisible();await page.getByRole('button',{name:'重试保存',exact:true}).click();await expect(page.locator('.save-state')).toContainText('所有修改已保存');expect(writes).toHaveLength(2);expect(writes[1]).toEqual(writes[0]);expect(writes[1].qa).toEqual({category:'新的分类',position:1});
+ await page.getByRole('button',{name:'问答分类：原分类',exact:true}).click();await page.getByRole('dialog',{name:/^(文章设置|问答设置)$/}).getByRole('textbox',{name:'问答分类',exact:true}).fill('新的分类');await closeSettings(page);await expect(page.getByRole('status')).toContainText('保存尚未确认',{timeout:8000});expect(writes).toHaveLength(1);await expect(page.getByRole('button',{name:'问答分类：新的分类',exact:true})).toBeVisible();await page.getByRole('button',{name:'重试保存',exact:true}).click();await expect(page.locator('.save-state')).toContainText('所有修改已保存');expect(writes).toHaveLength(2);expect(writes[1]).toEqual(writes[0]);expect(writes[1].qa).toEqual({category:'新的分类',position:1});
 });
 
 test('native editor preserves rich paste, links, formatting and native table through save and reopen',async({page},info)=>{
@@ -646,18 +685,18 @@ test('BlockNote image alignment control autosaves and matches the draft preview'
 
 test('R19 opt-in copy survives reload and restore waits for explicit save',async({page},info)=>{
  let writes=0;await page.route('**/api/admin/editor/*',r=>{if(r.request().method()==='GET')return r.fulfill({json:editorFixture});writes++;return r.fulfill({status:503,json:{error:'UNAVAILABLE'}});});
- await mount(page,()=>editorFixture);await page.getByText('本机草稿恢复',{exact:true}).click();await page.getByRole('button',{name:'在此设备开启恢复'}).click();
+ await mount(page,()=>editorFixture);await page.locator('.editor-input-backup > summary').click();await page.getByRole('button',{name:'在此设备开启恢复'}).click();
  await typeText(page,' 需要恢复的红字内容');await expect.poll(()=>page.evaluate(()=>Object.values(localStorage).some(v=>v.includes('需要恢复的红字内容')))).toBe(true);
  page.on('dialog',d=>d.accept());await page.reload();await expect(page.getByRole('region',{name:'可恢复输入'})).toBeVisible();await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`output/verification/R19-recovery-${info.project.name}.png`,fullPage:true});
  await page.getByRole('button',{name:'恢复到编辑区'}).click();await page.getByRole('button',{name:'确认继续',exact:true}).click();
  await expect(page.locator('.bn-editor')).toContainText('需要恢复的红字内容');await expect(page.getByText('已恢复输入，自动保存已暂停。请核对后点击立即保存。')).toBeVisible();
  const before=writes;await page.waitForTimeout(1500);expect(writes).toBe(before);
- await page.getByText('本机草稿恢复 · 已开启',{exact:true}).click();await page.getByRole('button',{name:'关闭并清除本机副本'}).click();await page.getByRole('button',{name:'确认继续',exact:true}).click();
+ await page.locator('.editor-input-backup > summary').click();await page.getByRole('button',{name:'关闭并清除本机副本'}).click();await page.getByRole('button',{name:'确认继续',exact:true}).click();
  expect(await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('juyu:editor-recovery:')))).toEqual([]);
 });
 test('R19 changed server version retains copy without replacing editor',async({page})=>{
  await page.route('**/api/admin/editor/*',r=>r.request().method()==='GET'?r.fulfill({json:{...editorFixture,sequence:9}}):r.fulfill({status:503,json:{error:'UNAVAILABLE'}}));
- await mount(page,()=>editorFixture);await page.getByText('本机草稿恢复',{exact:true}).click();await page.getByRole('button',{name:'在此设备开启恢复'}).click();await typeText(page,' 不要覆盖最新版本');
+ await mount(page,()=>editorFixture);await page.locator('.editor-input-backup > summary').click();await page.getByRole('button',{name:'在此设备开启恢复'}).click();await typeText(page,' 不要覆盖最新版本');
  await expect.poll(()=>page.evaluate(()=>Object.values(localStorage).some(v=>v.includes('不要覆盖最新版本')))).toBe(true);page.on('dialog',d=>d.accept());await page.reload();
  await page.getByRole('button',{name:'恢复到编辑区'}).click();await page.getByRole('button',{name:'确认继续',exact:true}).click();
  await expect(page.getByText('无法安全恢复：服务器版本或权限可能已变化。副本仍保留，请复制后与最新文章对照。')).toBeVisible();
@@ -666,7 +705,7 @@ test('R19 changed server version retains copy without replacing editor',async({p
 
 test('R19 unsaved new article reopens its original recovery identity',async({page})=>{
  await page.route('**/api/admin/editor/*',r=>r.fulfill({status:404,json:{error:'NOT_FOUND'}}));await mount(page,()=>null);
- await page.getByText('本机草稿恢复',{exact:true}).click();await page.getByRole('button',{name:'在此设备开启恢复'}).click();await typeText(page,' 尚未命名的新文章');
+ await page.locator('.editor-input-backup > summary').click();await page.getByRole('button',{name:'在此设备开启恢复'}).click();await typeText(page,' 尚未命名的新文章');
  await expect.poll(()=>page.evaluate(()=>Object.values(localStorage).some(v=>v.includes('尚未命名的新文章')))).toBe(true);
  page.on('dialog',d=>d.accept());await page.reload();await page.getByRole('button',{name:'恢复到编辑区'}).click();await page.getByRole('button',{name:'确认继续',exact:true}).click();await expect(page.locator('.bn-editor')).toContainText('尚未命名的新文章');
 });
