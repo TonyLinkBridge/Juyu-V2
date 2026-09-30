@@ -12,8 +12,18 @@ function validSecret(value:string|null,secret:string|undefined){
 }
 
 export async function GET(request:Request){
- if(!validSecret(request.headers.get('authorization'),process.env.CRON_SECRET))
+ const authorization=request.headers.get('authorization');
+ if(!validSecret(authorization,process.env.CRON_SECRET)){
+  if(request.headers.get('user-agent')==='vercel-cron/1.0'){
+   const secret=process.env.CRON_SECRET;
+   const supplied=authorization?.startsWith('Bearer ')?authorization.slice(7):null;
+   console.error('SLACK_CRON_AUTH_REJECTED',{
+    configured:Boolean(secret),minimumLength:(secret?.length??0)>=16,
+    bearerHeader:supplied!==null,sameLength:supplied!==null&&supplied.length===secret?.length,
+   });
+  }
   return new Response('Unauthorized',{status:401});
+ }
  try{
   const result=await deliverSlackNotifications(5);
   if(!result.configured)return Response.json({error:'SLACK_NOT_CONFIGURED'},{status:503});
