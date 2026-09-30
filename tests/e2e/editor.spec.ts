@@ -127,6 +127,30 @@ test('compact workspace exposes one preview action and three complete settings g
  await expect(dialog.getByRole('link',{name:'历史记录与版本',exact:true})).toHaveCount(0);
 });
 
+test('article settings keep form rows and category choices closely grouped',async({page},testInfo)=>{
+ const categoryOptions=[
+  {id:'00000000-0000-4000-8000-000000000201',version:1,name:'会员',parentId:null,position:0,audience:'staff' as const,enabled:true},
+  {id:'00000000-0000-4000-8000-000000000202',version:1,name:'账户管理',parentId:null,position:1,audience:'staff' as const,enabled:true},
+ ];
+ await mount(page,()=>({...editorFixture,categoryOptions,categoryIds:[categoryOptions[0].id]}));
+ await page.getByRole('button',{name:'文章设置',exact:true}).click();
+ const dialog=page.getByRole('dialog',{name:'文章设置',exact:true});
+ const layout=await dialog.evaluate(element=>{
+  const firstFieldset=element.querySelector('.editor-settings-group-body > fieldset')!;
+  const labels=[...element.querySelectorAll('.editor-metadata > label')];
+  const cards=[...element.querySelectorAll('.article-category-options > label')];
+  const first=cards[0].getBoundingClientRect(),second=cards[1].getBoundingClientRect();
+  return {fieldsetMargin:getComputedStyle(firstFieldset).marginBlockStart,labelMargins:labels.map(label=>getComputedStyle(label).marginBlockStart),categoryMargin:getComputedStyle(cards[0]).marginBlockStart,categoryDisplay:getComputedStyle(cards[0]).display,categoryHeight:first.height,categoryGap:second.top-first.bottom};
+ });
+ expect(layout.fieldsetMargin).toBe('0px');
+ expect(layout.labelMargins).toEqual(['0px','0px']);
+ expect(layout.categoryMargin).toBe('0px');
+ expect(layout.categoryDisplay).toBe('flex');
+ expect(layout.categoryHeight).toBeLessThanOrEqual(72);
+ expect(layout.categoryGap).toBeLessThanOrEqual(12);
+ await page.screenshot({path:`output/verification/editor-settings-density-${testInfo.project.name}.png`,animations:'disabled'});
+});
+
 test('published article settings expose update note history and lifecycle actions',async({page})=>{
  const published={...structuredClone(editorFixture),status:'published' as const,publishedRevision:2,publicationNumber:1};
  await mount(page,()=>published);
