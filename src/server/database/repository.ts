@@ -17,6 +17,7 @@ import type { AuditEntry, Document, Revision, Viewer } from '../../domain/model.
 import { createDocument, transition } from '../../domain/workflow.ts';
 import type { Command, DraftInput } from '../../domain/workflow.ts';
 import {publicationSlug} from '../../fumadocs/slugs.ts';
+import {queueSlackNotification} from '../slack/queue.ts';
 
 function requireAdmin(viewer: Viewer | null): asserts viewer is Viewer {
   if (!canManage(viewer)) throw new Error('FORBIDDEN: 需要通过公司验证的管理员');
@@ -133,6 +134,7 @@ async function persistNext(client:PoolClient,id:string,document:Document,next:Do
         workflow_state=$5,approval_mode=$6,submitted_by=$7,reviewer_id=$8,approved_by=$9,updated_at=$10 WHERE id=$1`,
         [id, next.sequence, next.publishedRevisionId, w.revisionId, w.status, w.approvalMode, w.submittedBy, w.reviewerId, w.approvedBy, now]);
       await insertAudit(client, id, next.audit[next.audit.length - 1]);
+      await queueSlackNotification(client,document,next,command,actor);
 }
 
 async function editorSnapshot(client:PoolClient,doc:Document):Promise<EditorData> {

@@ -6,5 +6,6 @@
   "env": {
     "JUYU_PERFORMANCE_LOGGING": "true"
   },
-  "buildCommand": "npm run verify:build"
+  "buildCommand": "npm run verify:build",
+  "crons": [{ "path": "/api/cron/slack-notifications", "schedule": "*/5 * * * *" }]
 }
