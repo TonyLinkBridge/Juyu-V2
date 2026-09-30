@@ -274,7 +274,7 @@ a:not(.juyu-fumadocs *):focus-visible, button:not(.juyu-fumadocs *):focus-visibl
 }
 
 /* T023: GitBook footer/theme/banner adapted to the same palette as the reader. */
-button:not(.juyu-fumadocs *), input:not(.juyu-fumadocs *), select:not(.juyu-fumadocs *) { color: inherit; }
+input:not(.juyu-fumadocs *), select:not(.juyu-fumadocs *) { color: inherit; }
 .site-footer { align-items: center; flex-wrap: wrap; }
 .footer-copy { display: flex; flex-direction: column; gap: 4px; }
 .footer-copy strong { color: var(--ink); font-size: 12px; font-weight: 550; }

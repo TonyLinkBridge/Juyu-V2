@@ -18,7 +18,7 @@ test('workspace renders real-count contract and responsive list with safe titles
  await expect(page.getByRole('button',{name:'删除草稿'})).toHaveCount(4);
  if(info.project.name!=='mobile'){await page.reload();await expect(page.locator('.tasks-all-list')).toBeVisible();await page.getByRole('link',{name:'看板',exact:true}).click();}
  await page.screenshot({path:`output/verification/workspace-${info.project.name}.png`,fullPage:false});
- await page.evaluate(()=>document.documentElement.dataset.theme='dark');await page.screenshot({path:`output/verification/workspace-dark-${info.project.name}.png`,fullPage:false});
+ await page.evaluate(()=>document.documentElement.classList.add('dark'));await page.screenshot({path:`output/verification/workspace-dark-${info.project.name}.png`,fullPage:false});
  if(info.project.name==='mobile'){await page.locator('.tasks-mobile-list').scrollIntoViewIfNeeded();await page.screenshot({path:'output/verification/workspace-mobile-content.png',fullPage:false});}
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  const contrasts=await page.locator('.task-status-filters strong').evaluateAll(nodes=>nodes.map(node=>{
@@ -36,6 +36,15 @@ test('workspace filters by personal scope, kind and status and resets page via k
  await page.getByRole('link',{name:'清除筛选'}).click();await page.getByLabel('资料类型').selectOption('ops');await page.getByRole('button',{name:'应用筛选'}).click();await expect(page.getByRole('status')).toContainText('共 12 篇');
  await page.getByRole('navigation',{name:'按状态查看'}).getByRole('link',{name:/^草稿\s*6$/}).click();await expect(page.getByRole('status')).toContainText('共 6 篇');
  await page.getByLabel('搜索标题').fill('no-match');await page.getByRole('button',{name:'应用筛选'}).click();await expect(page.getByRole('heading',{name:'没有符合条件的内容'})).toBeVisible();
+});
+test('workspace primary filter action keeps readable text contrast',async({page})=>{
+ await fixture(page);
+ const colors=await page.getByRole('button',{name:'应用筛选'}).evaluate(button=>{
+  const style=getComputedStyle(button);
+  return {color:style.color,background:style.backgroundColor};
+ });
+ expect(colors.color).toBe('rgb(255, 255, 255)');
+ expect(colors.background).not.toBe('rgba(0, 0, 0, 0)');
 });
 test('workspace service failure is distinct from empty and retry recovers',async({page})=>{
  await fixture(page,{failed:true});await expect(page.getByRole('heading',{name:'内容暂时无法读取'})).toBeVisible();await expect(page.getByText(/共 0 篇/)).toHaveCount(0);
