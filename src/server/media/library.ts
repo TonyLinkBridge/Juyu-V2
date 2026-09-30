@@ -10,7 +10,7 @@ const columns=`a.id,a.filename,a.mime_type AS mime,a.byte_size::text AS size,a.c
 const joins=`FROM juyu.assets a JOIN juyu.documents d ON d.id=a.document_id JOIN juyu.revisions r ON r.document_id=d.id AND r.revision_id=d.workflow_revision_id LEFT JOIN juyu.members m ON m.clerk_user_id=a.uploaded_by`;
 export async function readMediaLibrary(c:PoolClient,input:Record<string,unknown>):Promise<MediaLibraryData>{
  const query=libraryQuery(input);if(!(await c.query('SELECT juyu.is_admin() allowed')).rows[0]?.allowed)throw new Error('FORBIDDEN');
- const base=`d.lifecycle='active' AND a.status='ready' AND a.filename ILIKE $1 ESCAPE '\\'`;
+ const base=`d.lifecycle='active' AND a.status='ready' AND (a.filename ILIKE $1 ESCAPE '\\' OR r.title ILIKE $1 ESCAPE '\\' OR m.display_name ILIKE $1 ESCAPE '\\')`;
  const values=[`%${escapeLike(query.q)}%`];
  const grouped=(await c.query<{type:Exclude<typeof query.type,'all'>;n:number}>(`SELECT ${categorySQL} AS type,count(*)::integer AS n ${joins} WHERE ${base} GROUP BY ${categorySQL}`,values)).rows;
  const counts={all:0,image:0,video:0,audio:0,file:0};for(const row of grouped){counts[row.type]=row.n;counts.all+=row.n;}

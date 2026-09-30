@@ -27,3 +27,5 @@
 .admin-data-detail .analytics-people-scroll{max-height:340px;overscroll-behavior:contain}.analytics-people-scroll thead{position:sticky;top:0;background:var(--panel);z-index:1}
 /* AdminFrame already owns the responsive page inset; avoid applying it twice. */
 .admin-page-content .admin-data-main{padding:0}
+
+.media-preview-image-link{display:block;width:100%;height:100%}.media-library-file-link{display:block;overflow-wrap:anywhere}.media-list-file{display:flex;align-items:center;gap:10px}.media-preview-retry{font:inherit;color:var(--ink);border:1px solid var(--line);border-radius:4px;background:var(--panel);padding:3px 8px;cursor:pointer}.media-preview-retry:focus-visible{outline:2px solid var(--brand);outline-offset:2px}.media-list-thumbnail:has(.media-preview-retry){height:auto;min-height:42px}.media-library-thumbnail .media-file-icon{padding:6px}
