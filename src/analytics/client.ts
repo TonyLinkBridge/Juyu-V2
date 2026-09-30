@@ -6,9 +6,9 @@ export async function postAnalytics(input:AnalyticsInput):Promise<AnalyticsRecei
  if(!response.ok){if(response.status>=400&&response.status<500)throw new AnalyticsRejected('REJECTED');throw new Error('UNCONFIRMED');}
  const data=await response.json();if(!data||data.eventId!==input.eventId||data.kind!==input.kind)throw new Error('INVALID_ACK');return {eventId:data.eventId,kind:data.kind};
 }
-export function deliverAnalytics(input:AnalyticsInput,{delayMs=1000,onSettled=()=>{}}:{delayMs?:number;onSettled?:()=>void}={}){
+export function deliverAnalytics(input:AnalyticsInput,{delayMs=1000,onSettled=()=>{},onAccepted=()=>{}}:{delayMs?:number;onSettled?:()=>void;onAccepted?:()=>void}={}){
  let stopped=false,finished=false,retried=false,timer:ReturnType<typeof setTimeout>|undefined;
  const finish=()=>{if(!finished){finished=true;onSettled();}};
- const send=()=>{if(stopped)return finish();void postAnalytics(input).then(finish,error=>{if(!stopped&&!retried&&!(error instanceof AnalyticsRejected)){retried=true;timer=setTimeout(send,delayMs);}else finish();});};
+ const send=()=>{if(stopped)return finish();void postAnalytics(input).then(()=>{if(!stopped)onAccepted();finish();},error=>{if(!stopped&&!retried&&!(error instanceof AnalyticsRejected)){retried=true;timer=setTimeout(send,delayMs);}else finish();});};
  send();return()=>{stopped=true;clearTimeout(timer);finish();};
 }

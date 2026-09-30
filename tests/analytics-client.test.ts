@@ -9,3 +9,21 @@ test('analytics transient failure retries the identical event once and final fai
 test('analytics cancellation stops scheduled retries and definite rejections do not loop',async()=>{
  const old=globalThis.fetch;let count=0;globalThis.fetch=async()=>{count++;return Response.json({error:'FORBIDDEN'},{status:403});};try{await new Promise<void>(resolve=>deliverAnalytics(input,{delayMs:1,onSettled:resolve}));assert.equal(count,1);globalThis.fetch=async()=>{count++;throw new Error('offline');};const stop=deliverAnalytics(input,{delayMs:20});stop();await new Promise(r=>setTimeout(r,40));assert.equal(count,2);}finally{globalThis.fetch=old;}
 });
+test('analytics acceptance fires only for an acknowledged open and never after cancellation',async()=>{
+ const old=globalThis.fetch;let accepted=0;
+ try{
+  globalThis.fetch=async()=>Response.json({eventId:input.eventId,kind:input.kind});
+  await new Promise<void>(resolve=>deliverAnalytics(input,{onAccepted:()=>accepted++,onSettled:resolve}));
+  assert.equal(accepted,1);
+  for(const response of [Response.json({error:'FORBIDDEN'},{status:403}),Response.json({eventId:'wrong',kind:input.kind})]){
+   globalThis.fetch=async()=>response.clone();
+   await new Promise<void>(resolve=>deliverAnalytics(input,{delayMs:1,onAccepted:()=>accepted++,onSettled:resolve}));
+   assert.equal(accepted,1);
+  }
+  let respond!:(response:Response)=>void;
+  globalThis.fetch=()=>new Promise<Response>(resolve=>{respond=resolve;});
+  const stop=deliverAnalytics(input,{onAccepted:()=>accepted++});stop();
+  respond(Response.json({eventId:input.eventId,kind:input.kind}));
+  await new Promise(resolve=>setTimeout(resolve,10));assert.equal(accepted,1);
+ }finally{globalThis.fetch=old;}
+});

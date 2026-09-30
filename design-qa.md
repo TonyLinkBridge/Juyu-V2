@@ -49,7 +49,7 @@ No actionable P0/P1/P2 findings remain for the tested scope.
 
 ## Verification and release boundary
 
-552 unit tests passed. Full existing DB regression: 437 passed before final migration-boundary helper; final core + analytics/media DB checks: 28 passed, including the new bounded migration test. Typecheck, lint and production build passed; CSS/browser tracing checks passed. Final CSS inset-only change was recaptured; build rerun recorded at handoff.
+553 unit tests passed. Full existing DB regression: 437 passed before final migration-boundary helper; final core + analytics/media DB checks: 28 passed, including the new bounded migration test. Typecheck, lint and production build passed; CSS/browser tracing checks passed. Final CSS inset-only change was recaptured. The final acceptance callback correction was followed by the complete verify:build check: acknowledged opens enable timing, rejected or cancelled opens do not.
 
 Production migration 0055 is required before deployment. Local screenshots and database tests do not prove production installation or real-account acceptance. No production credentials, sample people or sample assets are committed.
 
