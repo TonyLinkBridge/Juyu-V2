@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript，Node 原生测试；此阶段无需外部账号或运行时依赖。
 
-**Spec:** `docs/design/review-workbench.md`、`docs/design/employee-reader.md`、`TASKS.md`。
+**Spec:** `docs/design/review-workbench.md`、`docs/design/employee-reader.md`、`../../project/TASKS.md`。
 
 ## Global Constraints
 

@@ -15,7 +15,7 @@ T017 平面目录及 T018 分类树使用同一服务器身份与数据库授权
 
 GitBook PagesList 分组分支递归渲染，PageGroupItem 默认展开。折叠时用 hidden 隔离子链接，按钮提供 aria-expanded/aria-controls。页面重新导航会重新展开并定位当前项；暂不记忆个人折叠偏好。样式沿用 GitBook 结构并适配 JUYU；多层分类没有使用上游 sticky 分组标题，避免叠加遮挡。
 
-T049 实现后台分类编辑、移动及排序控件。T019 实现正文；T021 手机抽屉本地状态见下文；其余任务按当前 TASKS.md 执行。真实 Clerk/Supabase 联合验收仍需用户准备测试配置。
+T049 实现后台分类编辑、移动及排序控件。T019 实现正文；T021 手机抽屉本地状态见下文；其余任务按当前 [任务总表](../../docs/project/TASKS.md) 执行。真实 Clerk/Supabase 联合验收仍需用户准备测试配置。
 
 ## T019 正文与本页目录
 

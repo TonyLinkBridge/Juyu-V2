@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16.3.1、React 19.2.8、TypeScript 5.9.3、Tailwind 4.2.1，Node 原生测试及 Playwright。版本取自本机提供的 site 已安装包，依赖清单不整包照搬。
 
-**Spec:** `TASKS.md` T007，`docs/TECH_STACK.md`。UI 的本阶段交付是入口页，不是 GitBook/Tasks 已移植页面。
+**Spec:** `../../project/TASKS.md` T007，`docs/TECH_STACK.md`。UI 的本阶段交付是入口页，不是 GitBook/Tasks 已移植页面。
 
 ## Global Constraints
 

@@ -4,7 +4,7 @@
 
 **Goal:** Admin defines versioned fields; editor validates and stores their snapshots with immutable article revisions; disabled values and historical versions survive.
 **Architecture:** Existing settings/setting_versions; new revisions.custom_fields JSONB; shared strict model; admin-only settings GET/PUT; current definitions fetched server-side for existing/new editor. No new packages/cloud actions.
-**Spec:** TASKS.md T048 and accepted conversation requirements.
+**Spec:** `../../project/TASKS.md` T048 and accepted conversation requirements.
 
 ## Decisions
 - Types: text, number, date, select, boolean. Maximum 30 settings total, names 1–80 trimmed codepoints, text value max2000, select 1–30 distinct nonblank options <=80, finite numbers, real YYYY-MM-DD dates, boolean false is a valid required answer; null represents absent. Fields are article metadata for all content kinds, inherit article visibility and approval.

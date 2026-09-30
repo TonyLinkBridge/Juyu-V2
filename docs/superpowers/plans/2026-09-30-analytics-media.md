@@ -39,5 +39,5 @@ Files: AnalyticsDashboard, AnalyticsPeople, MediaLibrary, MediaUpload, admin med
 Consumes: Task 1 usage/PeoplePage and Task 2 library/targets, existing upload/delivery.
 - [x] Add interaction checks for selection, tabs, filtering, upload state, error/empty states.
 - [x] Build selected structure in current red/gray tokens, retain original shell and legacy URLs.
-- [x] Verify real components in internal browser at desktop/mobile/light/dark; save design-qa.md.
+- [x] Verify real components in internal browser at desktop/mobile/light/dark; save [design-qa.md](../../design/design-qa.md).
 - [x] Run full unit suite, targeted DB checks, typecheck/lint/build and diff check.

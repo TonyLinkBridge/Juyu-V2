@@ -5,7 +5,7 @@
 **Goal:** 为已确认的辅助功能建立有明确关联和拒绝默认访问的数据结构。
 **Architecture:** 追加 0002_supporting_data.sql，不改已验收的 0001_core.sql。沿用私有 juyu schema、PostgreSQL 外键、RLS 默认拒绝及显式迁移事务；本次仅表结构，不开放新的接口。
 **Tech Stack:** Node 24.19.0、TypeScript、pg、PostgreSQL 17 临时测试。
-**Spec:** TASKS.md 的 T009，以及 T011、T044–T054 已批准的功能定义。
+**Spec:** `../../project/TASKS.md` 的 T009，以及 T011、T044–T054 已批准的功能定义。
 
 ## 范围与关系
 
@@ -27,7 +27,7 @@
 - [x] src/server/database/migrations/0002_supporting_data.sql：实现上述表、复合外键、检查、索引与 RLS。migrate.ts 注册追加版本。
 - [x] tests/database/core.test.ts：迁移计数更新为 2；checksum 故障只改 0001 行，避免污染新增迁移。
 - [x] 跑全部数据库测试、既有单元测试、类型检查和 lint。独立代码审查后修正具体问题。由于本轮不改 Next 页面或依赖，不重复 UI 测试和构建。
-- [x] docs/verification/2026-09-08-supporting-data.md 记录证据；src/server/database/README.md 描述表和边界；TASKS.md 只在上述通过后完成 T009。
+- [x] docs/verification/2026-09-08-supporting-data.md 记录证据；src/server/database/README.md 描述表和边界；`../../project/TASKS.md` 只在上述通过后完成 T009。
 
 ## 测试核心断言
 

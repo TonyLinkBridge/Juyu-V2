@@ -5,7 +5,7 @@
 Goal: Admin-only trash, restore-to-unpublished-draft and explicitly confirmed permanent deletion, with audited version checks and honest private-file cleanup.
 Architecture: Existing lifecycle/read guards immediately close employee access. A new migration provides bounded lifecycle transitions, immutable deletion receipts and private storage cleanup jobs; permanent deletion removes document data through a narrowly authorized database function, without general runtime DELETE privileges. UI uses current sequence and never simulates success.
 Tech Stack: existing Next.js/React/TypeScript, PostgreSQL, private storage.
-Spec: TASKS.md T033 and accepted role/publication contract.
+Spec: `../../project/TASKS.md` T033 and accepted role/publication contract.
 
 Ruling: Restoring always yields an unpublished draft, clears current reviewer/approval/publication pointers, and does not expose old or unapproved content. Existing review/audit evidence retained until explicit purge; purge keeps a separate immutable audit receipt and metadata history, not article bodies.
 Ruling: Permanent deletion requires trash state, current sequence and exact title confirmation. No real company data is deleted in this task; all destructive verification uses isolated fixtures.
