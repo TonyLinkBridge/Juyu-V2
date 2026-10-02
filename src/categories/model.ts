@@ -37,7 +37,7 @@ export function normalizeCategoryDefinitions(value:unknown):CategoryDefinition[]
 export function normalizeCategoryIds(value:unknown):string[]{
  if(value===undefined)return [];if(!Array.isArray(value)||value.length>20||value.some(id=>typeof id!=='string'||!uuid.test(id))||new Set(value).size!==value.length)return bad();return [...value].sort();
 }
-export function categoryPath(definitions:CategoryDefinition[],id:string):string{
+export function categoryPath(definitions:ReadonlyArray<Pick<CategoryDefinition,'id'|'name'|'parentId'>>,id:string):string{
  const names:string[]=[],seen=new Set<string>();let current=definitions.find(c=>c.id===id);
  while(current&&!seen.has(current.id)){seen.add(current.id);names.unshift(current.name);current=definitions.find(c=>c.id===current!.parentId);}return names.join(' / ');
 }

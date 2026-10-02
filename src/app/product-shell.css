@@ -200,3 +200,9 @@
  .knowledge-home--editorial .home-document-list a{grid-template-columns:36px minmax(0,1fr) 18px;gap:10px}.knowledge-home--editorial .home-document-list small{display:none}.knowledge-home--editorial .home-document-number{font-size:19px}
  .knowledge-home--editorial .home-updates a{grid-template-columns:8px minmax(0,1fr)}.knowledge-home--editorial .home-updates time{grid-column:2}
 }
+
+/* Shared category metadata in Admin list and board; wraps at every viewport size. */
+.task-category-summary,.task-category-details{display:block;color:var(--muted);font-size:12px;line-height:1.65;margin-top:6px;overflow-wrap:anywhere}
+.task-category-details summary{cursor:pointer}
+.task-category-details summary:focus-visible{outline:2px solid var(--brand);outline-offset:3px;border-radius:3px}
+.task-category-details ul{padding-left:18px;margin:6px 0 0;list-style:disc}

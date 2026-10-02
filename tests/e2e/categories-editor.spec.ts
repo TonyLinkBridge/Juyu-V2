@@ -21,7 +21,8 @@ test('article directory icon saves with the editor draft',async({page})=>{
  await page.route('**/api/admin/editor/*',r=>{const input=r.request().postDataJSON();saved={...saved,...input,sequence:input.expectedSequence+1};return r.fulfill({json:saved});});
  await mount(page,saved);
  await page.getByRole('button',{name:'文章设置',exact:true}).click();
- await page.getByRole('button',{name:/^内容与访问/}).click();
+ const contentToggle=page.getByRole('button',{name:/^内容与访问/});
+ if(await contentToggle.getAttribute('aria-expanded')!=='true')await contentToggle.click();
  await page.getByRole('combobox',{name:'文章目录图标'}).selectOption('lightbulb');
  await expect.poll(()=>saved.iconKey,{timeout:8000}).toBe('lightbulb');
  await expect(page.getByRole('status')).toContainText('所有修改已保存');

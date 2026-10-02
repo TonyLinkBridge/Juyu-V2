@@ -10,7 +10,7 @@ async function workspaceComponent(){
  if(component)return component;
  const directory=resolve('output/verification/workspace-fixture');await mkdir(directory,{recursive:true});await writeFile(resolve(directory,'package.json'),'{"type":"commonjs"}');
  await writeFile(resolve(directory,'next-navigation.js'),'exports.useRouter=()=>({refresh(){}});');
- for(const name of ['src/components/shell/NavigationLink.tsx','src/workspace/model.ts','src/lifecycle/client.ts','src/drafts/client.ts',...['DraftRowAction','TaskCard','TaskColumn','TasksBoard','TasksFilters','TasksList','TasksWorkspace'].map(n=>`src/components/tasks/${n}.tsx`)]){
+ for(const name of ['src/components/shell/NavigationLink.tsx','src/workspace/model.ts','src/lifecycle/client.ts','src/drafts/client.ts',...['DraftRowAction','TaskCategories','TaskCard','TaskColumn','TasksBoard','TasksFilters','TasksList','TasksWorkspace'].map(n=>`src/components/tasks/${n}.tsx`)]){
   const destination=resolve(directory,name.replace(/\.tsx?$/,'.js'));await mkdir(dirname(destination),{recursive:true});
   const compiled=ts.transpileModule(await readFile(name,'utf8'),{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText.replace(/require\("([^"\n]+)\.ts"\)/g,'require("$1.js")').replace('require("next/navigation")','require("../../../next-navigation.js")');
   await writeFile(destination,compiled);
