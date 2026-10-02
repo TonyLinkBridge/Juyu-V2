@@ -1,3 +1,5 @@
+import {queueTelemetry} from '../../../../../../../server/developers/application';
+import {currentAccountViewer} from '../../../../../../../server/authentication/account-clerk';
 import {applicationAuthorization} from '../../../../../../../server/authorization/application';
 import {reviewResponse} from '../../../../../../../server/review/http';
 import {readBounded,requireMediaOrigin} from '../../../../../../../server/media/upload';
@@ -10,6 +12,8 @@ export async function POST(request:Request,context:{params:Promise<{id:string}>}
  let input:unknown;try{input=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));}catch{throw new Error('INVALID_INPUT');}
  const value=parsePublicationDiagnostic(input);
  await (await applicationAuthorization()).requireEditorAdmin();
+ const actor=await currentAccountViewer();
+ queueTelemetry({source:'publication-client',name:value.stage,level:value.stage.endsWith('failed')?'error':value.stage==='blocked'?'warning':'info',actorId:actor?.id,documentId:(await context.params).id,diagnostic:value});
  console.info(JSON.stringify({event:'juyu.publication-client',...value}));
  return {logged:true};
 });}

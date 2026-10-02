@@ -23,7 +23,8 @@
     "db:migrate:slack": "node --experimental-strip-types scripts/apply-slack-outbox.ts",
     "postbuild": "node scripts/check-built-styles.mjs && node scripts/check-built-browser.mjs",
     "verify:build": "npm run typecheck && npm run lint && npm test && npm run build",
-    "test:critical": "playwright test tests/e2e/foundation.spec.ts tests/e2e/editor.spec.ts tests/e2e/favorites.spec.ts tests/e2e/favorites-reader.spec.ts tests/e2e/ops.spec.ts tests/e2e/reference.spec.ts tests/e2e/qa.spec.ts tests/e2e/qa-reuse.spec.ts tests/e2e/pending-ui.spec.ts tests/e2e/media-library.spec.ts"
+    "test:critical": "playwright test tests/e2e/foundation.spec.ts tests/e2e/editor.spec.ts tests/e2e/favorites.spec.ts tests/e2e/favorites-reader.spec.ts tests/e2e/ops.spec.ts tests/e2e/reference.spec.ts tests/e2e/qa.spec.ts tests/e2e/qa-reuse.spec.ts tests/e2e/pending-ui.spec.ts tests/e2e/media-library.spec.ts tests/e2e/developers.spec.ts",
+    "db:migrate:developers": "node --experimental-strip-types scripts/apply-developers.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",

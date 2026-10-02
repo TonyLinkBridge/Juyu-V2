@@ -24,7 +24,7 @@ test('English reader chrome keeps its language in search and quick links',async(
  if(info.project.name==='mobile')await page.getByRole('button',{name:'Open search'}).click();
  await expect(page.getByRole('combobox',{name:'Search articles'})).toBeVisible();
  await page.locator('.account-menu>summary').click();
- await expect(page.locator('.mobile-account-appearance').getByRole('group',{name:'Appearance'})).toBeVisible();
+ await expect(page.locator('.mobile-account-appearance').locator('[data-theme-toggle]')).toBeVisible();
  await expect(page.getByText('账号权限',{exact:true})).toHaveCount(0);
  await page.keyboard.press('Escape');
  await page.getByRole('button',{name:'Quick links'}).click();
@@ -58,13 +58,13 @@ test('R05 mobile header expands search and keeps theme and admin entry in accoun
  await page.goto('/reader-frame-fixture?headerFixture=1&q=test');await page.addStyleTag({content:bundle.css});await page.addScriptTag({content:bundle.script});
  const input=page.getByRole('combobox',{name:'搜索资料'}),toggle=page.getByRole('button',{name:'打开搜索'}),account=page.locator('.account-menu>summary');
  if(info.project.name==='mobile'){
-  await expect(input).toBeHidden();await expect(toggle).toBeVisible();await expect(page.locator('.account-controls>.theme-toggler')).toBeHidden();await expect(page.locator('.account-controls>.admin-console-button')).toBeHidden();
+  await expect(input).toBeHidden();await expect(toggle).toBeVisible();await expect(page.locator('.account-controls>[data-theme-toggle]')).toBeHidden();await expect(page.locator('.account-controls>.admin-console-button')).toBeHidden();
   await toggle.click();await expect(input).toBeFocused();await input.fill('域名');const box=await input.boundingBox();expect(box!.width).toBeGreaterThan(180);await input.press('Escape');await expect(input).toBeHidden();await expect(toggle).toBeFocused();
   await page.keyboard.press('Control+k');await expect(input).toBeFocused();await account.click();await expect(input).toBeHidden();
-  await expect(page.locator('.mobile-account-shortcut').getByRole('link',{name:'管理后台'})).toBeVisible();await page.locator('.mobile-account-appearance').getByLabel('深色',{exact:true}).check();await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+  await expect(page.locator('.mobile-account-shortcut').getByRole('link',{name:'管理后台'})).toBeVisible();await page.locator('.mobile-account-appearance').getByRole('button',{name:'Dark',exact:true}).click();await expect(page.locator('html')).toHaveClass(/dark/);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'output/verification/R05-mobile-menu.png'});await page.keyboard.press('Escape');await expect(account).toBeFocused();
   for(const width of [320,390,760]){await page.setViewportSize({width,height:844});await toggle.click();await expect(input).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`output/verification/R05-search-${width}.png`});await input.press('Escape');}
- }else{await expect(input).toBeVisible();await expect(toggle).toBeHidden();await expect(page.locator('.account-controls>.theme-toggler')).toBeVisible();await expect(page.locator('.account-controls>.admin-console-button')).toBeVisible();}
+ }else{await expect(input).toBeVisible();await expect(toggle).toBeHidden();await expect(page.locator('.account-controls>[data-theme-toggle]')).toBeVisible();await expect(page.locator('.account-controls>.admin-console-button')).toBeVisible();}
 });
 
 test('R08 Reference has one active admin navigation entry on desktop and mobile',async({page},info)=>{
@@ -80,4 +80,15 @@ test('R21 PDF no longer receives duplicate legacy account search or navigation c
  await expect(page.locator('.entry-frame')).toHaveCount(0);await expect(page.locator('header')).toHaveCount(0);await expect(page.locator('.knowledge-sidebar')).toHaveCount(0);
  await expect(page.getByText('重复标题栏')).toHaveCount(0);await expect(page.getByText('重复目录')).toHaveCount(0);
  await expect(page.getByRole('main')).toBeVisible();
+});
+
+test('Developers navigation appears only with the server Super Admin presentation flag',async({page},info)=>{
+ await page.route('**/reader-frame-fixture*',r=>r.fulfill({contentType:'text/html',body:'<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="app"></div></body></html>'}));
+ for(const role of ['admin','super']){
+  await page.goto('/reader-frame-fixture?adminFixture=1&developerFixture='+role);await page.addStyleTag({content:bundle.css});await page.addScriptTag({content:bundle.script});
+  if(info.project.name==='mobile')await page.locator('.admin-mobile-nav>summary').click();
+  const nav=page.locator('nav[aria-label="后台导航"]:visible');
+  if(role==='admin')await expect(nav.getByText('开发者工具',{exact:true})).toHaveCount(0);
+  else{await nav.getByText('开发者工具',{exact:true}).click();for(const name of ['Overview','API Keys','Webhooks','Events / Logs'])await expect(nav.getByRole('link',{name,exact:true})).toBeVisible();}
+ }
 });

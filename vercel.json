@@ -4,8 +4,14 @@
     "sin1"
   ],
   "env": {
-    "JUYU_PERFORMANCE_LOGGING": "true"
+    "JUYU_PERFORMANCE_LOGGING": "true",
+    "JUYU_DEVELOPER_LOGGING": "true"
   },
   "buildCommand": "npm run verify:build",
-  "crons": [{ "path": "/api/cron/slack-notifications", "schedule": "*/5 * * * *" }]
+  "crons": [
+    {
+      "path": "/api/cron/slack-notifications",
+      "schedule": "*/5 * * * *"
+    }
+  ]
 }

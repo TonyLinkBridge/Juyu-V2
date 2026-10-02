@@ -1,3 +1,4 @@
+import {observeDeveloperRequest} from '../../../../../../server/developers/instrumentation.ts';
 import {applicationAuthorization} from '../../../../../../server/authorization/application';
 import {reviewResponse} from '../../../../../../server/review/http';
 import {readBounded,requireMediaOrigin} from '../../../../../../server/media/upload';
@@ -9,7 +10,7 @@ export async function GET(request:Request,context:{params:Promise<{id:string}>})
  if(new URL(request.url).search)throw new Error('INVALID_INPUT');
  return service.publicationDetail((await context.params).id);
 });}
-export async function POST(request:Request,context:{params:Promise<{id:string}>}){return reviewResponse(async()=>{
+export async function POST(request:Request,context:{params:Promise<{id:string}>}){return observeDeveloperRequest('publication',()=>reviewResponse(async()=>{
  const service=await applicationAuthorization();await service.requireEditorAdmin();requireMediaOrigin(request,process.env.APP_ORIGIN);
  if(new URL(request.url).search||request.headers.get('content-type')?.split(';')[0].trim()!=='application/json')throw new Error('INVALID_INPUT');
  const bytes=await readBounded(request.body,8192,AbortSignal.any([request.signal,AbortSignal.timeout(15000)]));
@@ -17,4 +18,4 @@ export async function POST(request:Request,context:{params:Promise<{id:string}>}
  const result=await service.changePublication((await context.params).id,input);
  after(deliverSlackNotificationsSafely);
  return result;
-});}
+}));}

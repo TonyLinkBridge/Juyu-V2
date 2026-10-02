@@ -1,3 +1,4 @@
+import {observeDeveloperRequest} from '../../../../../server/developers/instrumentation.ts';
 import {applicationAuthorization} from '../../../../../server/authorization/application';
 import {protectedResponse} from '../../../../../server/authorization/service';
 import {exportPDF} from '../../../../../server/pdf/export';
@@ -8,8 +9,8 @@ export const runtime='nodejs';
 // Allow a cold browser extraction plus rendering and the final authorization recheck.
 export const maxDuration=60;
 export async function GET(request:Request,context:{params:Promise<{id:string}>}){
- try{const service=await applicationAuthorization();return exportPDF(request,(await context.params).id,Number(new URL(request.url).searchParams.get('revision')),{
+ return observeDeveloperRequest('pdf',async()=>{try{const service=await applicationAuthorization();return exportPDF(request,(await context.params).id,Number(new URL(request.url).searchParams.get('revision')),{
   snapshot:(id,revision)=>service.pdf(id,revision),asset:id=>service.asset(id),render:renderPDF,
   storage:()=>{const origin=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!origin||!key)throw new Error('AUTH_NOT_CONFIGURED');return new SupabasePrivateStorage(origin,key);},
- });}catch(error){return protectedResponse(async()=>{throw error;});}
+ });}catch(error){return protectedResponse(async()=>{throw error;});}});
 }

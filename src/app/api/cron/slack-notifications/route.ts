@@ -1,3 +1,4 @@
+import {cleanupDeveloperTelemetry} from '../../../../server/developers/application';
 import {timingSafeEqual} from 'node:crypto';
 import {deliverSlackNotifications} from '../../../../server/slack/service';
 
@@ -25,6 +26,7 @@ export async function GET(request:Request){
   return new Response('Unauthorized',{status:401});
  }
  try{
+  await cleanupDeveloperTelemetry();
   const result=await deliverSlackNotifications(5);
   if(!result.configured)return Response.json({error:'SLACK_NOT_CONFIGURED'},{status:503});
   return Response.json({sent:result.sent,failed:result.failed});

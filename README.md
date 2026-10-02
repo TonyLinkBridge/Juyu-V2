@@ -24,6 +24,7 @@
 | 分类与权限 | 管理成员、阅读范围、文章分类、目录顺序及导航设置。 |
 | 媒体文件 | 上传、查找和预览私有文件，查看文件关联的文章。 |
 | 使用分析 | 查看资料打开情况、搜索表现与员工阅读明细；历史未采集的停留时间显示为“未记录”。 |
+| 开发者工具 | Super Admin 查看服务配置、连接检查、Slack 投递与集中日志；启用依赖迁移 0056。 |
 | Slack 通知 | 提交、审核、发布与更新通知；实际送达依赖工作区授权、频道配置、数据库迁移和重试任务。 |
 
 “平均可见停留”表示页面在前台可见的时间，不能证明员工读完或理解了资料。统计口径见[使用分析说明](docs/setup/analytics-visible-time.md)。
@@ -113,6 +114,7 @@ fonts/     PDF 与流程图使用的中文字体
 | --- | --- |
 | [本地启动与环境接入](docs/setup/local-development.md) | 环境变量、登录、数据库与私有存储前置条件。 |
 | [检查与部署](docs/setup/verification-and-deployment.md) | 检查命令、CI、部署顺序与上线验收。 |
+| [开发者工具](docs/setup/developers.md) | 四个开发者页面、权限、连接检查边界和迁移顺序。 |
 | [Slack 通知](docs/setup/slack-notifications.md) | Bot 权限、频道配置、通知队列与重试。 |
 | [使用分析](docs/setup/analytics-visible-time.md) | 可见停留统计口径与迁移要求。 |
 | [备份与恢复](docs/setup/T060-backup-recovery.md) | 数据库、文件备份与恢复演练。 |
