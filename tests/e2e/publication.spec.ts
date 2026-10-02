@@ -34,3 +34,11 @@ test('R18 global navigation stays blocked through uncertain publication and clea
  await page.getByRole('button',{name:'重试原操作'}).click();await expect(page.getByRole('status')).toContainText('已正式发布');
  await page.getByRole('link',{name:'全局侧栏测试'}).click();await expect(page).toHaveURL(/__leave_target/);expect(calls).toBe(2);
 });
+
+
+test('publication diagnostic endpoint cannot log through forged administrator headers or a cross-site origin',async({request})=>{
+ const path='/api/admin/review/00000000-0000-4000-8000-000000000037/publication/diagnostics';
+ const data={attempt:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',stage:'blocked',sequence:41,reason:'uploading',online:true};
+ const crossSite=await request.post(path,{headers:{origin:'https://untrusted.example','x-role':'super_admin'},data});expect(crossSite.status()).toBe(403);expect(crossSite.headers()['cache-control']).toBe('private, no-store');
+ const forged=await request.post(path,{headers:{origin:'http://127.0.0.1:3210','x-role':'super_admin','x-user-id':'super-a'},data});expect([403,503]).toContain(forged.status());expect(await forged.json()).not.toHaveProperty('logged');
+});

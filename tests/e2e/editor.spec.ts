@@ -761,3 +761,74 @@ test('invalid file format is an error notification regardless of Chinese wording
  await mount(page,()=>editorFixture);await settings(page,'封面与附件');await page.getByLabel('上传文件',{exact:true}).setInputFiles({name:'bad.exe',mimeType:'application/octet-stream',buffer:Buffer.from('invalid')});
  await expect(page.locator('.juyu-toast.error')).toContainText('文件格式或大小不符合要求');await expect(page.locator('.juyu-toast.success')).toHaveCount(0);
 });
+
+
+// Publication recovery: exercise the real editor; only the HTTP boundary is simulated.
+test('direct publication preflight failure permits a safe recheck without discarding input or submitting a write',async({page})=>{
+ const article={...structuredClone(editorFixture),canDirectPublish:true};let healthy=false;const writes:unknown[]=[];
+ await page.route('**/api/admin/review/*/publication',r=>r.request().method()==='GET'?r.fulfill(healthy?{json:{article,revision:1,approval:null,canQueue:false,canPublish:false,canDirectPublish:true,history:[],historyMore:false}}:{status:503,json:{error:'REVIEW_UNAVAILABLE'}}):(writes.push(r.request().postDataJSON()),r.fulfill({json:{documentId:article.documentId,sequence:4,revision:1,action:'direct_publish',status:'published',publishedRevision:1,approvedBy:'super-a'}})));
+ await mount(page,()=>article);await page.getByRole('button',{name:'批准并发布',exact:true}).click();const dialog=page.getByRole('dialog',{name:'批准并发布'});await dialog.getByRole('button',{name:'确认发布',exact:true}).click();
+ await expect(dialog).toBeVisible();await expect(dialog.getByRole('alert')).toContainText('未能读取');await expect(dialog.getByRole('button',{name:'取消',exact:true})).toBeEnabled();await expect(page.locator('.bn-editor')).toHaveAttribute('contenteditable','true');expect(writes).toHaveLength(0);
+ await dialog.getByRole('button',{name:'取消',exact:true}).click();await expect(page.getByRole('button',{name:'批准并发布',exact:true})).toBeEnabled();await page.getByRole('button',{name:'批准并发布',exact:true}).click();healthy=true;await dialog.getByRole('button',{name:'重新核对发布状态',exact:true}).click();await expect(dialog.getByRole('button',{name:'确认发布',exact:true})).toBeEnabled();expect(writes).toHaveLength(0);await expect(page.getByRole('textbox',{name:'文章标题'})).toHaveValue('编辑测试文章');
+ await dialog.getByRole('button',{name:'确认发布',exact:true}).click();await expect(page.locator('.editor-notices').getByRole('status')).toContainText('已由你的 Super Admin');expect(writes).toEqual([{action:'direct_publish',expectedSequence:3}]);
+});
+test('direct publication version conflict offers a server comparison and keeps an input backup when loading the newer draft',async({page})=>{
+ const article={...structuredClone(editorFixture),canDirectPublish:true};const newer={...article,title:'另一个窗口的新草稿',body:'服务器的新正文',sequence:4};const writes:unknown[]=[];
+ await page.route('**/api/admin/editor/*',r=>r.fulfill({json:newer}));
+ await page.route('**/api/admin/review/*/publication',r=>r.request().method()==='GET'?r.fulfill({json:{article:newer,revision:2,approval:null,canQueue:false,canPublish:false,canDirectPublish:true,history:[],historyMore:false}}):(writes.push(r.request().postDataJSON()),r.fulfill({json:{documentId:article.documentId,sequence:5,revision:2,action:'direct_publish',status:'published',publishedRevision:2,approvedBy:'super-a'}})));
+ await mount(page,()=>article);await page.getByRole('button',{name:'批准并发布',exact:true}).click();const dialog=page.getByRole('dialog',{name:'批准并发布'});await dialog.getByRole('button',{name:'确认发布',exact:true}).click();
+ await expect(dialog.getByRole('alert')).toContainText('版本');await expect(dialog.getByRole('alert')).not.toContainText('登录状态');expect(writes).toHaveLength(0);
+ await dialog.getByRole('button',{name:'保留输入并对照服务器版本',exact:true}).click();const recovery=page.getByRole('region',{name:'保存恢复'});await expect(recovery.getByRole('heading',{name:newer.title})).toBeVisible();await expect(page.getByRole('textbox',{name:'文章标题'})).toHaveValue(article.title);
+ await recovery.getByRole('button',{name:'保留备份并载入此版本',exact:true}).click();await page.locator('dialog.juyu-confirm').getByRole('button',{name:'确认继续'}).click();await expect(page.getByRole('textbox',{name:'文章标题'})).toHaveValue(newer.title);
+ const backup=page.getByRole('textbox',{name:'载入前的输入备份 1'});await page.getByText('载入前的输入备份 1',{exact:true}).click();await expect(backup).toHaveValue(/编辑测试文章/);await expect(backup).toHaveValue(/原始正文/);
+ await page.getByRole('button',{name:'批准并发布',exact:true}).click();await page.getByRole('dialog',{name:'批准并发布'}).getByRole('button',{name:'确认发布',exact:true}).click();await expect(page.locator('.editor-notices').getByRole('status')).toContainText('已由你的 Super Admin');expect(writes).toEqual([{action:'direct_publish',expectedSequence:4}]);
+});
+test('direct publication attachment rejection remains recoverable on the same page after files become ready',async({page})=>{
+ const article={...structuredClone(editorFixture),canDirectPublish:true};let ready=false;const writes:unknown[]=[];
+ await page.route('**/api/admin/review/*/publication',r=>{if(r.request().method()==='GET')return r.fulfill({json:{article,revision:1,approval:null,canQueue:false,canPublish:false,canDirectPublish:true,history:[],historyMore:false}});writes.push(r.request().postDataJSON());return r.fulfill(ready?{json:{documentId:article.documentId,sequence:4,revision:1,action:'direct_publish',status:'published',publishedRevision:1,approvedBy:'super-a'}}:{status:409,json:{error:'UPLOAD_IN_PROGRESS'}});});
+ await mount(page,()=>article);await page.getByRole('button',{name:'批准并发布',exact:true}).click();const dialog=page.getByRole('dialog',{name:'批准并发布'});await dialog.getByRole('button',{name:'确认发布',exact:true}).click();await expect(dialog).toBeVisible();await expect(dialog.getByRole('alert')).toContainText('附件');await expect(page.getByRole('button',{name:'批准并发布',exact:true})).toBeVisible();
+ ready=true;await dialog.getByRole('button',{name:'重新核对发布状态',exact:true}).click();await expect(dialog.getByRole('button',{name:'确认发布',exact:true})).toBeEnabled();expect(writes).toHaveLength(1);await dialog.getByRole('button',{name:'确认发布',exact:true}).click();await expect(page.locator('.editor-notices').getByRole('status')).toContainText('已由你的 Super Admin');expect(writes).toEqual([{action:'direct_publish',expectedSequence:3},{action:'direct_publish',expectedSequence:3}]);
+});
+test('an unconfirmed direct publication locks editing and preserves the exact operation through a later conflict',async({page})=>{
+ const article={...structuredClone(editorFixture),canDirectPublish:true};const writes:unknown[]=[];
+ await page.route('**/api/admin/review/*/publication',r=>{if(r.request().method()==='GET')return r.fulfill({json:{article,revision:1,approval:null,canQueue:false,canPublish:false,canDirectPublish:true,history:[],historyMore:false}});writes.push(r.request().postDataJSON());return writes.length===1?r.abort('failed'):writes.length===2?r.fulfill({status:409,json:{error:'CONFLICT'}}):r.fulfill({json:{documentId:article.documentId,sequence:4,revision:1,action:'direct_publish',status:'published',publishedRevision:1,approvedBy:'super-a'}});});
+ await mount(page,()=>article);await page.getByRole('button',{name:'批准并发布',exact:true}).click();const dialog=page.getByRole('dialog',{name:'批准并发布'});await dialog.getByRole('button',{name:'确认发布',exact:true}).click();await expect(dialog.getByRole('alert')).toContainText('尚未确认');await expect(page.locator('.bn-editor')).toHaveAttribute('contenteditable','false');await expect(dialog.getByRole('button',{name:'取消',exact:true})).toBeDisabled();await expect(dialog.getByRole('button',{name:'重新核对发布状态',exact:true})).toBeDisabled();
+ await dialog.getByRole('button',{name:'重试原发布',exact:true}).click();await expect(dialog.getByRole('alert')).toContainText('尚未确认');await dialog.getByRole('button',{name:'重试原发布',exact:true}).click();await expect(page.locator('.editor-notices').getByRole('status')).toContainText('已由你的 Super Admin');expect(writes).toEqual(Array(3).fill({action:'direct_publish',expectedSequence:3}));
+});
+test('an open publication confirmation explains uploading even when the draft is already saved',async({page})=>{
+ const article={...structuredClone(editorFixture),canDirectPublish:true};let release!:()=>void;const held=new Promise<void>(r=>{release=r;});
+ await page.route('**/api/admin/media/*/upload',async r=>{await held;return r.fulfill({json:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',filename:'sample.png',mime:'image/png',size:'68',status:'ready'}});});
+ await mount(page,()=>article);await page.getByRole('button',{name:'批准并发布',exact:true}).click();await settings(page,'封面与附件');await page.getByRole('button',{name:'关闭文章设置',exact:true}).click();
+ // Start the real upload from the settings input, then return to the open confirmation.
+ await settings(page,'封面与附件');await page.getByLabel('上传文件',{exact:true}).setInputFiles({name:'sample.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9jjCcAAAAASUVORK5CYII=','base64')});await closeSettings(page);
+ const dialog=page.getByRole('dialog',{name:'批准并发布'});await expect(page.locator('.save-state')).toContainText('所有修改已保存');await expect(dialog.getByRole('button',{name:'确认发布',exact:true})).toBeDisabled();await expect(dialog.getByRole('status')).toContainText('上传');release();await expect(dialog.getByRole('button',{name:'确认发布',exact:true})).toBeEnabled();
+});
+
+// Already-open tools must obey the same publication lock as the writing surface.
+test('direct publication locks already-open insertion tools while sending and while the result is uncertain',async({page})=>{
+ const article={...structuredClone(editorFixture),canDirectPublish:true};let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve;});
+ await page.route('**/api/admin/review/*/publication',async route=>{if(route.request().method()==='GET')return route.fulfill({json:{article,revision:1,approval:null,canQueue:false,canPublish:false,canDirectPublish:true,history:[],historyMore:false}});await held;return route.abort('failed');});
+ await mount(page,()=>article);await page.getByRole('navigation',{name:'编辑工具'}).getByRole('button',{name:'内容插入',exact:true}).click();const panel=page.getByRole('region',{name:'内容插入'});const before=await page.locator('.bn-block-outer').count();
+ await page.getByRole('button',{name:'批准并发布',exact:true}).click();const dialog=page.getByRole('dialog',{name:'批准并发布'});await dialog.getByRole('button',{name:'确认发布',exact:true}).click();await expect(dialog.getByRole('button',{name:'正在发布…',exact:true})).toBeVisible();
+ for(const name of ['提示框','代码块','分页标签','折叠内容'])await expect(panel.getByRole('button',{name:new RegExp('^'+name)})).toBeDisabled();release();await expect(dialog.getByRole('alert')).toContainText('尚未确认');
+ for(const name of ['提示框','代码块','分页标签','折叠内容'])await expect(panel.getByRole('button',{name:new RegExp('^'+name)})).toBeDisabled();expect(await page.locator('.bn-block-outer').count()).toBe(before);
+});
+test('direct publication locks the trash action while sending and while the result is uncertain',async({page})=>{
+ const article={...structuredClone(editorFixture),canDirectPublish:true};let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve;});let trashWrites=0;
+ await page.route('**/api/admin/lifecycle/*',route=>{trashWrites++;return route.abort('failed');});
+ await page.route('**/api/admin/review/*/publication',async route=>{if(route.request().method()==='GET')return route.fulfill({json:{article,revision:1,approval:null,canQueue:false,canPublish:false,canDirectPublish:true,history:[],historyMore:false}});await held;return route.abort('failed');});
+ await mount(page,()=>article);await page.getByRole('button',{name:'批准并发布',exact:true}).click();const dialog=page.getByRole('dialog',{name:'批准并发布'});await dialog.getByRole('button',{name:'确认发布',exact:true}).click();await expect(dialog.getByRole('button',{name:'正在发布…',exact:true})).toBeVisible();
+ await settings(page);await expect(page.getByRole('button',{name:'删除文章',exact:true})).toBeDisabled();await closeSettings(page);release();await expect(dialog.getByRole('alert')).toContainText('尚未确认');await settings(page);await expect(page.getByRole('button',{name:'删除文章',exact:true})).toBeDisabled();expect(trashWrites).toBe(0);
+});
+
+for(const phase of ['sending','uncertain'] as const)test(`a delayed local recovery keeps its copy when direct publication becomes ${phase}`,async({page})=>{
+ const article={...structuredClone(editorFixture),canDirectPublish:true};let releaseRead!:()=>void;const heldRead=new Promise<void>(resolve=>{releaseRead=resolve;});let releasePublish!:()=>void;const heldPublish=new Promise<void>(resolve=>{releasePublish=resolve;});let readStarted=false;
+ await page.route('**/api/admin/editor/*',async route=>{if(route.request().method()!=='GET')return route.abort('failed');readStarted=true;await heldRead;return route.fulfill({json:article});});
+ await page.route('**/api/admin/review/*/publication',async route=>{if(route.request().method()==='GET')return route.fulfill({json:{article,revision:1,approval:null,canQueue:false,canPublish:false,canDirectPublish:true,history:[],historyMore:false}});await heldPublish;return route.abort('failed');});
+ await mount(page,()=>article);await page.locator('.editor-input-backup > summary').click();await page.getByRole('button',{name:'在此设备开启恢复'}).click();await typeText(page,' 等待中的本机恢复输入');await expect.poll(()=>page.evaluate(()=>Object.values(localStorage).some(v=>v.includes('等待中的本机恢复输入')))).toBe(true);
+ page.on('dialog',dialog=>dialog.accept());await page.reload();await page.getByRole('button',{name:'恢复到编辑区',exact:true}).click();await page.locator('dialog.juyu-confirm').getByRole('button',{name:'确认继续'}).click();await expect.poll(()=>readStarted).toBe(true);
+ await page.getByRole('button',{name:'批准并发布',exact:true}).click();const dialog=page.getByRole('dialog',{name:'批准并发布'});await dialog.getByRole('button',{name:'确认发布',exact:true}).click();await expect(dialog.getByRole('button',{name:'正在发布…',exact:true})).toBeVisible();
+ if(phase==='uncertain'){releasePublish();await expect(dialog.getByRole('alert')).toContainText('尚未确认');}
+ releaseRead();const recovery=page.locator('.editor-recovery-panel');await expect(recovery.getByRole('status')).toContainText('无法安全恢复');await expect(page.getByRole('region',{name:'可恢复输入'})).toBeVisible();await page.getByText('查看副本以便手动复制',{exact:true}).click();await expect(page.getByRole('textbox',{name:'本机恢复副本'})).toHaveValue(/等待中的本机恢复输入/);await expect(page.locator('.bn-editor')).not.toContainText('等待中的本机恢复输入');await expect(page.getByRole('button',{name:'恢复到编辑区',exact:true})).toBeDisabled();
+ if(phase==='sending'){releasePublish();await expect(dialog.getByRole('alert')).toContainText('尚未确认');}
+});
