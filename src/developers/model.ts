@@ -15,12 +15,17 @@ export function integrationCatalog(env:Record<string,string|undefined>):Integrat
 }
 export type EventSource='audit'|'slack'|'request'|'connection'|'publication-client'|'operator';
 export type EventLevel='info'|'warning'|'error';
-export interface EventFilter {q:string;days:7|30;source:'all'|EventSource;level:'all'|EventLevel;page:number}
+export type EventKind='request'|'connection'|'notification'|'publication'|'review'|'diagnostic';
+export interface EventFilter {q:string;days:7|30;source:'all'|EventSource;level:'all'|EventLevel;page:number;date?:string;levels?:EventLevel[];type?:EventKind}
 export function parseEventFilter(params:URLSearchParams):EventFilter{
- const allowed=['q','days','source','level','page'];for(const k of params.keys())if(!allowed.includes(k)||params.getAll(k).length!==1)throw new Error('INVALID_INPUT');
+ const allowed=['q','days','source','level','page','date','levels','type'];for(const k of params.keys())if(!allowed.includes(k)||params.getAll(k).length!==1)throw new Error('INVALID_INPUT');
  const q=(params.get('q')??'').trim(),days=Number(params.get('days')??30),page=Number(params.get('page')??1),source=params.get('source')??'all',level=params.get('level')??'all';
  if(q.length>120||/[\u0000-\u001f]/.test(q)||![7,30].includes(days)||!Number.isSafeInteger(page)||page<1||page>1000||!['all','audit','slack','request','connection','publication-client','operator'].includes(source)||!['all','info','warning','error'].includes(level))throw new Error('INVALID_INPUT');
- return {q,days:days as 7|30,page,source:source as EventFilter['source'],level:level as EventFilter['level']};
+ const date=params.get('date'),type=params.get('type'),levels=params.get('levels')?.split(',');
+ if(date!==null&&(!/^20\d{2}-\d{2}-\d{2}$/.test(date)||Number.isNaN(Date.parse(date))||new Date(date).toISOString().slice(0,10)!==date))throw Error('INVALID_INPUT');
+ if(levels&&(!levels.length||new Set(levels).size!==levels.length||levels.some(x=>!['info','warning','error'].includes(x))||level!=='all'))throw Error('INVALID_INPUT');
+ if(type!==null&&!['request','connection','notification','publication','review','diagnostic'].includes(type))throw Error('INVALID_INPUT');
+ return {q,days:days as 7|30,page,source:source as EventFilter['source'],level:level as EventFilter['level'],...(date?{date}:{}),...(levels?{levels:levels as EventLevel[]}:{}),...(type?{type:type as EventKind}:{})};
 }
 export interface Telemetry {source:'request'|'connection'|'publication-client';name:string;level:EventLevel;status?:number;durationMs?:number;code?:string;actorId?:string;documentId?:string;diagnostic?:import('../review/publication-diagnostics.ts').PublicationDiagnostic}
 export function safeTelemetry(value:unknown):Telemetry|null{
@@ -37,9 +42,13 @@ export function safeTelemetry(value:unknown):Telemetry|null{
  return {source:x.source as Telemetry['source'],name:String(x.name),level:x.level as EventLevel,...(x.code!==undefined?{code:String(x.code)}:{}),...(x.actorId!==undefined?{actorId:String(x.actorId)}:{}),...(x.documentId!==undefined?{documentId:String(x.documentId)}:{}),...(x.diagnostic!==undefined?{diagnostic:parsePublicationDiagnostic(x.diagnostic)}:{}),...(x.status!==undefined?{status:Number(x.status)}:{}),...(x.durationMs!==undefined?{durationMs:Number(x.durationMs)}:{})};
 }
 export interface DeveloperEvent {id:string;at:string;source:EventSource;level:EventLevel;name:string;title:string|null;actor:string|null;documentId:string|null;status:number|null;durationMs:number|null;detail:Record<string,string|number|null>}
-export interface EventPage {items:DeveloperEvent[];page:number;hasNext:boolean;filter:EventFilter}
+export interface EventSummary {total:number;levels:Record<EventLevel,number>;sources:{id:EventSource;count:number}[];interfaces:{id:string;count:number}[];articles:{id:string;title:string;count:number}[]}
+export interface EventPage {items:DeveloperEvent[];page:number;hasNext:boolean;filter:EventFilter;summary:EventSummary}
 export interface Notification {documentId:string;sequence:number;event:string;title:string|null;actor:string;createdAt:string;attempts:number;nextAttemptAt:string;sentAt:string|null;leaseUntil:string|null;lastError:string|null;state:'sent'|'sending'|'failed'|'pending'}
 export function notificationState(row:Pick<Notification,'sentAt'|'leaseUntil'|'lastError'>,now=Date.now()):Notification['state']{return row.sentAt?'sent':row.leaseUntil&&Date.parse(row.leaseUntil)>now?'sending':row.lastError?'failed':'pending';}
 export interface NotificationPage {items:Notification[];page:number;hasNext:boolean;totals:{sent:number;failed:number;pending:number};configured:boolean;channel:string|null;retryConfigured:boolean}
-export interface Overview {days:7|30;integrations:Integration[];release:string;requests:{count:number;failed:number;averageMs:number|null;since:string|null};timeline:{day:string;count:number;failed:number}[];notifications:NotificationPage['totals'];recent:DeveloperEvent[]}
-export const eventNames:Record<string,string>={asset:'图片与附件读取',pdf:'PDF 导出',publication:'文章发布接口',create:'创建草稿',edit:'修改草稿',submit:'提交二审',withdraw:'撤回审核',reassign:'更换审核人',reject:'退回修改',approve:'审核通过',queue:'等待发布',publish:'发布文章',direct_publish:'批准并发布',revision_started:'开始修订',submitted:'提交二审通知',approved:'审核通过通知',changes_requested:'退回修改通知',published:'文章发布通知',updated:'文章更新通知',retry:'重试通知',confirm_open:'打开发布确认',confirm_click:'点击确认发布',preflight_start:'开始发布前检查',preflight_failed:'发布前检查失败',publish_start:'开始发布请求',publish_failed:'发布请求失败',publish_success:'发布请求成功',recheck_start:'开始核对发布结果',recheck_failed:'核对发布结果失败',recheck_success:'核对发布结果成功',blocked:'发布操作被阻止'};
+export interface Overview {days:7|30;integrations:Integration[];release:string;requests:{count:number;failed:number;averageMs:number|null;minimumMs:number|null;maximumMs:number|null;since:string|null};timeline:{day:string;count:number;failed:number;averageMs:number|null}[];notificationTimeline:{day:string;sent:number;failed:number;pending:number}[];notifications:NotificationPage['totals'];recent:DeveloperEvent[]}
+export const eventNames:Record<string,string>={clerk:'Clerk 连接检查',database:'数据库连接检查',storage:'文件服务检查',slack:'Slack 连接检查',cron:'定时任务配置检查',asset:'图片与附件读取',pdf:'PDF 导出',publication:'文章发布接口',create:'创建草稿',edit:'修改草稿',submit:'提交二审',withdraw:'撤回审核',reassign:'更换审核人',reject:'退回修改',approve:'审核通过',queue:'等待发布',publish:'发布文章',direct_publish:'批准并发布',revision_started:'开始修订',submitted:'提交二审通知',approved:'审核通过通知',changes_requested:'退回修改通知',published:'文章发布通知',updated:'文章更新通知',retry:'重试通知',confirm_open:'打开发布确认',confirm_click:'点击确认发布',preflight_start:'开始发布前检查',preflight_failed:'发布前检查失败',publish_start:'开始发布请求',publish_failed:'发布请求失败',publish_success:'发布请求成功',recheck_start:'开始核对发布结果',recheck_failed:'核对发布结果失败',recheck_success:'核对发布结果成功',blocked:'发布操作被阻止'};
+
+/** Quote one CSV cell and keep spreadsheet formula prefixes as literal text. */
+export function csvField(value:string){const text=/^\s*[=+\-@]|^[\t\r\n]/.test(value)?"'"+value:value;return '"'+text.replaceAll('"','""')+'"';}

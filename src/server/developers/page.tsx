@@ -1,4 +1,5 @@
 import 'server-only';
+import {deploymentRelease} from "../../config/readiness";
 import {redirect} from 'next/navigation';
 import {clerkConfiguration} from '../../config/clerk';
 import {currentAccountAccess} from '../authentication/account-clerk';
@@ -13,5 +14,5 @@ export async function developerPage(section:DeveloperSection){
  try{await applicationDevelopers().access();}catch(e){denied=e instanceof Error&&e.message.startsWith('FORBIDDEN');unavailable=true;}
  if(denied)redirect('/admin/access-denied');
  if(unavailable)return <main id="main-content" className="admin-data-main"><h1>开发者工具</h1><p role="alert">暂时无法确认开发者权限，请稍后重新进入。</p><a href="/admin">返回内容管理</a></main>;
- return <DeveloperConsole section={section}/>;
+ return <DeveloperConsole section={section} release={deploymentRelease(process.env)}/>;
 }

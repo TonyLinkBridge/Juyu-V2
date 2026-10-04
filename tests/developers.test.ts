@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {integrationCatalog,parseEventFilter,safeTelemetry,notificationState} from '../src/developers/model.ts';
+import {csvField,integrationCatalog,parseEventFilter,safeTelemetry,notificationState} from '../src/developers/model.ts';
 import {developerOnly} from '../src/server/developers/guard.ts';
 import {observeRequest} from '../src/server/developers/telemetry.ts';
 
@@ -19,6 +19,11 @@ test('Super Admin guard rejects ordinary admins and unavailable sessions without
 test('filters validate bounded paging and supported sources/levels',()=>{
  assert.deepEqual(parseEventFilter(new URLSearchParams('q=publish&days=7&source=slack&level=error&page=2')),{q:'publish',days:7,source:'slack',level:'error',page:2});
  for(const query of ['page=-1','days=400','source=evil','level=fatal','q='+ 'a'.repeat(121),'page=1&page=2','unknown=1'])assert.throws(()=>parseEventFilter(new URLSearchParams(query)),/INVALID_INPUT/);
+});
+test('custom log dates and multiple severity filters validate real calendar days',()=>{
+ const filter=parseEventFilter(new URLSearchParams('date=2026-10-04&levels=warning,error&type=request'));
+ assert.equal(filter.date,'2026-10-04');assert.deepEqual(filter.levels,['warning','error']);assert.equal(filter.type,'request');
+ for(const q of ['date=2026-02-30','date=2026-13-01','date=2026-10-04T00:00:00Z','levels=error,error','levels=error,fatal','levels=error&level=warning','type=evil'])assert.throws(()=>parseEventFilter(new URLSearchParams(q)),/INVALID_INPUT/);
 });
 test('request observation preserves response and failure despite a broken recorder',async()=>{
  const rows:unknown[]=[];const response=new Response('private body',{status:502});
@@ -54,4 +59,10 @@ test('diagnostics and telemetry reject arbitrary content, and probes reject redi
  assert.equal(safeTelemetry({source:'publication-client',name:'blocked',level:'warning',diagnostic:{attempt:'bad',stage:'blocked',reason:'uploading',sequence:1,online:true}}),null);
  let calls=0;const result=await probeIntegration('storage',{NEXT_PUBLIC_SUPABASE_URL:'https://example.test/extra',SUPABASE_SERVICE_ROLE_KEY:'SECRET'},{fetcher:async()=>{calls++;return Response.json({});},readiness:async()=>({authentication:'ok',database:'ok'})});assert.equal(result.check,'failed');assert.equal(calls,0);
  const cron=await probeIntegration('cron',{CRON_SECRET:'SECRET'},{fetcher:fetch,readiness:async()=>({authentication:'ok',database:'ok'})});assert.equal(cron.check,'unsupported');
+});
+
+test('CSV fields retain quotes and commas without executing spreadsheet formulas',()=>{
+ assert.equal(csvField('Haley, "Super"'),'"Haley, ""Super"""');
+ for(const value of ['=1+1',' +SUM(A1)','-1+1','@SUM(A1)','\t=1','\n=1'])assert.equal(csvField(value),'"\''+value+'"');
+ assert.equal(csvField('正常文章'),'"正常文章"');
 });

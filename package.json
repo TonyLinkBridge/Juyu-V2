@@ -69,6 +69,7 @@
     "prosemirror-tables": "1.8.5",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "recharts": "3.10.1",
     "shiki": "4.4.3"
   }
 }
