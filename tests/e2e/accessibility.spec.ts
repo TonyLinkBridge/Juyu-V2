@@ -55,8 +55,8 @@ test('workspace keeps frequent actions visible and tools keyboard operable at 32
  await page.screenshot({path:`output/verification/T057/workspace-320-${info.project.name}.png`,fullPage:true});
 });
 test('actual login skip link and named editor can be reached with the keyboard',async({page})=>{
- await page.goto('/sign-in');await page.keyboard.press('Tab');await expect(page.getByRole('link',{name:'跳到主要内容'})).toBeFocused();await page.keyboard.press('Enter');
- await expect(page).toHaveURL(/#main-content$/);await page.keyboard.press('Tab');await expect(page.getByRole('radio',{name:'跟随系统',exact:true})).toBeFocused();
+ await page.goto('/sign-in');await page.keyboard.press('Tab');await expect(page.getByRole('link',{name:'跳到登录'})).toBeFocused();await page.keyboard.press('Enter');
+ await expect(page).toHaveURL(/#main-content$/);await page.keyboard.press('Tab');await expect(page.getByRole('link',{name:'登录遇到问题？',exact:true})).toBeFocused();
  await mount(page,'editor');const body=page.getByRole('textbox',{name:'文章正文',exact:true});await expect(body).toBeVisible();
  await body.focus();await expect(body).toBeFocused();await page.keyboard.press('Tab');expect(await body.evaluate(e=>e===document.activeElement)).toBe(false);
 });
