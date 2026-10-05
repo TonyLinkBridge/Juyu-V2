@@ -88,13 +88,13 @@
 
 .favorite-control>button{display:inline-flex;align-items:center;gap:8px}
 
-/* R05: desktop controls stay in place; mobile exposes search and account only. */
+/* R05: mobile search expands below the header; the official theme control stays available. */
 .header-search{flex:1;min-width:0}.header-search-panel{width:100%}.header-search-toggle{display:none}
 @media(max-width:760px){
  .entry-frame .site-header{position:relative}.header-search{flex:0 0 44px;margin-left:auto}.header-search-toggle{display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink)}
  .header-search-panel{display:none;position:absolute;top:100%;left:0;right:0;width:auto;padding:12px 15px;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:0 8px 16px #0000000a;z-index:50}.header-search.is-open .header-search-panel{display:block}
  .entry-frame .site-header.has-search .header-search-panel .gitbook-search-form{width:100%}
- .account-controls>[data-theme-toggle],.account-controls>.admin-console-button{display:none}
+ .account-controls>.admin-console-button{display:none}
  .app-topbar .app-badge{display:none}.app-topbar .account-controls{margin-left:auto}
 }
 

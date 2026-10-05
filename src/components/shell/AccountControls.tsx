@@ -4,9 +4,9 @@ import {useState,type ReactNode} from 'react';
 import {usePathname,useRouter} from 'next/navigation';
 import {ClerkFailed,useClerk,useUser} from '@clerk/nextjs';
 import Link from 'next/link';
-import {useTheme} from 'next-themes';
+import {ThemeSwitch} from 'fumadocs-ui/layouts/shared/slots/theme-switch';
 import {Settings,ArrowUpRight} from 'lucide-react';
-import {UserMenu,type UserMenuLabels,type UserMenuItem,type ThemePreference} from '../ui/user-menu/user-menu';
+import {UserMenu,type UserMenuLabels,type UserMenuItem} from '../ui/user-menu/user-menu';
 import {useEmployeeSignOut} from '../employee-sign-out';
 import {requestReviewLeave} from '../../review/leave';
 /* eslint-disable @next/next/no-img-element -- Existing local JUYU brand asset. */
@@ -20,13 +20,11 @@ function LocaleSwitch({locale}:{locale:'zh-CN'|'en'}){
 }
 const chineseLabels:UserMenuLabels={accountMenu:'账号菜单',theme:'外观',status:'状态',light:'浅色',dark:'深色',system:'跟随系统',signOut:'退出登录',signingOut:'正在退出…',actionError:'操作未成功，请重试。'};
 function Menu({locale='zh-CN',...props}:Omit<Parameters<typeof UserMenu>[0],'labels'|'theme'|'onThemeChange'|'showName'>&{locale?:'zh-CN'|'en'}){
- const {theme,setTheme}=useTheme();
- const preference:ThemePreference=theme==='light'||theme==='dark'?theme:'system';
- return <UserMenu {...props} showName theme={preference} onThemeChange={setTheme} labels={locale==='en'?undefined:chineseLabels}/>;
+ return <UserMenu {...props} showName showTheme={false} labels={locale==='en'?undefined:chineseLabels}/>;
 }
 export function AccountMenu({admin=false,enabled=false,locale='zh-CN',accountOnly=false}:{admin?:boolean;enabled?:boolean;locale?:'zh-CN'|'en';accountOnly?:boolean}){
  const preview=usePathname().startsWith('/design-preview/');
- return <div className="account-controls">{!accountOnly&&!admin&&<LocaleSwitch locale={locale}/>}{preview?<Menu locale={locale} user={{name:locale==='en'?'Demo account':'示例账号',email:locale==='en'?'Interface preview only':'仅用于界面预览',plan:locale==='en'?'Preview':'预览'}} notice={<p>{locale==='en'?'This is not a real signed-in identity.':'未代表任何真实登录身份。'}</p>}/>:enabled?<SignedInAccount admin={admin} locale={locale}/>:<Menu locale={locale} user={{name:locale==='en'?'Account':'账号',email:locale==='en'?'Sign-in is not configured':'登录服务尚未配置',plan:locale==='en'?'Signed out':'未登录'}}/>}</div>;
+ return <div className="account-controls">{(admin||!accountOnly)&&<ThemeSwitch/>}{!accountOnly&&!admin&&<LocaleSwitch locale={locale}/>}{preview?<Menu locale={locale} user={{name:locale==='en'?'Demo account':'示例账号',email:locale==='en'?'Interface preview only':'仅用于界面预览',plan:locale==='en'?'Preview':'预览'}} notice={<p>{locale==='en'?'This is not a real signed-in identity.':'未代表任何真实登录身份。'}</p>}/>:enabled?<SignedInAccount admin={admin} locale={locale}/>:<Menu locale={locale} user={{name:locale==='en'?'Account':'账号',email:locale==='en'?'Sign-in is not configured':'登录服务尚未配置',plan:locale==='en'?'Signed out':'未登录'}}/>}</div>;
 }
 function SignedInAccount({admin,locale}:{admin:boolean;locale:'zh-CN'|'en'}){
  const {user,isLoaded,isSignedIn}=useUser();const clerk=useClerk();const router=useRouter();

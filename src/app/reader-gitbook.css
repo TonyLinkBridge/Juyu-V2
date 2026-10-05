@@ -15,7 +15,7 @@
 .entry-frame:has(.reader-layout) .header-search-panel .gitbook-search-form { width:100%; max-width:none; }
 .entry-frame:has(.reader-layout) .gitbook-search-input { min-height:38px; background:var(--panel); border-radius:12px; }
 .entry-frame:has(.reader-layout) .account-controls { grid-column:5; justify-self:end; gap:0; min-width:0; }
-.entry-frame:has(.reader-layout) .account-controls>[data-theme-toggle],.entry-frame:has(.reader-layout) .account-controls>.admin-console-button { display:none; }
+.entry-frame:has(.reader-layout) .account-controls>.admin-console-button { display:none; }
 .entry-frame:has(.reader-layout) .reader-layout { width:calc(100% - 64px); max-width:var(--reading-width,1376px); margin:0 auto; gap:48px; background:var(--panel); }
 .entry-frame:has(.reader-layout) .reader-navigation-shell { width:288px; flex:0 0 288px; top:var(--reader-chrome-height,64px); }
 .entry-frame:has(.reader-layout) .gitbook-table-of-contents { width:288px; flex-basis:288px; padding:32px 0 16px; gap:16px; background:var(--panel); }

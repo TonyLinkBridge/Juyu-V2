@@ -12,7 +12,8 @@ test('one Fumadocs provider supplies footer and account theme controls',async()=
  const footer=await readFile('src/components/gitbook/Footer/Footer.tsx','utf8');
  assert.match(footer,/fumadocs-ui\/layouts\/shared\/slots\/theme-switch/);
  assert.match(footer,/ThemeSwitch/);
- assert.match(account,/next-themes/);
+ assert.match(account,/fumadocs-ui\/layouts\/shared\/slots\/theme-switch/);
+ assert.match(account,/showTheme=\{false\}/);
  assert.doesNotMatch(account,/ThemeToggler/);
 
  const globals=await readFile('src/app/globals.css','utf8');

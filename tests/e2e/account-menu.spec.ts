@@ -10,16 +10,19 @@ async function mount(page:Page,query=''){
  await page.locator('.account-controls').locator('[aria-haspopup="menu"]').click();await expect(page.getByRole('menu')).toBeFocused();
 }
 
-test('account identity and theme use JUYU data and the existing page theme',async({page},info)=>{
+test('account identity retains JUYU data and the external official theme survives reload',async({page},info)=>{
  await mount(page);const menu=page.getByRole('menu');await expect(menu).toBeVisible();
  await expect(menu).toContainText('Haley QA');await expect(menu).toContainText('haley-qa@example.test');await expect(menu).toContainText('超级管理员');
  await expect(menu.getByText('Billing',{exact:true})).toHaveCount(0);await expect(menu.getByText('Pro',{exact:true})).toHaveCount(0);
- await menu.getByRole('menuitemradio',{name:'深色',exact:true}).click();await expect(page.locator('html')).toHaveClass(/dark/);await expect(menu).toBeVisible();
- await page.reload();await page.locator('.account-controls').locator('[aria-haspopup="menu"]').click();await expect(page.getByRole('menu')).toBeFocused();await expect(page.getByRole('menuitemradio',{name:'深色',exact:true})).toHaveAttribute('aria-checked','true');
- await page.getByRole('menuitemradio',{name:'跟随系统',exact:true}).click();await expect.poll(()=>page.evaluate(()=>localStorage.getItem('theme'))).toBe('system');
+ await expect(menu.getByRole('group',{name:'外观',exact:true})).toHaveCount(0);
+ await page.keyboard.press('Escape');await expect(menu).toHaveCount(0);
+ const theme=page.locator('.account-controls>[data-theme-toggle]');await theme.click();await expect(page.locator('html')).toHaveClass(/dark/);
+ await page.reload();await expect(page.locator('html')).toHaveClass(/dark/);expect(await page.evaluate(()=>localStorage.getItem('theme'))).toBe('dark');
+ await theme.click();await expect(page.locator('html')).toHaveClass(/light/);
+ await page.locator('[aria-haspopup="menu"]').click();await expect(menu).toBeFocused();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
- if(info.project.name==='mobile'){await expect(page.getByRole('menu')).toHaveCSS('position','fixed');expect(await page.locator('html').evaluate(el=>el.style.overflow)).toBe('hidden');}
- await page.keyboard.press('Escape');await expect(page.getByRole('menu')).toHaveCount(0);await expect(page.locator('[aria-haspopup="menu"]')).toBeFocused();
+ if(info.project.name==='mobile'){await expect(menu).toHaveCSS('position','fixed');expect(await page.locator('html').evaluate(el=>el.style.overflow)).toBe('hidden');}
+ await page.keyboard.press('Escape');await expect(menu).toHaveCount(0);await expect(page.locator('[aria-haspopup="menu"]')).toBeFocused();
  expect(await page.locator('html').evaluate(el=>el.style.overflow)).not.toBe('hidden');
 });
 
@@ -41,16 +44,16 @@ test('account settings failure remains visible and missing sessions cannot logou
  await mount(page,'?no-session=1');await expect(page.getByRole('menuitem',{name:'退出登录',exact:true})).toBeDisabled();await expect(page.getByRole('status')).toContainText('当前登录会话尚未确认');
 });
 
-test('keyboard navigation opens real settings and preserves localized theme controls',async({page})=>{
+test('keyboard navigation opens real settings without obsolete theme menu items',async({page})=>{
  await mount(page,'?lang=en');await expect(page.getByRole('menu')).toBeVisible();await page.keyboard.press('Escape');await expect(page.getByRole('menu')).toHaveCount(0);const trigger=page.getByRole('button',{name:'Account menu, Haley QA',exact:true});await trigger.press('ArrowDown');
  await expect(page.getByRole('menuitem',{name:'Account settings',exact:true})).toBeFocused();await page.keyboard.press('Enter');await expect(page.locator('#profile-result')).toHaveText('账号设置已打开');await expect(page.getByRole('menu')).toHaveCount(0);
- await trigger.click();await expect(page.getByRole('group',{name:'Appearance',exact:true})).toBeVisible();await expect(page.getByRole('menuitemradio',{name:'System',exact:true})).toBeVisible();await expect(page.getByRole('menu')).toContainText('Super Admin');
+ await trigger.click();await expect(page.getByRole('group',{name:'Appearance',exact:true})).toHaveCount(0);await expect(page.getByRole('menuitemradio')).toHaveCount(0);await expect(page.getByRole('menu')).toContainText('Super Admin');
 });
 
 // Verify the rendered menu semantics rather than its implementation class names.
 test('account menu has valid accessible controls in light and dark themes',async({page})=>{
  await mount(page);await expect(page.getByRole('menu')).toHaveCSS('opacity','1');await expect(page.getByRole('menuitem',{name:'账号设置',exact:true})).toHaveCSS('opacity','1');await expect(page.getByRole('menuitem',{name:'退出登录',exact:true})).toHaveCSS('opacity','1');await page.addScriptTag({content:await readFile('node_modules/axe-core/axe.min.js','utf8')});
- for(const theme of ['深色','浅色']){await page.getByRole('menuitemradio',{name:theme,exact:true}).click();
+ for(const theme of ['dark','light']){await page.keyboard.press('Escape');await expect(page.getByRole('menu')).toHaveCount(0);await page.locator('.account-controls>[data-theme-toggle]').click();await expect(page.locator('html')).toHaveClass(new RegExp(theme));await page.locator('[aria-haspopup="menu"]').click();await expect(page.getByRole('menu')).toHaveCSS('opacity','1');
   await page.evaluate(async()=>{await new Promise<void>(done=>requestAnimationFrame(()=>done()));await Promise.all(document.querySelector('[role="menu"]')!.getAnimations({subtree:true}).map(animation=>animation.finished.catch(()=>{})));});
   const result=await page.evaluate(async()=>await (window as unknown as {axe:{run(context:unknown,options:unknown):Promise<AxeResults>}}).axe.run('[role="menu"]',{runOnly:['aria-allowed-attr','aria-required-children','aria-required-parent','button-name','color-contrast']}));
   expect(result.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)}))).toEqual([]);
@@ -69,4 +72,17 @@ test('menu repositions when feedback height or its responsive surface changes',a
  if(info.project.name==='desktop')await expect.poll(async()=> (await anchor()).above).toBe(true);
  await page.setViewportSize({width:390,height:844});await expect(page.getByRole('menu')).toHaveCount(1);await expect(page.getByRole('menu')).toHaveCSS('opacity','1');await expect.poll(async()=> (await anchor()).inside).toBe(true);
  await page.setViewportSize({width:1440,height:900});await expect(page.getByRole('menu')).toHaveCount(1);await expect(page.getByRole('menu')).toHaveCSS('opacity','1');await expect.poll(async()=> (await anchor()).above&&(await anchor()).inside).toBe(true);
+});
+
+// Removing the inner controls must not make the official external control disappear on phones.
+test('reader and admin retain one usable external theme control without duplicate menu controls',async({page})=>{
+ for(const query of ['?reader=1','']){
+  await mount(page,query);const menu=page.getByRole('menu');
+  await expect(menu.getByRole('group',{name:'外观',exact:true})).toHaveCount(0);
+  await page.keyboard.press('Escape');await expect(menu).toHaveCount(0);
+  const theme=page.locator('.account-controls>[data-theme-toggle]');await expect(theme).toBeVisible();
+  await theme.click();await expect(page.locator('html')).toHaveClass(/dark/);
+  await theme.click();await expect(page.locator('html')).toHaveClass(/light/);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
 });
