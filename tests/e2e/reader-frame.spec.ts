@@ -16,18 +16,18 @@ test('reader frame retains search and navigation when content changes; notices n
 });
 
 test('English reader chrome keeps its language in search and quick links',async({page},info)=>{
- await page.route('**/reader-frame-fixture*',r=>r.fulfill({contentType:'text/html',body:'<html lang="zh-CN"><body><div id="app"></div></body></html>'}));
- await page.goto('/reader-frame-fixture?q=example&lang=en');await page.addScriptTag({content:bundle.script});
+ await page.route('**/reader-frame-fixture*',r=>r.fulfill({contentType:'text/html',body:'<html lang="zh-CN"><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="app"></div></body></html>'}));
+ await page.goto('/reader-frame-fixture?q=example&lang=en');await page.addStyleTag({content:bundle.css});await page.addScriptTag({content:bundle.script});
  await expect(page.locator('html')).toHaveAttribute('lang','en');
  await expect(page.getByRole('navigation',{name:'Help Centre language'}).getByRole('link',{name:'EN',exact:true})).toHaveAttribute('aria-current','page');
  await expect(page.getByRole('navigation',{name:'Help Centre language'}).getByRole('link',{name:'中文',exact:true})).toHaveAttribute('href','/help-centre');
  if(info.project.name==='mobile')await page.getByRole('button',{name:'Open search'}).click();
  await expect(page.getByRole('combobox',{name:'Search articles'})).toBeVisible();
- await page.locator('.account-menu>summary').click();
- await expect(page.locator('.mobile-account-appearance').locator('[data-theme-toggle]')).toBeVisible();
+ await page.locator('[aria-haspopup="menu"]').click();await expect(page.getByRole('menu')).toBeFocused();
+ await expect(page.getByRole('group',{name:'Appearance',exact:true})).toBeVisible();
  await expect(page.getByText('账号权限',{exact:true})).toHaveCount(0);
- await page.keyboard.press('Escape');
- await page.getByRole('button',{name:'Quick links'}).click();
+ await page.keyboard.press('Escape');await expect(page.getByRole('menu')).toHaveCount(0);
+ if(info.project.name==='mobile')await page.getByRole('button',{name:'Quick links'}).click();
  await expect(page.getByRole('navigation',{name:'Help Centre quick links'}).getByRole('link',{name:'Help Centre'})).toHaveAttribute('href','/help-centre?lang=en');
 });
 
@@ -56,15 +56,15 @@ test('formal Fumadocs article path is not wrapped in the legacy reader frame',as
 test('R05 mobile header expands search and keeps theme and admin entry in account menu',async({page},info)=>{
  await page.route('**/reader-frame-fixture*',r=>r.fulfill({contentType:'text/html',body:'<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="app"></div></body></html>'}));
  await page.goto('/reader-frame-fixture?headerFixture=1&q=test');await page.addStyleTag({content:bundle.css});await page.addScriptTag({content:bundle.script});
- const input=page.getByRole('combobox',{name:'搜索资料'}),toggle=page.getByRole('button',{name:'打开搜索'}),account=page.locator('.account-menu>summary');
+ const input=page.getByRole('combobox',{name:'搜索资料'}),toggle=page.getByRole('button',{name:'打开搜索'}),account=page.locator('[aria-haspopup="menu"]');
  if(info.project.name==='mobile'){
   await expect(input).toBeHidden();await expect(toggle).toBeVisible();await expect(page.locator('.account-controls>[data-theme-toggle]')).toBeHidden();await expect(page.locator('.account-controls>.admin-console-button')).toBeHidden();
   await toggle.click();await expect(input).toBeFocused();await input.fill('域名');const box=await input.boundingBox();expect(box!.width).toBeGreaterThan(180);await input.press('Escape');await expect(input).toBeHidden();await expect(toggle).toBeFocused();
   await page.keyboard.press('Control+k');await expect(input).toBeFocused();await account.click();await expect(input).toBeHidden();
-  await expect(page.locator('.mobile-account-shortcut').getByRole('link',{name:'管理后台'})).toBeVisible();await page.locator('.mobile-account-appearance').getByRole('button',{name:'Dark',exact:true}).click();await expect(page.locator('html')).toHaveClass(/dark/);
+  await expect(page.getByRole('menuitem',{name:'管理后台',exact:true})).toBeVisible();await page.getByRole('menuitemradio',{name:'深色',exact:true}).click();await expect(page.locator('html')).toHaveClass(/dark/);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'output/verification/R05-mobile-menu.png'});await page.keyboard.press('Escape');await expect(account).toBeFocused();
   for(const width of [320,390,760]){await page.setViewportSize({width,height:844});await toggle.click();await expect(input).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`output/verification/R05-search-${width}.png`});await input.press('Escape');}
- }else{await expect(input).toBeVisible();await expect(toggle).toBeHidden();await expect(page.locator('.account-controls>[data-theme-toggle]')).toBeVisible();await expect(page.locator('.account-controls>.admin-console-button')).toBeVisible();}
+ }else{await expect(input).toBeVisible();await expect(toggle).toBeHidden();await expect(page.locator('.account-controls>[data-theme-toggle]')).toHaveCount(0);await expect(page.locator('.account-controls>.admin-console-button')).toBeVisible();}
 });
 
 test('R08 Reference has one active admin navigation entry on desktop and mobile',async({page},info)=>{

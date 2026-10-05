@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {access,readFile} from 'node:fs/promises';
 import test from 'node:test';
 
-test('the application uses one official Fumadocs theme provider and switch',async()=>{
+test('one Fumadocs provider supplies footer and account theme controls',async()=>{
  const layout=await readFile('src/app/layout.tsx','utf8');
  assert.match(layout,/RootProvider/);
  assert.match(layout,/fumadocsRootI18n\('zh-CN'\)/);
@@ -10,11 +10,10 @@ test('the application uses one official Fumadocs theme provider and switch',asyn
 
  const account=await readFile('src/components/shell/AccountControls.tsx','utf8');
  const footer=await readFile('src/components/gitbook/Footer/Footer.tsx','utf8');
- for(const source of [account,footer]){
-  assert.match(source,/fumadocs-ui\/layouts\/shared\/slots\/theme-switch/);
-  assert.match(source,/ThemeSwitch/);
-  assert.doesNotMatch(source,/ThemeToggler/);
- }
+ assert.match(footer,/fumadocs-ui\/layouts\/shared\/slots\/theme-switch/);
+ assert.match(footer,/ThemeSwitch/);
+ assert.match(account,/next-themes/);
+ assert.doesNotMatch(account,/ThemeToggler/);
 
  const globals=await readFile('src/app/globals.css','utf8');
  const shell=await readFile('src/app/product-shell.css','utf8');
