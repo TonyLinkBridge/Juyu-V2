@@ -1,5 +1,10 @@
 import '../../forms-settings.css';
 import '../../admin/fumadocs-theme.css';
+import '../../admin/admin-data.css';
+import {AdminPageSkeleton,MediaPageSkeleton,AnalyticsPageSkeleton,EditorPageSkeleton} from '../../../components/loading/LoadingSkeletons';
+import {ReaderContentSkeleton} from '../../../components/loading/ReaderRouteLoading';
+import {FumadocsDocsLayout} from '../../../components/fumadocs/FumadocsDocsLayout';
+import {DocsPage} from 'fumadocs-ui/layouts/docs/page';
 import {OpsCollection} from '../../../components/ops/OpsCollection';
 import {FormSettings} from '../../../components/forms/FormSettings';
 import {LoginScreen} from '../../../components/login-screen';
@@ -37,6 +42,9 @@ export default async function DesignPreview({params}:{params:Promise<{screen:str
  ]);
  const data:WorkspaceData={query:workspaceQuery({view:'list',scope:'all'}),items:titles.map((title,i)=>({id:`preview-${i}`,title,kind:'article',status:i<2?'in_review':i===2?'published':'draft',sequence:8,revision:8,publishedRevision:i===2?8:null,updatedAt:'2026-09-10T02:24:00Z',author:'Tony',editor:'Tony',submitter:'Tony',reviewer:i===3?null:'Ivy',canReview:i<2})),counts:{draft:1,in_review:2,changes_requested:0,approved:0,queued:0,published:1},total:4,page:1,pages:1};
  const notice=<nav className="preview-banner" aria-label="设计预览页面"><span>本地预览 · 示例内容，不代表正式资料</span>{[['home','首页'],['article','文章'],['admin','工作台'],['review','审核']].map(([id,label])=><Link key={id} href={`/design-preview/${id}`}>{label}</Link>)}</nav>;
+ if(screen==='loading-reader')return <><p className="preview-banner">本地加载预览 · 占位内容，不是正式资料</p><FumadocsDocsLayout tree={{name:'JUYU Help Centre',children:[]}} nav={{title:'JUYU Help Centre',url:'/help-centre'}} tabs={false} searchToggle={{enabled:false}}><DocsPage toc={[]} breadcrumb={{enabled:false}}><ReaderContentSkeleton article/></DocsPage></FumadocsDocsLayout></>;
+ const loadingViews:Record<string,typeof AdminPageSkeleton>={'loading-list':AdminPageSkeleton,'loading-media':MediaPageSkeleton,'loading-analytics':AnalyticsPageSkeleton,'loading-editor':EditorPageSkeleton};
+ if(loadingViews[screen]){const Content=loadingViews[screen];return <><nav className="preview-banner" aria-label="加载预览导航"><span>本地加载预览 · 占位内容，不是正式资料</span>{Object.keys(loadingViews).map(id=><Link key={id} href={`/design-preview/${id}`}>{id==='loading-list'?'管理列表':id==='loading-media'?'媒体文件':id==='loading-analytics'?'使用分析':'编辑器'}</Link>)}</nav><AdminFrame><Content/></AdminFrame></>;}
  if(screen==='home')return <>{notice}<EntryShell account navigation={<ReaderQuickLinks items={menu} currentHref="/design-preview/home"/>}><KnowledgeHome pages={pages} menu={menu.filter(i=>['knowledge','reference','qa'].includes(i.id))} latest={titles.map((title,i)=>({id:`preview-${i}`,title,updated:'2026-09-10T02:24:00Z'}))} recent={titles.map((title,i)=>({id:`preview-${i}`,title,kind:'article',revision:8,tags:[],viewedRevision:8,viewedAt:'2026-09-10T02:24:00Z'}))} admin/></EntryShell></>;
  if(screen==='ops')return <>{notice}<EntryShell search={<SearchInput/>} navigation={<ReaderQuickLinks items={menu} currentHref="/help-centre/ops"/>}><main id="main-content" className="search-main"><OpsCollection state="ready" data={{items:[],total:0,page:1,pages:1}}/></main></EntryShell></>;
  if(screen==='forms')return <>{notice}<AdminFrame><main id="main-content"><FormSettings initial={[]} definitions={[]} state="ready"/></main></AdminFrame></>;

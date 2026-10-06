@@ -1,0 +1,32 @@
+/* Loading placeholders inherit the JUYU light/dark tokens; no separate palette. */
+.juyu-skeleton{position:relative;overflow:hidden;max-width:100%;flex-shrink:0;background:var(--hover);--skeleton-highlight:color-mix(in srgb,var(--panel) 65%,transparent)}
+.juyu-skeleton-shimmer{position:absolute;inset:0;pointer-events:none;will-change:transform}
+.juyu-loading-region{min-width:0}
+.juyu-loading-status{font-size:13px;line-height:1.65;color:var(--muted);margin:8px 0 20px}
+.juyu-skeleton-heading{display:grid;gap:12px;margin-bottom:28px}
+.juyu-skeleton-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.juyu-skeleton-toolbar .juyu-skeleton-search{flex:1;min-width:140px;width:auto!important}
+.juyu-skeleton-panel{min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.juyu-skeleton-table-row{display:grid;gap:20px;align-items:center;min-height:62px;padding:18px 16px;border-bottom:1px solid var(--line)}
+.juyu-skeleton-table-row:first-child{min-height:42px;background:var(--surface)}
+.juyu-skeleton-table-row:last-child{border-bottom:0}
+.juyu-skeleton-tabs{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}
+.juyu-skeleton-lines{display:grid;gap:16px;padding:6px 0;max-width:100%}
+.juyu-skeleton-metric{display:grid;gap:14px;padding:16px}
+.juyu-skeleton-chart{margin-top:18px}
+.juyu-skeleton-caption{margin:12px 0 18px}
+.juyu-media-loading .media-library-tile:hover{border-color:var(--line)}
+.media-preview-loading{width:100%;height:100%;min-height:42px;overflow:hidden}
+.media-library-large-preview .media-preview-loading{min-height:180px}
+.media-preview-loading>.juyu-skeleton{min-height:inherit}
+.juyu-editor-loading .juyu-loading-status{margin:12px 28px}
+.juyu-editor-loading-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:66px;padding:14px 28px;border-bottom:1px solid var(--line);background:var(--panel)}
+.juyu-editor-loading-title{margin:22px 0}
+.juyu-reader-loading{width:100%;max-width:900px;margin:0 auto;padding:36px 24px 64px}
+.juyu-reader-loading-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:28px}
+.juyu-reader-loading-cards>div{display:grid;gap:14px;padding:20px}
+/* The Fumadocs neutral theme uses the same background and muted color. Blend
+   its foreground token so the loading shape remains visible in either theme. */
+.juyu-fumadocs .juyu-skeleton{background:color-mix(in srgb,var(--color-fd-background) 90%,var(--color-fd-foreground));--skeleton-highlight:color-mix(in srgb,var(--color-fd-background) 70%,transparent)}
+@media(max-width:760px){.juyu-skeleton-table-row{gap:12px;padding:14px 10px;min-height:54px}.juyu-media-loading .media-library-types{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.juyu-skeleton-toolbar .juyu-skeleton-search{flex-basis:100%}.juyu-editor-loading .juyu-loading-status{margin-inline:12px}.juyu-editor-loading-toolbar{padding-inline:12px}.juyu-reader-loading{padding:24px 18px 48px}.juyu-reader-loading-cards{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.juyu-skeleton-shimmer{display:none;will-change:auto}}

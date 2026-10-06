@@ -1,6 +1,7 @@
 'use client';
 /* eslint-disable @next/next/no-img-element -- Authenticated private asset delivery; no public image optimizer. */
 import {useEffect,useState} from 'react';
+import {LoaderSkeleton} from '../ui/loaders-skeleton';
 import {previewQueue} from '../../media/preview-queue';
 import {UploadSimple,SquaresFour,ListBullets,X,FileText,FilePdf,FilmStrip,MusicNotes,ImageSquare,DownloadSimple,ArrowUpRight,MagnifyingGlass} from '@phosphor-icons/react';
 import {libraryHref,fileCategory,formatBytes,type LibraryAsset,type FileCategory,type MediaLibraryData} from '../../media/library';
@@ -22,7 +23,7 @@ function FilePreview({asset,large=false,href}:{asset:LibraryAsset;large?:boolean
   return()=>{active=false;controller.abort();if(objectUrl)URL.revokeObjectURL(objectUrl);};
  },[asset.id,type,attempt]);
  if(type==='image'&&!failed){
-  if(!image)return <div className="media-file-icon"><ImageSquare size={large?56:32}/><span>加载预览…</span></div>;
+  if(!image)return <div className="media-preview-loading" role="img" aria-label={`正在加载图片预览：${asset.documentTitle} · ${asset.filename}`} aria-busy="true"><LoaderSkeleton height="100%" borderRadius={0}/></div>;
   const img=<img src={image} alt={large?asset.filename:''} onError={()=>setFailed(true)}/>;
   return href?<a className="media-preview-image-link" href={href} aria-label={`打开文件详情：${asset.documentTitle} · ${asset.filename}`}>{img}</a>:img;
  }

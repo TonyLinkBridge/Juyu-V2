@@ -34,3 +34,14 @@ test('file links identify their article and search explains the supported fields
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:`output/verification/media-library-${info.project.name}.png`,fullPage:true});
 });
+
+test('pending thumbnails reserve their space and reveal the image when the request finishes',async({page})=>{
+ let finish!:()=>void;const gate=new Promise<void>(resolve=>{finish=resolve;});
+ await page.route('**/api/admin/assets/**',async route=>{await gate;await route.fulfill({path:'tests/fixtures/article-cover.png',contentType:'image/png'});});
+ await mount(page,{...data,items:items.slice(0,1),total:1});
+ const pending=page.getByRole('img',{name:'正在加载图片预览：MFA 操作 1 · image.png',exact:true});
+ await expect(pending).toBeVisible();await expect(pending).toHaveAttribute('aria-busy','true');
+ const thumbnail=page.locator('.media-library-thumbnail');const before=await thumbnail.boundingBox();
+ finish();await expect(thumbnail.locator('img')).toHaveJSProperty('naturalWidth',400);await expect(pending).toHaveCount(0);
+ const after=await thumbnail.boundingBox();expect(after?.height).toBe(before?.height);
+});

@@ -15,7 +15,7 @@ test('dashboard presents distinct-click rate, formal metadata and fingerprint li
  await page.route('**/api/admin/analytics/people?**',r=>r.fulfill({json:{items:[],total:0,page:1,pages:1}}));await page.getByRole('region',{name:'热门资料',exact:true}).getByRole('button',{name:article.title}).click();await expect(page.getByRole('link',{name:'打开正式资料',exact:true})).toHaveAttribute('href','/help-centre/articles/formal-local');await expect(page.getByRole('region',{name:'需要改进的资料',exact:true}).getByRole('link',{name:article.title})).toHaveAttribute('href','/admin/feedback?document=formal-local&revision=3');await expect(page.locator('main script')).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  const table=page.getByRole('region',{name:'热门搜索分组表格，可横向滚动'});await table.focus();await expect(table).toBeFocused();if(info.project.name==='mobile')expect(await table.evaluate(el=>el.scrollWidth>el.clientWidth)).toBe(true);
- await page.screenshot({path:`output/verification/dashboard-${info.project.name}.png`,fullPage:true,animations:'disabled'});await page.evaluate(()=>document.documentElement.dataset.theme='dark');await expect.poll(()=>page.locator('html').evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(25, 25, 31)');await page.screenshot({path:`output/verification/dashboard-dark-${info.project.name}.png`,fullPage:true,animations:'disabled'});
+ await page.screenshot({path:`output/verification/dashboard-${info.project.name}.png`,fullPage:true,animations:'disabled'});await page.evaluate(()=>document.documentElement.classList.add('dark'));await expect.poll(()=>page.locator('html').evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(25, 25, 31)');await page.screenshot({path:`output/verification/dashboard-dark-${info.project.name}.png`,fullPage:true,animations:'disabled'});
 });
 test('dashboard range form navigates with only the selected supported period',async({page})=>{
  await mount(page);const select=page.getByLabel('统计范围');await expect(select).toHaveValue('30');await select.focus();await expect(select).toBeFocused();await select.selectOption('7');
@@ -29,4 +29,16 @@ test('dashboard zero data has no fabricated rates and failures suppress supplied
 });
 test('actual dashboard requires configured identity and rejects forged admin headers',async({page,request})=>{
  const response=await request.get('/api/admin/analytics?days=30',{headers:{'x-role':'admin','x-user-id':'other'}});expect(response.status()).toBe(503);expect(response.headers()['cache-control']).toBe('private, no-store');expect(await response.json()).toEqual({error:'ANALYTICS_UNAVAILABLE'});expect((await request.post('/api/admin/analytics',{data:{days:30}})).status()).toBe(405);await page.goto('/admin/analytics');await expect(page).toHaveURL(/\/admin\/sign-in$/);
+});
+
+test('employee detail shows a table placeholder then keeps existing rows while changing pages',async({page})=>{
+ let first!:()=>void,second!:()=>void;const firstGate=new Promise<void>(resolve=>{first=resolve;}),secondGate=new Promise<void>(resolve=>{second=resolve;});
+ const person=(name:string)=>({memberId:name,displayName:name,views:2,documents:1,averageVisibleMs:60000,measuredViews:2});
+ await page.route('**/api/admin/analytics/people?**',async route=>{const next=new URL(route.request().url()).searchParams.get('page')==='2';await(next?secondGate:firstGate);await route.fulfill({json:{items:[person(next?'同事乙':'同事甲')],total:2,page:next?2:1,pages:2}});});
+ await mount(page);await page.getByRole('tab',{name:'员工',exact:true}).click();
+ await expect(page.getByRole('region',{name:'正在读取员工明细…',exact:true})).toBeVisible();
+ first();await expect(page.getByRole('rowheader',{name:'同事甲',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'下一页',exact:true}).click();
+ await expect(page.getByRole('rowheader',{name:'同事甲',exact:true})).toBeVisible();await expect(page.getByRole('status')).toHaveText('正在更新员工明细…');await expect(page.getByRole('button',{name:'下一页',exact:true})).toBeDisabled();
+ second();await expect(page.getByRole('rowheader',{name:'同事乙',exact:true})).toBeVisible();await expect(page.getByRole('rowheader',{name:'同事甲',exact:true})).toHaveCount(0);await expect(page.getByRole('status')).toHaveCount(0);
 });

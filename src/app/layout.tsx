@@ -8,6 +8,7 @@ import { clerkConfiguration } from '../config/clerk';
 import {fumadocsRootI18n} from '../fumadocs/i18n';
 import './globals.css';
 import './product-shell.css';
+import './loading.css';
 import './login.css';
 import './review-layout.css';
 import './feedback.css';
