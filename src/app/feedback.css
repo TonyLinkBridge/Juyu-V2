@@ -122,3 +122,5 @@
 .editor-preview-outline button:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px}
 .editor-preview-outline p{margin:8px 0 0}
 @media(max-width:760px){.editor-outline-guidance{margin-inline:24px}}
+
+.editor-settings-actions>button[data-slot=copy-button]{display:flex;justify-content:flex-start;gap:8px}

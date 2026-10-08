@@ -1,4 +1,5 @@
 'use client';
+import {CopyButton} from '../ui/copy-button';
 import {confirmAction} from '../feedback/feedback';
 import {useState,type Ref} from 'react';
 import type {EditorData} from '../../editor/contract';
@@ -7,7 +8,7 @@ import {statuses,kinds} from '../../workspace/model';
 export function InputBackup({value,label,locale='zh-CN'}:{value:string;label?:string;locale?:'zh-CN'|'en'}){
  const [message,setMessage]=useState('');
  const t=(zh:string,en:string)=>locale==='en'?en:zh;const title=label??t('当前输入备份','Current input backup');
- return <details className="editor-input-backup"><summary>{title}</summary><p>{t('完整输入保留在此页面内。关闭或刷新页面后不会保留，请按需复制。','Your current input stays on this page only. Copy it before closing or refreshing.')}</p><textarea aria-label={title} value={value} readOnly rows={8} spellCheck={false}/><button type="button" onClick={async()=>{try{await navigator.clipboard.writeText(value);setMessage(t('备份已复制。','Backup copied.'));}catch{setMessage(t('复制未成功，请选中上方文字手动复制。','Could not copy it. Select the text above and copy it manually.'));}}}>{t('复制这份备份','Copy this backup')}</button>{message&&<p role="status">{message}</p>}</details>;
+ return <details className="editor-input-backup"><summary>{title}</summary><p>{t('完整输入保留在此页面内。关闭或刷新页面后不会保留，请按需复制。','Your current input stays on this page only. Copy it before closing or refreshing.')}</p><textarea aria-label={title} value={value} readOnly rows={8} spellCheck={false}/><CopyButton value={value} label={t('复制这份备份','Copy this backup')} copiedLabel={t('已复制','Copied')} pendingLabel={t('正在复制…','Copying…')} errorLabel={t('复制未成功，请选中上方文字手动复制。','Could not copy it. Select the text above and copy it manually.')} onCopied={()=>setMessage(t('备份已复制。','Backup copied.'))} onCopyError={()=>setMessage('')}/>{message&&<p role="status">{message}</p>}</details>;
 }
 export function EditorRecovery({documentId,sequence,busy,copy,onLoad,readButtonRef,locale='zh-CN'}:{readButtonRef?:Ref<HTMLButtonElement>;documentId:string;sequence:number|null;busy:boolean;copy:string;locale?:'zh-CN'|'en';onLoad:(data:EditorData)=>void}){
  const [latest,setLatest]=useState<EditorData|null>(null);const [loading,setLoading]=useState(false);const [error,setError]=useState('');

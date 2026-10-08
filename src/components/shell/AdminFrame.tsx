@@ -8,6 +8,7 @@ import {NavigationLink} from './NavigationLink';
 import {usePathname,useSearchParams} from 'next/navigation';
 import {Files,Clock,ImageSquare,Users,Gear,ArrowUpRight,List,Archive,ChartBar,ChatCircle,Trash,Code} from '@phosphor-icons/react';
 import {AccountMenu} from './AccountControls';
+import type {AdminGuideRole} from '../onboarding/UsageGuide';
 
 export {AccountMenu} from './AccountControls';
 
@@ -25,10 +26,10 @@ export function Brand({locale='zh-CN'}:{locale?:'zh-CN'|'en'}){return <Link href
 
 const links=[['/admin','知识文章',Files],['/admin?kind=ops&view=list','OPS 内容管理',Files],['/admin?kind=reference&view=list','Reference 管理',Files],['/admin?kind=qa&view=list','Q&A 管理',ChatCircle],['/admin?scope=review&view=list','待我审核',Clock],['/admin/media','媒体文件',ImageSquare],['/admin/members','成员与权限',Users],['/admin/analytics','使用分析',ChartBar],['/admin/feedback','文章反馈',ChatCircle],['/admin/availability','归档资料',Archive],['/admin/trash','回收站',Trash]] as const;
 
-export function AdminFrame({children,accountEnabled=false,developerEnabled=false}:{children:ReactNode;accountEnabled?:boolean;developerEnabled?:boolean}){
+export function AdminFrame({children,accountEnabled=false,developerEnabled=false,guideRole=null}:{children:ReactNode;accountEnabled?:boolean;developerEnabled?:boolean;guideRole?:AdminGuideRole|null}){
  const path=usePathname();
  if(path.startsWith('/admin/sign-in'))return <>{children}</>;
- return <InAdminFrame.Provider value={true}><div className={`admin-frame${path==='/admin/editor'?' is-editor':''}`}><a className="skip-link" href="#main-content">跳到主要内容</a><header className="app-topbar"><Brand/><span className="app-badge">管理后台</span><Link prefetch={false} href="/help-centre" className="library-link">员工资料库 <ArrowUpRight size={16}/></Link><AccountMenu admin enabled={accountEnabled}/></header><aside className="admin-sidebar"><details className="admin-mobile-nav"><summary><List size={20}/> 管理导航</summary><Sidebar path={path} developerEnabled={developerEnabled}/></details><div className="admin-desktop-nav"><Sidebar path={path} developerEnabled={developerEnabled}/></div></aside><div className="admin-page-content">{children}</div></div></InAdminFrame.Provider>;
+ return <InAdminFrame.Provider value={true}><div className={`admin-frame${path==='/admin/editor'?' is-editor':''}`}><a className="skip-link" href="#main-content">跳到主要内容</a><header className="app-topbar"><Brand/><span className="app-badge">管理后台</span><Link prefetch={false} href="/help-centre" className="library-link">员工资料库 <ArrowUpRight size={16}/></Link><AccountMenu admin enabled={accountEnabled} guideRole={guideRole}/></header><aside className="admin-sidebar"><details className="admin-mobile-nav"><summary><List size={20}/> 管理导航</summary><Sidebar path={path} developerEnabled={developerEnabled}/></details><div className="admin-desktop-nav"><Sidebar path={path} developerEnabled={developerEnabled}/></div></aside><div className="admin-page-content">{children}</div></div></InAdminFrame.Provider>;
 }
 
 function Sidebar({path,developerEnabled}:{path:string;developerEnabled:boolean}){

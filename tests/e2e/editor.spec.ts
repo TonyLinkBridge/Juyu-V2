@@ -489,7 +489,7 @@ test('recovery read failure wrong article and clipboard failure retain input wit
  let reply='failure';await page.route('**/api/admin/editor/*',route=>route.request().method()==='PUT'?route.fulfill({status:409,json:{error:'CONFLICT'}}):reply==='failure'?route.fulfill({status:403,json:{error:'FORBIDDEN'}}):route.fulfill({json:{...editorFixture,documentId:'wrong',sequence:4}}));
  await mount(page,()=>editorFixture);await typeText(page,' 不可丢失');await expect(page.getByRole('region',{name:'保存恢复'})).toBeVisible();await page.getByRole('button',{name:'读取服务器最新版本'}).click();await expect(page.getByRole('region',{name:'保存恢复'}).getByRole('alert')).toContainText('没有管理权限');await expect(page.getByRole('region',{name:'服务器版本'})).toHaveCount(0);
  reply='wrong';await page.getByRole('button',{name:'读取服务器最新版本'}).click();await expect(page.getByRole('region',{name:'保存恢复'}).getByRole('alert')).toContainText('未读取成功');await expect(page.getByRole('button',{name:'保留备份并载入此版本'})).toHaveCount(0);
- await page.getByText('当前输入备份',{exact:true}).click();await page.evaluate(()=>Object.defineProperty(navigator.clipboard,'writeText',{configurable:true,value:()=>Promise.reject(new Error('denied'))}));await page.getByRole('button',{name:'复制这份备份'}).click();await expect(page.getByText('复制未成功，请选中上方文字手动复制。')).toBeVisible();await expect(page.getByLabel('当前输入备份',{exact:true})).toContainText('不可丢失');
+ await page.getByText('当前输入备份',{exact:true}).click();await page.evaluate(()=>{Object.defineProperty(navigator.clipboard,'writeText',{configurable:true,value:()=>Promise.reject(new Error('denied'))});document.execCommand=()=>false;});await page.getByRole('button',{name:'复制这份备份'}).click();await expect(page.getByText('复制未成功，请选中上方文字手动复制。')).toBeVisible();await expect(page.getByLabel('当前输入备份',{exact:true})).toContainText('不可丢失');
 });
 test('recovery of a submitted snapshot locks editing and preserves previous input',async({page})=>{
  const latest={...editorFixture,sequence:4,status:'in_review'};await page.route('**/api/admin/editor/*',r=>r.request().method()==='GET'?r.fulfill({json:latest}):r.fulfill({status:409,json:{error:'INVALID_STATE'}}));
@@ -838,4 +838,31 @@ test('official category multi-select saves real draft assignments and enforces t
  await dialog.getByRole('option',{name:'目录 1 · 全体员工',exact:true}).click();await expect(extra).toBeEnabled();await extra.click();
  await expect.poll(()=>saved.categoryIds.includes(categoryOptions[20].id),{timeout:8000}).toBe(true);expect(saved.categoryIds).toHaveLength(20);expect(saved.categoryIds).not.toContain(categoryOptions[0].id);expect(writes.length).toBeGreaterThan(0);
  await page.reload();await settings(page,'内容与访问');await dialog.getByRole('button',{name:/选择目录分类/}).click();await expect(extra).toHaveAttribute('aria-selected','true');
+});
+
+test('editor copy acknowledges the complete current draft including unsaved metadata and body',async({page})=>{
+ await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{await new Promise(resolve=>setTimeout(resolve,200));(window as Window&{copiedDraft?:string}).copiedDraft=text;}}}));
+ await page.route('**/api/admin/editor/*',route=>route.fulfill({status:503,json:{error:'SAVE_FAILED'}}));
+ await mount(page,()=>structuredClone(editorFixture));await page.getByRole('textbox',{name:'文章标题',exact:true}).fill('尚未保存的标题');await typeText(page,' 完整未保存正文');
+ await settings(page);await page.getByRole('button',{name:'复制当前输入',exact:true}).click();
+ await expect(page.getByRole('button',{name:'已复制',exact:true})).toHaveAttribute('data-copied','true');
+ const copied=await page.evaluate(()=>(window as Window&{copiedDraft?:string}).copiedDraft);const snapshot=JSON.parse(copied!);
+ expect(snapshot).toMatchObject({title:'尚未保存的标题',documentId:editorFixture.documentId,kind:'article',audience:'staff'});expect(snapshot.body).toBeInstanceOf(Array);expect(JSON.stringify(snapshot.body)).toContain('完整未保存正文');
+ await closeSettings(page);await expect(page.getByRole('textbox',{name:'文章标题',exact:true})).toHaveValue('尚未保存的标题');await expect(page.locator('.bn-editor')).toContainText('完整未保存正文');
+});
+
+
+test('clipboard fallback selects the full draft inside the modal settings dialog',async({page})=>{
+ await page.addInitScript(()=>{
+  Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('denied');}}});
+  document.execCommand=()=>{
+   const target=document.activeElement;
+   if(!(target instanceof HTMLTextAreaElement))return false;
+   (window as Window&{copiedDraft?:string}).copiedDraft=target.value.slice(target.selectionStart,target.selectionEnd);return true;
+  };
+ });
+ await mount(page,()=>structuredClone(editorFixture));await settings(page);await page.getByRole('button',{name:'复制当前输入',exact:true}).click();
+ await expect(page.getByRole('button',{name:'已复制',exact:true})).toHaveAttribute('data-copied','true');
+ const copied=await page.evaluate(()=>(window as Window&{copiedDraft?:string}).copiedDraft);expect(JSON.parse(copied!)).toMatchObject({title:editorFixture.title,documentId:editorFixture.documentId});
+ await expect(page.getByRole('dialog',{name:'文章设置',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'已复制',exact:true})).toBeFocused();
 });

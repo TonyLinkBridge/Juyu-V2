@@ -6,11 +6,17 @@ const require=createRequire(import.meta.url);
 /** Production TSX and Next CSS Modules, not re-created preview markup. */
 export async function arcBrowserBundle(name:string,entry:string){
  const dir=resolve(`output/verification/${name}-fixture`);await mkdir(dir,{recursive:true});
+ await writeFile(resolve(dir,'package.json'),'{"type":"module"}');
  const cssRule=await prepareUserMenuFixture(dir);
  await writeFile(resolve(dir,'entry.js'),entry);
- const navigation=resolve(dir,'navigation.cjs');await writeFile(navigation,`exports.useRouter=()=>({push:path=>window.location.assign(path),refresh:()=>{}});`);
+ const navigation=resolve(dir,'navigation.cjs');await writeFile(navigation,`exports.useRouter=()=>({push:path=>window.location.assign(path),prefetch:()=>{},refresh:()=>{}});`);
+ // Isolated browser fixtures have no Next router. Mock only framework navigation,
+ // retaining native GET submission and real production components.
+ const form=resolve(dir,'form.cjs'),link=resolve(dir,'link.cjs');
+ await writeFile(form,`const React=require('react');module.exports=function Form({prefetch,replace,scroll,...props}){return React.createElement('form',props);};`);
+ await writeFile(link,`const React=require('react');module.exports=function Link({prefetch,prefetchOnIntent,...props}){return React.createElement('a',props);};module.exports.useLinkStatus=()=>({pending:false});`);
  const {webpack}=require('next/dist/compiled/webpack/webpack');
- await new Promise<void>((done,reject)=>{const compiler=webpack({mode:'development',devtool:false,entry:resolve(dir,'entry.js'),output:{path:dir,filename:'bundle.js'},resolve:{extensions:['.tsx','.ts','.js','.json'],modules:[resolve('node_modules')],alias:{'next/navigation':navigation}},module:{rules:[cssRule,{test:/\.tsx?$/,exclude:/node_modules/,use:resolve('tests/helpers/fixture-typescript-loader.mjs')},{test:/\.js$/,resolve:{fullySpecified:false}}]}});compiler.run((error:Error|null,stats:{hasErrors():boolean;toString():string})=>compiler.close(()=>error||stats.hasErrors()?reject(error??new Error(stats.toString())):done()));});
+ await new Promise<void>((done,reject)=>{const compiler=webpack({mode:'development',devtool:false,entry:resolve(dir,'entry.js'),output:{path:dir,filename:'bundle.js'},resolve:{extensions:['.tsx','.ts','.js','.json'],modules:[resolve('node_modules')],alias:{'next/navigation':navigation,'next/form':form,'next/link':link}},module:{rules:[cssRule,{test:/\.tsx?$/,exclude:/node_modules/,use:resolve('tests/helpers/fixture-typescript-loader.mjs')},{test:/\.js$/,resolve:{fullySpecified:false}}]}});compiler.run((error:Error|null,stats:{hasErrors():boolean;toString():string})=>compiler.close(()=>error||stats.hasErrors()?reject(error??new Error(stats.toString())):done()));});
  const built=await Promise.all((await readdir('.next/static/chunks')).filter(n=>n.endsWith('.css')).map(n=>readFile(`.next/static/chunks/${n}`,'utf8')));
  return {script:await readFile(resolve(dir,'bundle.js'),'utf8'),css:built.join('\n')+await readFile('src/app/globals.css','utf8')+await readFile('src/app/admin/admin-data.css','utf8')+await readFile('src/app/loading.css','utf8')};
 }

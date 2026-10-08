@@ -1,0 +1,17 @@
+{
+  "name": "Cult UI Onboarding",
+  "url": "https://www.cult-ui.com/docs/components/onboarding",
+  "registry": "https://www.cult-ui.com/r/onboarding.json",
+  "retrievedAt": "2026-10-08",
+  "sha256": "444e24307b013cb4383d9bcca5d0ecf5c8e0b51383d7d3f5aebf2eec2160c170",
+  "license": "MIT",
+  "licenseFile": "copy-button.LICENSE.md",
+  "upstream": "https://github.com/nolly-studio/cult-ui",
+  "adaptations": [
+    "Relative cn and native Button shell replace global shadcn aliases.",
+    "Official state and all compound primitives preserved.",
+    "Consumer scopes JUYU typography, colors, buttons and spacing through CSS Modules.",
+    "Usage guide supplies real roles, enabled features and existing destinations; no account personalization or privilege changes.",
+    "Empty interface expressed as an equivalent type alias to satisfy project lint."
+  ]
+}

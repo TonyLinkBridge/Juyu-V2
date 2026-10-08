@@ -86,3 +86,37 @@ test('reader and admin retain one usable external theme control without duplicat
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }
 });
+
+test('employee guide follows enabled features and can be completed and replayed',async({page})=>{
+ let reads=0;await page.route('**/api/features',r=>{reads++;return r.fulfill({json:{flags:{search:false,pdfExport:false,favorites:false,recent:false,feedback:false,analytics:false,forms:false}}});});
+ await mount(page,'?reader=1&role=support');expect(reads).toBe(0);await page.getByRole('menuitem',{name:'使用指南',exact:true}).click();
+ const guide=page.getByRole('dialog',{name:'员工使用指南',exact:true});await expect(guide).toBeVisible();await expect(guide.getByRole('heading',{name:'按分类找资料',exact:true})).toBeVisible();await expect(guide.getByRole('progressbar')).toHaveAttribute('aria-valuemax','2');
+ await guide.getByRole('button',{name:'下一步',exact:true}).click();await expect(guide.getByRole('heading',{name:'阅读正式资料',exact:true})).toBeVisible();await expect(guide).not.toContainText('反馈');await expect(guide).not.toContainText('批准并发布');
+ await guide.getByRole('button',{name:'开始使用',exact:true}).click();await expect(guide).toHaveCount(0);await expect(page.getByRole('button',{name:'账号菜单, Haley QA',exact:true})).toBeFocused();
+ await page.getByRole('button',{name:'账号菜单, Haley QA',exact:true}).click();await page.getByRole('menuitem',{name:'使用指南',exact:true}).click();await expect(guide.getByRole('heading',{name:'按分类找资料',exact:true})).toBeVisible();expect(reads).toBe(2);
+});
+test('admin guide maps publishing to verified role and never performs writes',async({page})=>{
+ const writes:string[]=[];page.on('request',r=>{if(r.method()!=='GET')writes.push(r.url());});
+ await page.route('**/api/features',r=>r.fulfill({json:{flags:{search:true,pdfExport:true,favorites:true,recent:true,feedback:true,analytics:true,forms:true}}}));
+ await mount(page,'?role=admin');await page.getByRole('menuitem',{name:'使用指南',exact:true}).click();const guide=page.getByRole('dialog',{name:'后台使用指南',exact:true});
+ await guide.getByRole('button',{name:'下一步',exact:true}).click();await expect(guide.getByRole('heading',{name:'编辑与自动保存',exact:true})).toBeVisible();await guide.getByRole('button',{name:'下一步',exact:true}).click();await expect(guide).toContainText('提交二审');await expect(guide).not.toContainText('批准并发布');await page.keyboard.press('Escape');await expect(guide).toHaveCount(0);
+ await mount(page,'?role=super_admin');await page.getByRole('menuitem',{name:'使用指南',exact:true}).click();await guide.getByRole('button',{name:'下一步',exact:true}).click();await guide.getByRole('button',{name:'下一步',exact:true}).click();await expect(guide).toContainText('批准并发布');expect(writes).toEqual([]);
+});
+test('guide feature read failure is actionable and signed-out accounts cannot open it',async({page})=>{
+ let failed=true;await page.route('**/api/features',r=>r.fulfill(failed?{status:503,json:{error:'FEATURE_UNAVAILABLE'}}:{json:{flags:{search:true,pdfExport:false,favorites:false,recent:false,feedback:false,analytics:false,forms:false}}}));
+ await mount(page,'?reader=1&role=ops&lang=en');await page.getByRole('menuitem',{name:'Usage guide',exact:true}).click();const guide=page.getByRole('dialog',{name:'Employee usage guide',exact:true});await expect(guide.getByRole('alert')).toContainText('could not be loaded');
+ failed=false;await guide.getByRole('button',{name:'Try again',exact:true}).click();await expect(guide.getByRole('progressbar')).toHaveAttribute('aria-valuemax','3');await guide.getByRole('button',{name:'Next',exact:true}).click();await expect(guide.getByRole('heading',{name:'Search for answers',exact:true})).toBeVisible();await guide.getByRole('button',{name:'Close guide',exact:true}).click();await expect(guide).toHaveCount(0);
+ await mount(page,'?signed-out=1');await expect(page.getByRole('menuitem',{name:'使用指南',exact:true})).toHaveCount(0);
+});
+
+test('guide remains readable and keyboard accessible inside the Fumadocs sidebar',async({page})=>{
+ await page.route('**/api/features',r=>r.fulfill({json:{flags:{search:true,pdfExport:true,favorites:true,recent:true,feedback:true,analytics:true,forms:true}}}));
+ await mount(page,'?reader=1&sidebar=1&role=support');await page.keyboard.press('Escape');await page.evaluate(()=>document.documentElement.classList.add('dark'));await page.locator('[aria-haspopup="menu"]').click();await page.getByRole('menuitem',{name:'使用指南',exact:true}).click();const guide=page.getByRole('dialog',{name:'员工使用指南',exact:true});await expect(guide.getByRole('button',{name:'关闭使用指南',exact:true})).toBeFocused();
+ const bounds=await guide.boundingBox();expect(bounds!.x).toBeGreaterThanOrEqual(0);expect(bounds!.x+bounds!.width).toBeLessThanOrEqual(await page.evaluate(()=>innerWidth));expect(await guide.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+ await page.addScriptTag({content:await readFile('node_modules/axe-core/axe.min.js','utf8')});const result=await page.evaluate(async()=>await (window as unknown as {axe:{run(context:unknown,options:unknown):Promise<AxeResults>}}).axe.run('dialog',{runOnly:['aria-allowed-attr','aria-required-children','aria-required-parent','button-name','color-contrast']}));expect(result.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)}))).toEqual([]);
+ await guide.getByRole('button',{name:'下一步',exact:true}).click();await expect(guide.getByRole('heading',{name:'搜索资料',exact:true})).toBeFocused();await page.keyboard.press('Escape');await expect(guide).toHaveCount(0);
+});
+test('opening a guide does not bypass the editor navigation guard',async({page})=>{
+ await page.route('**/api/features',r=>r.fulfill({json:{flags:{search:true,pdfExport:true,favorites:true,recent:true,feedback:true,analytics:true,forms:true}}}));
+ await mount(page,'?guard=1');await page.getByRole('menuitem',{name:'使用指南',exact:true}).click();const guide=page.getByRole('dialog',{name:'后台使用指南',exact:true});await guide.getByRole('link',{name:'打开内容管理 ↗',exact:true}).click();await expect(guide).toBeVisible();await expect(page).toHaveURL(/__account-fixture/);await expect(page.locator('#guard-result')).toBeEmpty();
+});

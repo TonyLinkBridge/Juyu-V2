@@ -11,6 +11,8 @@ export function loadComponent(file:string,overrides:Record<string,unknown>={}):R
   const exports:Record<string,unknown>={};cache.set(path,exports);
   const stub=(name:string):unknown=>{
    if(name in overrides)return overrides[name];
+   if(name.endsWith('.css'))return {__esModule:true,default:new Proxy({},{get:(_target,key)=>String(key)})};
+   if(name==='next/navigation')return {...require(name),useRouter:()=>({push:()=>{throw Error('Navigation requires a browser test');}})};
    if(name==='next/link'||name.endsWith('/NavigationLink'))return {__esModule:true,default:(input:Record<string,unknown>)=>{const props={...input};delete props.prefetch;delete props.prefetchOnIntent;return createElement('a',props);},NavigationLink:(input:Record<string,unknown>)=>{const props={...input};delete props.prefetch;delete props.prefetchOnIntent;return createElement('a',props);}};
    if(name==='next/form')return {__esModule:true,default:(props:Record<string,unknown>)=>createElement('form',props)};
    if(!name.startsWith('.'))return require(name);

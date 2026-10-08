@@ -1,0 +1,17 @@
+{
+  "name": "Cult UI CopyButton",
+  "url": "https://www.cult-ui.com/docs/components/copy-button",
+  "registry": "https://www.cult-ui.com/r/copy-button.json",
+  "retrievedAt": "2026-10-08",
+  "sha256": "e8b2015121efcb5227bd315d1cb1c9bf99f86db99faa9be092a34255d4d37d30",
+  "license": "MIT",
+  "upstream": "https://github.com/nolly-studio/cult-ui",
+  "adaptations": [
+    "Relative imports and CSS Modules mapped to existing JUYU tokens instead of initializing another shadcn theme.",
+    "Native button replaces the shadcn Button shell; official clipboard helper, fallback and icon motion preserved.",
+    "Chinese visible labels, pending guard, success/error callbacks and honest failure message added.",
+    "Legacy fallback restores previous keyboard focus.",
+    "Applied to full editor input and recovery backups; published Fumadocs copy controls remain official and unchanged.",
+    "Legacy fallback selects inside the current modal dialog so native modal inertness cannot block copying."
+  ]
+}

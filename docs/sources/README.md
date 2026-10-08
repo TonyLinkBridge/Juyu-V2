@@ -112,3 +112,10 @@ T055：权限与越权核查及流程图错误响应/图片优化配置收紧。
 
 
 T056：两管理员连续演练脚本、实际轨迹和真实验收表；无产品源码、依赖、迁移或供应商改编变更。指纹 `T056-two-admin-workflow.json`；真实Clerk/Supabase及账号流程仍待验收。
+
+## Cult UI interaction components
+
+- CopyButton: [official registry](https://www.cult-ui.com/r/copy-button.json), applied to full editor input and recovery backups. Original clipboard fallback and icon animation are retained; button shell, labels and focus restoration map to JUYU. Published Fumadocs copy controls are unchanged.
+- Onboarding: [official registry](https://www.cult-ui.com/r/onboarding.json), applied to the signed-in account menu's Usage guide. Official compound primitives are retained. Consumer content reflects employee/admin roles, enabled features and existing destinations. Opening a guide fetches current feature flags once, with explicit retry after failure; it never submits or publishes content.
+
+MIT license and SHA256 provenance are stored beside these components in `src/components/ui/`. Source adaptation is not a claim of untouched upstream styling; JUYU tokens and typography remain the visual authority.

@@ -6,7 +6,7 @@ Official registry TSX and CSS Modules, retrieved 2026-10-08. Registry URLs and S
 | --- | --- | --- |
 | File Dropzone | Media upload dialog | Chinese labels; explicit-submit staging, disabled controls, external upload status/progress, safe retry callback |
 | Action Button | Media upload and category save | Chinese labels supplied by caller; synchronous duplicate-click guard; success only after acknowledged action; optional live announcement when the host form already has its own status; JUYU action color tokens |
-| Filter Toolbar | Media library | Chinese labels; URL-backed filter add/remove/clear |
+| Filter Toolbar | Content workspace and media library | Chinese labels; URL-backed filter add/remove/clear |
 | Multi-select | Article category assignment | Chinese label defaults; full hierarchy paths and effective-access hints from existing category model; max 20; menu flips upward and scrolls within a short drawer |
 | Sortable Data Table | Media list | Chinese labels; controlled manual server sorting before pagination; current detail-row highlight |
 | Date Range Picker | Analytics | Chinese labels and locale; calendar bounds validated on server and shared with employee detail |

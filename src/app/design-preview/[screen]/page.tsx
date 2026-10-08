@@ -17,12 +17,17 @@ import {AdminFrame} from '../../../components/shell/AdminFrame';
 import {KnowledgeHome} from '../../../components/home/KnowledgeHome';
 import {ReaderQuickLinks} from '../../../components/navigation-settings/ReaderQuickLinks';
 import {SearchInput} from '../../../components/gitbook/Search/SearchInput';
+import {TasksFilterBar} from '../../../components/tasks/TasksFilterBar';
+import {TasksList} from '../../../components/tasks/TasksList';
+import ArticleEditor from '../../../components/editor/ArticleEditor';
+import {GuidePreview} from '../../../components/admin-preview/GuidePreview';
+import {AdminControlsPreview} from '../../../components/admin-preview/AdminControlsPreview';
 import {TasksWorkspace} from '../../../components/tasks/TasksWorkspace';
 import {ReviewDecision} from '../../../components/review/ReviewDecision';
-import {workspaceQuery,type WorkspaceData} from '../../../workspace/model';
+import {workspaceQuery,statuses,type QueryInput,type WorkspaceData} from '../../../workspace/model';
 import type {NavigationNode} from '../../../reader/tree';
 // Local fixture only. No real route/API authorization is bypassed.
-export default async function DesignPreview({params}:{params:Promise<{screen:string}>}){
+export default async function DesignPreview({params,searchParams}:{params:Promise<{screen:string}>;searchParams:Promise<QueryInput>}){
  if(process.env.NODE_ENV!=='development'||process.env.JUYU_DESIGN_PREVIEW!=='true')notFound();
  const {screen}=await params;
  if(screen==='login-light'||screen==='login-dark')return <LoginScreen audience={screen==='login-dark'?'admin':'employee'}><LoginPreview/></LoginScreen>;
@@ -48,6 +53,17 @@ export default async function DesignPreview({params}:{params:Promise<{screen:str
  if(screen==='home')return <>{notice}<EntryShell account navigation={<ReaderQuickLinks items={menu} currentHref="/design-preview/home"/>}><KnowledgeHome pages={pages} menu={menu.filter(i=>['knowledge','reference','qa'].includes(i.id))} latest={titles.map((title,i)=>({id:`preview-${i}`,title,updated:'2026-09-10T02:24:00Z'}))} recent={titles.map((title,i)=>({id:`preview-${i}`,title,kind:'article',revision:8,tags:[],viewedRevision:8,viewedAt:'2026-09-10T02:24:00Z'}))} admin/></EntryShell></>;
  if(screen==='ops')return <>{notice}<EntryShell search={<SearchInput/>} navigation={<ReaderQuickLinks items={menu} currentHref="/help-centre/ops"/>}><main id="main-content" className="search-main"><OpsCollection state="ready" data={{items:[],total:0,page:1,pages:1}}/></main></EntryShell></>;
  if(screen==='forms')return <>{notice}<AdminFrame><main id="main-content"><FormSettings initial={[]} definitions={[]} state="ready"/></main></AdminFrame></>;
+ if(screen==='admin-controls'){
+  let query;try{query=workspaceQuery({kind:'article',...await searchParams,view:'list'});}catch{notFound();}
+  let items=data.items.filter(item=>(query.kind==='all'||item.kind===query.kind)&&item.title.includes(query.q));
+  if(query.scope==='review')items=items.filter(item=>item.canReview);else if(query.scope==='returned')items=items.filter(item=>item.status==='changes_requested');
+  const counts=Object.fromEntries(statuses.map(status=>[status.id,items.filter(item=>item.status===status.id).length])) as WorkspaceData['counts'];
+  if(query.status!=='all')items=items.filter(item=>item.status===query.status);
+  const filtered:WorkspaceData={...data,query:{...query,page:1},items,total:items.length,counts};
+  return <>{notice}<AdminFrame><main id="main-content" className="tasks-workspace"><div className="tasks-heading"><div><h1>知识文章管理</h1><p>筛选与草稿复制预览 · 以下为示例资料</p></div></div><TasksFilterBar query={filtered.query} action="/design-preview/admin-controls"/><div className="tasks-results"><p role="status">共 {filtered.total} 篇示例资料</p></div>{items.length?<TasksList data={filtered}/>:<section className="tasks-empty"><h2>没有符合条件的内容</h2><p>可以清除筛选重新查看。</p></section>}<AdminControlsPreview/></main></AdminFrame></>;
+ }
+ if(screen==='onboarding')return <>{notice}<AdminFrame><main id="main-content" className="tasks-workspace"><GuidePreview/></main></AdminFrame></>;
+ if(screen==='editor')return <>{notice}<AdminFrame><main id="main-content" className="editor-main"><ArticleEditor initial={{documentId:'preview-editor',title:titles[0],body,sequence:8,status:'draft',lifecycle:'active',blocks:[],cover:null,tags:['域名转入'],assets:[],kind:'article',audience:'staff',publishedRevision:null}} recoveryOwner="preview"/></main></AdminFrame></>;
  if(screen==='admin')return <>{notice}<AdminFrame><TasksWorkspace data={data}/></AdminFrame></>;
  if(screen==='review')return <>{notice}<AdminFrame><main id="main-content" className="editor-main"><p className="back-link">内容管理 / 待我审核</p><h1>二审处理</h1><ReviewDecision initial={{article:{documentId:'preview-0',title:titles[0],body,sequence:4,status:'in_review',lifecycle:'active',blocks:[],cover:null,tags:[],assets:[],kind:'article',audience:'staff',publishedRevision:1},review:{revision:8,submittedBy:'preview-tony',reviewerId:'preview-ivy',reviewerName:'Ivy',status:'in_review',reason:null,submittedAt:'2026-09-10T09:30:00Z',decidedAt:null},canDecide:true}}/></main></AdminFrame></>;
  notFound();
