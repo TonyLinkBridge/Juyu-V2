@@ -1,8 +1,3 @@
-import {readFile,writeFile,mkdir,readdir} from 'node:fs/promises';import {resolve} from 'node:path';import {createRequire} from 'node:module';
-const require=createRequire(import.meta.url);
-export async function mediaLibraryBrowserBundle(){
- const dir=resolve('output/verification/media-library-fixture');await mkdir(dir,{recursive:true});
- await writeFile(resolve(dir,'entry.js'),`import React from 'react';import {createRoot} from 'react-dom/client';import {MediaLibrary} from '${resolve('src/components/media/MediaLibrary.tsx')}';const props=JSON.parse(document.getElementById('data').textContent);createRoot(document.getElementById('media-library')).render(React.createElement(MediaLibrary,props));`);
- const {webpack}=require('next/dist/compiled/webpack/webpack');await new Promise<void>((done,reject)=>{const compiler=webpack({mode:'development',devtool:false,entry:resolve(dir,'entry.js'),output:{path:dir,filename:'bundle.js'},resolve:{extensions:['.tsx','.ts','.js','.json'],modules:[resolve('node_modules')]},module:{rules:[{test:/\.tsx?$/,exclude:/node_modules/,use:resolve('tests/helpers/fixture-typescript-loader.mjs')},{test:/\.js$/,resolve:{fullySpecified:false}}]}});compiler.run((error:Error|null,stats:{hasErrors():boolean;toString():string})=>compiler.close(()=>error||stats.hasErrors()?reject(error??new Error(stats.toString())):done()));});
- return {script:await readFile(resolve(dir,'bundle.js'),'utf8'),css:(await Promise.all((await readdir('.next/static/chunks')).filter(n=>n.endsWith('.css')).map(n=>readFile(`.next/static/chunks/${n}`,'utf8')))).join('\n')+await readFile('src/app/globals.css','utf8')+await readFile('src/app/admin/admin-data.css','utf8')+await readFile('src/app/loading.css','utf8')};
-}
+import {resolve} from 'node:path';
+import {arcBrowserBundle} from './arc-browser';
+export async function mediaLibraryBrowserBundle(){return arcBrowserBundle('media-library',`import React from 'react';import {createRoot} from 'react-dom/client';import {MediaLibrary} from '${resolve('src/components/media/MediaLibrary.tsx')}';const props=JSON.parse(document.getElementById('data').textContent);createRoot(document.getElementById('media-library')).render(React.createElement(MediaLibrary,props));`);}

@@ -146,3 +146,11 @@ test('asset library searches files literally, filters ready active assets, shows
  await assert.rejects(service(support).mediaLibrary({}),/FORBIDDEN/);await assert.rejects(service(support).uploadTargets({}),/FORBIDDEN/);
  await assert.rejects(service(admin).mediaLibrary({q:['a']}),/INVALID_INPUT/);
 });
+
+test('custom calendar range and employee detail agree on inclusive UTC+8 days and exclude next midnight',async()=>{
+ const d=await publish(await draft('Calendar formal'));
+ const times=['2024-02-28T15:59:59.999Z','2024-02-28T16:00:00.000Z','2024-02-29T15:59:59.999Z','2024-02-29T16:00:00.000Z'];
+ for(const stamp of times){const id=randomUUID();await fixture.pool.query("INSERT INTO juyu.analytics_events(id,member_id,kind,document_id,revision_id,occurred_at) VALUES($1,'s','view',$2,1,$3)",[id,d.id,stamp]);}
+ const range={from:'2024-02-29',to:'2024-02-29'},data=await db.run(admin,c=>readAnalyticsDashboard(c,range),true),people=await service(admin).analyticsPeople({...range,documentId:d.id});
+ assert.equal(data.summary.views,2);assert.equal(data.days,1);assert.deepEqual(data.dateRange,range);assert.deepEqual(data.usage?.trend,[{date:'2024-02-29',views:2}]);assert.equal(people.items[0].views,2);assert.equal(people.total,1);
+});

@@ -1,5 +1,5 @@
 import type {PoolClient} from 'pg';
-import {libraryQuery,type LibraryAsset,type MediaLibraryData,type UploadTargets} from '../../media/library.ts';
+import {libraryQuery,libraryOrder,type LibraryAsset,type MediaLibraryData,type UploadTargets} from '../../media/library.ts';
 const categorySQL=`CASE WHEN a.mime_type LIKE 'image/%' THEN 'image' WHEN a.mime_type LIKE 'video/%' THEN 'video' WHEN a.mime_type LIKE 'audio/%' THEN 'audio' ELSE 'file' END`;
 const escapeLike=(value:string)=>value.replace(/[\\%_]/g,'\\$&');
 const columns=`a.id,a.filename,a.mime_type AS mime,a.byte_size::text AS size,a.created_at AS "createdAt",a.document_id AS "documentId",r.title AS "documentTitle",coalesce(nullif(btrim(m.display_name),''),'未命名员工') AS "uploadedBy",d.workflow_state<>'in_review' AS "canUpload",
@@ -15,7 +15,7 @@ export async function readMediaLibrary(c:PoolClient,input:Record<string,unknown>
  const grouped=(await c.query<{type:Exclude<typeof query.type,'all'>;n:number}>(`SELECT ${categorySQL} AS type,count(*)::integer AS n ${joins} WHERE ${base} GROUP BY ${categorySQL}`,values)).rows;
  const counts={all:0,image:0,video:0,audio:0,file:0};for(const row of grouped){counts[row.type]=row.n;counts.all+=row.n;}
  const total=counts[query.type],pages=Math.max(1,Math.ceil(total/30)),page=Math.min(query.page,pages);
- const order=query.sort==='name'?'a.filename COLLATE "C",a.id':query.sort==='size'?'a.byte_size DESC,a.id':'a.created_at DESC,a.id';
+ const order=libraryOrder(query);
  const items=(await c.query<LibraryAsset>(`SELECT ${columns} ${joins} WHERE ${base} AND ($2='all' OR ${categorySQL}=$2) ORDER BY ${order} LIMIT 30 OFFSET $3`,[...values,query.type,(page-1)*30])).rows;
  // A selected file must satisfy the same active-owner and upload-ready boundary as delivery.
  const selected=query.file?(items.find(x=>x.id===query.file)??(await c.query<LibraryAsset>(`SELECT ${columns} ${joins} WHERE d.lifecycle='active' AND a.status='ready' AND a.id=$1`,[query.file])).rows[0]??null):null;

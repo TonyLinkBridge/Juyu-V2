@@ -17,15 +17,18 @@ test('dashboard presents distinct-click rate, formal metadata and fingerprint li
  const table=page.getByRole('region',{name:'热门搜索分组表格，可横向滚动'});await table.focus();await expect(table).toBeFocused();if(info.project.name==='mobile')expect(await table.evaluate(el=>el.scrollWidth>el.clientWidth)).toBe(true);
  await page.screenshot({path:`output/verification/dashboard-${info.project.name}.png`,fullPage:true,animations:'disabled'});await page.evaluate(()=>document.documentElement.classList.add('dark'));await expect.poll(()=>page.locator('html').evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(25, 25, 31)');await page.screenshot({path:`output/verification/dashboard-dark-${info.project.name}.png`,fullPage:true,animations:'disabled'});
 });
-test('dashboard range form navigates with only the selected supported period',async({page})=>{
- await mount(page);const select=page.getByLabel('统计范围');await expect(select).toHaveValue('30');await select.focus();await expect(select).toBeFocused();await select.selectOption('7');
- await page.route('**/admin/analytics?days=7',r=>r.fulfill({contentType:'text/html',body:'<p>Range fixture</p>'}));await page.getByRole('button',{name:'查看统计'}).click();await expect(page).toHaveURL(/\/admin\/analytics\?days=7$/);
- await mount(page,{data:{...data,days:90}});await expect(page.getByLabel('统计范围')).toHaveValue('90');await expect(page.getByRole('link',{name:'刷新统计'})).toHaveAttribute('href','/admin/analytics?days=90');
+test('official date picker applies a custom calendar range and refresh preserves it',async({page})=>{
+ await page.clock.setFixedTime(new Date('2026-10-08T05:00:00Z'));
+ await mount(page);await page.getByRole('button',{name:/统计范围:/}).click();
+ const dialog=page.getByRole('dialog',{name:'统计范围',exact:true});await expect(dialog).toBeVisible();
+ await dialog.getByRole('button',{name:'最近 7 天',exact:true}).click();
+ await page.route('**/admin/analytics?from=2026-10-02&to=2026-10-08',r=>r.fulfill({contentType:'text/html',body:'<p>Range fixture</p>'}));await dialog.getByRole('button',{name:'应用日期',exact:true}).click();await expect(page).toHaveURL(/from=2026-10-02&to=2026-10-08$/);
+ await mount(page,{data:{...data,days:7,dateRange:{from:'2026-10-02',to:'2026-10-08'}}});await expect(page.getByRole('link',{name:'刷新统计'})).toHaveAttribute('href','/admin/analytics?from=2026-10-02&to=2026-10-08');
 });
 test('dashboard zero data has no fabricated rates and failures suppress supplied stale data',async({page})=>{
  await mount(page,{data:{...data,summary:{searches:0,zeroResults:0,clickedSearches:0,searchClicks:0,views:0,feedbackTotal:0,feedbackNegative:0},popularSearches:[],zeroResultSearches:[],popularArticles:[],negativeFeedback:[]}});
  await expect(page.getByRole('status')).toContainText('暂无可展示的数据');await page.getByRole('tab',{name:'概览',exact:true}).click();await expect(page.locator('.analytics-metrics')).toContainText('—');await expect(page.locator('.analytics-metrics')).not.toContainText('0%');
- for(const state of ['unavailable','denied','invalid']){await page.unrouteAll();await mount(page,{state,data});await expect(page.getByRole('alert')).toBeVisible();await expect(page.locator('.analytics-metrics')).toHaveCount(0);await expect(page.getByRole('link',{name:article.title})).toHaveCount(0);await expect(page.getByRole('status')).toHaveCount(0);}
+ for(const state of ['unavailable','denied','invalid']){await page.unrouteAll();await mount(page,{state,data});await expect(page.getByRole('alert')).toBeVisible();await expect(page.locator('.analytics-metrics')).toHaveCount(0);await expect(page.getByRole('link',{name:article.title})).toHaveCount(0);await expect(page.getByRole('status').filter({hasText:/\S/})).toHaveCount(0);}
 });
 test('actual dashboard requires configured identity and rejects forged admin headers',async({page,request})=>{
  const response=await request.get('/api/admin/analytics?days=30',{headers:{'x-role':'admin','x-user-id':'other'}});expect(response.status()).toBe(503);expect(response.headers()['cache-control']).toBe('private, no-store');expect(await response.json()).toEqual({error:'ANALYTICS_UNAVAILABLE'});expect((await request.post('/api/admin/analytics',{data:{days:30}})).status()).toBe(405);await page.goto('/admin/analytics');await expect(page).toHaveURL(/\/admin\/sign-in$/);
@@ -40,5 +43,21 @@ test('employee detail shows a table placeholder then keeps existing rows while c
  first();await expect(page.getByRole('rowheader',{name:'同事甲',exact:true})).toBeVisible();
  await page.getByRole('button',{name:'下一页',exact:true}).click();
  await expect(page.getByRole('rowheader',{name:'同事甲',exact:true})).toBeVisible();await expect(page.getByRole('status')).toHaveText('正在更新员工明细…');await expect(page.getByRole('button',{name:'下一页',exact:true})).toBeDisabled();
- second();await expect(page.getByRole('rowheader',{name:'同事乙',exact:true})).toBeVisible();await expect(page.getByRole('rowheader',{name:'同事甲',exact:true})).toHaveCount(0);await expect(page.getByRole('status')).toHaveCount(0);
+ second();await expect(page.getByRole('rowheader',{name:'同事乙',exact:true})).toBeVisible();await expect(page.getByRole('rowheader',{name:'同事甲',exact:true})).toHaveCount(0);await expect(page.getByRole('status').filter({hasText:/\S/})).toHaveCount(0);
+});
+
+test('official calendar stages changes until apply and custom employee detail keeps the same dates',async({page},info)=>{
+ await page.clock.setFixedTime(new Date('2026-10-08T05:00:00Z'));let peopleUrl='';
+ await mount(page,{data:{...data,days:7,dateRange:{from:'2026-10-02',to:'2026-10-08'}}});
+ const trigger=page.getByRole('button',{name:/统计范围:/});await trigger.click();
+ const dialog=page.getByRole('dialog',{name:'统计范围',exact:true});
+ const day=(n:number)=>dialog.getByRole('button',{name:new RegExp(`2026年10月${n}日`)});
+ await day(3).click();await day(5).click();await dialog.getByRole('button',{name:'取消',exact:true}).click();
+ await expect(page).toHaveURL(/__dashboard_fixture$/);await expect(page.getByRole('link',{name:'刷新统计'})).toHaveAttribute('href','/admin/analytics?from=2026-10-02&to=2026-10-08');
+ await trigger.click();await day(3).click();await day(5).click();await expect(day(9)).toBeDisabled();
+ await expect(dialog.getByRole('button',{name:'应用日期'})).toBeInViewport({ratio:1});
+ await page.screenshot({path:`output/verification/analytics-arc-calendar-${info.project.name}.png`,fullPage:false,animations:'disabled'});
+ await page.route('**/admin/analytics?from=2026-10-03&to=2026-10-05',r=>r.fulfill({contentType:'text/html',body:'<p>Calendar fixture</p>'}));await dialog.getByRole('button',{name:'应用日期',exact:true}).click();await expect(page).toHaveURL(/from=2026-10-03&to=2026-10-05$/);
+ await page.route('**/api/admin/analytics/people?**',r=>{peopleUrl=r.request().url();return r.fulfill({json:{items:[],total:0,page:1,pages:1}});});
+ await mount(page,{data:{...data,days:3,dateRange:{from:'2026-10-03',to:'2026-10-05'}}});await page.getByRole('tab',{name:'员工',exact:true}).click();await expect.poll(()=>peopleUrl).toContain('from=2026-10-03&to=2026-10-05');expect(peopleUrl).not.toContain('days=');
 });

@@ -1,0 +1,12 @@
+.scope.scope {
+ --action-button-background:var(--action); --action-button-foreground:var(--action-text);
+ --accent:var(--action); --accent-strong:var(--action-hover); --accent-subtle:var(--accent-soft); --accent-foreground:var(--action-text);
+ --control-on:var(--action); --control-glyph:var(--action-text); --focus-outline:var(--focus); --focus-outline-width:2px;
+ --radius-control:8px; --radius-panel:12px; --radius-surface:12px;
+ --control-height-sm:36px; --control-height-md:42px; --control-height-lg:48px;
+ --leading-body:1.5; --tracking-body:0; min-width:0; font-size:14px;
+}
+.scope button {font:inherit;cursor:pointer;}
+.scope button:disabled {cursor:not-allowed;}
+.scope input[type=file] {display:none;}
+.scope button:focus-visible {outline:2px solid var(--focus);outline-offset:2px;}

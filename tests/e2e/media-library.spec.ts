@@ -45,3 +45,62 @@ test('pending thumbnails reserve their space and reveal the image when the reque
  finish();await expect(thumbnail.locator('img')).toHaveJSProperty('naturalWidth',400);await expect(pending).toHaveCount(0);
  const after=await thumbnail.boundingBox();expect(after?.height).toBe(before?.height);
 });
+
+test('official filter chips remove one condition and preserve sort and view',async({page})=>{
+ await page.route('**/api/admin/assets/**',r=>r.fulfill({path:'tests/fixtures/article-cover.png',contentType:'image/png'}));
+ await mount(page,{...data,query:{...data.query,q:'MFA',type:'image',sort:'name',view:'list'}});
+ await expect(page.getByRole('group',{name:'已应用的筛选'})).toContainText('MFA');
+ await page.route('**/admin/media?**',r=>r.fulfill({contentType:'text/html',body:'<p>Filtered result</p>'}));
+ await page.getByRole('button',{name:'移除 搜索: MFA',exact:true}).click();await expect(page).toHaveURL(/\/admin\/media\?type=image&sort=name&view=list$/);
+});
+test('official table header requests a global server sort, preserving search and type',async({page},info)=>{
+ await page.route('**/api/admin/assets/**',r=>r.fulfill({path:'tests/fixtures/article-cover.png',contentType:'image/png'}));
+ await mount(page,{...data,query:{...data.query,q:'MFA',type:'image',view:'list'},items:items.slice(0,2),total:35,pages:2});
+ const primary=page.getByRole('button',{name:'上传文件',exact:true});
+ const rgb=await primary.evaluate(el=>getComputedStyle(el).backgroundColor.match(/\d+/g)!.map(Number));expect(rgb[0]).toBeGreaterThan(rgb[1]*2);expect(rgb[0]).toBeGreaterThan(rgb[2]*2);
+ const table=page.getByRole('table',{name:'媒体文件列表'});await expect(table).toBeVisible();
+ await expect(table.getByRole('columnheader',{name:/上传时间/})).toHaveAttribute('aria-sort','descending');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:`output/verification/media-arc-table-${info.project.name}.png`,fullPage:true});
+ await page.route('**/admin/media?**',r=>r.fulfill({contentType:'text/html',body:'<p>Sorted result</p>'}));
+ await table.getByRole('button',{name:/大小/}).click();await expect(page).toHaveURL(/q=MFA&type=image&sort=size&direction=asc&view=list$/);
+});
+async function openUpload(page:Page){
+ await page.route('**/api/admin/media/targets?**',r=>r.fulfill({json:{items:[{id:'local-document',title:'本地测试文章'}],page:1,pages:1,total:1}}));
+ await mount(page,{...data,items:[],total:0});await page.getByRole('button',{name:'上传文件',exact:true}).click();
+ const dialog=page.getByRole('dialog',{name:'上传文件',exact:true});await dialog.getByRole('radio',{name:'本地测试文章'}).check();
+ await dialog.locator('input[type=file]').setInputFiles({name:'example.txt',mimeType:'text/plain',buffer:Buffer.from('JUYU local fixture')});
+ return dialog;
+}
+test('dropzone and action button wait for confirmed upload and prevent duplicate clicks',async({page},info)=>{
+ let calls=0,release!:()=>void;const gate=new Promise<void>(resolve=>release=resolve);
+ await page.route('**/api/admin/media/local-document/upload',async r=>{calls++;await gate;await r.fulfill({status:201,json:{id:items[0].id,status:'ready'}});});
+ const dialog=await openUpload(page);await expect(dialog).toContainText('example.txt');
+ const button=dialog.getByRole('button',{name:'上传文件',exact:true});await button.evaluate(el=>{el.dispatchEvent(new MouseEvent('click',{bubbles:true}));el.dispatchEvent(new MouseEvent('click',{bubbles:true}));});
+ await expect(button).toHaveAttribute('aria-busy','true');await expect(dialog.getByRole('button',{name:'关闭上传窗口'})).toBeDisabled();await expect(dialog.getByRole('button',{name:'移除 example.txt'})).toBeDisabled();
+ await expect.poll(()=>calls).toBe(1);release();await expect(dialog.getByRole('button',{name:'完成，查看文件'})).toBeVisible();await expect(dialog).toContainText('已上传');
+ await expect(dialog.getByRole('button',{name:'完成，查看文件'})).toBeInViewport({ratio:1});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:`output/verification/media-arc-upload-${info.project.name}.png`,fullPage:true});
+});
+test('uncertain upload result keeps file and forbids an unsafe retry',async({page})=>{
+ let calls=0;await page.route('**/api/admin/media/local-document/upload',r=>{calls++;return r.fulfill({status:502,json:{error:'UNAVAILABLE'}});});
+ const dialog=await openUpload(page);await dialog.getByRole('button',{name:'上传文件',exact:true}).click();
+ await expect(dialog).toContainText('上传结果未确认');await expect(dialog.getByRole('button',{name:'上传文件',exact:true})).toBeDisabled();await expect(dialog.getByRole('button',{name:'重试 example.txt',exact:true})).toHaveCount(0);await expect(dialog.getByRole('button',{name:'关闭上传窗口'})).toBeEnabled();expect(calls).toBe(1);
+});
+test('confirmed validation failure permits an explicit retry without losing the selection',async({page})=>{
+ let calls=0;await page.route('**/api/admin/media/local-document/upload',r=>++calls===1?r.fulfill({status:400,json:{error:'INVALID_UPLOAD'}}):r.fulfill({status:201,json:{id:items[0].id,status:'ready'}}));
+ const dialog=await openUpload(page);await dialog.getByRole('button',{name:'上传文件',exact:true}).click();await dialog.getByRole('button',{name:'重试 example.txt',exact:true}).click();await expect(dialog.getByRole('button',{name:'完成，查看文件'})).toBeVisible();expect(calls).toBe(2);
+});
+
+test('official add-filter menu and clear-all retain sorting and the chosen view',async({page})=>{
+ await mount(page,{...data,items:[],total:0,query:{...data.query,q:'MFA',sort:'size',direction:'asc',view:'list',page:2}});
+ await page.route('**/admin/media?**',r=>r.fulfill({contentType:'text/html',body:'<p>Filter fixture</p>'}));
+ await page.getByRole('button',{name:'添加筛选',exact:true}).click();
+ await page.getByRole('menuitem',{name:/文件类型/}).click();
+ await page.getByRole('menuitemradio',{name:'视频',exact:true}).click();
+ await expect(page).toHaveURL(/q=MFA&type=video&sort=size&direction=asc&view=list$/);
+ await mount(page,{...data,items:[],total:0,query:{...data.query,q:'MFA',type:'image',sort:'size',direction:'asc',view:'list',page:2}});
+ await expect(page.getByRole('link',{name:'清除筛选',exact:true})).toHaveAttribute('href','/admin/media?sort=size&direction=asc&view=list');
+ await page.getByRole('button',{name:'清除全部',exact:true}).click();await expect(page).toHaveURL(/sort=size&direction=asc&view=list$/);
+});

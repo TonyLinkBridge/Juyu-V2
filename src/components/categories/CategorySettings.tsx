@@ -1,4 +1,6 @@
 'use client';
+import {ArcScope} from '../ui/arc/ArcScope';
+import {ActionButton} from '../ui/arc/action-button/action-button';
 import {confirmAction} from '../feedback/feedback';
 
 import {useEffect, useRef, useState, type ReactNode, type FormEvent} from 'react';
@@ -130,7 +132,7 @@ export function CategorySettings({initial=[],state='ready'}:{initial?:CategoryDe
       const result=await saveCategory(operation.id,operation.write);
       setCategories(current=>current.some(category=>category.id===result.id)?current.map(category=>category.id===result.id?result:category):[...current,result]);
       setDraft(fromDefinition(result));setPending(null);setConflict(false);
-      setNotice({kind:'success',text:result.enabled?'分类设置已保存。当前访问限制已生效。':'分类已停用。关联内容及历史版本会保留，当前访问限制已生效。'});
+      setNotice({kind:'success',text:result.enabled?'分类设置已保存。当前访问限制已生效。':'分类已停用。关联内容及历史版本会保留，当前访问限制已生效。'});return true;
     }catch(error){
       if(error instanceof CategoryWriteRejected && !wasUncertain){
         setPending(null);setConflict(error.message==='CATEGORY_CONFLICT');
@@ -211,7 +213,7 @@ export function CategorySettings({initial=[],state='ready'}:{initial?:CategoryDe
           <p className="category-settings-policy">保存后实际访问：{effectivePolicy(categories,draft)}</p>
           {policyChanged && <p className="category-settings-message category-settings-message-error">此修改会立即影响已有正式内容及子分类的访问。保存前需要再次确认。</p>}
         </fieldset><div className="category-settings-actions">
-          {pending?<button type="button" className="category-settings-primary" disabled={busy} onClick={()=>void submit()}>{busy?'正在确认保存…':'重试原提交'}</button>:<button type="submit" className="category-settings-primary" disabled={busy||conflict||deletePending!==null}>{busy?'正在保存…':'保存分类'}</button>}
+          {pending&&!busy?<button type="button" className="category-settings-primary" disabled={busy} onClick={()=>void submit()}>{busy?'正在确认保存…':'重试原提交'}</button>:<ArcScope><ActionButton announce={false} aria-label="保存分类" label={busy?'正在保存…':'保存分类'} pendingLabel="正在保存…" successLabel="已保存" disabled={busy||conflict||deletePending!==null} onAction={async()=>{if(!await submit())throw new Error('SAVE_NOT_CONFIRMED');}}/></ArcScope>}
           <button type="button" disabled={frozen} onClick={closeEditor}>关闭编辑</button>
           {saved && (deletePending?<button type="button" className="category-settings-danger" disabled={busy} onClick={()=>void remove()}>{busy?'正在确认删除…':'重试删除'}</button>:<button type="button" className="category-settings-danger" disabled={busy||pending!==null} onClick={()=>void remove()}>删除分类</button>)}
           {(conflict||pending||deletePending) && <button type="button" disabled={busy} onClick={()=>void reload()}>载入最新设置（替换当前输入）</button>}

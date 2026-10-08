@@ -155,17 +155,13 @@ test('article settings keep form rows and category choices closely grouped',asyn
  const layout=await dialog.evaluate(element=>{
   const firstFieldset=element.querySelector('.editor-settings-group-body > fieldset')!;
   const labels=[...element.querySelectorAll('.editor-metadata > label')];
-  const cards=[...element.querySelectorAll('.article-category-options > label')];
-  const first=cards[0].getBoundingClientRect(),second=cards[1].getBoundingClientRect();
-  return {fieldsetMargin:getComputedStyle(firstFieldset).marginBlockStart,labelMargins:labels.map(label=>getComputedStyle(label).marginBlockStart),categoryMargin:getComputedStyle(cards[0]).marginBlockStart,categoryDisplay:getComputedStyle(cards[0]).display,categoryHeight:first.height,categoryGap:second.top-first.bottom};
+  return {fieldsetMargin:getComputedStyle(firstFieldset).marginBlockStart,labelMargins:labels.map(label=>getComputedStyle(label).marginBlockStart)};
  });
- expect(layout.fieldsetMargin).toBe('0px');
- expect(layout.labelMargins).toEqual(['0px','0px']);
- expect(layout.categoryMargin).toBe('0px');
- expect(layout.categoryDisplay).toBe('flex');
- expect(layout.categoryHeight).toBeLessThanOrEqual(72);
- expect(layout.categoryGap).toBeLessThanOrEqual(12);
- await page.screenshot({path:`output/verification/editor-settings-density-${testInfo.project.name}.png`,animations:'disabled'});
+ expect(layout.fieldsetMargin).toBe('0px');expect(layout.labelMargins).toEqual(['0px','0px']);
+ const categories=dialog.getByRole('button',{name:/选择目录分类/});await expect(categories).toBeVisible();expect((await categories.boundingBox())!.height).toBeLessThanOrEqual(48);
+ await categories.click();await expect(dialog.getByRole('option',{name:/会员/})).toHaveAttribute('aria-selected','true');await expect(dialog.getByRole('option',{name:/账户管理/})).toBeInViewport({ratio:1});
+ const menu=dialog.getByRole('listbox',{name:'选择目录分类'});await expect(menu).toBeInViewport({ratio:1});
+ await page.screenshot({path:`output/verification/editor-settings-compact-${testInfo.project.name}.png`,fullPage:true});
 });
 
 test('published article settings expose update note history and lifecycle actions',async({page})=>{
@@ -831,4 +827,15 @@ for(const phase of ['sending','uncertain'] as const)test(`a delayed local recove
  if(phase==='uncertain'){releasePublish();await expect(dialog.getByRole('alert')).toContainText('尚未确认');}
  releaseRead();const recovery=page.locator('.editor-recovery-panel');await expect(recovery.getByRole('status')).toContainText('无法安全恢复');await expect(page.getByRole('region',{name:'可恢复输入'})).toBeVisible();await page.getByText('查看副本以便手动复制',{exact:true}).click();await expect(page.getByRole('textbox',{name:'本机恢复副本'})).toHaveValue(/等待中的本机恢复输入/);await expect(page.locator('.bn-editor')).not.toContainText('等待中的本机恢复输入');await expect(page.getByRole('button',{name:'恢复到编辑区',exact:true})).toBeDisabled();
  if(phase==='sending'){releasePublish();await expect(dialog.getByRole('alert')).toContainText('尚未确认');}
+});
+
+test('official category multi-select saves real draft assignments and enforces twenty selections',async({page})=>{
+ const categoryOptions=Array.from({length:21},(_,i)=>({id:`00000000-0000-4000-8000-${String(i+300).padStart(12,'0')}`,version:1,name:`目录 ${i+1}`,parentId:null,position:i,audience:'staff' as const,enabled:true}));
+ let saved={...structuredClone(editorFixture),categoryOptions,categoryIds:categoryOptions.slice(0,20).map(x=>x.id)};const writes:unknown[]=[];
+ await page.route('**/api/admin/editor/*',route=>{const write=route.request().postDataJSON();writes.push(write);saved={...saved,...write,sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);await settings(page,'内容与访问');const dialog=page.getByRole('dialog',{name:'文章设置',exact:true});
+ await dialog.getByRole('button',{name:/选择目录分类/}).click();const extra=dialog.getByRole('option',{name:'目录 21 · 全体员工',exact:true});await expect(extra).toBeDisabled();
+ await dialog.getByRole('option',{name:'目录 1 · 全体员工',exact:true}).click();await expect(extra).toBeEnabled();await extra.click();
+ await expect.poll(()=>saved.categoryIds.includes(categoryOptions[20].id),{timeout:8000}).toBe(true);expect(saved.categoryIds).toHaveLength(20);expect(saved.categoryIds).not.toContain(categoryOptions[0].id);expect(writes.length).toBeGreaterThan(0);
+ await page.reload();await settings(page,'内容与访问');await dialog.getByRole('button',{name:/选择目录分类/}).click();await expect(extra).toHaveAttribute('aria-selected','true');
 });

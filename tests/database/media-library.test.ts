@@ -23,6 +23,10 @@ test('media search finds filenames, article titles and uploaders without widenin
   for(const q of ['image.png','MFA','本地上传者']){
    const result=await service.mediaLibrary({q});assert.equal(result.total,1,q);assert.equal(result.items[0]?.id,asset);
   }
+  const ids:string[]=[];
+  for(let i=0;i<31;i++){const id=randomUUID();ids.push(id);await service.reserveUpload(document,id,{filename:`sort-${String(i).padStart(2,'0')}.png`,mime:'image/png',size:2000+i});await service.finishUpload(id,true);}
+  const asc=await service.mediaLibrary({q:'sort-',sort:'size',direction:'asc',view:'list'}),next=await service.mediaLibrary({q:'sort-',sort:'size',direction:'asc',view:'list',page:'2'}),desc=await service.mediaLibrary({q:'sort-',sort:'size',direction:'desc'});
+  assert.equal(asc.items[0].id,ids[0]);assert.equal(asc.items[29].id,ids[29]);assert.equal(next.items[0].id,ids[30]);assert.equal(desc.items[0].id,ids[30]);assert.equal(asc.total,31);
   const concurrent=await Promise.all(Array.from({length:20},()=>service.mediaLibrary({q:'image.png'})));
   assert.ok(concurrent.every(result=>result.total===1));
   assert.equal((await service.mediaLibrary({q:'%'})).total,0,'a wildcard is a literal search');

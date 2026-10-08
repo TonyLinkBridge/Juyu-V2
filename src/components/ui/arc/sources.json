@@ -1,0 +1,36 @@
+{
+  "retrieved": "2026-10-08",
+  "license": "https://uiarc.dev/license",
+  "components": [
+    {
+      "component": "file-dropzone",
+      "source": "https://uiarc.dev/r/file-dropzone.json",
+      "sha256": "f15cc4b530b5f270fb4dc25f9c0b5de67f650cecb8deb9863c4e6d9205dce186"
+    },
+    {
+      "component": "action-button",
+      "source": "https://uiarc.dev/r/action-button.json",
+      "sha256": "10dd212b94358431af8d806abdba2cf77857bf5fa02b437616411366017111e2"
+    },
+    {
+      "component": "filter-toolbar",
+      "source": "https://uiarc.dev/r/filter-toolbar.json",
+      "sha256": "e5fbafcbf0464c0730d9633c808f2eeb0465b19350769c144597bb4512596424"
+    },
+    {
+      "component": "multi-select",
+      "source": "https://uiarc.dev/r/multi-select.json",
+      "sha256": "f8adaa6283a63c63646403a680a15cf6077e1407f95ad2f80ac30c4b5bf00841"
+    },
+    {
+      "component": "sortable-data-table",
+      "source": "https://uiarc.dev/r/sortable-data-table.json",
+      "sha256": "23e37213b102763fc327cd5c8148ef56d8fec059e00747cd28fa3c5379eb45d7"
+    },
+    {
+      "component": "date-range-picker",
+      "source": "https://uiarc.dev/r/date-range-picker.json",
+      "sha256": "96e983e9e5bafade5601392e9569a7a6c56be0904a784bb36db15c306b279ed8"
+    }
+  ]
+}
