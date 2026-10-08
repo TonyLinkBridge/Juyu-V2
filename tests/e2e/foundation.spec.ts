@@ -1,5 +1,26 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type APIResponse, type Page } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
+
+// Loading boundaries can send headers before Next emits the login redirect.
+// A plain 200 is not enough: the response must still direct only to our login.
+async function expectEmployeeLoginRedirect(response: APIResponse, page: Page) {
+  const headers = response.headers();
+  expect(headers['cache-control']).toContain('no-store');
+  if (response.status() === 307) {
+    expect(headers.location).toBe('/sign-in');
+    return;
+  }
+  expect(response.status()).toBe(200);
+  expect(headers['content-type']).toContain('text/html');
+  const refreshTargets = await page.evaluate((html) => {
+    const document = new DOMParser().parseFromString(html, 'text/html');
+    return [...document.querySelectorAll('meta[http-equiv]')]
+      .filter((meta) => meta.getAttribute('http-equiv')?.toLowerCase() === 'refresh')
+      .map((meta) => meta.getAttribute('content'));
+  }, await response.text());
+  expect(refreshTargets).toHaveLength(1);
+  expect(refreshTargets[0]).toMatch(/^[01];url=\/sign-in$/);
+}
 
 test('website opens employee login directly without an admin chooser', async ({ page }, testInfo) => {
   const errors: string[] = [];
@@ -10,7 +31,7 @@ test('website opens employee login directly without an admin chooser', async ({ 
   await expect(page.getByRole('status')).toContainText('尚未连接');
   await expect(page.getByRole('status')).toContainText('登录服务尚未连接');await expect(page.getByRole('button',{name:/Slack|登录/})).toHaveCount(0);
   await expect(page.getByRole('link', { name: '进入员工资料库' })).toHaveCount(0);
-  await expect(page.getByRole('link',{name:'管理员登录 ↗'})).toHaveAttribute('href','/admin/sign-in');
+  await expect(page.getByRole('link',{name:'管理员登录',exact:true})).toHaveAttribute('href','/admin/sign-in');
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
   await mkdir('output/verification', { recursive: true });
   await page.screenshot({ path: `output/verification/entry-flow-${testInfo.project.name}-login.png`, fullPage: true });
@@ -25,7 +46,9 @@ test('admin entry and forged role parameters never grant access', async ({ page 
   await expect(page.getByText('创建文章', { exact: true })).toHaveCount(0);
   await mkdir('output/verification', { recursive: true });
   await page.screenshot({ path: `output/verification/entry-flow-${testInfo.project.name}-admin.png`, fullPage: true });
-  await page.getByRole('link', { name: '返回员工登录 ↗' }).focus();
+  const employeeEntry = page.getByRole('link', { name: '员工资料库', exact: true });
+  await expect(employeeEntry).toHaveAttribute('href', '/sign-in');
+  await employeeEntry.focus();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/sign-in$/);
 });
@@ -71,9 +94,12 @@ test('Clerk catch-all and employee entry remain closed without keys, ignoring fo
     maxRedirects: 0,
     headers: { Cookie: '__session=forged; role=admin', 'X-Clerk-Auth-Status': 'signed-in', 'X-Clerk-Auth-User-Id': 'user_forged' },
   });
-  expect(response.status()).toBe(307);
-  expect(response.headers().location).toBe('/sign-in');
-  expect(response.headers()['cache-control']).toContain('no-store');
+  await expectEmployeeLoginRedirect(response, page);
+  await page.goto('/help-centre?returnTo=https://example.org&role=admin');
+  await expect(page).toHaveURL(/\/sign-in$/);
+  await expect(page.getByRole('heading', { name: '登录聚域资料库' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: '文章目录' })).toHaveCount(0);
+  await expect(page.getByRole('search')).toHaveCount(0);
 });
 
 
@@ -157,7 +183,7 @@ test('reader navigation remains protected without identity configuration despite
 
 test('search page rejects forged identity and never exposes results before login',async({page,request})=>{
  const response=await request.get('/help-centre?q=private&role=admin',{maxRedirects:0,headers:{Cookie:'__session=forged; role=admin','X-Clerk-Auth-Status':'signed-in','X-Clerk-Auth-User-Id':'user_admin'}});
- expect(response.status()).toBe(307);expect(response.headers().location).toBe('/sign-in');expect(response.headers()['cache-control']).toContain('no-store');
+ await expectEmployeeLoginRedirect(response, page);
  await page.goto('/help-centre?q=private&role=admin');await expect(page).toHaveURL(/\/sign-in$/);await expect(page.getByRole('search')).toHaveCount(0);await expect(page.getByRole('list',{name:'搜索结果列表'})).toHaveCount(0);
 });
 
