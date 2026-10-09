@@ -1,5 +1,6 @@
 "use client";
 import {useEffect,useId,useRef,useState} from 'react';
+import {createPortal} from 'react-dom';
 import {useRouter} from 'next/navigation';
 import {X} from 'lucide-react';
 import {Onboarding,TipsList} from '../ui/onboarding';
@@ -7,20 +8,21 @@ import {normalizeFeatureFlags,type FeatureFlags} from '../../features/model';
 import {requestReviewLeave} from '../../review/leave';
 import styles from './usage-guide.module.css';
 export type AdminGuideRole='admin'|'super_admin';
-interface Props {admin?:boolean;adminRole?:AdminGuideRole|null;locale?:'zh-CN'|'en';onClose:()=>void;}
+interface SaveProps {saving?:boolean;saveFailed?:boolean;onRetrySave?:()=>Promise<boolean>;onDismiss?:()=>void;}
+interface Props extends SaveProps {admin?:boolean;adminRole?:AdminGuideRole|null;locale?:'zh-CN'|'en';onClose:()=>void|boolean|Promise<void|boolean>;onComplete?:()=>void|boolean|Promise<void|boolean>;}
 interface GuideStep {title:string;description:string;tips:string[];link?:{href:string;label:string};}
 /** Real role/feature mapping is consumer content; the multi-step UI is Cult's official component. */
-export function UsageGuide({admin=false,adminRole=null,locale='zh-CN',onClose}:Props){
+export function UsageGuide({admin=false,adminRole=null,locale='zh-CN',onClose,...lifecycle}:Props){
  const [flags,setFlags]=useState<FeatureFlags|null>(null),[failed,setFailed]=useState(false),[retry,setRetry]=useState(0);
  useEffect(()=>{
   const controller=new AbortController();let active=true;const timer=setTimeout(()=>controller.abort(),10000);
   void fetch('/api/features',{cache:'no-store',signal:controller.signal}).then(async response=>{if(!response.ok)throw Error('FEATURE_UNAVAILABLE');const value=await response.json();const next=normalizeFeatureFlags(value.flags);if(active)setFlags(next);}).catch(()=>{if(active)setFailed(true);}).finally(()=>clearTimeout(timer));
   return()=>{active=false;clearTimeout(timer);controller.abort();};
  },[retry]);
- return <GuideDialog admin={admin} adminRole={adminRole} locale={locale} flags={flags} failed={failed} onRetry={()=>{setFailed(false);setFlags(null);setRetry(n=>n+1);}} onClose={onClose}/>;
+ return <GuideDialog admin={admin} adminRole={adminRole} locale={locale} flags={flags} failed={failed} onRetry={()=>{setFailed(false);setFlags(null);setRetry(n=>n+1);}} onClose={onClose} {...lifecycle}/>;
 }
 /** Also used by development-only previews with explicitly labelled fixture features. */
-export function GuideDialog({admin=false,adminRole=null,locale='zh-CN',flags,failed=false,onRetry,onClose}:Props&{flags:FeatureFlags|null;failed?:boolean;onRetry?:()=>void}){
+export function GuideDialog({admin=false,adminRole=null,locale='zh-CN',flags,failed=false,onRetry,onClose,onComplete,saving=false,saveFailed=false,onRetrySave,onDismiss}:Props&{flags:FeatureFlags|null;failed?:boolean;onRetry?:()=>void}){
  const ref=useRef<HTMLDialogElement>(null),heading=useRef<HTMLHeadingElement>(null),id=useId(),router=useRouter();
  const [step,setStep]=useState(1);const t=(zh:string,en:string)=>locale==='en'?en:zh;
  useEffect(()=>{const dialog=ref.current;if(dialog&&!dialog.open)dialog.showModal();return()=>{if(dialog?.open)dialog.close();};},[]);
@@ -37,18 +39,37 @@ export function GuideDialog({admin=false,adminRole=null,locale='zh-CN',flags,fai
   {title:t('阅读正式资料','Read published content'),description:t('打开文章后，按目录或正文步骤查阅。','Follow the article headings and instructions.'),tips:[t('以文章当前正式版为准，遇到不明确的步骤请向负责人确认。','Use the current published version. Ask the owner if a step is unclear.'),...(flags.favorites?[t('常用文章可加入收藏，之后从收藏入口快速打开。','Save frequently used articles to Favorites for quick access.')]:[]),...(flags.feedback?[t('文章下方可以反馈资料是否有帮助，或说明哪里需要改进。','Use article feedback to say whether the content helped or what needs improvement.')]:[])]}
  ]:[];
  const inaccessible=admin&&!adminRole;
- return <dialog ref={ref} className={styles.dialog} aria-labelledby={id} onCancel={event=>{event.preventDefault();onClose();}}>
-  <div className={styles.top}><h2 id={id}>{title}</h2><button type="button" aria-label={t('关闭使用指南','Close guide')} onClick={onClose}><X size={20} aria-hidden="true"/></button></div>
+ return typeof document==='undefined'?null:createPortal(<dialog ref={ref} className={styles.dialog} aria-labelledby={id} onCancel={event=>{event.preventDefault();void onClose();}}>
+  <div className={styles.top}><h2 id={id}>{title}</h2><button type="button" aria-label={t('关闭使用指南','Close guide')} disabled={saving} onClick={()=>void onClose()}><X size={20} aria-hidden="true"/></button></div>
   <div className={styles.body}>
-   {failed||inaccessible?<><p role="alert">{t('暂时无法读取当前功能，请重试。','Your current features could not be loaded. Try again.')}</p>{onRetry&&!inaccessible&&<button className={styles.retry} type="button" onClick={onRetry}>{t('重新读取','Try again')}</button>}</>:!flags?<p role="status">{t('正在读取当前功能…','Loading your current features…')}</p>:<Onboarding totalSteps={steps.length} value={step} onValueChange={setStep} onComplete={onClose}>
+   {failed||inaccessible?<><p role="alert">{t('暂时无法读取当前功能，请重试。','Your current features could not be loaded. Try again.')}</p>{onRetry&&!inaccessible&&<button className={styles.retry} type="button" onClick={onRetry}>{t('重新读取','Try again')}</button>}</>:!flags?<p role="status">{t('正在读取当前功能…','Loading your current features…')}</p>:<fieldset className={styles.controls} disabled={saving}><Onboarding totalSteps={steps.length} value={step} onValueChange={setStep} onComplete={()=>void (onComplete||onClose)()}>
     <Onboarding.StepIndicator aria-label={t(`第 ${step} 步，共 ${steps.length} 步`,`Step ${step} of ${steps.length}`)}/>
     {steps.map((item,index)=><Onboarding.Step step={index+1} key={item.title}>
      <Onboarding.Header><h2 ref={step===index+1?heading:undefined} tabIndex={-1}>{item.title}</h2><p>{item.description}</p></Onboarding.Header>
      <TipsList title={t('操作提示','Tips')}>{item.tips.map((tip,i)=><TipsList.Item key={tip} number={i+1}>{tip}</TipsList.Item>)}</TipsList>
-     {item.link&&<a className={styles.link} href={item.link.href} onClick={async event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();if(admin&&!await requestReviewLeave('navigate'))return;onClose();router.push(item.link!.href);}}>{item.link.label} ↗</a>}
+     {item.link&&<a className={styles.link} href={item.link.href} aria-disabled={saving||undefined} onClick={async event=>{if(saving){event.preventDefault();return;}if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();if(admin&&!await requestReviewLeave('navigate'))return;if(await onClose()===false)return;router.push(item.link!.href);}}>{item.link.label} ↗</a>}
     </Onboarding.Step>)}
     <Onboarding.Navigation aria-label={t('指南步骤','Guide navigation')} backLabel={t('上一步','Back')} nextLabel={t('下一步','Next')} completeLabel={t('开始使用','Get started')}/>
-   </Onboarding>}
+   </Onboarding></fieldset>}
+   <GuideSaveNotice locale={locale} saving={saving} saveFailed={saveFailed} onRetrySave={onRetrySave} onDismiss={onDismiss}/>
   </div>
- </dialog>;
+ </dialog>,document.body);
+}
+
+function GuideSaveNotice({locale='zh-CN',saving,saveFailed,onRetrySave,onDismiss}:SaveProps&{locale?:'zh-CN'|'en'}){
+ const t=(zh:string,en:string)=>locale==='en'?en:zh;
+ if(saving)return <p className={styles.saveStatus} role="status">{t('正在保存引导状态…','Saving your guide preferences…')}</p>;
+ if(!saveFailed)return null;
+ return <div className={styles.saveNotice}><p role="alert">{t('未能保存引导状态，请重试。也可以本次先关闭；换设备后可能会再次提醒。','Your guide preferences could not be saved. Retry, or dismiss for this tab; the reminder may appear on another device.')}</p><div className={styles.actions}><button type="button" onClick={()=>void onRetrySave?.()}>{t('重试保存','Retry saving')}</button><button type="button" onClick={onDismiss}>{t('本次先关闭','Dismiss for this tab')}</button></div></div>;
+}
+export function GuideWelcome({admin=false,locale='zh-CN',onStart,onSkip,...save}:SaveProps&{admin?:boolean;locale?:'zh-CN'|'en';onStart:()=>void;onSkip:()=>Promise<boolean>}){
+ const t=(zh:string,en:string)=>locale==='en'?en:zh;
+ return typeof document==='undefined'?null:createPortal(<aside className={styles.welcome} role="region" aria-label={admin?t('后台新手引导','Admin onboarding'):t('员工新手引导','Employee onboarding')}>
+  <p className={styles.eyebrow}>{admin?t('后台使用指南','Admin usage guide'):t('员工使用指南','Employee usage guide')}</p>
+  <h2>{t('欢迎使用 JUYU 知识库','Welcome to the JUYU Knowledge Hub')}</h2>
+  <p>{admin?t('花一分钟了解资料管理、编辑保存和审核发布。','Take a minute to learn how to manage content, save drafts, and review and publish.'):t('花一分钟了解怎样找资料、搜索答案和阅读正式内容。','Take a minute to learn how to find content, search for answers and read published guidance.')}</p>
+  <p className={styles.hint}>{t('以后也可以从头像菜单的「使用指南」重新查看。','You can revisit the usage guide from your account menu at any time.')}</p>
+  <div className={styles.actions}><button type="button" disabled={save.saving} onClick={onStart}>{t('开始引导','Start guide')}</button><button type="button" disabled={save.saving} onClick={()=>void onSkip()}>{t('暂时跳过','Skip for now')}</button></div>
+  <GuideSaveNotice locale={locale} {...save}/>
+ </aside>,document.body);
 }

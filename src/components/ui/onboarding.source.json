@@ -11,7 +11,8 @@
     "Relative cn and native Button shell replace global shadcn aliases.",
     "Official state and all compound primitives preserved.",
     "Consumer scopes JUYU typography, colors, buttons and spacing through CSS Modules.",
-    "Usage guide supplies real roles, enabled features and existing destinations; no account personalization or privilege changes.",
-    "Empty interface expressed as an equivalent type alias to satisfy project lint."
+    "Usage guide supplies real roles, enabled features and existing destinations; no privilege changes.",
+    "Empty interface expressed as an equivalent type alias to satisfy project lint.",
+    "JUYU consumer adds a non-blocking first-use prompt and per-account, per-audience Clerk guide preferences; official compound primitives remain unchanged."
   ]
 }
