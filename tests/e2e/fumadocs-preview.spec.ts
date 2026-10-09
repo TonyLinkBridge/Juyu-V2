@@ -127,6 +127,44 @@ test('directory and unavailable states use the official Fumadocs shell',async({p
  await expect(page.getByRole('link',{name:'重新加载'})).toHaveAttribute('href','/design-preview/fumadocs-reader?fixture=directory-error');
 });
 
+for(const scrollbar of ['native','persistent'] as const){
+ test(`home content tabs avoid vertical overflow with ${scrollbar} scrollbars`,async({page},info)=>{
+  test.setTimeout(60000);
+  await page.goto('/design-preview/fumadocs-reader?fixture=home');
+  const tabs=page.locator('.home-section-tabs');
+  await expect(tabs).toBeVisible();
+  await page.evaluate(()=>document.fonts.ready);
+  if(scrollbar==='persistent'){
+   await page.addStyleTag({content:`
+    .home-section-tabs::-webkit-scrollbar{width:12px;height:12px}
+    .home-section-tabs::-webkit-scrollbar-track{background:#eee}
+    .home-section-tabs::-webkit-scrollbar-thumb{background:#aaa}
+   `});
+  }
+  const viewport=page.viewportSize()!;
+  for(const width of [viewport.width,320]){
+   await page.setViewportSize({width,height:viewport.height});
+   await expect.poll(()=>tabs.evaluate(element=>element.scrollHeight-element.clientHeight)).toBe(0);
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+   const links=tabs.getByRole('link');
+   if(info.project.use.isMobile){
+    await tabs.evaluate(element=>element.scrollTo({left:element.scrollWidth,behavior:'instant'}));
+   }else{
+    await links.first().focus();
+    for(let index=1;index<await links.count();index++)await page.keyboard.press('Tab');
+    await expect(links.last()).toBeFocused();
+   }
+   await expect.poll(()=>links.last().evaluate(element=>{
+    const link=element.getBoundingClientRect();
+    const visible=element.parentElement!.getBoundingClientRect();
+    return link.left>=visible.left-1&&link.right<=visible.right+1;
+   })).toBe(true);
+   if(width===320)expect(await tabs.evaluate(element=>element.scrollWidth>element.clientWidth)).toBe(true);
+  }
+  await page.screenshot({path:`output/verification/home-tabs-${scrollbar}-${info.project.name}.png`});
+ });
+}
+
 test('Help Centre home retains every JUYU entry inside the official Fumadocs home layout',async({page},info)=>{
  const requestedTags:string[]=[];
  await page.route('**/api/fumadocs-search?**',async route=>{
