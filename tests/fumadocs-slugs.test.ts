@@ -6,6 +6,8 @@ test('publication slug follows a stable Fumadocs page segment without inventing 
  assert.equal(publicationSlug(' 普通会员 '),'普通会员');
  assert.equal(publicationSlug('MFA 多重身份验证'),'mfa-多重身份验证');
  assert.equal(publicationSlug('  Account   Security  '),'account-security');
+ assert.equal(publicationSlug('如何绑定手机认证？'),'如何绑定手机认证');
+ assert.equal(publicationSlug('账户／安全'),'账户-安全');
 });
 
 test('publication slug rejects path syntax and keeps the section route canonical',()=>{

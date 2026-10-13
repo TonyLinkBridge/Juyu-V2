@@ -28,6 +28,12 @@ test('new publications receive unique stable page slugs while title edits keep t
  assert.equal((await fixture.pool.query('SELECT slug FROM juyu.documents WHERE id=$1',[first.id])).rows[0].slug,'普通会员');
 });
 
+test('publication slugs use the canonical application rule for fullwidth punctuation',async()=>{
+ const document=await repository.create({id:randomUUID(),title:'如何绑定手机认证？',body:'正文',kind:'article',audience:'staff'},actor);
+ const row=(await fixture.pool.query<{slug:string}>('SELECT slug FROM juyu.documents WHERE id=$1',[document.id])).rows[0];
+ assert.equal(row.slug,'如何绑定手机认证');
+});
+
 test('article and OPS routes may use the same slug because they have separate Fumadocs roots',async()=>{
  const article=await repository.create({id:randomUUID(),title:'升级处理',body:'正文',kind:'article',audience:'staff'},actor);
  const ops=await repository.create({id:randomUUID(),title:'升级处理',body:'正文',kind:'ops',audience:'ops'},actor);
