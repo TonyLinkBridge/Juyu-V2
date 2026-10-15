@@ -30,8 +30,10 @@ export function fumadocsContentTabs(
  items:MenuItem[],
  locale:'zh-CN'|'en',
  active?:{path:ContentPath;pathname:string},
- knowledgeEntry?:string,
+ _knowledgeEntry?:string,
 ):LayoutTab[]{
+ // Kept for existing callers; the Articles destination is now always the overview.
+ void _knowledgeEntry;
  const allowed=new Set(items.map(item=>item.href));
  return contentTabs.filter(tab=>allowed.has(tab.permissionPath)).map(({path,icon})=>{
   const label=copy[locale][path];
@@ -39,7 +41,7 @@ export function fumadocsContentTabs(
   return {
    title:label.title,
    description:label.description,
-   url:path==='/help-centre/library'&&knowledgeEntry?knowledgeEntry:`${path}${suffix}`,
+   url:`${path}${suffix}`,
    icon:createElement(icon,{size:20,weight:'regular','aria-hidden':true}),
    ...(active?.path===path?{urls:new Set([path,active.pathname])}:{}),
   } satisfies LayoutTab;

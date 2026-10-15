@@ -3,7 +3,7 @@ import {readerAnnouncement} from '../../config/reader-presentation';
 import {parseSearchQuery,parseSearchScope,searchTitles,searchHref} from '../../reader/search';
 import type {Publication} from '../../reader/body';
 import {FumadocsDirectoryState} from '../../components/fumadocs/FumadocsDirectoryState';
-import {FumadocsHomeShell,FumadocsKnowledgeHome} from '../../components/fumadocs/FumadocsKnowledgeHome';
+import {FumadocsHomeShell,FumadocsKnowledgeHome,FumadocsKnowledgeDirectory} from '../../components/fumadocs/FumadocsKnowledgeHome';
 import {FumadocsSearchPage} from '../../components/fumadocs/FumadocsSearchPage';
 import {applicationAuthorization} from '../../server/authorization/application';
 import type {NavigationNode} from '../../reader/tree';
@@ -18,7 +18,6 @@ import { currentAccountAccess } from '../../server/authentication/account-clerk'
 import { employeeCompanyAccess } from '../../server/authentication/company-clerk';
 import {ShieldIcon} from '../../components/entry-shell';
 import { EmployeeSignOut } from '../../components/employee-sign-out';
-import {firstTreePage} from '../../reader/tree';
 import {formalFumadocsPublicationPath} from '../../fumadocs/publication';
 import type {MenuItem} from '../../navigation-settings/model';
 export const dynamic = 'force-dynamic';
@@ -71,14 +70,15 @@ export default async function HelpCentre({searchParams,library=false}:{library?:
     const homeParams=await searchParams;
     const homeLocale=homeParams.lang==='en'?'en':'zh-CN';
     if(homeParams.article===undefined&&homeParams.q===undefined){
+      if(library){
+        let directory:Awaited<ReturnType<Awaited<ReturnType<typeof applicationAuthorization>>['knowledgeDirectory']>>|undefined;
+        try{directory=await(await applicationAuthorization()).knowledgeDirectory(homeLocale);}catch{}
+        if(!directory)return <FumadocsDirectoryState pages={[]} failed locale={homeLocale} retryHref={homeLocale==='en'?'/help-centre/library?lang=en':'/help-centre/library'}/>;
+        return <FumadocsKnowledgeDirectory pages={directory.pages} menu={directory.menu} search={directory.features.search} locale={homeLocale}/>;
+      }
       let home:Awaited<ReturnType<Awaited<ReturnType<typeof applicationAuthorization>>['home']>>|undefined;
       try{home=await(await applicationAuthorization()).home(homeLocale);}catch{}
       if(!home)return <FumadocsHomeShell account locale={homeLocale}><section className="message-main"><h1>{homeLocale==='en'?'The knowledge base is unavailable':'资料库暂时无法读取'}</h1><p>{homeLocale==='en'?'Try again later. A loading failure is not treated as an empty knowledge base.':'请稍后重试。读取失败不会被当作没有内容。'}</p><Link href={homeLocale==='en'?'/help-centre?lang=en':'/help-centre'}>{homeLocale==='en'?'Try again':'重新读取'}</Link></section></FumadocsHomeShell>;
-      if(library){
-        const first=firstTreePage(home.pages);
-        if(first)redirect(first.href);
-        return <FumadocsDirectoryState pages={home.pages} menu={home.menu} features={home.features} locale={homeLocale}/>;
-      }
       return <FumadocsKnowledgeHome pages={home.pages} menu={home.menu} latest={home.latest} recent={home.recent} locale={homeLocale} search={home.features.search} showRecent={home.features.recent} admin={admin.status==='admin'} announcement={readerAnnouncement}/>;
     }
     let features=closedFeatureFlags,featuresUnavailable=false;

@@ -17,10 +17,12 @@ async function route({nodes=tree,error='',entryError=false}={}){
   if(name==='next/navigation')return {redirect:(href:string)=>{throw new Error('REDIRECT:'+href);}};
   if(name.endsWith('/forms/entry'))return {requireFormReaderEntry:async()=>{if(entryError)throw new Error('ENTRY_DENIED');}};
   if(name.endsWith('/authorization/application'))return {applicationAuthorization:async()=>({
+   knowledgeDirectory:async()=>{if(error)throw new Error(error);return {pages:nodes,menu:[],features:{search:false}};},
    categoryNavigationTree:async()=>{if(error)throw new Error(error);return nodes;},
    readerMenu:async()=>[],
    features:async()=>({search:false}),
   })};
+  if(name.endsWith('/fumadocs/FumadocsKnowledgeHome'))return {FumadocsKnowledgeDirectory:(props:unknown)=>({type:'FumadocsKnowledgeDirectory',props})};
   if(name.endsWith('/fumadocs/FumadocsDirectoryState'))return {FumadocsDirectoryState:(props:unknown)=>({type:'FumadocsDirectoryState',props})};
   if(name.endsWith('/category-page'))return {categoryPage};
   if(name.endsWith('/forms/http'))return {formPage};
@@ -30,8 +32,8 @@ async function route({nodes=tree,error='',entryError=false}={}){
  return exports.default as (p:{params:Promise<{id:string}>;searchParams:Promise<Record<string,string|string[]>>})=>Promise<unknown>;
 }
 const params=(category=id,query:Record<string,string|string[]>={})=>({params:Promise.resolve({id:category}),searchParams:Promise.resolve(query)});
-test('category route directly opens authorized reading without catching Next redirect',async()=>{
- const page=await route();await assert.rejects(()=>page(params()),/REDIRECT:\/help-centre\/articles\/article-one/);
+test('category route lists authorized articles before opening an unchanged article URL',async()=>{
+ const page=await route();const result=await page(params());const output=JSON.stringify(result);assert.equal((result as {type:{name:string}}).type.name,'FumadocsKnowledgeDirectory');assert.match(output,/账户管理/);assert.match(output,/\/help-centre\/articles\/article-one/);
 });
 test('missing or inaccessible category keeps unavailable state without disclosing title',async()=>{
  const page=await route({nodes:[]});const result=await page(params());const output=JSON.stringify(result);assert.ok(!output.includes('账户管理'));assert.ok(output.includes('"failed":false'));assert.ok(output.includes('分类暂不可用'));
@@ -42,4 +44,10 @@ test('category service failure is distinguished from empty and entry denial is n
 });
 test('invalid category and repeated page input never redirect into broader collection',async()=>{
  const page=await route();for(const args of [params('../private'),params(id,{page:['1','2']})]){const output=JSON.stringify(await page(args));assert.ok(output.includes('"failed":false'));assert.ok(output.includes('分类暂不可用'));}
+});
+
+test('English category pages retain language and reject unrelated or repeated query input',async()=>{
+ const page=await route();const result=await page(params(id,{lang:'en'})) as {props:{locale:string;category:{id:string}}};
+ assert.equal(result.props.locale,'en');assert.equal(result.props.category.id,id);
+ for(const query of [{lang:['en','zh-CN']},{lang:'xx'},{scope:'all'}] as Record<string,string|string[]>[])assert.match(JSON.stringify(await page(params(id,query))),/分类暂不可用/);
 });

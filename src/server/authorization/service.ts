@@ -41,7 +41,7 @@ import {searchPublications} from '../search/repository.ts';
 import type {PoolClient} from 'pg';
 import type {MenuItem} from '../../navigation-settings/model.ts';
 import {publicationDescription,type Publication} from '../../reader/body.ts';
-import {firstTreePage,selectTreePage} from '../../reader/tree.ts';
+import {selectTreePage} from '../../reader/tree.ts';
 import {buildNavigationTree,type NavigationNode,type NavigationCategory,type NavigationMembership} from '../../reader/tree.ts';
 import { navigationPage, type NavigationPage } from '../../reader/navigation.ts';
 import type { AssetFile } from '../storage/contract.ts';
@@ -80,6 +80,17 @@ export class AuthorizationService {
       return {features,pages,menu,latest:rows.map(r=>({...r,updated:r.updated.toISOString()})),recent};
     },true);
   }
+  async knowledgeDirectory(locale:'zh-CN'|'en'='zh-CN'){
+    const v=await this.viewer();
+    return this.database.run(v,async c=>{
+      const allowed=(await c.query(`SELECT EXISTS(SELECT 1 FROM juyu.current_identity() i JOIN juyu.members m ON m.clerk_user_id=i.member_id WHERE nullif(btrim(m.verified_email),'') IS NOT NULL AND m.observed_at IS NOT NULL) AS allowed`)).rows[0].allowed;
+      if(!allowed)throw new Error('FORBIDDEN');
+      const features=await readFeatureFlags(c);
+      const pages=await readKnowledgeTree(c,locale,true);
+      const menu=await readReaderMenu(c,features);
+      return {features,pages,menu};
+    },true);
+  }
   async featureConfig(){const v=await this.viewer(true);return this.database.run(v,c=>readFeatureConfig(c),true);}
   async saveFeatureConfig(input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>writeFeatureConfig(c,input));}
   async navigationSettings(){const v=await this.viewer(true);return this.database.run(v,c=>readNavigationSettings(c),true);}
@@ -89,7 +100,7 @@ export class AuthorizationService {
     return this.database.run(v,async c=>{
       const features=await readFeatureFlags(c);
       const items=await readReaderMenu(c,features);
-      const knowledgeEntry=firstTreePage(await readKnowledgeTree(c,locale))?.href??(locale==='en'?'/help-centre/library?lang=en':'/help-centre/library');
+      const knowledgeEntry=locale==='en'?'/help-centre/library?lang=en':'/help-centre/library';
       return {items,features,knowledgeEntry};
     },true);
   }
@@ -225,7 +236,7 @@ async reader(requested:string|string[]|undefined,requestedSection?:'article'|'op
     // Never cache this across requests or viewers.
     const chrome=requestedSection?{
       items:await readReaderMenu(client,flags),features:flags,
-      knowledgeEntry:firstTreePage(filterTree(navigation,id=>!kinds.has(id)))?.href??(locale==='en'?'/help-centre/library?lang=en':'/help-centre/library'),
+      knowledgeEntry:locale==='en'?'/help-centre/library?lang=en':'/help-centre/library',
     }:undefined;
     return {
       viewerId:viewer.id,
@@ -387,4 +398,4 @@ async function readContentKinds(c:PoolClient):Promise<Map<string,string>>{
  const rows=(await c.query<{id:string;kind:string}>("SELECT id,'qa' AS kind FROM juyu.read_qa_publications() UNION ALL SELECT id,'reference' AS kind FROM juyu.read_reference_publications()"+(sections.ops?" UNION ALL SELECT id,'ops' AS kind FROM juyu.read_ops_publications()":''))).rows;
  return new Map(rows.map(n=>[n.id,n.kind]));
 }
-async function readKnowledgeTree(c:PoolClient,locale:'zh-CN'|'en'='zh-CN'):Promise<NavigationNode[]>{const kinds=await readContentKinds(c);return filterTree(await readNavigationTree(c,false,locale),id=>!kinds.has(id));}
+async function readKnowledgeTree(c:PoolClient,locale:'zh-CN'|'en'='zh-CN',repeatMemberships=false):Promise<NavigationNode[]>{const kinds=await readContentKinds(c);return filterTree(await readNavigationTree(c,repeatMemberships,locale),id=>!kinds.has(id));}

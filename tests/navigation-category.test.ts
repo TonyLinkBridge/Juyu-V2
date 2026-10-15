@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildNavigationTree} from '../src/reader/tree.ts';
-import {categoryPage} from '../src/reader/category-page.ts';
+import {categoryPage,categoryCards,categoryHref} from '../src/reader/category-page.ts';
 import type {NavigationNode} from '../src/reader/tree.ts';
 const id=(n:number)=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
 const doc=(n:number):NavigationNode=>({type:'document',id:id(n),title:`资料 ${n}`,href:`/help-centre?article=${id(n)}`});
@@ -23,4 +23,19 @@ test('category collections retain every valid membership while normal article tr
  assert.equal(categoryPage(buildNavigationTree(documents,categories,memberships),id(101)),null);
  const collections=buildNavigationTree(documents,categories,memberships,{repeatMemberships:true});assert.equal(categoryPage(collections,id(101))?.items[0].id,id(1));assert.equal(categoryPage(collections,id(100))?.total,1);
  assert.deepEqual(buildNavigationTree(documents,categories,[...memberships,{document_id:id(1),category_id:id(999)}],{repeatMemberships:true}),[]);
+});
+
+
+test('category article previews retain authorized descriptions icons and exact legacy URLs',()=>{
+ const article={type:'document' as const,id:id(1),title:'签约店铺',href:'/help-centre/articles/%E7%AD%BE%E7%BA%A6%EF%BC%88%E4%BC%81%E4%B8%9A%EF%BC%89',description:'当前正式资料说明',iconKey:'book' as const};
+ const result=categoryPage([{type:'group',id:id(100),title:'后台分类',descendants:[article]}],id(100))!;
+ assert.equal(result.items[0].description,article.description);assert.equal(result.items[0].iconKey,'book');assert.equal(result.items[0].href,article.href);
+});
+
+test('directory cards follow the current authorized order and show actual descendant titles once',()=>{
+ const article={...doc(1),title:'后台文章'};
+ const nodes:NavigationNode[]=[{type:'group',id:id(101),title:'后台第二分类',iconKey:'shield',descendants:[article,article]},{type:'group',id:id(100),title:'后台第一分类',descendants:[{type:'group',id:id(102),title:'真实子分类',descendants:[article]}]},doc(3)];
+ const cards=categoryCards(nodes);assert.deepEqual(cards.map(card=>card.title),['后台第二分类','后台第一分类']);assert.deepEqual(cards[0].articles,['后台文章']);assert.deepEqual(cards[1].topics,['真实子分类']);assert.equal(cards[0].iconKey,'shield');
+ assert.equal(categoryCards([{type:'group',id:id(999),title:'空分类',descendants:[]}]).length,0);
+ assert.equal(categoryHref(id(100),'en',2),`/help-centre/categories/${id(100)}?lang=en&page=2`);
 });

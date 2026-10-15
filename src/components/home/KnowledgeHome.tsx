@@ -4,7 +4,7 @@ import {ArrowRight} from '@phosphor-icons/react/dist/ssr';
 import type {NavigationNode} from '../../reader/tree';
 import type {MenuItem} from '../../navigation-settings/model';
 import type {RecentItem} from '../../recent/model';
-import {FullSearchTrigger} from 'fumadocs-ui/layouts/shared/slots/search-trigger';
+import {KnowledgeHomeHero} from './KnowledgeHomeHero';
 
 export function KnowledgeHome({
   pages,
@@ -40,56 +40,12 @@ export function KnowledgeHome({
 
   collect(pages);
 
-  const entries=menu.filter(
-    item=>![
-      '/help-centre/favorites',
-      '/help-centre/recent',
-      '/help-centre/forms'
-    ].includes(item.href)
-  );
   const featured=documents[0];
   const remaining=documents.slice(1,4);
-  const entryHref=(href:string)=>href==='/help-centre'
-    ? english?'/help-centre/library?lang=en':'/help-centre/library'
-    : english&&['/help-centre/ops','/help-centre/reference','/help-centre/qa'].includes(href)
-      ? `${href}?lang=en`
-      : href;
-  const entryLabel=(item:MenuItem)=>english
-    ? item.href==='/help-centre'?'Articles':item.href.includes('ops')?'OPS Internal':item.href.includes('reference')?'Reference':item.href.includes('qa')?'Q&A':item.label
-    : item.href==='/help-centre'?'知识文章':item.label;
 
   return (
     <div className="knowledge-home knowledge-home--editorial">
-      <section className="home-hero">
-        <p className="home-eyebrow">
-          {english?'JUYU team knowledge and operations':'JUYU 内部知识与运营中心'}
-        </p>
-
-        <h1>{english?<>What answer do you need <span>today?</span></>:<>今天需要找什么<span>答案</span>？</>}</h1>
-
-        <p className="home-description">
-          {english?'Find clear, approved guidance for the work in front of you.':'从正式知识与业务速查中，找到可靠的处理依据。'}
-        </p>
-
-        {search&&(
-          <div className="home-search">
-            <FullSearchTrigger hideIfDisabled/>
-          </div>
-        )}
-
-        <nav className="home-section-nav" aria-label={english?'Content types':'资料类型'}>
-          <div className="home-section-tabs">
-            {entries.map(item=><Link
-              prefetch={false}
-              prefetchOnIntent
-              key={item.id}
-              href={entryHref(item.href)}
-              aria-current={item.href==='/help-centre'?'page':undefined}
-            >{entryLabel(item)}</Link>)}
-          </div>
-          <p>{english?'Quick access to the knowledge and answers you need':'快速获取你需要的知识与答案'}</p>
-        </nav>
-      </section>
+      <KnowledgeHomeHero menu={menu} search={search} locale={locale}/>
 
       <div className="home-content">
         <div className="home-columns">

@@ -6,6 +6,7 @@ import {fumadocsMenuLinks} from '../../fumadocs/layout';
 import {AnnouncementBanner} from '../gitbook/Announcement/AnnouncementBanner';
 import {NewAnnouncements} from '../announcements/NewAnnouncements';
 import {KnowledgeHome} from '../home/KnowledgeHome';
+import {KnowledgeDirectory,type KnowledgeDirectoryProps} from '../home/KnowledgeDirectory';
 import {AccountMenu} from '../shell/AdminFrame';
 import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import type {FumadocsPublicationLocale} from '../../fumadocs/publication';
@@ -52,4 +53,8 @@ export function FumadocsKnowledgeHomeContent({announcement,...props}:FumadocsKno
 export function FumadocsKnowledgeHome(props:FumadocsKnowledgeHomeProps){
  const locale=props.locale??'zh-CN';
  return <FumadocsSearchProvider locale={locale}><FumadocsKnowledgeHomeContent {...props}/></FumadocsSearchProvider>;
+}
+
+export function FumadocsKnowledgeDirectory(props:KnowledgeDirectoryProps){
+ return <FumadocsHomeShell menu={props.menu} search={props.search} account locale={props.locale}><KnowledgeDirectory {...props}/></FumadocsHomeShell>;
 }

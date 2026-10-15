@@ -65,3 +65,42 @@ Accepted product adaptations, not unresolved defects:
 - [x] Verify desktop/mobile interactions, dark readability, code and production build.
 - [x] Keep the local implementation available for review, with sample-data notice.
 - [ ] Push/deploy and verify against a real production Super Admin account only when separately requested. This is a delivery-stage test gap, not evidence of completed production acceptance.
+
+---
+
+# Knowledge directory design QA — 2026-10-15
+
+final result: passed
+
+Scope: implement the selected JUYU category overview inside the existing Fumadocs HomeLayout, with links into authorized category article lists. The original Help Centre homepage and article reader stay available.
+
+## Evidence
+
+- Selected image: `output/verification/2026-10-15-knowledge-directory/selected-design.png`.
+- Desktop capture: `output/verification/2026-10-15-knowledge-directory/desktop.jpg` (1440 × 1100 CSS viewport, full-page capture).
+- Mobile capture: `output/verification/2026-10-15-knowledge-directory/mobile.jpg` (390 × 844 CSS viewport, full-page capture).
+- Dark capture: `output/verification/2026-10-15-knowledge-directory/dark.jpg`.
+- Source and desktop capture were opened together for comparison; mobile and dark captures were also inspected.
+- Local browser preview uses illustrative data and the production component. It does not bypass the real library/category account gates.
+
+## Fidelity surfaces and resolved findings
+
+| Surface | Result |
+| --- | --- |
+| Typography | Reuses the original JUYU editorial serif heading and existing body typography. |
+| Spacing/layout | Two-column desktop grid and single-column mobile layout. Initial extra action row increased card height; actions now align with the preview row. No mobile page overflow. |
+| Colors/tokens | Existing brand, background, border and muted text tokens retained. Dark-mode action text initially too dark; corrected to the system's existing dark brand token and recaptured. |
+| Images/icons | Existing brand and account controls retained. Category icons use the existing ReaderIcon set and actual backend keys. Categories without a configured icon remain without one. No new decorative raster assets. |
+| Copy/content | Category names, order, child topics, and article titles come from the authorized backend tree. There is no category-description field, so no invented category introductions are persisted. The official Fumadocs search label remains unchanged. |
+
+Expected differences from the illustrative image: actual category count/names/icons reflect backend configuration and reader access; the local preview account lacks the real administrator button; spacing follows existing JUYU tokens. These are intentional product constraints, not unresolved fidelity defects.
+
+## Functional and access verification
+
+- 12 relevant desktop/mobile browser cases passed, covering the original home, navigation feedback, category/article flow, empty state, language, search toggle and dark theme.
+- 35 isolated database cases passed, including multiple category memberships, private categories, draft exclusion, library separation, membership/enrollment gates, legacy slugs and localization.
+- Article URL values are used directly from authorized navigation nodes; slug generation/resolution, storage access policies and publication rules are unchanged.
+- No production database migration or category/article write is required.
+- Real-account production browsing is a separate deployment acceptance step; the local screenshots above are not production evidence.
+
+No unresolved P0/P1/P2 visual findings. Full assistive-technology certification and every browser/OS combination were not in scope.

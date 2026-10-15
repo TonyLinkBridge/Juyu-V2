@@ -15,6 +15,8 @@ import Link from 'next/link';
 import {EntryShell} from '../../../components/entry-shell';
 import {AdminFrame} from '../../../components/shell/AdminFrame';
 import {KnowledgeHome} from '../../../components/home/KnowledgeHome';
+import {FumadocsKnowledgeDirectory} from '../../../components/fumadocs/FumadocsKnowledgeHome';
+import {categoryPage} from '../../../reader/category-page';
 import {ReaderQuickLinks} from '../../../components/navigation-settings/ReaderQuickLinks';
 import {SearchInput} from '../../../components/gitbook/Search/SearchInput';
 import {TasksFilterBar} from '../../../components/tasks/TasksFilterBar';
@@ -30,6 +32,16 @@ import type {NavigationNode} from '../../../reader/tree';
 export default async function DesignPreview({params,searchParams}:{params:Promise<{screen:string}>;searchParams:Promise<QueryInput>}){
  if(process.env.NODE_ENV!=='development'||process.env.JUYU_DESIGN_PREVIEW!=='true')notFound();
  const {screen}=await params;
+ if(screen==='knowledge-directory'){
+  const query=await searchParams,locale=query.lang==='en'?'en':'zh-CN';
+  const categoryId=(n:number)=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
+  const titles=[['会员权益','普通会员','高级会员','金牌会员','签约店铺'],['账户与认证','实名认证','找回密码','登录验证','操作保护'],['资金与结算','在线充值','资金结算','Invoice','信用额度'],['抢注与竞价','域名预订','预订通道','竞价规则']];
+  const keys=['users','shield','currency','globe'] as const;
+  const directory:NavigationNode[]=titles.map(([title,...articles],index)=>({type:'group',id:categoryId(index+1),title,iconKey:keys[index],descendants:articles.map((name,i)=>({type:'document',id:`directory-${index}-${i}`,title:name,description:'查看已审核的业务规则与操作说明。',href:'/design-preview/fumadocs-reader'}))}));
+  const category=typeof query.category==='string'?categoryPage(directory,query.category,Number(query.page??1))??undefined:undefined;
+  const entries=[{id:'knowledge',label:'知识文章',href:'/help-centre'},{id:'ops',label:'OPS Internal',href:'/help-centre/ops'},{id:'reference',label:'Reference 速查',href:'/help-centre/reference'},{id:'qa',label:'Q&A 问答',href:'/help-centre/qa'}];
+  return <FumadocsKnowledgeDirectory pages={query.empty==='1'?[]:directory} menu={entries} search={query.search!=='off'} locale={locale} category={category}/>;
+ }
  if(screen==='login-light'||screen==='login-dark')return <LoginScreen audience={screen==='login-dark'?'admin':'employee'}><LoginPreview/></LoginScreen>;
  if(screen==='article'||screen==='article-email')redirect('/design-preview/fumadocs-reader');
  if(screen==='article-plain')redirect('/design-preview/fumadocs-reader?fixture=plain');

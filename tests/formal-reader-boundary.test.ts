@@ -31,10 +31,12 @@ test('the formal Help Centre shell does not import the legacy article reader',as
  assert.match(frame,/path==='\/help-centre'/);
 
  const knowledgeHome=await readFile('src/components/home/KnowledgeHome.tsx','utf8');
- assert.match(knowledgeHome,/FullSearchTrigger/);
+ const homeHero=await readFile('src/components/home/KnowledgeHomeHero.tsx','utf8');
+ assert.match(knowledgeHome,/KnowledgeHomeHero/);
+ assert.match(homeHero,/FullSearchTrigger/);
  assert.doesNotMatch(knowledgeHome,/gitbook\/Search\/SearchInput|<SearchInput/);
  assert.match(knowledgeHome,/knowledge-home--editorial/);
- assert.match(knowledgeHome,/home-section-tabs/);
+ assert.match(homeHero,/home-section-tabs/);
  assert.match(knowledgeHome,/home-featured/);
  assert.match(knowledgeHome,/home-document-number/);
  assert.match(knowledgeHome,/home-side/);
