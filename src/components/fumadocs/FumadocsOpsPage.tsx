@@ -1,3 +1,5 @@
+import {FumadocsHomeContent} from './FumadocsKnowledgeHome';
+import {CollectionDirectory,type CollectionDirectoryData} from '../home/CollectionDirectory';
 import {FumadocsDocsLayout as DocsLayout} from './FumadocsDocsLayout';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {MenuItem} from '../../navigation-settings/model';
@@ -12,8 +14,10 @@ import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import '../../app/fumadocs-reader.css';
 
 interface FumadocsOpsPageProps {
+ collection?:boolean;
+ directory?:CollectionDirectoryData;
  data?:OpsPage;
- state:'ready'|'denied'|'unavailable';
+ state:'ready'|'denied'|'unavailable'|'invalid';
  menu?:MenuItem[];
  knowledgeEntry?:string;
  search?:boolean;
@@ -42,7 +46,8 @@ function opsCopy(state:FumadocsOpsPageProps['state'],locale:'zh-CN'|'en'){
  };
 }
 
-export function FumadocsOpsContent({data,state,menu=[],knowledgeEntry,search=false,locale='zh-CN',tabsPathname='/help-centre/ops'}:FumadocsOpsPageProps){
+export function FumadocsOpsContent({collection=false,directory,data,state,menu=[],knowledgeEntry,search=false,locale='zh-CN',tabsPathname='/help-centre/ops'}:FumadocsOpsPageProps){
+ if(collection)return <FumadocsHomeContent menu={menu} account locale={locale}><div data-fumadocs-ops-page=""><CollectionDirectory kind="ops" directory={directory} state={state} menu={menu} search={search} locale={locale}></CollectionDirectory></div></FumadocsHomeContent>;
  const copy=opsCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={opsTree(state==='ready'?data:undefined,locale)}
@@ -54,7 +59,7 @@ export function FumadocsOpsContent({data,state,menu=[],knowledgeEntry,search=fal
   <DocsPage data-fumadocs-ops-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>
    <DocsTitle>{copy.title}</DocsTitle>
    <DocsDescription>{copy.description}</DocsDescription>
-   <DocsBody><div className="not-prose fumadocs-ops-content"><OpsCollection data={data} state={state} locale={locale} withinDocsPage/></div></DocsBody>
+   <DocsBody><div className="not-prose fumadocs-ops-content"><OpsCollection data={data} state={state==='invalid'?'unavailable':state} locale={locale} withinDocsPage/></div></DocsBody>
   </DocsPage>
  </DocsLayout></FumadocsPublicationI18n>;
 }

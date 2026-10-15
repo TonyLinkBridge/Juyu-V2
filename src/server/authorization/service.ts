@@ -91,6 +91,18 @@ export class AuthorizationService {
       return {features,pages,menu};
     },true);
   }
+  async collectionDirectory(kind:'ops'|'reference',locale:'zh-CN'|'en'='zh-CN'){
+    const v=await this.viewer();
+    return this.database.run(v,async c=>{
+      await requireVerifiedReader(c);
+      const sections=await readReaderSections(c);
+      if(kind!=='ops'&&kind!=='reference'||kind==='ops'&&!sections.ops)throw new Error('FORBIDDEN');
+      const features=await readFeatureFlags(c),kinds=await readContentKinds(c);
+      const mapLinks=(nodes:NavigationNode[]):NavigationNode[]=>nodes.map(node=>node.type==='group'?{...node,descendants:mapLinks(node.descendants)}:{...node,href:kind==='ops'?`/help-centre/ops/${encodeURIComponent(node.id)}`:`/help-centre/reference?page=1&article=${encodeURIComponent(node.id)}${locale==='en'?'&lang=en':''}#reference-detail`});
+      const pages=mapLinks(filterTree(await readNavigationTree(c,true,locale),id=>kinds.get(id)===kind));
+      return {features,pages,menu:await readReaderMenu(c,features),canEdit:(await c.query<{allowed:boolean}>('SELECT juyu.is_admin() AS allowed')).rows[0].allowed};
+    },true);
+  }
   async featureConfig(){const v=await this.viewer(true);return this.database.run(v,c=>readFeatureConfig(c),true);}
   async saveFeatureConfig(input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>writeFeatureConfig(c,input));}
   async navigationSettings(){const v=await this.viewer(true);return this.database.run(v,c=>readNavigationSettings(c),true);}

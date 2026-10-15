@@ -16,5 +16,5 @@ export default async function QaCollectionPage({searchParams}:{searchParams:Prom
  catch(error){if(error instanceof Error&&error.message.split(':')[0]==='FORBIDDEN')state='denied';else if(error instanceof Error&&error.message==='INVALID_INPUT')state='invalid';}
  let menu:Awaited<ReturnType<typeof readReaderPresentation>>['items']=[],knowledgeEntry:string|undefined;
  try{const presentation=await readReaderPresentation(locale);menu=presentation.items;knowledgeEntry=presentation.knowledgeEntry;}catch{}
- return <FumadocsQaPage searchEnabled={searchEnabled} data={data} state={state} viewerId={access.viewer.id} initialAnswer={state==='ready'?initialAnswer:undefined} locale={locale} menu={menu} knowledgeEntry={knowledgeEntry}/>;
+ return <FumadocsQaPage collection={params.question===undefined} searchEnabled={searchEnabled} data={data} state={state} viewerId={access.viewer.id} initialAnswer={state==='ready'?initialAnswer:undefined} locale={locale} menu={menu} knowledgeEntry={knowledgeEntry}/>;
 }

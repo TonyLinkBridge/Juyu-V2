@@ -2,7 +2,7 @@ import type {ReactNode} from 'react';
 import {ArrowLeft,ArrowRight} from '@phosphor-icons/react/dist/ssr';
 import {NavigationLink as Link} from '../shell/NavigationLink';
 import {KnowledgeHomeHero} from './KnowledgeHomeHero';
-import {ReaderIcon} from '../../reader/icons';
+import {DirectoryCategoryCards} from './DirectoryCategoryCards';
 import {categoryCards,categoryHref,type CategoryPage} from '../../reader/category-page';
 import type {NavigationNode} from '../../reader/tree';
 import type {MenuItem} from '../../navigation-settings/model';
@@ -31,14 +31,7 @@ export function KnowledgeDirectory({pages,menu,search=true,locale='zh-CN',catego
    </nav>}
    {cards.length>0&&<section aria-labelledby="directory-categories-title">
     <div className="home-section-heading"><h2 id="directory-categories-title">{category?(english?'Subcategories':'子分类'):(english?'Articles':'知识文章')}</h2><span>{english?'Browse approved guidance by topic':'按业务分类查阅正式资料'}</span></div>
-    <div className="directory-category-grid">{cards.map(card=><Link className="directory-category-card" prefetch={false} prefetchOnIntent key={card.id} href={card.href}>
-     {card.iconKey&&<ReaderIcon icon={card.iconKey} size={36} className="directory-category-icon"/>}
-     <div className="directory-category-copy"><h3>{card.title}</h3>
-      <p className="directory-category-topics">{card.topics.length?card.topics.join(' · '):(english?'Browse the approved articles in this topic':'查看本分类下的正式资料')}</p>
-      <p className="directory-category-preview">{card.articles.join(' · ')}</p>
-     </div>
-     <span className="directory-category-action">{english?'Browse topic':'查看分类'}<ArrowRight size={17} aria-hidden="true"/></span>
-    </Link>)}</div>
+    <DirectoryCategoryCards cards={cards} locale={locale}/>
    </section>}
    {articles.length>0&&<section className="directory-articles" aria-labelledby="directory-articles-title">
     <div className="home-section-heading"><h2 id="directory-articles-title">{category?(english?'Articles in this topic':'分类文章'):(cards.length?(english?'Other articles':'其他文章'):(english?'Articles':'知识文章'))}</h2>{category&&<span>{english?`${category.total} articles · Page ${category.page} of ${category.pages}`:`共 ${category.total} 篇 · 第 ${category.page} / ${category.pages} 页`}</span>}</div>

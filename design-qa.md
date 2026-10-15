@@ -115,3 +115,15 @@ No unresolved P0/P1/P2 visual findings. Full assistive-technology certification 
 - Homepage and category overview use the same verified-reader gate and complete authorized category memberships. No database migration or publication/slug mutation.
 - Local verification: production build, lint/typecheck and 592 unit tests passed; 95 isolated database tests passed; 12 desktop/mobile browser cases passed, covering categories, search, theme, empty state, locale, recent history and navigation.
 - In-app browser inspected the local homepage. Formal homepage acceptance follows deployment; local fixtures are not production content.
+
+
+---
+
+## 2026-10-15 — OPS, Reference and Q&A collection entrances
+
+- Reused the approved JUYU editorial header, content tabs and category cards inside the official Fumadocs HomeLayout. OPS/Reference retain original detail destinations; Q&A retains independent links and in-place answers.
+- OPS/Reference categories come from the current authorized publication tree, filtered to their respective kind with all category memberships retained. Scoped title/summary search and pagination operate only on that authorized collection.
+- Q&A uses its existing published question categories. Its overview uses cards; selecting a category or searching switches to compact category filters so answers stay accessible.
+- Preserved reference table filtering, native rich cells, PDF and edit actions on existing selected-reference URLs. No production data writes, slug changes or database migrations.
+- Verification: 595 unit tests and the production build passed; 58 isolated database cases passed; 42 desktop/mobile browser cases passed. In-app browser inspected local OPS/Reference overviews and Q&A overview/expanded answers.
+- Formal OPS/Reference currently show no published content for the tested account. Positive categorized-content flows use disposable database fixtures and local browser fixtures; live empty states and Q&A flows will be checked after deployment.

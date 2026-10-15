@@ -226,3 +226,26 @@
 .knowledge-directory .home-activity>section{min-width:0}
 .knowledge-directory .home-activity .home-recent{margin:0;padding:0;border:0}
 @media(max-width:900px){.knowledge-directory .home-activity{grid-template-columns:1fr;gap:28px}.knowledge-directory .home-activity .home-recent{padding-top:28px;border-top:1px solid var(--color-fd-border)}}
+
+.collection-search{display:flex;gap:12px;align-items:stretch;min-width:0}
+.collection-search input{min-width:0;flex:1;border:1px solid var(--color-fd-border);border-radius:6px;padding:16px 20px;background:var(--color-fd-background);color:var(--color-fd-foreground);font-size:16px}
+.collection-search button{border:0;border-radius:6px;padding:14px 22px;background:var(--action);color:var(--action-text);font-size:15px;font-weight:600;white-space:nowrap}
+.collection-search input:focus-visible,.collection-search button:focus-visible{outline:2px solid var(--juyu-home-accent);outline-offset:3px}
+.qa-directory .qa-view{max-width:none;padding:0;background:transparent;border:0}
+.qa-directory .qa-search{max-width:890px;margin:0 0 30px}
+.qa-directory .qa-category-overview>.directory-category-grid{margin-top:16px}
+.qa-directory .qa-category-overview>a{display:inline-flex;margin-bottom:4px;padding:8px 14px;border:1px solid var(--color-fd-border);border-radius:6px}
+.qa-directory .qa-category-overview>a[aria-current=page]{color:var(--juyu-home-accent);border-color:var(--juyu-home-accent)}
+.qa-directory .directory-category-card{min-height:132px}
+.qa-directory .qa-filter-group{margin-bottom:24px}
+.qa-directory .qa-list-heading{margin-top:32px}
+.qa-directory .qa-questions{border-top:1px solid var(--color-fd-border)}
+.qa-directory .qa-questions>div{border-radius:6px}
+@media(max-width:600px){.collection-search{gap:8px}.collection-search input{padding:14px 12px}.collection-search button{padding:12px}.qa-directory .qa-category-overview .directory-category-grid{grid-template-columns:minmax(0,1fr)}}
+
+.qa-directory .qa-filter-group{display:block}
+.qa-directory .qa-filter-group>strong{display:block;padding:0;margin-bottom:16px;color:var(--color-fd-foreground);font-family:Georgia,'Noto Serif CJK SC','Songti SC',serif;font-size:22px}
+.qa-directory .home-search .qa-search{margin:0;gap:12px}
+.qa-directory .home-search .qa-search input{border-color:var(--color-fd-border);border-radius:6px;padding:16px 20px;background:var(--color-fd-background);color:var(--color-fd-foreground);font-size:16px}
+.qa-directory .home-search .qa-search button{border-radius:6px;padding:14px 22px;background:var(--action);color:var(--action-text);font-size:15px;font-weight:600;white-space:nowrap}
+@media(max-width:600px){.qa-directory .home-search .qa-search{gap:8px}.qa-directory .home-search .qa-search input{padding:14px 12px}.qa-directory .home-search .qa-search button{padding:12px}}

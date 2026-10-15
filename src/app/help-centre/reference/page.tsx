@@ -1,3 +1,5 @@
+import {sectionQuery} from '../../../reader/section-directory';
+import type {CollectionDirectoryData} from '../../../components/home/CollectionDirectory';
 import {requireReaderAccount} from '../../../server/authentication/navigation';
 import {applicationAuthorization} from '../../../server/authorization/application';
 import {referenceQuery} from '../../../server/reference/http';
@@ -12,6 +14,14 @@ export default async function ReferenceCollectionPage({searchParams}:{searchPara
 
  let data:ReferencePage|undefined,detail:ReferenceDetail|undefined,state:'ready'|'denied'|'unavailable'='unavailable',detailState:'idle'|'ready'|'unavailable'='idle';
  const params=await searchParams,locale=params.lang==='en'?'en':'zh-CN';
+
+ if(params.article===undefined){
+  let directory:CollectionDirectoryData|undefined,collectionState:'ready'|'denied'|'unavailable'|'invalid'='unavailable',search=false,menu:Awaited<ReturnType<typeof readReaderPresentation>>['items']=[];
+  try{const query=sectionQuery(params),result=await(await applicationAuthorization()).collectionDirectory('reference',locale);search=result.features.search;menu=result.menu;directory={pages:result.pages,canEdit:result.canEdit,query:{...query,q:search?query.q:''}};collectionState='ready';}
+  catch(error){const code=error instanceof Error?error.message.split(':')[0]:'';if(code==='FORBIDDEN')collectionState='denied';else if(code==='INVALID_INPUT')collectionState='invalid';}
+  if(collectionState!=='ready')try{menu=(await readReaderPresentation(locale)).items;}catch{}
+  return <FumadocsReferencePage collection directory={directory} state={collectionState} locale={locale} menu={menu} search={search}/>;
+ }
 
  try{
   const url=new URL('http://local/');

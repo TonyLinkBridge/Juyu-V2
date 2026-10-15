@@ -1,3 +1,6 @@
+import {QaSearch} from '../qa/QaSearch';
+import {FumadocsHomeContent} from './FumadocsKnowledgeHome';
+import {KnowledgeHomeHero} from '../home/KnowledgeHomeHero';
 import {FumadocsDocsLayout as DocsLayout} from './FumadocsDocsLayout';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {MenuItem} from '../../navigation-settings/model';
@@ -12,6 +15,7 @@ import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import '../../app/fumadocs-reader.css';
 
 interface FumadocsQaPageProps {
+ collection?:boolean;
  data?:QaPage;
  initialAnswer?:Publication;
  previewAnswers?:Record<string,Publication>;
@@ -55,8 +59,13 @@ function qaCopy(state:FumadocsQaPageProps['state'],locale:'zh-CN'|'en'){
  };
 }
 
-export function FumadocsQaContent({data,initialAnswer,previewAnswers,viewerId,state,menu=[],knowledgeEntry,searchEnabled=true,locale='zh-CN',tabsPathname='/help-centre/qa'}:FumadocsQaContentProps){
+export function FumadocsQaContent({collection=false,data,initialAnswer,previewAnswers,viewerId,state,menu=[],knowledgeEntry,searchEnabled=true,locale='zh-CN',tabsPathname='/help-centre/qa'}:FumadocsQaContentProps){
  const copy=qaCopy(state,locale);
+ if(collection)return <FumadocsHomeContent menu={menu} account locale={locale}><div className="knowledge-home knowledge-home--editorial knowledge-directory collection-directory qa-directory" data-fumadocs-qa-page="">
+ <KnowledgeHomeHero menu={menu} search={state==='ready'&&!!data&&searchEnabled} searchContent={data?<QaSearch data={data} locale={locale}/>:undefined} locale={locale} directory activeHref="/help-centre/qa" title={copy.title} description={copy.description}/>
+ <div className="home-content"><QaView searchEnabled={searchEnabled} data={data} state={state} initialAnswer={initialAnswer} previewAnswers={previewAnswers} viewerId={viewerId} locale={locale} withinDocsPage directory showSearch={false}/></div>
+ </div></FumadocsHomeContent>;
+
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={qaTree(state==='ready'?data:undefined,locale)}
   tabs={fumadocsContentTabs(menu,locale,{path:'/help-centre/qa',pathname:tabsPathname},knowledgeEntry)}

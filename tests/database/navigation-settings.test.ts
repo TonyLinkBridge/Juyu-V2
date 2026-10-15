@@ -18,7 +18,7 @@ const admin:Viewer={id:'a',role:'admin',companyVerified:true},reviewer:Viewer={.
 const service=(v:Viewer=admin)=>new AuthorizationService(db,async()=>v);
 const entry=(page:'home'|'ops'|'reference'|'qa'|'favorites'|'recent'|'forms'='home'):NavigationEntry=>({id:randomUUID(),label:page,enabled:true,roles:['support','ops','admin'],target:{type:'page',page}});
 const category=(id= randomUUID(),parentId:string|null=null,audience='staff')=>db.run(admin,c=>writeCategoryDefinition(c,id,{expectedVersion:null,name:'Category',parentId,position:0,audience,enabled:true}));
-async function published(categoryIds:string[]=[],audience:'staff'|'ops'|'admin'='staff') {const d=await repo.create({id:randomUUID(),kind:'article',title:'Formal',body:'Published body',audience,categoryIds},admin);await service().submitReview(d.id,{expectedSequence:0,reviewerId:'b'});await service(reviewer).decideReview(d.id,{expectedSequence:1,action:'approve'});await service().changePublication(d.id,{expectedSequence:2,action:'queue'});await service().changePublication(d.id,{expectedSequence:3,action:'publish'});return (await repo.getForManagement(d.id,admin))!;}
+async function published(categoryIds:string[]=[],audience:'staff'|'ops'|'admin'='staff',kind:'article'|'ops'|'reference'='article') {const d=await repo.create({id:randomUUID(),kind,title:'Formal',body:'Published body',audience,categoryIds},admin);await service().submitReview(d.id,{expectedSequence:0,reviewerId:'b'});await service(reviewer).decideReview(d.id,{expectedSequence:1,action:'approve'});await service().changePublication(d.id,{expectedSequence:2,action:'queue'});await service().changePublication(d.id,{expectedSequence:3,action:'publish'});return (await repo.getForManagement(d.id,admin))!;}
 before(async()=>{fixture=await temporaryDatabase();await migrate(fixture.pool);await fixture.pool.query("INSERT INTO juyu.members(clerk_user_id,display_name,observed_role,verified_email,observed_at) VALUES('a','Admin','admin','a@example.test',now()),('b','Reviewer','admin','b@example.test',now()),('s','Support','support','s@example.test',now()),('o','Ops','ops','o@example.test',now())");const rp=randomBytes(24).toString('hex'),ip=randomBytes(24).toString('hex');await fixture.pool.query(`CREATE ROLE navigation_runtime LOGIN PASSWORD '${rp}' IN ROLE juyu_runtime; CREATE ROLE navigation_issuer LOGIN PASSWORD '${ip}' IN ROLE juyu_context_issuer`);runtime=fixture.connectAs('navigation_runtime',rp);issuer=fixture.connectAs('navigation_issuer',ip);db=new ScopedDatabase(runtime,issuer);repo=new DocumentRepository(db);});
 after(async()=>{await runtime?.end();await issuer?.end();await fixture?.close();});
 beforeEach(async()=>{await fixture.pool.query('TRUNCATE juyu.documents,juyu.settings,juyu.categories CASCADE');});
@@ -101,4 +101,18 @@ test('knowledge directory keeps all authorized category memberships and excludes
  assert.equal(categoryPage(directory.pages,first.id)?.items[0].href,'/help-centre/articles/'+encodeURIComponent(slug));
  await fixture.pool.query("UPDATE juyu.members SET verified_email=null WHERE clerk_user_id='s'");
  try{await assert.rejects(service(support).knowledgeDirectory(),/FORBIDDEN/);await assert.rejects(service(support).home(),/FORBIDDEN/);}finally{await fixture.pool.query("UPDATE juyu.members SET verified_email='s@example.test' WHERE clerk_user_id='s'");}
+});
+
+
+test('OPS and Reference directories use only their own authorized published categories and original destinations',async()=>{
+ const group=await category(),privateGroup=await category(randomUUID(),null,'admin');
+ const operation=await published([group.id],'ops','ops');
+ const reference=await published([group.id],'staff','reference');
+ const secret=await published([privateGroup.id],'staff','reference');await published([group.id]);
+ const opsDirectory=await service(ops).collectionDirectory('ops');const opsPage=categoryPage(opsDirectory.pages,group.id);
+ assert.deepEqual(opsPage?.items.map(item=>item.id),[operation.id]);assert.equal(opsPage?.items[0].href,'/help-centre/ops/'+operation.id);
+ await assert.rejects(service(support).collectionDirectory('ops'),/FORBIDDEN/);
+ const references=await service(support).collectionDirectory('reference');const items=categoryPage(references.pages,group.id)?.items;
+ assert.deepEqual(items?.map(item=>item.id),[reference.id]);assert.equal(items?.[0].href,'/help-centre/reference?page=1&article='+reference.id+'#reference-detail');assert.ok(!JSON.stringify(references).includes(secret.id));
+ await fixture.pool.query("UPDATE juyu.members SET verified_email=null WHERE clerk_user_id='s'");try{await assert.rejects(service(support).collectionDirectory('reference'),/FORBIDDEN/);}finally{await fixture.pool.query("UPDATE juyu.members SET verified_email='s@example.test' WHERE clerk_user_id='s'");}
 });

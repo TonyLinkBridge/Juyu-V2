@@ -1,3 +1,4 @@
+import {sectionQuery} from '../../../reader/section-directory';
 import type {Root} from 'fumadocs-core/page-tree';
 import {FumadocsDocsLayout as DocsLayout} from '../../../components/fumadocs/FumadocsDocsLayout';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle,PageLastUpdate} from 'fumadocs-ui/layouts/docs/page';
@@ -235,8 +236,9 @@ function fixture(kind:'default'|'plain'='default'){
  </DocsLayout></FumadocsPublicationI18n>;
 }
 
-export default async function FumadocsReaderPreview({searchParams}:{searchParams:Promise<{article?:string|string[];fixture?:string|string[];lang?:string|string[]}>}){
- const {article:requested,fixture:fixtureKind}=await searchParams;
+export default async function FumadocsReaderPreview({searchParams}:{searchParams:Promise<{article?:string|string[];fixture?:string|string[];lang?:string|string[];collection?:string;category?:string;q?:string;page?:string;empty?:string;state?:string}>}){
+ const previewParams=await searchParams;
+ const {article:requested,fixture:fixtureKind}=previewParams;
  if(requested===undefined){
   if(process.env.NODE_ENV!=='development'||process.env.JUYU_DESIGN_PREVIEW!=='true')notFound();
   if(fixtureKind===undefined)return fixture();
@@ -245,6 +247,20 @@ export default async function FumadocsReaderPreview({searchParams}:{searchParams
   if(fixtureKind==='directory-error')return <FumadocsDirectoryContent pages={[]} features={{search:true}} failed retryHref={`${path}?fixture=directory-error`}/>;
   if(fixtureKind==='home')return <FumadocsKnowledgeHomeContent pages={directoryPages} menu={homeMenu} latest={[{id:'fumadocs-preview',title:'如何修改账户邮箱',updated:'2026-09-25T01:00:00.000Z'}]} recent={[{id:'fumadocs-preview',title:'如何修改账户邮箱',kind:'article',revision:1,publicationNumber:1,tags:['账户安全'],viewedRevision:1,viewedAt:'2026-09-25T02:00:00.000Z'}]} search showRecent locale="zh-CN"/>;
   if(fixtureKind==='search')return <FumadocsSearchContent pages={directoryPages} features={{search:true,analytics:false}} search={fixtureSearch} scope="all" retryHref={`${path}?fixture=search`}/>;
+  if(previewParams.collection==='1'){
+   if(fixtureKind==='qa'){
+    let items=fixtureQaData.items;if(previewParams.category!==undefined)items=items.filter(item=>item.category===previewParams.category);
+    if(previewParams.q)items=items.filter(item=>item.title.includes(previewParams.q!));
+    return <FumadocsQaContent collection data={{...fixtureQaData,items,total:items.length,category:previewParams.category,q:previewParams.q}} previewAnswers={fixtureQaAnswers} state="ready" menu={homeMenu} searchEnabled locale={previewParams.lang==='en'?'en':'zh-CN'}/>;
+   }
+   const kind=fixtureKind==='ops'?'ops':'reference',locale=previewParams.lang==='en'?'en':'zh-CN';
+   const query=sectionQuery(Object.fromEntries(Object.entries(previewParams).filter(([key])=>['page','category','q','lang'].includes(key))));
+   const source=kind==='ops'?fixtureOps.items:fixtureReferenceData.items;
+   const pages:NavigationNode[]=previewParams.empty==='1'?[]:[{type:'group',id:'00000000-0000-4000-8000-000000000020',title:kind==='ops'?'运营流程':'业务速查',iconKey:'shield',descendants:source.map(item=>({type:'document',id:item.id,title:item.title,description:'已审核的正式资料',href:kind==='ops'?'/help-centre/ops/'+item.id:'/help-centre/reference?page=1&article='+item.id+'#reference-detail'}))}];
+   const state=previewParams.state==='denied'?'denied':previewParams.state==='unavailable'?'unavailable':'ready';
+   if(fixtureKind==='ops')return <FumadocsOpsContent collection directory={{pages,query}} state={state} menu={homeMenu} search locale={locale}/>;
+   if(fixtureKind==='reference')return <FumadocsReferenceContent collection directory={{pages,query}} state={state} menu={homeMenu} search locale={locale}/>;
+  }
   if(fixtureKind==='ops')return <FumadocsOpsContent data={fixtureOps} state="ready" menu={homeMenu} knowledgeEntry="/help-centre/articles/fumadocs-preview" search locale="zh-CN" tabsPathname={path}/>;
   if(fixtureKind==='reference')return <FumadocsReferenceContent data={fixtureReferenceData} detail={fixtureReferenceDetail} state="ready" detailState="ready" menu={homeMenu} knowledgeEntry="/help-centre/articles/fumadocs-preview" search locale="zh-CN" tabsPathname={path}/>;
   if(fixtureKind==='qa')return <FumadocsQaContent data={fixtureQaData} previewAnswers={fixtureQaAnswers} state="ready" menu={homeMenu} knowledgeEntry="/help-centre/articles/fumadocs-preview" searchEnabled locale="zh-CN" tabsPathname={path}/>;

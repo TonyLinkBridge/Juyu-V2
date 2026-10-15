@@ -1,3 +1,5 @@
+import {FumadocsHomeContent} from './FumadocsKnowledgeHome';
+import {CollectionDirectory,type CollectionDirectoryData} from '../home/CollectionDirectory';
 import {FumadocsDocsLayout as DocsLayout} from './FumadocsDocsLayout';
 import {DocsBody,DocsDescription,DocsPage,DocsTitle} from 'fumadocs-ui/layouts/docs/page';
 import type {MenuItem} from '../../navigation-settings/model';
@@ -11,9 +13,11 @@ import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import '../../app/fumadocs-reader.css';
 
 interface FumadocsReferencePageProps {
+ collection?:boolean;
+ directory?:CollectionDirectoryData;
  data?:ReferencePage;
  detail?:ReferenceDetail;
- state:'ready'|'denied'|'unavailable';
+ state:'ready'|'denied'|'unavailable'|'invalid';
  detailState?:'idle'|'ready'|'unavailable';
  menu?:MenuItem[];
  knowledgeEntry?:string;
@@ -48,7 +52,8 @@ function referenceCopy(state:FumadocsReferencePageProps['state'],locale:'zh-CN'|
  };
 }
 
-export function FumadocsReferenceContent({data,detail,state,detailState='idle',menu=[],knowledgeEntry,search=false,locale='zh-CN',tabsPathname='/help-centre/reference'}:FumadocsReferencePageProps){
+export function FumadocsReferenceContent({collection=false,directory,data,detail,state,detailState='idle',menu=[],knowledgeEntry,search=false,locale='zh-CN',tabsPathname='/help-centre/reference'}:FumadocsReferencePageProps){
+ if(collection)return <FumadocsHomeContent menu={menu} account locale={locale}><div data-fumadocs-reference-page=""><CollectionDirectory kind="reference" directory={directory} state={state} menu={menu} search={search} locale={locale}>{directory?.canEdit&&<p className="reader-actions"><a className="secondary-link" href="/admin/editor?kind=reference">{locale==='en'?'Create reference article':'新建速查资料'}</a></p>}</CollectionDirectory></div></FumadocsHomeContent>;
  const copy=referenceCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
   tree={referenceTree(state==='ready'?data:undefined,locale)}
@@ -60,7 +65,7 @@ export function FumadocsReferenceContent({data,detail,state,detailState='idle',m
   <DocsPage data-fumadocs-reference-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>
    <DocsTitle>{copy.title}</DocsTitle>
    <DocsDescription>{copy.description}</DocsDescription>
-   <DocsBody><div className="not-prose fumadocs-reference-content"><ReferenceView data={data} detail={detail} state={state} detailState={detailState} locale={locale} withinDocsPage/></div></DocsBody>
+   <DocsBody><div className="not-prose fumadocs-reference-content"><ReferenceView data={data} detail={detail} state={state==='invalid'?'unavailable':state} detailState={detailState} locale={locale} withinDocsPage/></div></DocsBody>
   </DocsPage>
  </DocsLayout></FumadocsPublicationI18n>;
 }

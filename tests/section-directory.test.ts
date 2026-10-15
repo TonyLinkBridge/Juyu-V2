@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {sectionQuery,sectionPage,sectionHref} from '../src/reader/section-directory.ts';
+import type {NavigationNode} from '../src/reader/tree.ts';
+const id='00000000-0000-4000-8000-000000000001';
+const doc={type:'document' as const,id:'old',title:'原流程',href:'/help-centre/ops/old'};
+const tree:NavigationNode[]=[{type:'group',id,title:'后台分类',descendants:[doc]},doc];
+test('section directory uses authorized backend groups and preserves article destinations',()=>{const page=sectionPage(tree,sectionQuery({category:id}));assert.equal(page?.category?.title,'后台分类');assert.equal(page?.items[0].href,doc.href);assert.equal(page?.total,1);assert.equal(sectionPage(tree,sectionQuery({}))?.total,1);assert.equal(sectionPage(tree,sectionQuery({category:'00000000-0000-4000-8000-000000000002'})),null);});
+test('section search is scoped to the supplied authorized collection and paginates without duplicates',()=>{const page=sectionPage(tree,sectionQuery({q:'流程',page:'99'}));assert.equal(page?.total,1);assert.equal(page?.page,1);assert.equal(sectionPage(tree,sectionQuery({q:'missing'}))?.total,0);assert.equal(sectionHref('reference',{page:2,category:id,q:'费用',locale:'en'}),'/help-centre/reference?category='+id+'&q=%E8%B4%B9%E7%94%A8&lang=en&page=2');});
+test('section filters reject repeated malformed and unrelated parameters',()=>{for(const query of [{category:'../secret'},{q:['a','b']},{page:'0'},{lang:'xx'},{unknown:'x'}])assert.throws(()=>sectionQuery(query),/INVALID_INPUT/);});
