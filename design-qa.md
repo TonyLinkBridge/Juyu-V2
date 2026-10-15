@@ -127,3 +127,15 @@ No unresolved P0/P1/P2 visual findings. Full assistive-technology certification 
 - Preserved reference table filtering, native rich cells, PDF and edit actions on existing selected-reference URLs. No production data writes, slug changes or database migrations.
 - Verification: 595 unit tests and the production build passed; 58 isolated database cases passed; 42 desktop/mobile browser cases passed. In-app browser inspected local OPS/Reference overviews and Q&A overview/expanded answers.
 - Formal OPS/Reference currently show no published content for the tested account. Positive categorized-content flows use disposable database fixtures and local browser fixtures; live empty states and Q&A flows will be checked after deployment.
+
+
+---
+
+## 2026-10-15 — Image actions across readers and previews
+
+- Removed original-file/download actions from the shared image gallery used by Q&A, structured reading, draft, review and historical body previews. Captions, light/dark sources, zoom, gallery navigation and close/focus behavior remain.
+- Images intentionally rendered as filenames no longer gain an extra download link. Explicit file attachments retain their open/download actions; video/audio actions, historical attachment inventories and the admin media library are unchanged.
+- Removed separate original-cover links in review and history previews while retaining cover metadata and private revision-scoped image delivery.
+- Verification: 595 unit tests, typecheck and production build passed. Lint exited successfully with one existing anonymous-export warning in the fixture TypeScript loader. All 128 relevant desktop/mobile browser cases passed, including Q&A native/legacy images, draft/history previews, theme/gallery behavior, attachment routes and admin media downloads.
+- In-app browser inspected local Q&A and media previews using test-only data; image zoom/close worked and a test attachment was downloaded. Production real-account acceptance follows deployment and is recorded separately in ignored verification artifacts.
+- No database, access-control, asset API, article link or publication state changes.

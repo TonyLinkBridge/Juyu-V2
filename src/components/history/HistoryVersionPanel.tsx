@@ -10,7 +10,7 @@ import {MediaBlocks} from '../gitbook/Media/MediaBlocks';
 const statusLabels={draft:'草稿',in_review:'审核中',changes_requested:'待修改',approved:'已批准',queued:'待发布',published:'已发布'};
 function HistoryCover({url,alt,position}:{url:string;alt:string;position:number}){
  const [failed,setFailed]=useState(false);
- return <figure className="review-decision-cover">{failed?<p>历史封面暂时无法读取。</p>:<img src={url} alt={alt||'历史版本封面'} style={{objectPosition:`center ${position}%`}} onError={()=>setFailed(true)}/>}<figcaption><a href={url} target="_blank" rel="noopener noreferrer">打开历史封面</a></figcaption></figure>;
+ return <figure className="review-decision-cover">{failed?<p>历史封面暂时无法读取。</p>:<img src={url} alt={alt||'历史版本封面'} style={{objectPosition:`center ${position}%`}} onError={()=>setFailed(true)}/>}<figcaption>{alt||'历史版本封面'}</figcaption></figure>;
 }
 export function HistoryVersionPanel({initial}:{initial:HistoryVersion}){
  const [detail,setDetail]=useState(initial),[confirming,setConfirming]=useState(false),[busy,setBusy]=useState<'read'|'write'|''>(''),[uncertain,setUncertain]=useState(false),[blocked,setBlocked]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[confirmedUnread,setConfirmedUnread]=useState(false);

@@ -48,9 +48,9 @@ test('adjacent images open as a gallery and theme image follows the reader theme
  await page.route(url=>url.pathname==='/help-centre',route=>route.fulfill({contentType:'text/html',body:`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${bundle.css}</style></head><body><div id="presentation"></div><script id="data" type="application/json">${JSON.stringify({pages:[{type:'document',id:'media-test',title:'主题图片',href:'/help-centre?article=media-test'}],requested:'media-test',article:{id:'media-test',title:'主题图片',revision:1,body:'正文',blocks}})}</script><script>${bundle.script}</script></body></html>`}));
  await page.route('**/api/assets/**',route=>route.fulfill({path:'tests/fixtures/article-cover.png',contentType:'image/png'}));
  await page.goto('/help-centre');
- const gallery=page.locator('.reader-image-gallery.has-multiple');await expect(gallery).toHaveCount(1);
+ const gallery=page.locator('.reader-image-gallery.has-multiple');await expect(gallery).toHaveCount(1);await expect(gallery.getByRole('link')).toHaveCount(0);
  await expect(gallery.getByAltText('主图')).toHaveAttribute('src',new RegExp(asset));
- await page.getByRole('radio',{name:'深色',exact:true}).check();await expect(gallery.getByAltText('主图')).toHaveAttribute('src',new RegExp(dark));
+ await page.getByRole('button',{name:'Dark',exact:true}).click();await expect(gallery.getByAltText('主图')).toHaveAttribute('src',new RegExp(dark));
  await gallery.getByRole('button',{name:'放大图片：主图'}).click();const dialog=page.getByRole('dialog',{name:'图片放大查看'});await expect(dialog).toBeVisible();await expect(dialog.getByText('1 / 2')).toBeVisible();
  await dialog.getByRole('button',{name:'下一张'}).click();await expect(dialog.getByText('2 / 2')).toBeVisible();await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();await expect(gallery.getByRole('button',{name:'放大图片：补充图'})).toBeFocused();
 });
@@ -58,7 +58,7 @@ test('native article images use the same zoom viewer without leaving the page',a
  const body='JUYU_BLOCKNOTE_V1\n'+JSON.stringify([{id:'native-image',type:'image',props:{url:'/api/assets/'+asset,name:'正文图片',caption:'正文截图'},children:[]}]);
  await page.route(url=>url.pathname==='/help-centre',route=>route.fulfill({contentType:'text/html',body:`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${bundle.css}</style></head><body><div id="presentation"></div><script id="data" type="application/json">${JSON.stringify({pages:[{type:'document',id:'media-test',title:'正文图片',href:'/help-centre?article=media-test'}],requested:'media-test',article:{id:'media-test',title:'正文图片',revision:1,body,blocks:[]}})}</script><script>${bundle.script}</script></body></html>`}));
  await page.route('**/api/assets/**',route=>route.fulfill({path:'tests/fixtures/article-cover.png',contentType:'image/png'}));
- await page.goto('/help-centre');await page.getByRole('button',{name:'放大图片：正文图片'}).click();
+ await page.goto('/help-centre');await expect(page.locator('.reader-image-gallery').getByRole('link')).toHaveCount(0);await page.getByRole('button',{name:'放大图片：正文图片'}).click();
  const dialog=page.getByRole('dialog',{name:'图片放大查看'});await expect(dialog).toBeVisible();await dialog.getByRole('button',{name:'关闭图片'}).click();await expect(dialog).not.toBeVisible();
 });
 
@@ -85,3 +85,16 @@ test('native video actually plays locally generated WebM bytes on both viewports
 test('media reload uses custom confirmation and cancellation retains changes',async({page})=>{await editor(page);await page.getByRole('button',{name:'新增表格',exact:true}).click();await page.getByLabel('第 1 行第 1 列').fill('不要丢掉');page.on('dialog',d=>d.dismiss());await page.getByRole('button',{name:'重新载入',exact:true}).click();await expect(page.getByRole('dialog')).toBeVisible();await page.getByRole('dialog').getByRole('button',{name:'取消',exact:true}).click();await expect(page.getByLabel('第 1 行第 1 列')).toHaveValue('不要丢掉');});
 
 test('confirmed media reload does not prompt a second native confirmation',async({page})=>{await editor(page);await page.getByRole('button',{name:'新增表格',exact:true}).click();let native=0;page.on('dialog',async d=>{native++;await d.dismiss();});await page.getByRole('button',{name:'重新载入',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'确认继续'}).click();await expect(page.getByLabel('第 1 行第 1 列')).toHaveCount(0);expect(native).toBe(0);});
+
+test('draft image preview retains zoom without file actions and preserves attachment downloads',async({page})=>{
+ const seed=structuredClone(initial);seed.blocks=[{id:'preview-image',type:'image',assetId:asset,caption:'预览图片说明',alt:'预览图片'},{id:'preview-file',type:'file',assetId:asset,caption:'附件保留下载',alt:'测试附件'}];
+ await editor(page,false,seed);await page.getByText('预览内容块（未发布）',{exact:true}).click();
+ const gallery=page.locator('.reader-image-gallery');await expect(gallery.getByRole('link')).toHaveCount(0);await expect(gallery).toContainText('预览图片说明');
+ await expect(page.locator('.media-file a[download]')).toHaveAttribute('href','/api/admin/assets/'+asset+'?download=1');
+ await gallery.getByRole('button',{name:'放大图片：预览图片'}).click();const dialog=page.getByRole('dialog',{name:'图片放大查看'});await expect(dialog).toBeVisible();await dialog.getByRole('button',{name:'关闭图片'}).click();await expect(dialog).toBeHidden();
+});
+test('images intentionally shown as filenames have no extra download action',async({page})=>{
+ const body='JUYU_BLOCKNOTE_V1\n'+JSON.stringify([{id:'hidden-image',type:'image',props:{url:'/api/assets/'+asset,name:'仅显示名称的图片',caption:'隐藏缩略图',showPreview:false},children:[]}]);
+ await page.route(url=>url.pathname==='/help-centre',route=>route.fulfill({contentType:'text/html',body:`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><style>${bundle.css}</style></head><body><div id="presentation"></div><script id="data" type="application/json">${JSON.stringify({pages:[{type:'document',id:'media-test',title:'正文',href:'/help-centre?article=media-test'}],requested:'media-test',article:{id:'media-test',title:'正文',revision:1,body}})}</script><script>${bundle.script}</script></body></html>`}));
+ await page.goto('/help-centre');await expect(page.getByRole('link',{name:'仅显示名称的图片',exact:true})).toBeVisible();await expect(page.locator('.native-file a[download]')).toHaveCount(0);
+});

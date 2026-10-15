@@ -31,7 +31,7 @@ export function StructuredDocument({blocks,documentId,revision,admin=false,local
     const url=mediaAssetUrl(id,admin,documentId,revision),p=b.props;
     result.push(<Fragment key={b.id}><figure className="native-file" style={style(p)}>
      {b.type==='image'&&p.showPreview!==false?<img src={url} alt={p.name} loading="lazy" style={{width:p.previewWidth,maxWidth:'100%'}}/>:b.type==='video'&&p.showPreview!==false?<video src={url} controls playsInline preload="metadata" style={{width:p.previewWidth,maxWidth:'100%'}} aria-label={p.name}><track kind="captions"/></video>:b.type==='audio'&&p.showPreview!==false?<audio src={url} controls preload="metadata" aria-label={p.name}/>:<a href={url} target="_blank" rel="noopener noreferrer">{p.name||(locale==='en'?'Open file':'打开文件')}</a>}
-     <figcaption>{p.caption}<a className="native-file-download" href={`${url}?download=1`} download>{locale==='en'?'Download':'下载'}{p.name?' '+p.name:locale==='en'?' file':'文件'}</a></figcaption>
+     {(p.caption||b.type!=='image')&&<figcaption>{p.caption}{b.type!=='image'&&<a className="native-file-download" href={`${url}?download=1`} download>{locale==='en'?'Download':'下载'}{p.name?' '+p.name:locale==='en'?' file':'文件'}</a>}</figcaption>}
     </figure>{children}</Fragment>);continue;
    }
    if(b.type==='divider'){result.push(<Fragment key={b.id}><hr/>{children}</Fragment>);continue;}

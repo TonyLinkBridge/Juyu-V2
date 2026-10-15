@@ -104,3 +104,11 @@ test('official add-filter menu and clear-all retain sorting and the chosen view'
  await expect(page.getByRole('link',{name:'清除筛选',exact:true})).toHaveAttribute('href','/admin/media?sort=size&direction=asc&view=list');
  await page.getByRole('button',{name:'清除全部',exact:true}).click();await expect(page).toHaveURL(/sort=size&direction=asc&view=list$/);
 });
+
+test('media management retains original preview and download actions for image files',async({page})=>{
+ await page.route('**/api/admin/assets/**',r=>r.fulfill({path:'tests/fixtures/article-cover.png',contentType:'image/png'}));
+ await mount(page,{...data,items:items.slice(0,1),total:1,selected:items[0]});
+ const detail=page.getByRole('complementary',{name:'文件详情'});
+ await expect(detail.getByRole('link',{name:'预览原文件',exact:true})).toHaveAttribute('href','/api/admin/assets/aaaaaaaa-aaaa-4aaa-8aaa-000000000000');
+ await expect(detail.getByRole('link',{name:'下载文件',exact:true})).toHaveAttribute('href','/api/admin/assets/aaaaaaaa-aaaa-4aaa-8aaa-000000000000?download=1');
+});

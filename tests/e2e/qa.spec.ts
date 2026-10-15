@@ -30,3 +30,23 @@ test('Q&A expands the selected answer in place without navigating away',async({p
 test('actual Q&A routes reject unconfigured forged identities',async({page,request})=>{
  const r=await request.get('/api/qa',{headers:{'x-role':'admin','x-user-id':'a'}});expect(r.status()).toBe(503);expect(r.headers()['cache-control']).toBe('private, no-store');await page.goto('/help-centre/qa');await expect(page).toHaveURL(/\/sign-in$/);
 });
+
+for(const format of ['native','legacy'] as const)test(`Q&A ${format} images keep zoom and captions without file actions while attachments remain downloadable`,async({page})=>{
+ const asset='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+ const image={id:'qa-picture',type:'image',assetId:asset,alt:'问答截图',caption:'问答图片说明'};
+ const file={id:'qa-attachment',type:'file',assetId:asset,alt:'附件说明',caption:'供下载的附件'};
+ const body=format==='native'?'JUYU_BLOCKNOTE_V1\n'+JSON.stringify([
+  {id:'qa-picture',type:'image',props:{url:'/api/assets/'+asset,name:'问答截图',caption:'问答图片说明'},children:[]},
+  {id:'qa-attachment',type:'file',props:{url:'/api/assets/'+asset,name:'附件说明',caption:'供下载的附件'},children:[]},
+ ]):'标准答案';
+ await page.route('**/api/qa/qa-local',route=>route.fulfill({json:{id:'qa-local',title:'如何核对账户？',revision:1,body,blocks:format==='legacy'?[image,file]:[]}}));
+ await page.route('**/api/assets/**',route=>route.fulfill({path:'tests/fixtures/article-cover.png',contentType:'image/png'}));
+ await mount(page);await page.getByRole('button',{name:'如何核对 <script>账户</script>？'}).click();
+ const gallery=page.locator('.reader-image-gallery');await expect(gallery.getByAltText('问答截图')).toBeVisible();
+ await expect(gallery).toContainText('问答图片说明');await expect(gallery.getByRole('link')).toHaveCount(0);
+ const attachment=page.locator(format==='native'?'.native-file':'.media-file');
+ await expect(attachment.locator('a[download]')).toHaveAttribute('href','/api/assets/'+asset+'?download=1');
+ const before=page.url();await gallery.getByRole('button',{name:'放大图片：问答截图'}).click();
+ const dialog=page.getByRole('dialog',{name:'图片放大查看'});await expect(dialog).toBeVisible();await expect(dialog.getByAltText('问答截图')).toBeVisible();
+ await dialog.getByRole('button',{name:'关闭图片'}).click();await expect(dialog).toBeHidden();expect(page.url()).toBe(before);
+});
