@@ -29,3 +29,11 @@ test('dynamic routes and anchors are populated from the database content source'
  assert.deepEqual(options.meta?.['help-centre/reference']?.queries,[{article:'ref-one'}]);
  assert.equal(publicationLinkFile(publications[2]).url,'/help-centre/qa?question=qa-one&lang=en#qa-qa-one');
 });
+
+for(const slug of ['签约店铺（个人-企业）','为什么触发强制登录验证？']){
+ test(`published link validation uses the original stored URL: ${slug}`,()=>{
+  const publication={id:'legacy',kind:'article' as const,slug,title:slug,body:encodeEditorBody([]),revision:1};
+  assert.equal(publicationLinkFile(publication).url,`/help-centre/articles/${encodeURIComponent(slug)}`);
+  assert.deepEqual(publicationLinkScanOptions([publication]).populate?.['help-centre/articles/[articleId]'],[{value:{articleId:slug},hashes:[]}]);
+ });
+}

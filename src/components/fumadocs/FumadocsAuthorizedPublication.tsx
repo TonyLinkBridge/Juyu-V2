@@ -31,7 +31,7 @@ export async function FumadocsAuthorizedPublication({articleId,mode='preview',ro
  const formal=mode==='formal';
  let requestedArticleId=articleId;
  if(formal)try{requestedArticleId=publicationPathValue(articleId);}catch{notFound();}
- if(!requestedArticleId.trim()||requestedArticleId.length>(formal?250:200))notFound();
+ if(!requestedArticleId.trim()||[...requestedArticleId].length>(formal?250:200))notFound();
  let result:Awaited<ReturnType<Awaited<ReturnType<typeof applicationAuthorization>>['reader']>>;
  try{
   const authorization=await applicationAuthorization();

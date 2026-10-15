@@ -1,10 +1,14 @@
 export type PublicationSlugSection='article'|'ops';
 
-/** Next can expose a dynamic path segment in its percent-encoded form. */
+/**
+ * Decode once and preserve a stored slug exactly. Historical slugs predate the
+ * current NFKC creation rule; normalizing them here would break immutable URLs.
+ * This validates a single safe database path segment, not a new title.
+ */
 export function publicationPathValue(value:string):string{
  try{
   const decoded=decodeURIComponent(value);
-  if(publicationSlug(decoded)!==decoded)throw new Error('INVALID_PUBLICATION_PATH');
+  if(!decoded||[...decoded].length>250||decoded==='.'||decoded==='..'||/[\s/\\?#%\u0000-\u001f\u007f]/u.test(decoded))throw new Error('INVALID_PUBLICATION_PATH');
   return decoded;
  }catch{throw new Error('INVALID_PUBLICATION_PATH');}
 }
@@ -22,6 +26,6 @@ export function publicationSlug(title:string):string{
 }
 
 export function publicationSlugPath(slug:string,section:PublicationSlugSection='article'):string{
- const value=publicationSlug(slug);
+ const value=publicationPathValue(encodeURIComponent(slug));
  return `${section==='ops'?'/help-centre/ops/':'/help-centre/articles/'}${encodeURIComponent(value)}`;
 }
