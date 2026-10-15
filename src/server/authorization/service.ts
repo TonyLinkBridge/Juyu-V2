@@ -39,6 +39,7 @@ import type {ArticlePresentation} from '../../domain/presentation.ts';
 import type {TitleSearch} from '../../reader/search.ts';
 import {searchPublications} from '../search/repository.ts';
 import type {PoolClient} from 'pg';
+import type {MenuItem} from '../../navigation-settings/model.ts';
 import {publicationDescription,type Publication} from '../../reader/body.ts';
 import {firstTreePage,selectTreePage} from '../../reader/tree.ts';
 import {buildNavigationTree,type NavigationNode,type NavigationCategory,type NavigationMembership} from '../../reader/tree.ts';
@@ -86,8 +87,8 @@ export class AuthorizationService {
   async readerChrome(locale:'zh-CN'|'en'='zh-CN'){
     const v=await this.viewer();
     return this.database.run(v,async c=>{
-      const items=await readReaderMenu(c);
       const features=await readFeatureFlags(c);
+      const items=await readReaderMenu(c,features);
       const knowledgeEntry=firstTreePage(await readKnowledgeTree(c,locale))?.href??(locale==='en'?'/help-centre/library?lang=en':'/help-centre/library');
       return {items,features,knowledgeEntry};
     },true);
@@ -172,7 +173,7 @@ export class AuthorizationService {
       return readNavigationTree(client);
     },true);
   }
-async reader(requested:string|string[]|undefined,requestedSection?:'article'|'ops'):Promise<{viewerId:string;features:Awaited<ReturnType<typeof readFeatureFlags>>;section?:'ops';pages:NavigationNode[];article:Publication|null;favorite?:import('../../favorites/model.ts').FavoriteState;destination?:string;referenceAliases?:Record<string,string>}> {
+async reader(requested:string|string[]|undefined,requestedSection?:'article'|'ops'):Promise<{viewerId:string;features:Awaited<ReturnType<typeof readFeatureFlags>>;section?:'ops';pages:NavigationNode[];article:Publication|null;favorite?:import('../../favorites/model.ts').FavoriteState;destination?:string;referenceAliases?:Record<string,string>;chrome?:{items:MenuItem[];features:Awaited<ReturnType<typeof readFeatureFlags>>;knowledgeEntry:string}}> {
   const viewer=await this.viewer();
   return this.database.run(viewer,async client=>{
     const flags=await readFeatureFlags(client);
@@ -193,10 +194,9 @@ async reader(requested:string|string[]|undefined,requestedSection?:'article'|'op
         destination:'/help-centre/qa?question='+encodeURIComponent(requestedId as string)+(requestedLanguage==='en'?'&lang=en':'')+'#qa-'+encodeURIComponent(requestedId as string)
       };
     }
-    const pages=filterTree(
-      await readNavigationTree(client,false,requestedLanguage??'zh-CN'),
-      id=>(kinds.get(id)??'article')===kind
-    );
+    const locale=requestedLanguage??'zh-CN';
+    const navigation=await readNavigationTree(client,false,locale);
+    const pages=filterTree(navigation,id=>(kinds.get(id)??'article')===kind);
     const selected=selectTreePage(pages,requestedId);
     if(!selected){
       return {
@@ -221,10 +221,17 @@ async reader(requested:string|string[]|undefined,requestedSection?:'article'|'op
       ? Object.fromEntries((await client.query<{source:string;id:string}>(`SELECT l.source_id AS source,p.id FROM unnest($1::text[]) p(id)
          CROSS JOIN LATERAL juyu.read_publication_language(p.id) l WHERE l.locale='en'`,[treeIds(pages)])).rows.map(item=>[item.source,item.id]))
       : undefined;
+    // Reuse the same authorized directory and repeatable-read snapshot for the chrome.
+    // Never cache this across requests or viewers.
+    const chrome=requestedSection?{
+      items:await readReaderMenu(client,flags),features:flags,
+      knowledgeEntry:firstTreePage(filterTree(navigation,id=>!kinds.has(id)))?.href??(locale==='en'?'/help-centre/library?lang=en':'/help-centre/library'),
+    }:undefined;
     return {
       viewerId:viewer.id,
       features:flags,
       pages,
+      chrome,
       favorite,
       referenceAliases,
       section:kind==='ops'?'ops':undefined,
@@ -341,7 +348,7 @@ export async function protectedResponse(action:()=>Promise<unknown>):Promise<Res
 
 async function readNavigationTree(client:PoolClient,repeatMemberships=false,locale:'zh-CN'|'en'='zh-CN'):Promise<NavigationNode[]> {
       const pages=await client.query<{id:string;slug?:string;title:string;description?:string;body:string;iconKey?:import('../../reader/icon-keys.ts').ReaderIconKey|null;position:number|null}>(
-        'SELECT document_id AS id,juyu.read_publication_slug(document_id) AS slug,title,description,body,icon_key AS "iconKey",juyu.read_publication_navigation_position(document_id) AS position FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id) AND EXISTS(SELECT 1 FROM juyu.read_publication_language(document_id) l WHERE l.locale=$1)',[locale]);
+        `SELECT document_id AS id,juyu.read_publication_slug(document_id) AS slug,title,description,CASE WHEN description<>'' THEN '' ELSE body END AS body,icon_key AS "iconKey",juyu.read_publication_navigation_position(document_id) AS position FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id) AND EXISTS(SELECT 1 FROM juyu.read_publication_language(document_id) l WHERE l.locale=$1)`,[locale]);
       const memberships=await client.query<NavigationMembership>(
         'SELECT document_id,category_id FROM juyu.revision_categories WHERE juyu.can_read_revision(document_id,revision_id) AND EXISTS(SELECT 1 FROM juyu.read_publication_language(document_id) l WHERE l.locale=$1)',[locale]);
       const categories=await client.query<NavigationCategory>(
@@ -354,13 +361,20 @@ async function readNavigationTree(client:PoolClient,repeatMemberships=false,loca
 async function readPresentation(client:PoolClient,id:string,body:string):Promise<ArticlePresentation&{slug?:string;locale?:'zh-CN'|'en';sourceId?:string;sourceSlug?:string;englishId?:string|null;englishSlug?:string|null;publicationNumber?:number|null;customFields?:FieldSnapshot[]}> {
  const row=(await client.query<{tags:string[];cover_asset_id:string|null;cover_alt:string;cover_position:number}>('SELECT * FROM juyu.read_publication_presentation($1)',[id])).rows[0];
  if(!row)return {};
- const presentation=(await client.query('SELECT juyu.read_publication_blocks($1) AS blocks,juyu.publication_number($1) AS publication_number,juyu.read_publication_icon($1) AS icon_key,juyu.read_publication_description($1) AS description,juyu.read_publication_timestamp($1) AS published_at',[id])).rows[0];
- const language=(await client.query<{locale:'zh-CN'|'en';sourceId:string;englishId:string|null}>('SELECT locale,source_id AS "sourceId",english_id AS "englishId" FROM juyu.read_publication_language($1)',[id])).rows[0];
- const slug=(await client.query<{slug:string|null}>('SELECT juyu.read_publication_slug($1) AS slug',[id])).rows[0]?.slug??undefined;
- const sourceSlug=language?.sourceId?(await client.query<{slug:string|null}>('SELECT juyu.read_publication_slug($1) AS slug',[language.sourceId])).rows[0]?.slug??undefined:undefined;
- const englishSlug=language?.englishId?(await client.query<{slug:string|null}>('SELECT juyu.read_publication_slug($1) AS slug',[language.englishId])).rows[0]?.slug??null:null;
+ // These metadata reads have no dependencies on one another; one SQL round trip
+ // retains the same publication functions and their permission checks.
+ const presentation=(await client.query(`SELECT juyu.read_publication_blocks($1) AS blocks,
+  juyu.publication_number($1) AS publication_number,juyu.read_publication_icon($1) AS icon_key,
+  juyu.read_publication_description($1) AS description,juyu.read_publication_timestamp($1) AS published_at,
+  l.locale,l.source_id AS "sourceId",l.english_id AS "englishId",juyu.read_publication_slug($1) AS slug,
+  CASE WHEN l.source_id IS NOT NULL THEN juyu.read_publication_slug(l.source_id) END AS "sourceSlug",
+  CASE WHEN l.english_id IS NOT NULL THEN juyu.read_publication_slug(l.english_id) END AS "englishSlug",
+  juyu.read_publication_fields($1) AS fields
+  FROM (VALUES(1)) seed(n) LEFT JOIN LATERAL juyu.read_publication_language($1) l ON true`,[id])).rows[0];
+ const language=presentation;
+ const slug=presentation?.slug??undefined,sourceSlug=presentation?.sourceSlug??undefined,englishSlug=presentation?.englishSlug??null;
  const blocks=presentation?.blocks;
- const customFields=normalizeFieldSnapshots((await client.query('SELECT juyu.read_publication_fields($1) AS fields',[id])).rows[0]?.fields);
+ const customFields=normalizeFieldSnapshots(presentation?.fields);
  const description=publicationDescription(body,presentation?.description);
  return {...(slug?{slug}:{}),locale:language?.locale??'zh-CN',sourceId:language?.sourceId??id,...(sourceSlug?{sourceSlug}:{}),englishId:language?.englishId??null,englishSlug,publicationNumber:presentation?.publication_number??null,...(presentation?.published_at?{publishedAt:(presentation.published_at as Date).toISOString()}:{}),...(description?{description}:{}),...(presentation?.icon_key?{iconKey:presentation.icon_key}:{}),...(customFields.length?{customFields}:{}),...(blocks?.length?{blocks:normalizeBlocks(blocks)}:{}),...(row.tags.length?{tags:row.tags}:{}),...(row.cover_asset_id?{cover:{assetId:row.cover_asset_id,alt:row.cover_alt,position:row.cover_position}}:{})};
 }

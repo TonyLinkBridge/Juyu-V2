@@ -1,4 +1,5 @@
 import {RootProvider} from 'fumadocs-ui/provider/next';
+import {FumadocsNavigationLink} from './FumadocsNavigationLink';
 import type {ReactNode} from 'react';
 import {fumadocsRootI18n} from '../../fumadocs/i18n';
 import type {FumadocsPublicationLocale} from '../../fumadocs/publication';
@@ -8,6 +9,7 @@ import {FumadocsScopedSearchDialog} from './FumadocsScopedSearchDialog';
 /** One localized Fumadocs search configuration for every formal Help Centre surface. */
 export function FumadocsSearchProvider({locale='zh-CN',children}:{locale?:FumadocsPublicationLocale;children:ReactNode}){
  return <RootProvider
+  components={{Link:FumadocsNavigationLink}}
   theme={{enabled:false}}
   i18n={fumadocsRootI18n(locale)}
   search={{SearchDialog:FumadocsScopedSearchDialog,options:fumadocsSearchOptions(locale)}}

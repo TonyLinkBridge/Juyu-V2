@@ -8,7 +8,6 @@ import {FumadocsPublicationI18n} from './FumadocsPublicationI18n';
 import {FumadocsAccountFooter} from './FumadocsAccountFooter';
 import {FumadocsSearchProvider} from './FumadocsSearchProvider';
 import {fumadocsContentTabs} from '../../fumadocs/tabs';
-import {readReaderPresentation} from '../../server/reader-presentation';
 import {FumadocsPublicationPage} from './FumadocsPublicationPage';
 import {publicationPathValue} from '../../fumadocs/slugs';
 
@@ -49,9 +48,8 @@ export async function FumadocsAuthorizedPublication({articleId,mode='preview',ro
  const destinations=fumadocsPublicationLanguages(article,mode,section);
  const navRoot=formal?'/help-centre':previewRoot;
  const activePath=section==='ops'?'/help-centre/ops':'/help-centre/library';
- let menu:Awaited<ReturnType<typeof readReaderPresentation>>['items']=[];
- let knowledgeEntry:string|undefined;
- if(formal)try{const presentation=await readReaderPresentation(locale);menu=presentation.items;knowledgeEntry=presentation.knowledgeEntry;}catch{}
+ const menu=result.chrome?.items??[];
+ const knowledgeEntry=result.chrome?.knowledgeEntry;
  return <FumadocsSearchProvider locale={locale}><FumadocsPublicationI18n locale={locale} destinations={destinations}><DocsLayout tree={tree} tabs={formal?fumadocsContentTabs(menu,locale,{path:activePath,pathname:canonicalPath},knowledgeEntry):false} nav={{title:'JUYU Help Centre',url:navRoot}} sidebar={formal?{prefetch:false,footer:<FumadocsAccountFooter locale={locale}/>}:{prefetch:false}} searchToggle={{enabled:formal&&result.features.search}}>
   <FumadocsPublicationPage article={article} features={result.features} viewerId={result.viewerId} favorite={result.favorite} formal={formal} recentKind={section} referencePages={referencePages(result.pages,mode,section)} referenceAliases={result.referenceAliases}/>
  </DocsLayout></FumadocsPublicationI18n></FumadocsSearchProvider>;

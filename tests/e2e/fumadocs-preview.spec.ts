@@ -514,8 +514,8 @@ test('PDF screen uses the official Fumadocs shell and print keeps only the prote
  if(info.project.name==='desktop'){
   const sidebarAccount=page.locator('#nd-sidebar .fumadocs-sidebar-account');
   await expect(sidebarAccount).toBeVisible();
-  await sidebarAccount.locator('.account-menu>summary').click();
-  const accountPopover=sidebarAccount.locator('.account-menu>div');
+  await sidebarAccount.getByRole('button',{name:/^账号菜单/}).click();
+  const accountPopover=page.getByRole('menu');
   await expect(accountPopover).toBeVisible();
   const popoverBounds=await accountPopover.boundingBox();
   const viewport=page.viewportSize();
@@ -523,7 +523,7 @@ test('PDF screen uses the official Fumadocs shell and print keeps only the prote
   expect(viewport).not.toBeNull();
   expect(popoverBounds!.y).toBeGreaterThanOrEqual(0);
   expect(popoverBounds!.y+popoverBounds!.height).toBeLessThanOrEqual(viewport!.height);
-  await sidebarAccount.locator('.account-menu>summary').click();
+  await sidebarAccount.getByRole('button',{name:/^账号菜单/}).click();
  }
  await expect(page.locator('#nd-sidebar .fumadocs-nav-account')).toHaveCount(0);
  await expect(page.locator('.entry-frame')).toHaveCount(0);

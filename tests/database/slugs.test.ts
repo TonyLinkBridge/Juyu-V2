@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {after,before,test} from 'node:test';
 import {randomBytes,randomUUID} from 'node:crypto';
 import type {Pool} from 'pg';
-import {ScopedDatabase} from '../../src/server/database/scoped.ts';
+import {ScopedDatabase,type Transactions} from '../../src/server/database/scoped.ts';
 import {AuthorizationService} from '../../src/server/authorization/service.ts';
 import {publicationPathValue} from '../../src/fumadocs/slugs.ts';
 import {articleContentPath} from '../../src/reader/content-path.ts';
@@ -114,3 +114,64 @@ for(const [id,title,original,canonical] of [
   assert.equal((await fixture.pool.query('SELECT slug FROM juyu.documents WHERE id=$1',[id])).rows[0].slug,original);
  });
 }
+
+
+test('formal article reads its directory, menu and presentation in one authorized snapshot',async()=>{
+ let scopes=0;
+ const queries:string[]=[];
+ const counted:Transactions={async run(viewer,work,readOnly){
+  scopes++;
+  return database.run(viewer,client=>work(new Proxy(client,{get(target,key,receiver){
+   if(key==='query')return (...args:unknown[])=>{if(typeof args[0]==='string')queries.push(args[0]);return Reflect.apply(target.query,target,args);};
+   return Reflect.get(target,key,receiver);
+  }})),readOnly);
+ }};
+ const reader=new AuthorizationService(counted,async()=>support);
+ const expectedChrome=await new AuthorizationService(database,async()=>support).readerChrome();
+ const result=await reader.reader('签约店铺（个人-企业）','article');
+ assert.equal(result.article?.id,'legacy-shop');
+ assert.deepEqual(result.chrome,expectedChrome);
+ assert.equal(scopes,1);
+ assert.equal(queries.filter(sql=>sql.includes('read_feature_flags()')).length,1);
+ assert.equal(queries.filter(sql=>sql.includes('FROM juyu.revisions WHERE')).length,1);
+ // Includes seven unchanged feedback/favorite feature and permission queries.
+ assert.ok(queries.length<=19,`Repeated directory/flags or metadata round trips returned: ${queries.length}`);
+});
+
+test('directory reads skip large bodies when an explicit description already exists',async()=>{
+ let document=await repository.create({id:randomUUID(),title:'独立简介检查',description:'已填写的简介',body:'完整正文保留',kind:'article',audience:'staff'},superAdmin);
+ document=await repository.execute(document.id,{type:'direct_publish'},superAdmin,{expectedSequence:document.sequence});
+ let capturedBody:string|undefined;
+ const counted:Transactions={async run(viewer,work,readOnly){
+  return database.run(viewer,client=>work(new Proxy(client,{get(target,key,receiver){
+   if(key==='query')return async(...args:unknown[])=>{
+    const result=await Reflect.apply(target.query,target,args);
+    if(typeof args[0]==='string'&&args[0].includes('FROM juyu.revisions WHERE'))capturedBody=result.rows.find((row:{id:string})=>row.id===document.id)?.body;
+    return result;
+   };
+   return Reflect.get(target,key,receiver);
+  }})),readOnly);
+ }};
+ const result=await new AuthorizationService(counted,async()=>support).reader(document.id,'article');
+ assert.equal(capturedBody,'');
+ assert.equal(result.article?.body,'完整正文保留');
+ const flatten=(nodes:typeof result.pages):Extract<typeof nodes[number],{type:'document'}>[]=>nodes.flatMap(node=>node.type==='group'?flatten(node.descendants):[node]);
+ assert.equal(flatten(result.pages).find(page=>page.id===document.id)?.description,'已填写的简介');
+ assert.equal(flatten(result.pages).find(page=>page.id==='legacy-login')?.description,'旧版正文');
+});
+
+test('repeated reads recheck each viewer and the latest publication instead of sharing cached access',async()=>{
+ let document=await repository.create({id:randomUUID(),title:'权限实时检查（内部）',body:'内部原文',kind:'article',audience:'ops'},superAdmin);
+ document=await repository.execute(document.id,{type:'direct_publish'},superAdmin,{expectedSequence:document.sequence});
+ let viewer:typeof support|typeof superAdmin=support;
+ const reader=new AuthorizationService(database,async()=>viewer);
+ assert.equal((await reader.reader(document.id,'article')).article,null);
+ viewer=superAdmin;
+ assert.equal((await reader.reader(document.id,'article')).article?.body,'内部原文');
+ document=await repository.execute(document.id,{type:'edit',title:'权限实时检查（已更新）',body:'内部新正文',audience:'ops'},superAdmin,{expectedSequence:document.sequence});
+ await repository.execute(document.id,{type:'direct_publish'},superAdmin,{expectedSequence:document.sequence});
+ const updated=await reader.reader(document.id,'article');
+ assert.equal(updated.article?.body,'内部新正文');
+ viewer=support;
+ assert.equal((await reader.reader(document.id,'article')).article,null);
+});

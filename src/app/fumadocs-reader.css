@@ -321,3 +321,7 @@
  }
  .fumadocs-reader-columns>article:first-child { padding-top:0;border-top:0; }
 }
+
+/* Pending feedback overlays the real link without moving the sidebar or page. */
+.juyu-fumadocs-navigation-link{position:relative}
+.juyu-fumadocs-navigation-link>.juyu-nav-pending{position:absolute;inset-inline-end:6px;top:calc(50% - 6px);margin:0;pointer-events:none}
