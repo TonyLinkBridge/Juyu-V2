@@ -358,10 +358,7 @@ function FumadocsImage({image,blockId}:{image:PreviewImage;blockId:string}){
  const figureStyle=image.width?{width:`min(${image.width}px, 100%)`}:undefined;
  return <figure className="fumadocs-reader-image not-prose" data-fumadocs-image={blockId} data-image-alignment={image.alignment} style={figureStyle}>
   {image.showPreview?<ImageZoom src={src} alt={label} zoomInProps={{src,alt:label}} rmiz={{children:null,a11yNameButtonZoom:locale==='en'?'Expand image':'放大图片',a11yNameButtonUnzoom:locale==='en'?'Minimize image':'关闭大图'}}><img src={src} alt={label} loading="lazy"/></ImageZoom>:null}
-  <figcaption>
-   {image.caption&&<p>{image.caption}</p>}
-   <div className="fumadocs-reader-image-actions"><a className={buttonVariants({variant:'outline',size:'sm'})} href={src} target="_blank" rel="noopener noreferrer">{locale==='en'?'Open original':'打开原文件'}</a><a className={buttonVariants({variant:'ghost',size:'sm'})} href={`${src}?download=1`} download>{locale==='en'?'Download':'下载文件'}</a></div>
-  </figcaption>
+  {image.caption&&<figcaption><p>{image.caption}</p></figcaption>}
  </figure>;
 }
 
