@@ -347,15 +347,16 @@ export async function protectedResponse(action:()=>Promise<unknown>):Promise<Res
 }
 
 async function readNavigationTree(client:PoolClient,repeatMemberships=false,locale:'zh-CN'|'en'='zh-CN'):Promise<NavigationNode[]> {
-      const pages=await client.query<{id:string;slug?:string;title:string;description?:string;body:string;iconKey?:import('../../reader/icon-keys.ts').ReaderIconKey|null;position:number|null}>(
-        `SELECT document_id AS id,juyu.read_publication_slug(document_id) AS slug,title,description,CASE WHEN description<>'' THEN '' ELSE body END AS body,icon_key AS "iconKey",juyu.read_publication_navigation_position(document_id) AS position FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id) AND EXISTS(SELECT 1 FROM juyu.read_publication_language(document_id) l WHERE l.locale=$1)`,[locale]);
-      const memberships=await client.query<NavigationMembership>(
-        'SELECT document_id,category_id FROM juyu.revision_categories WHERE juyu.can_read_revision(document_id,revision_id) AND EXISTS(SELECT 1 FROM juyu.read_publication_language(document_id) l WHERE l.locale=$1)',[locale]);
+      const pages=await client.query<{id:string;slug?:string;title:string;description?:string;body:string;iconKey?:import('../../reader/icon-keys.ts').ReaderIconKey|null;position:number|null;category_ids:string[]}>(
+        'SELECT id,slug,title,description,body,icon_key AS "iconKey","position",category_ids FROM juyu.read_publication_navigation($1)',[locale]);
+      // These memberships come from the same current publication and authoritative
+      // relation, already checked by can_read_document in the projection.
+      const memberships:NavigationMembership[]=pages.rows.flatMap(page=>page.category_ids.map(category_id=>({document_id:page.id,category_id})));
       const categories=await client.query<NavigationCategory>(
         locale==='en'
           ? `SELECT c.id,coalesce(n.name,'Other articles') AS name,c.parent_id,c.position,ci.icon_key,cx.document_id AS index_document_id FROM juyu.categories c LEFT JOIN juyu.category_icons ci ON ci.category_id=c.id LEFT JOIN juyu.category_indexes cx ON cx.category_id=c.id LEFT JOIN juyu.read_category_english_names() n ON n.category_id=c.id WHERE juyu.category_allowed(c.id)`
           : 'SELECT c.id,c.name,c.parent_id,c.position,ci.icon_key,cx.document_id AS index_document_id FROM juyu.categories c LEFT JOIN juyu.category_icons ci ON ci.category_id=c.id LEFT JOIN juyu.category_indexes cx ON cx.category_id=c.id WHERE juyu.category_allowed(c.id)');
-      return buildNavigationTree(pages.rows.map(({body,...page})=>({...page,description:publicationDescription(body,page.description)})),categories.rows,memberships.rows,{repeatMemberships,locale});
+      return buildNavigationTree(pages.rows.map(({id,slug,title,description,body,iconKey,position})=>({id,slug,title,description:publicationDescription(body,description),iconKey,position})),categories.rows,memberships,{repeatMemberships,locale});
 }
 
 async function readPresentation(client:PoolClient,id:string,body:string):Promise<ArticlePresentation&{slug?:string;locale?:'zh-CN'|'en';sourceId?:string;sourceSlug?:string;englishId?:string|null;englishSlug?:string|null;publicationNumber?:number|null;customFields?:FieldSnapshot[]}> {

@@ -133,9 +133,9 @@ test('formal article reads its directory, menu and presentation in one authorize
  assert.deepEqual(result.chrome,expectedChrome);
  assert.equal(scopes,1);
  assert.equal(queries.filter(sql=>sql.includes('read_feature_flags()')).length,1);
- assert.equal(queries.filter(sql=>sql.includes('FROM juyu.revisions WHERE')).length,1);
+ assert.equal(queries.filter(sql=>sql.includes('FROM juyu.read_publication_navigation(')).length,1);
  // Includes seven unchanged feedback/favorite feature and permission queries.
- assert.ok(queries.length<=19,`Repeated directory/flags or metadata round trips returned: ${queries.length}`);
+ assert.ok(queries.length<=18,`Repeated directory/flags or metadata round trips returned: ${queries.length}`);
 });
 
 test('directory reads skip large bodies when an explicit description already exists',async()=>{
@@ -146,7 +146,7 @@ test('directory reads skip large bodies when an explicit description already exi
   return database.run(viewer,client=>work(new Proxy(client,{get(target,key,receiver){
    if(key==='query')return async(...args:unknown[])=>{
     const result=await Reflect.apply(target.query,target,args);
-    if(typeof args[0]==='string'&&args[0].includes('FROM juyu.revisions WHERE'))capturedBody=result.rows.find((row:{id:string})=>row.id===document.id)?.body;
+    if(typeof args[0]==='string'&&args[0].includes('FROM juyu.read_publication_navigation('))capturedBody=result.rows.find((row:{id:string})=>row.id===document.id)?.body;
     return result;
    };
    return Reflect.get(target,key,receiver);
@@ -174,4 +174,44 @@ test('repeated reads recheck each viewer and the latest publication instead of s
  assert.equal(updated.article?.body,'内部新正文');
  viewer=support;
  assert.equal((await reader.reader(document.id,'article')).article,null);
+});
+
+test('directory projection emits only current publications rather than historical revisions',async()=>{
+ let document=await repository.create({id:randomUUID(),title:'历史目录查询',body:'正式正文',kind:'article',audience:'staff'},superAdmin);
+ document=await repository.execute(document.id,{type:'direct_publish'},superAdmin,{expectedSequence:document.sequence});
+ for(let revision=0;revision<40;revision++)document=await repository.execute(document.id,{type:'edit',title:`历史目录草稿 ${revision}`,body:'不应进入目录的草稿',audience:'staff'},superAdmin,{expectedSequence:document.sequence});
+ let directoryRows=0,directoryLoops=0,readablePublications=0;
+ const inspected:Transactions={async run(viewer,work,readOnly){
+  return database.run(viewer,async client=>{
+   readablePublications=Number((await client.query('SELECT count(*) AS n FROM juyu.revisions WHERE juyu.can_read_revision(document_id,revision_id)')).rows[0].n);
+   return work(new Proxy(client,{get(target,key,receiver){
+    if(key==='query')return async(...args:unknown[])=>{
+     if(typeof args[0]==='string'&&args[0].includes('FROM juyu.read_publication_navigation(')){
+      const plan=(await target.query('EXPLAIN (ANALYZE,FORMAT JSON) '+args[0],args[1] as unknown[])).rows[0]['QUERY PLAN'][0].Plan;
+      const visit=(node:Record<string,unknown>)=>{if(node['Function Name']==='read_publication_navigation'){directoryRows+=Number(node['Actual Rows']);directoryLoops+=Number(node['Actual Loops']);}for(const child of (node.Plans??[]) as Record<string,unknown>[])visit(child);};visit(plan);
+     }
+     return Reflect.apply(target.query,target,args);
+    };
+    return Reflect.get(target,key,receiver);
+   }}));
+  },readOnly);
+ }};
+ const result=await new AuthorizationService(inspected,async()=>superAdmin).reader(document.id,'article');
+ assert.equal(result.article?.title,'历史目录查询');
+ assert.equal(result.article?.body,'正式正文');
+ assert.equal(directoryLoops,1,'One authorized directory projection per read');
+ assert.equal(directoryRows,readablePublications,'Historical revisions must not enter the directory payload');
+});
+
+test('the compact directory projection exposes only current authorized publications and their original metadata',async()=>{
+ const rows=await database.run(support,async client=>(await client.query('SELECT * FROM juyu.read_publication_navigation($1)',['zh-CN'])).rows,true);
+ assert.ok(rows.some(row=>row.id==='legacy-shop'&&row.slug==='签约店铺（个人-企业）'&&row.body==='旧版正文'));
+ assert.ok(rows.some(row=>row.id==='legacy-login'&&row.slug==='为什么触发强制登录验证？'));
+ assert.equal(rows.some(row=>row.id==='legacy-ops'),false);
+ assert.equal(rows.some(row=>row.title.startsWith('历史目录草稿')),false);
+ assert.equal(rows.some(row=>row.title.startsWith('权限实时检查')),false);
+ await database.run(support,async client=>{
+  assert.equal((await client.query("SELECT count(*)::int AS n FROM juyu.documents")).rows[0].n,0);
+ },true);
+ assert.equal((await fixture.pool.query("SELECT has_function_privilege('public','juyu.read_publication_navigation(text)','EXECUTE') AS granted")).rows[0].granted,false);
 });
