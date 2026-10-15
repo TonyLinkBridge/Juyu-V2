@@ -150,3 +150,14 @@ No unresolved P0/P1/P2 visual findings. Full assistive-technology certification 
 - Strengthened the regression to observe all DOM mutations during the swap and reject transient duplicate menus/IDs, rather than checking only the settled state. The failing scenarios passed ten repeated desktop/mobile runs after the fix.
 - Full local Verify-equivalent checks passed: 595 unit tests and production build; 350 critical browser cases; 22 reader-navigation cases; 19 isolated developer/legacy-slug database cases. Existing lint warning in the fixture TypeScript loader is unchanged.
 - No credentials, permissions, article links, theme settings, sign-out behavior or production data were changed. Remote Verify acceptance is recorded separately after pushing the fix.
+
+
+---
+
+## 2026-10-15 — Separate preview compilation from navigation assertions
+
+- Verify run 38748768731 passed the full critical UI step, including both responsive-menu regressions, then exposed one failure in the previously skipped reader-navigation step. The first desktop article request was still pending when its 5-second heading assertion expired; the other 21 cases passed.
+- The downloaded browser trace contains no 404 response for that destination. A clean local development cache confirmed a first-request compilation cost versus millisecond responses after compilation.
+- The directory browser suite now prepares the actual development article route in a bounded beforeAll hook and requires HTTP 200. The clicked destination and the original 5-second visible-heading assertion remain unchanged; no navigation failures are ignored and no retries were added.
+- Empty-cache verification passed all 22 desktop/mobile navigation cases. The final production build, typecheck/lint and 595 unit tests passed again. This is a test-setup correction only; production content, routes, permissions and navigation behavior are unchanged.
+- The preceding menu fix remains in main and its 350 critical UI cases passed on GitHub. A new complete remote Verify run is required for this test-only follow-up.

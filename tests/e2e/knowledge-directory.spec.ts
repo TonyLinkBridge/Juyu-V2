@@ -2,6 +2,15 @@ import {test,expect} from '@playwright/test';
 const base='/design-preview/knowledge-directory';
 const category='00000000-0000-4000-8000-000000000001';
 
+// next dev compiles this destination on demand. Keep CI's one-time compilation
+// outside the navigation assertion; broken destinations still fail this setup,
+// and the actual clicked URL and visible article keep their original checks.
+test.beforeAll(async({request})=>{
+ test.setTimeout(60000);
+ const destination=await request.get('/design-preview/fumadocs-reader',{timeout:60000});
+ expect(destination.status()).toBe(200);
+});
+
 test('category overview leads to an article list and preserves the supplied article destination',async({page},info)=>{
  test.setTimeout(60000);
  await page.goto(base);
