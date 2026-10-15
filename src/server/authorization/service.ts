@@ -71,9 +71,10 @@ export class AuthorizationService {
   async home(locale:'zh-CN'|'en'='zh-CN'){
     const v=await this.viewer();
     return this.database.run(v,async c=>{
+      await requireVerifiedReader(c);
       const features=await readFeatureFlags(c);
-      const pages=await readKnowledgeTree(c,locale);
-      const menu=await readReaderMenu(c);
+      const pages=await readKnowledgeTree(c,locale,true);
+      const menu=await readReaderMenu(c,features);
       const knowledgeIds=treeIds(pages);
       const rows=(await c.query<{id:string;title:string;updated:Date}>(`SELECT r.document_id AS id,r.title,juyu.read_publication_timestamp(r.document_id) AS updated FROM juyu.revisions r WHERE juyu.can_read_revision(r.document_id,r.revision_id) AND r.document_id=ANY($1::text[]) ORDER BY updated DESC,r.document_id COLLATE "C" LIMIT 5`,[knowledgeIds])).rows;
       const recent=features.recent?(await readRecent(c,1,locale)).items.slice(0,4):[];
@@ -83,8 +84,7 @@ export class AuthorizationService {
   async knowledgeDirectory(locale:'zh-CN'|'en'='zh-CN'){
     const v=await this.viewer();
     return this.database.run(v,async c=>{
-      const allowed=(await c.query(`SELECT EXISTS(SELECT 1 FROM juyu.current_identity() i JOIN juyu.members m ON m.clerk_user_id=i.member_id WHERE nullif(btrim(m.verified_email),'') IS NOT NULL AND m.observed_at IS NOT NULL) AS allowed`)).rows[0].allowed;
-      if(!allowed)throw new Error('FORBIDDEN');
+      await requireVerifiedReader(c);
       const features=await readFeatureFlags(c);
       const pages=await readKnowledgeTree(c,locale,true);
       const menu=await readReaderMenu(c,features);
@@ -399,3 +399,8 @@ async function readContentKinds(c:PoolClient):Promise<Map<string,string>>{
  return new Map(rows.map(n=>[n.id,n.kind]));
 }
 async function readKnowledgeTree(c:PoolClient,locale:'zh-CN'|'en'='zh-CN',repeatMemberships=false):Promise<NavigationNode[]>{const kinds=await readContentKinds(c);return filterTree(await readNavigationTree(c,repeatMemberships,locale),id=>!kinds.has(id));}
+
+async function requireVerifiedReader(c:PoolClient){
+ const allowed=(await c.query(`SELECT EXISTS(SELECT 1 FROM juyu.current_identity() i JOIN juyu.members m ON m.clerk_user_id=i.member_id WHERE nullif(btrim(m.verified_email),'') IS NOT NULL AND m.observed_at IS NOT NULL) AS allowed`)).rows[0].allowed;
+      if(!allowed)throw new Error('FORBIDDEN');
+}

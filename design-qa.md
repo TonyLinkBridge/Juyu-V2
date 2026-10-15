@@ -104,3 +104,14 @@ Expected differences from the illustrative image: actual category count/names/ic
 - Real-account production browsing is a separate deployment acceptance step; the local screenshots above are not production evidence.
 
 No unresolved P0/P1/P2 visual findings. Full assistive-technology certification and every browser/OS combination were not in scope.
+
+
+---
+
+## 2026-10-15 — Apply the approved category overview to the homepage
+
+- `/help-centre` now reuses `KnowledgeDirectory`; categories precede recent updates and reading history. `/help-centre/library` and category/article destinations remain available.
+- Existing Fumadocs layout, official search, JUYU fonts/colors, announcements and account controls remain in use. Homepage omits the redundant return-to-home link.
+- Homepage and category overview use the same verified-reader gate and complete authorized category memberships. No database migration or publication/slug mutation.
+- Local verification: production build, lint/typecheck and 592 unit tests passed; 95 isolated database tests passed; 12 desktop/mobile browser cases passed, covering categories, search, theme, empty state, locale, recent history and navigation.
+- In-app browser inspected the local homepage. Formal homepage acceptance follows deployment; local fixtures are not production content.

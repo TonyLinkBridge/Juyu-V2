@@ -77,7 +77,7 @@ test('writer rechecks eligibility after concurrent demotion and member exclusion
 });
 test('pending membership and enrollment revoke configuration menu and direct category landing',async()=>{
  const op=(await fixture.pool.query("INSERT INTO juyu.member_operations(actor_id,target_id,kind,requested_role) VALUES('b','a','role','support') RETURNING id")).rows[0].id;try{await assert.rejects(service().navigationSettings(),/FORBIDDEN/);await assert.rejects(service().saveNavigationSettings({expectedVersion:0,entries:[]}),/FORBIDDEN/);await assert.rejects(service().readerMenu(),/FORBIDDEN/);await assert.rejects(service().categoryNavigationTree(),/FORBIDDEN/);await assert.rejects(service().knowledgeDirectory(),/FORBIDDEN/);}finally{await fixture.pool.query("UPDATE juyu.member_operations SET status='conflict',finished_at=now() WHERE id=$1",[op]);}
- await fixture.pool.query("INSERT INTO juyu.role_enrollments(member_id,requested_role,purpose) VALUES('s','support','default')");try{await assert.rejects(service(support).readerMenu(),/FORBIDDEN/);await assert.rejects(service(support).categoryNavigationTree(),/FORBIDDEN/);await assert.rejects(service(support).knowledgeDirectory(),/FORBIDDEN/);}finally{await fixture.pool.query("UPDATE juyu.role_enrollments SET state='complete',confirmed_at=now() WHERE member_id='s'");}
+ await fixture.pool.query("INSERT INTO juyu.role_enrollments(member_id,requested_role,purpose) VALUES('s','support','default')");try{await assert.rejects(service(support).readerMenu(),/FORBIDDEN/);await assert.rejects(service(support).categoryNavigationTree(),/FORBIDDEN/);await assert.rejects(service(support).knowledgeDirectory(),/FORBIDDEN/);await assert.rejects(service(support).home(),/FORBIDDEN/);}finally{await fixture.pool.query("UPDATE juyu.role_enrollments SET state='complete',confirmed_at=now() WHERE member_id='s'");}
 });
 test('migration23 preserves generic legacy settings categories and replay state',async()=>{
  const old=await temporaryDatabase();try{await old.pool.query('CREATE SCHEMA juyu; CREATE TABLE juyu.schema_migrations(version text PRIMARY KEY,checksum text NOT NULL,applied_at timestamptz NOT NULL DEFAULT now())');const versions=(await fixture.pool.query("SELECT version FROM juyu.schema_migrations WHERE version<'0023_navigation_settings' ORDER BY version")).rows;
@@ -94,10 +94,11 @@ test('knowledge directory keeps all authorized category memberships and excludes
  const qa=await repo.create({id:randomUUID(),kind:'qa',title:'Q&A only',body:'qa',audience:'staff',categoryIds:[first.id]},admin);
  await service().submitReview(qa.id,{expectedSequence:0,reviewerId:'b'});await service(reviewer).decideReview(qa.id,{expectedSequence:1,action:'approve'});await service().changePublication(qa.id,{expectedSequence:2,action:'queue'});await service().changePublication(qa.id,{expectedSequence:3,action:'publish'});
  const directory=await service(support).knowledgeDirectory();
+ const home=await service(support).home();assert.deepEqual(home.pages,directory.pages);
  assert.equal(categoryPage(directory.pages,first.id)?.items[0].id,shared.id);assert.equal(categoryPage(directory.pages,second.id)?.items[0].id,shared.id);
  assert.equal(categoryPage(directory.pages,privateCategory.id),null);assert.ok(!JSON.stringify(directory.pages).includes('Unpublished draft'));assert.ok(!JSON.stringify(directory.pages).includes('Q&A only'));
  const slug=(await fixture.pool.query('SELECT slug FROM juyu.documents WHERE id=$1',[shared.id])).rows[0].slug;
  assert.equal(categoryPage(directory.pages,first.id)?.items[0].href,'/help-centre/articles/'+encodeURIComponent(slug));
  await fixture.pool.query("UPDATE juyu.members SET verified_email=null WHERE clerk_user_id='s'");
- try{await assert.rejects(service(support).knowledgeDirectory(),/FORBIDDEN/);}finally{await fixture.pool.query("UPDATE juyu.members SET verified_email='s@example.test' WHERE clerk_user_id='s'");}
+ try{await assert.rejects(service(support).knowledgeDirectory(),/FORBIDDEN/);await assert.rejects(service(support).home(),/FORBIDDEN/);}finally{await fixture.pool.query("UPDATE juyu.members SET verified_email='s@example.test' WHERE clerk_user_id='s'");}
 });

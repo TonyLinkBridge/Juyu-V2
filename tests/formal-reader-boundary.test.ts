@@ -32,14 +32,15 @@ test('the formal Help Centre shell does not import the legacy article reader',as
 
  const knowledgeHome=await readFile('src/components/home/KnowledgeHome.tsx','utf8');
  const homeHero=await readFile('src/components/home/KnowledgeHomeHero.tsx','utf8');
- assert.match(knowledgeHome,/KnowledgeHomeHero/);
+ const knowledgeDirectory=await readFile('src/components/home/KnowledgeDirectory.tsx','utf8');
+ assert.match(knowledgeDirectory,/KnowledgeHomeHero/);
  assert.match(homeHero,/FullSearchTrigger/);
  assert.doesNotMatch(knowledgeHome,/gitbook\/Search\/SearchInput|<SearchInput/);
- assert.match(knowledgeHome,/knowledge-home--editorial/);
+ assert.match(knowledgeDirectory,/knowledge-home--editorial/);
  assert.match(homeHero,/home-section-tabs/);
- assert.match(knowledgeHome,/home-featured/);
- assert.match(knowledgeHome,/home-document-number/);
- assert.match(knowledgeHome,/home-side/);
+ assert.match(knowledgeHome,/KnowledgeDirectory/);
+
+ assert.match(knowledgeHome,/KnowledgeHomeActivity/);
  assert.doesNotMatch(knowledgeHome,/home-entry-icon/);
  const searchProvider=await readFile('src/components/fumadocs/FumadocsSearchProvider.tsx','utf8');
  assert.match(searchProvider,/fumadocsSearchOptions\(locale\)/);

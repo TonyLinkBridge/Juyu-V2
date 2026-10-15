@@ -185,8 +185,8 @@ test('Help Centre home retains every JUYU entry inside the official Fumadocs hom
  await page.goto('/design-preview/fumadocs-reader?fixture=home');
  const home=page.locator('[data-fumadocs-home-page]');
  await expect(home).toBeVisible();
- await expect(home.getByRole('heading',{name:'今天需要找什么答案？',level:1})).toBeVisible();
- const answerAccent=home.getByRole('heading',{name:'今天需要找什么答案？',level:1}).locator('span');
+ await expect(home.getByRole('heading',{name:'按业务，找到你需要的答案',level:1})).toBeVisible();
+ const answerAccent=home.getByRole('heading',{name:'按业务，找到你需要的答案',level:1}).locator('span');
  const accentColor=await answerAccent.evaluate(element=>getComputedStyle(element).color);
  expect(accentColor).toBe('rgb(179, 19, 27)');
  const brand=page.locator('#nd-nav .juyu-home-brand');
@@ -200,7 +200,7 @@ test('Help Centre home retains every JUYU entry inside the official Fumadocs hom
  await expect(themeSwitch).toHaveCount(1);
  await themeSwitch.click();
  await expect.poll(()=>page.evaluate(()=>document.documentElement.classList.contains('dark'))).toBe(true);
- const darkColors=await home.getByRole('heading',{name:'今天需要找什么答案？'}).evaluate(element=>({text:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}));
+ const darkColors=await home.getByRole('heading',{name:'按业务，找到你需要的答案'}).evaluate(element=>({text:getComputedStyle(element).color,background:getComputedStyle(document.body).backgroundColor}));
  expect(darkColors.text).not.toBe('rgb(0, 0, 0)');
  expect(darkColors.text).not.toBe(darkColors.background);
  await page.screenshot({path:`output/verification/fumadocs-home-${info.project.name}-dark.png`,fullPage:true});
@@ -210,10 +210,11 @@ test('Help Centre home retains every JUYU entry inside the official Fumadocs hom
  const tabs=home.locator('.home-section-tabs');
  await expect(tabs).toBeVisible();
  await expect(tabs.getByRole('link',{name:'知识文章'})).toHaveAttribute('aria-current','page');
- await expect(home.locator('.home-featured')).toBeVisible();
- await expect(home.locator('.home-document-number')).toHaveCount(3);
- await expect(home.locator('.home-side .home-updates')).toBeVisible();
- await expect(home.locator('.home-side .home-recent')).toBeVisible();
+ await expect(home.locator('.home-featured')).toHaveCount(0);
+ await expect(home.locator('.directory-category-card')).toHaveCount(1);
+ await expect(home.locator('.directory-category-card')).toContainText('账户管理');
+ await expect(home.locator('.home-activity .home-updates')).toBeVisible();
+ await expect(home.locator('.home-activity .home-recent')).toBeVisible();
  const searchTrigger=home.locator('.home-search [data-search-full]');
  await expect(searchTrigger).toBeVisible();
  await searchTrigger.click();
@@ -242,7 +243,7 @@ test('Help Centre home retains every JUYU entry inside the official Fumadocs hom
  await expect(home.getByRole('link',{name:'OPS Internal',exact:true})).toHaveAttribute('href','/help-centre/ops');
  await expect(home.getByRole('link',{name:'Reference 速查',exact:true})).toHaveAttribute('href','/help-centre/reference');
  await expect(home.getByRole('link',{name:'Q&A 问答',exact:true})).toHaveAttribute('href','/help-centre/qa');
- await expect(home.getByRole('link',{name:/普通会员权益说明 已发布 · 正式资料/})).toHaveAttribute('href','/help-centre/articles/fumadocs-preview');
+ await expect(home.locator('.home-recent-items').getByRole('link',{name:/如何修改账户邮箱/})).toHaveAttribute('href','/help-centre/articles/fumadocs-preview');
  await expect(home.getByText('正式版本 1',{exact:true})).toBeVisible();
  await expect(page.locator('.entry-frame')).toHaveCount(0);
  await expect(page.locator('.knowledge-sidebar')).toHaveCount(0);

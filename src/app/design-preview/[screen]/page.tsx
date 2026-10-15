@@ -46,7 +46,7 @@ export default async function DesignPreview({params,searchParams}:{params:Promis
  if(screen==='article'||screen==='article-email')redirect('/design-preview/fumadocs-reader');
  if(screen==='article-plain')redirect('/design-preview/fumadocs-reader?fixture=plain');
  const titles=['域名转入操作指南','客户身份核验','费用与续费规则','异常升级处理'];
- const pages:NavigationNode[]=[{type:'group',id:'start',title:'新人上手',descendants:[{type:'document',id:'intro',title:'开始使用资料库',href:'/design-preview/article?article=intro'}]},{type:'group',id:'domains',title:'域名业务',descendants:titles.map((title,i)=>({type:'document',id:`preview-${i}`,title,href:`/design-preview/article?article=preview-${i}`}))}];
+ const pages:NavigationNode[]=[{type:'group',id:'00000000-0000-4000-8000-000000000010',title:'新人上手',descendants:[{type:'document',id:'intro',title:'开始使用资料库',href:'/design-preview/article?article=intro'}]},{type:'group',id:'00000000-0000-4000-8000-000000000011',title:'域名业务',descendants:titles.map((title,i)=>({type:'document',id:`preview-${i}`,title,href:`/design-preview/article?article=preview-${i}`}))}];
  const menu=[{id:'home',label:'首页',href:'/design-preview/home'},{id:'knowledge',label:'知识资料',href:'/design-preview/article'},{id:'reference',label:'Reference 速查',href:'/help-centre/reference'},{id:'qa',label:'Q&A 问答',href:'/help-centre/qa'},{id:'ops',label:'OPS Internal',href:'/help-centre/ops'},{id:'favorites',label:'收藏',href:'/help-centre/favorites'},{id:'recent',label:'最近浏览',href:'/help-centre/recent'}];
  const text=(id:string,type:string,value:string)=>({id,type,props:{},content:[{type:'text',text:value,styles:{}}],children:[]});
  const body=encodeEditorBody([

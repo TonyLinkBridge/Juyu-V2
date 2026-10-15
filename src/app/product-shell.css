@@ -220,3 +220,9 @@
  .directory-category-card:not(:has(.directory-category-icon)) .directory-category-action{grid-column:1 / -1}
 }
 .dark .knowledge-directory{--juyu-home-accent:var(--brand)}
+
+/* Homepage activity follows the same authorized category overview. */
+.knowledge-directory .home-activity{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:38px;margin-top:40px;padding-top:32px;border-top:1px solid var(--color-fd-border)}
+.knowledge-directory .home-activity>section{min-width:0}
+.knowledge-directory .home-activity .home-recent{margin:0;padding:0;border:0}
+@media(max-width:900px){.knowledge-directory .home-activity{grid-template-columns:1fr;gap:28px}.knowledge-directory .home-activity .home-recent{padding-top:28px;border-top:1px solid var(--color-fd-border)}}

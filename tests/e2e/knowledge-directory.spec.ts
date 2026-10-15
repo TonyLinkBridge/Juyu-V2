@@ -49,3 +49,18 @@ test('dark theme uses the existing readable JUYU brand color for topic actions',
  await expect(page.locator('.directory-category-action').first()).toHaveCSS('color','rgb(255, 160, 170)');
  await expect(page.locator('.directory-category-card').first()).toBeVisible();
 });
+
+test('homepage shows categories first and keeps updates and recent history below them',async({page},info)=>{
+ await page.goto('/design-preview/fumadocs-reader?fixture=home');
+ await expect(page.locator('[data-knowledge-directory]')).toBeVisible();
+ await expect(page.locator('.directory-category-card').first()).toBeVisible();
+ await expect(page.locator('.home-featured')).toHaveCount(0);
+ await expect(page.getByRole('link',{name:'返回知识库首页'})).toHaveCount(0);
+ const categories=await page.locator('.directory-category-grid').boundingBox();
+ const activity=await page.locator('.home-activity').boundingBox();
+ expect(activity!.y).toBeGreaterThanOrEqual(categories!.y+categories!.height);
+ await expect(page.locator('.home-activity').getByRole('heading',{name:'最近修订'})).toBeVisible();
+ await expect(page.locator('.home-activity').getByRole('heading',{name:'最近浏览'})).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:`output/verification/home-category-${info.project.name}.png`,fullPage:true});
+});

@@ -1,3 +1,4 @@
+import type {ReactNode} from 'react';
 import {ArrowLeft,ArrowRight} from '@phosphor-icons/react/dist/ssr';
 import {NavigationLink as Link} from '../shell/NavigationLink';
 import {KnowledgeHomeHero} from './KnowledgeHomeHero';
@@ -13,8 +14,10 @@ export interface KnowledgeDirectoryProps {
  search?:boolean;
  locale?:'zh-CN'|'en';
  category?:CategoryPage;
+ home?:boolean;
+ children?:ReactNode;
 }
-export function KnowledgeDirectory({pages,menu,search=true,locale='zh-CN',category}:KnowledgeDirectoryProps){
+export function KnowledgeDirectory({pages,menu,search=true,locale='zh-CN',category,home=false,children}:KnowledgeDirectoryProps){
  const english=locale==='en',library='/help-centre/library'+(english?'?lang=en':'');
  const cards=categoryCards(category?.groups??pages,locale);
  const articles:NavigationPage[]=category?.items??pages.filter((node):node is Extract<NavigationNode,{type:'document'}>=>node.type==='document');
@@ -49,7 +52,8 @@ export function KnowledgeDirectory({pages,menu,search=true,locale='zh-CN',catego
     </nav>}
    </section>}
    {!cards.length&&!articles.length&&<section className="home-empty"><h2>{english?'No articles available yet':'暂无可阅读的正式资料'}</h2><p>{english?'Published articles you can read will appear here.':'有你可以阅读的文章发布后，会显示在这里。'}</p></section>}
-   <footer className="directory-footer"><p>{english?'Only content you have permission to read is shown.':'资料按你的阅读权限展示'}</p><Link prefetch={false} prefetchOnIntent href={'/help-centre'+(english?'?lang=en':'')}><ArrowLeft size={16} aria-hidden="true"/>{english?'Back to the Help Centre':'返回知识库首页'}</Link></footer>
+   {children}
+   <footer className="directory-footer"><p>{english?'Only content you have permission to read is shown.':'资料按你的阅读权限展示'}</p>{!home&&<Link prefetch={false} prefetchOnIntent href={'/help-centre'+(english?'?lang=en':'')}><ArrowLeft size={16} aria-hidden="true"/>{english?'Back to the Help Centre':'返回知识库首页'}</Link>}</footer>
   </div>
  </div>;
 }

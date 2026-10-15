@@ -155,8 +155,8 @@ const plainBlocks:EditorBlock[]=[
 const fixtureArticle:Publication={id:'fumadocs-preview',title:'如何修改账户邮箱',revision:1,body:'',locale:'zh-CN',publicationNumber:1,publishedAt:'2026-09-23T12:00:00.000Z',feedback:{memberId:'preview',value:null}};
 const plainFixtureArticle:Publication={id:'fumadocs-preview-plain',title:'没有章节标题的文章',revision:1,body:'',locale:'zh-CN',publicationNumber:1,feedback:{memberId:'preview',value:null}};
 const fixtureLanguages={'zh-CN':path,en:`${path}?lang=en`} as const;
-const directoryPages:NavigationNode[]=[{type:'group',id:'preview-account',title:'账户管理',descendants:[
- {type:'group',id:'preview-security',title:'账户安全',descendants:[
+const directoryPages:NavigationNode[]=[{type:'group',id:'00000000-0000-4000-8000-000000000012',title:'账户管理',descendants:[
+ {type:'group',id:'00000000-0000-4000-8000-000000000013',title:'账户安全',descendants:[
   {type:'document',id:'fumadocs-preview',title:'普通会员权益说明',description:'详细介绍普通会员的权益范围、使用规则及相关说明，帮助你快速了解会员体系。',href:'/help-centre/articles/fumadocs-preview'},
   {type:'document',id:'example-customer',title:'大客户权益说明',href:'/help-centre/articles/example-customer'},
   {type:'document',id:'example-premium',title:'高级会员权益说明',href:'/help-centre/articles/example-premium'},
