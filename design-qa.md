@@ -139,3 +139,14 @@ No unresolved P0/P1/P2 visual findings. Full assistive-technology certification 
 - Verification: 595 unit tests, typecheck and production build passed. Lint exited successfully with one existing anonymous-export warning in the fixture TypeScript loader. All 128 relevant desktop/mobile browser cases passed, including Q&A native/legacy images, draft/history previews, theme/gallery behavior, attachment routes and admin media downloads.
 - In-app browser inspected local Q&A and media previews using test-only data; image zoom/close worked and a test attachment was downloaded. Production real-account acceptance follows deployment and is recorded separately in ignored verification artifacts.
 - No database, access-control, asset API, article link or publication state changes.
+
+
+---
+
+## 2026-10-15 — Responsive account-menu CI regression
+
+- GitHub Verify run 38742988073 built successfully but failed two account-menu browser cases: breakpoint swaps briefly retained both exiting and entering surfaces, producing duplicate menu IDs/roles and shared refs. This was reproduced locally.
+- Keyed the desktop/mobile AnimatePresence boundaries so a breakpoint swap removes the previous surface immediately; ordinary opening/closing animations and account actions remain unchanged. User-opened menus retain keyboard focus when their surface changes; default-open menus do not gain focus from this fix.
+- Strengthened the regression to observe all DOM mutations during the swap and reject transient duplicate menus/IDs, rather than checking only the settled state. The failing scenarios passed ten repeated desktop/mobile runs after the fix.
+- Full local Verify-equivalent checks passed: 595 unit tests and production build; 350 critical browser cases; 22 reader-navigation cases; 19 isolated developer/legacy-slug database cases. Existing lint warning in the fixture TypeScript loader is unchanged.
+- No credentials, permissions, article links, theme settings, sign-out behavior or production data were changed. Remote Verify acceptance is recorded separately after pushing the fix.

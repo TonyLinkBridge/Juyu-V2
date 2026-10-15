@@ -70,8 +70,18 @@ test('menu repositions when feedback height or its responsive surface changes',a
  await mount(page,'?reader=1&sidebar=1&profile-fails=1');await page.getByRole('menuitem',{name:'账号设置',exact:true}).click();await expect(page.getByRole('alert')).toBeVisible();
  const anchor=()=>page.evaluate(()=>{const m=document.querySelector('[role="menu"]')!.getBoundingClientRect(),t=document.querySelector('[aria-haspopup="menu"]')!.getBoundingClientRect();return {above:m.bottom<=t.y-7,inside:m.x>=0&&m.y>=0&&m.right<=innerWidth&&m.bottom<=innerHeight};});
  if(info.project.name==='desktop')await expect.poll(async()=> (await anchor()).above).toBe(true);
- await page.setViewportSize({width:390,height:844});await expect(page.getByRole('menu')).toHaveCount(1);await expect(page.getByRole('menu')).toHaveCSS('opacity','1');await expect.poll(async()=> (await anchor()).inside).toBe(true);
- await page.setViewportSize({width:1440,height:900});await expect(page.getByRole('menu')).toHaveCount(1);await expect(page.getByRole('menu')).toHaveCSS('opacity','1');await expect.poll(async()=> (await anchor()).above&&(await anchor()).inside).toBe(true);
+ // Observe the entire swap, including exit-animation frames that a settled
+ // count assertion misses on a fast local machine.
+ await page.evaluate(()=>{
+  const state={maximum:0,duplicateIds:false};
+  (window as unknown as {menuSwap:typeof state}).menuSwap=state;
+  const observe=()=>{const menus=Array.from(document.querySelectorAll('[role="menu"]'));state.maximum=Math.max(state.maximum,menus.length);state.duplicateIds ||= new Set(menus.map(menu=>menu.id)).size!==menus.length;};
+  new MutationObserver(observe).observe(document.body,{childList:true,subtree:true});observe();
+ });
+ await page.setViewportSize({width:390,height:844});await expect(page.locator('[role="menu"][draggable="false"]')).toBeVisible();await expect(page.getByRole('menu')).toHaveCount(1);await expect(page.getByRole('menu')).toHaveCSS('opacity','1');await expect.poll(async()=> (await anchor()).inside).toBe(true);
+ await page.setViewportSize({width:1440,height:900});await expect(page.locator('[role="menu"][data-align]')).toBeVisible();await expect(page.getByRole('menu')).toHaveCount(1);await expect(page.getByRole('menu')).toHaveCSS('opacity','1');await expect.poll(async()=> (await anchor()).above&&(await anchor()).inside).toBe(true);
+ const swap=await page.evaluate(()=>(window as unknown as {menuSwap:{maximum:number;duplicateIds:boolean}}).menuSwap);
+ expect(swap).toEqual({maximum:1,duplicateIds:false});await expect(page.getByRole('menu')).toBeFocused();
 });
 
 // Removing the inner controls must not make the official external control disappear on phones.

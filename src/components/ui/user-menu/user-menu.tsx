@@ -185,6 +185,8 @@ export function UserMenu({ user, status: statusProp, defaultStatus = "available"
   const pending = useRef(false);
   const sheet = hydrated && compact;
   const inline = !portal && !sheet;
+  const previousSheet = useRef(sheet);
+  const userOpened = useRef(false);
 
   useEffect(() => { mounted.current = true; const current = typed.current; return () => { mounted.current = false; window.clearTimeout(current.timer); }; }, []);
 
@@ -196,6 +198,7 @@ export function UserMenu({ user, status: statusProp, defaultStatus = "available"
 
   function setOpen(next: boolean, why: OpenReason = null) {
     reason.current = next ? why : null;
+    userOpened.current = next && why !== null;
     if (next) setSigningOut(pending.current);
     setHighlight(null);
     setInnerOpen(next);
@@ -219,6 +222,15 @@ export function UserMenu({ user, status: statusProp, defaultStatus = "available"
       else surfaceRef.current?.focus({ preventScroll: true });
     });
     return () => cancelAnimationFrame(frame);
+  }, [open, sheet]);
+
+  // A breakpoint swap replaces the old surface immediately. Keep keyboard focus
+  // in a user-opened menu without making a default-open menu steal focus.
+  useLayoutEffect(() => {
+    const changed = previousSheet.current !== sheet;
+    previousSheet.current = sheet;
+    if (!open) userOpened.current = false;
+    else if (changed && userOpened.current) surfaceRef.current?.focus({ preventScroll: true });
   }, [open, sheet]);
 
   // The panel is placed against the trigger and scales from the avatar's center, flipping above when there is no room below.
@@ -433,14 +445,16 @@ export function UserMenu({ user, status: statusProp, defaultStatus = "available"
     {(notice || operationError) && <div className={styles.notice}>{notice}{operationError && <p role="alert">{operationError}</p>}</div>}
   </>;
 
-  const panel = <AnimatePresence>
+  // Distinct boundaries prevent exiting desktop and mobile surfaces from
+  // coexisting with the same menu id, refs and keyboard handlers.
+  const panel = <AnimatePresence key="panel">
     {open && !sheet && <motion.div key="panel" ref={surfaceRef} {...menuProps} className={styles.panel} data-inline={inline || undefined} data-align={align}
       variants={reduced ? stillMotion : panelMotion} initial="closed" animate="open" exit="exit">
       {content}
     </motion.div>}
   </AnimatePresence>;
 
-  const bottomSheet = <AnimatePresence>
+  const bottomSheet = <AnimatePresence key="sheet">
     {open && sheet && <motion.div key="scrim" className={styles.scrim} aria-hidden="true" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       transition={{ duration: reduced ? .1 : .2, ease: standard }} onClick={() => close(true)} />}
     {open && sheet && <motion.div key="sheet" ref={surfaceRef} {...menuProps} className={`${styles.panel} ${styles.sheet}`}
