@@ -32,3 +32,12 @@ employeeCompanyAccess() 只在服务器运行。verified 返回公司身份信�
 - 当前逐次调用 Slack；正式部署前需结合配额与访问量验收性能及限流处理，不声称已完成高并发验证。
 
 参考：[Clerk Slack 连接](https://clerk.com/docs/guides/configure/auth-strategies/social-connections/slack)、[Slack userInfo 返回与错误](https://docs.slack.dev/reference/methods/openid.connect.userInfo/)。实现另核对已安装 Clerk 7.9.1 类型。旧 site 的 lib/clerk-server.ts 仅用于比较；本轮独立编写，不修改旧站、不复制凭据或旧逻辑。
+
+
+## 单账号邮箱准入例外（2026-10-16）
+
+服务器可配置可撤销的 `JUYU_APPROVED_EMAIL_ACCOUNT`，值为仅含 `userId` 与 `email` 的单个 JSON 对象。仅在当前 Clerk 会话的用户 ID 与配置精确相同、主邮箱已验证、主邮箱与配置邮箱一致且域名仍在公司允许列表内时，该账号无需 Slack 关联即可通过公司身份检查。禁止账号、锁定账号、未验证邮箱、换邮箱、换账号均不能通过。
+
+配置只保存在对应部署环境，不写入 NEXT_PUBLIC 变量、不由浏览器传入、不使用 Clerk public/unsafe metadata 作为批准标记，也不在源码中硬编码真实账号。缺失、非法或带额外字段的配置关闭例外，其他账号沿用原 Slack 校验。删除配置并重新部署可撤销例外；不得用扩大公司域名或伪造 Slack 账号/令牌替代。
+
+返回证据明确标为 `verification: approved_email`，Slack 用户与工作区标识为 null，不伪造 Slack 验证结果。例外不授予角色；账号现有的 Clerk 角色、成员开通、停用、待核对及每篇资料的权限仍分别验证。公司准入公开诊断接口继续仅返回状态，不泄露账号和邮箱。修改正式配置后必须重新部署并由账号本人完成真实登录验收。

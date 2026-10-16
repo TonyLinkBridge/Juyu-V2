@@ -15,7 +15,8 @@ export interface CompanyProvider {
 export type CompanyAccess =
   | { status: 'unconfigured' | 'signed_out' | 'unavailable' }
   | { status: 'denied'; reason: 'company_email' | 'account' | 'slack_connection' | 'slack_identity' }
-  | { status: 'verified'; userId: string; email: string; slackUserId: string; slackTeamId: string };
+  | { status: 'verified'; userId: string; email: string; slackUserId: string; slackTeamId: string }
+  | { status: 'verified'; userId: string; email: string; verification: 'approved_email'; slackUserId: null; slackTeamId: null };
 
 const domainPattern = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
 export function companyPolicy(env: Environment) {
@@ -28,9 +29,23 @@ function email(value: string): string | null {
   if (!/^[^@\s]+@[^@\s]+$/.test(value)) return null;
   return value.toLowerCase();
 }
+/** One explicitly approved server-owned identity, never a role or client metadata claim. */
+function approvedEmailAccount(raw: string | undefined): { userId: string; email: string } | null {
+  if (!raw || raw.length > 4096) return null;
+  try {
+    const value: unknown = JSON.parse(raw);
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+    const record = value as Record<string, unknown>;
+    if (Object.keys(record).length !== 2 || typeof record.userId !== 'string'
+      || !/^user_[a-zA-Z0-9]+$/.test(record.userId) || typeof record.email !== 'string'
+      || record.email.includes('*')) return null;
+    const address = email(record.email);
+    return address ? { userId: record.userId, email: address } : null;
+  } catch { return null; }
+}
 const isSlack = (provider: string) => provider === 'slack' || provider === 'oauth_slack';
 
-/** Revalidates server-owned evidence. Metadata, browser claims and unverified ID tokens are never read. */
+/** Revalidates server-owned evidence. Browser claims and unverified ID tokens are never trusted. */
 export async function verifyCompanyAccount(session: EmployeeSession, env: Environment, provider: CompanyProvider): Promise<CompanyAccess> {
   if (session.status !== 'signed_in') return { status: session.status };
   return verifyCompanyUser(session.userId, env, provider);
@@ -46,6 +61,12 @@ export async function verifyCompanyUser(userId: string, env: Environment, provid
     const primary = user.emailAddresses.find(item => item.id === user.primaryEmailAddressId);
     const address = primary && email(primary.emailAddress);
     if (!primary || primary.verification?.status !== 'verified' || !address || !policy.domains.includes(address.split('@')[1])) return { status: 'denied', reason: 'company_email' };
+    // This narrowly scoped exception changes company admission only. Existing enrollment,
+    // role, disabled-member and per-document checks remain mandatory downstream.
+    const approval = approvedEmailAccount(env.JUYU_APPROVED_EMAIL_ACCOUNT);
+    if (approval?.userId === user.id && approval.email === address) {
+      return { status: 'verified', userId: user.id, email: address, verification: 'approved_email', slackUserId: null, slackTeamId: null };
+    }
     const accounts = user.externalAccounts.filter(item => isSlack(item.provider) && item.verification?.status === 'verified' && email(item.emailAddress) === address);
     if (accounts.length !== 1) return { status: 'denied', reason: 'slack_connection' };
     const account = accounts[0];
