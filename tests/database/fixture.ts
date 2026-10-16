@@ -6,6 +6,27 @@ import { createServer } from 'node:net';
 import EmbeddedPostgres from 'embedded-postgres';
 import { Pool } from 'pg';
 
+const rawPoolEnds=new WeakMap<Pool,()=>Promise<void>>();
+const poolEndings=new WeakMap<Pool,Promise<void>>();
+
+export function endPool(pool:Pool):Promise<void>{
+ const existing=poolEndings.get(pool);if(existing)return existing;
+ const target=pool.totalCount;
+ let removed=0,resolveRemoved:()=>void=()=>{};
+ const removedAll=target===0?Promise.resolve():new Promise<void>(resolve=>{resolveRemoved=resolve;});
+ const onRemove=()=>{removed++;if(removed>=target)resolveRemoved();};
+ pool.on('remove',onRemove);
+ const rawEnd=rawPoolEnds.get(pool)??pool.end.bind(pool);
+ const ending=(async()=>{try{await rawEnd();await removedAll;}finally{pool.off('remove',onRemove);}})();
+ poolEndings.set(pool,ending);return ending;
+}
+
+function trackedPool(options:ConstructorParameters<typeof Pool>[0]){
+ const pool=new Pool(options),rawEnd=pool.end.bind(pool);rawPoolEnds.set(pool,rawEnd);
+ pool.end=((callback?:((error?:Error)=>void))=>{const ending=endPool(pool);if(callback){void ending.then(()=>callback(),error=>callback(error instanceof Error?error:new Error(String(error))));return;}return ending;}) as Pool['end'];
+ return pool;
+}
+
 export async function temporaryDatabase() {
   // Never accepts an external URL or credentials. This cluster is owned by this test.
   const directory = await mkdtemp(join(tmpdir(), 'juyu-db-test-'));
@@ -27,7 +48,8 @@ export async function temporaryDatabase() {
     onLog: () => {}, onError: () => {},
   });
   let started = false;
-  const pool = new Pool({ host: '127.0.0.1', port, user: 'postgres', password, database: 'postgres', max: 8, connectionTimeoutMillis: 5000 });
+  const pools=new Set<Pool>();
+  const pool = trackedPool({ host: '127.0.0.1', port, user: 'postgres', password, database: 'postgres', max: 8, connectionTimeoutMillis: 5000 });pools.add(pool);
   try {
     await database.initialise();
     await database.start();
@@ -41,9 +63,9 @@ export async function temporaryDatabase() {
   }
   return {
     pool,
-    connectAs(user: string, password: string) { return new Pool({ host: '127.0.0.1', port, user, password, database: 'postgres', max: 4, connectionTimeoutMillis: 5000 }); },
+    connectAs(user: string, password: string) { const connected=trackedPool({ host: '127.0.0.1', port, user, password, database: 'postgres', max: 4, connectionTimeoutMillis: 5000 });pools.add(connected);return connected; },
     async close() {
-      await pool.end();
+      await Promise.all([...pools].map(endPool));
       await database.stop();
       await rm(directory, { recursive: true, force: true });
     },

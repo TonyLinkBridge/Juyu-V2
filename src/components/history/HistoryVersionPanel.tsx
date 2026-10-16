@@ -14,7 +14,7 @@ function HistoryCover({url,alt,position}:{url:string;alt:string;position:number}
 }
 export function HistoryVersionPanel({initial}:{initial:HistoryVersion}){
  const [detail,setDetail]=useState(initial),[confirming,setConfirming]=useState(false),[busy,setBusy]=useState<'read'|'write'|''>(''),[uncertain,setUncertain]=useState(false),[blocked,setBlocked]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[confirmedUnread,setConfirmedUnread]=useState(false);
- const operation=useRef(false),pending=useRef<{input:RestoreVersionInput;currentRevision:number;publishedRevision:number|null}|null>(null),minimumSequence=useRef(initial.sequence),minimumRevision=useRef(initial.currentRevision);
+ const operation=useRef(false),pending=useRef<{input:RestoreVersionInput;highestRevision:number;publishedRevision:number|null}|null>(null),minimumSequence=useRef(initial.sequence),minimumRevision=useRef(initial.currentRevision);
  useEffect(()=>{
   // Guard the actual outer navigation too, including the synchronous request start.
   const held=()=>operation.current||pending.current!==null;
@@ -24,7 +24,7 @@ export function HistoryVersionPanel({initial}:{initial:HistoryVersion}){
   return()=>{window.removeEventListener('beforeunload',warn);document.removeEventListener('click',link,true);document.removeEventListener('auxclick',link,true);};
  },[]);
  const version=detail.version,id=encodeURIComponent(detail.documentId),locked=Boolean(busy)||uncertain;
- const allowed=detail.canRestore&&detail.lifecycle==='active'&&detail.status!=='in_review'&&version.revision<detail.currentRevision;
+ const allowed=detail.canRestore&&detail.lifecycle==='active'&&detail.status!=='in_review'&&version.revision!==detail.currentRevision;
  const base=`/api/admin/history/${id}/versions/${version.revision}/assets/`;
  async function reload(){
   if(operation.current||pending.current)return;operation.current=true;setBusy('read');setBlocked(true);setError('');
@@ -32,15 +32,15 @@ export function HistoryVersionPanel({initial}:{initial:HistoryVersion}){
  }
  async function restore(){
   if(operation.current||!uncertain&&(blocked||!confirming||!allowed))return;
-  const exact=pending.current??{input:{expectedSequence:detail.sequence,sourceRevision:version.revision},currentRevision:detail.currentRevision,publishedRevision:detail.publishedRevision};pending.current=exact;operation.current=true;setBusy('write');setError('');setNotice('');
+  const exact=pending.current??{input:{expectedSequence:detail.sequence,sourceRevision:version.revision},highestRevision:detail.highestRevision,publishedRevision:detail.publishedRevision};pending.current=exact;operation.current=true;setBusy('write');setError('');setNotice('');
   try{
-   const ack=await restoreHistoryVersion(detail.documentId,exact.input,exact.currentRevision,exact.publishedRevision);minimumSequence.current=ack.sequence;minimumRevision.current=ack.revision;pending.current=null;setUncertain(false);setConfirming(false);setBlocked(true);setConfirmedUnread(true);setNotice(`已从版本 ${ack.sourceRevision} 建立新草稿版本 ${ack.revision}。${ack.publishedRevision===null?'当前仍无正式版。':`正式内容（工作修订 ${ack.publishedRevision}） 保持不变。`}新草稿必须重新二审和发布。`);setBusy('read');
+   const ack=await restoreHistoryVersion(detail.documentId,exact.input,exact.highestRevision,exact.publishedRevision);minimumSequence.current=ack.sequence;minimumRevision.current=ack.revision;pending.current=null;setUncertain(false);setConfirming(false);setBlocked(true);setConfirmedUnread(true);setNotice(`已从版本 ${ack.sourceRevision} 建立新草稿版本 ${ack.revision}。${ack.publishedRevision===null?'当前仍无正式版。':`正式内容（工作修订 ${ack.publishedRevision}） 保持不变。`}新草稿必须重新二审和发布。`);setBusy('read');
    try{const next=await readHistoryVersion(detail.documentId,version.revision,ack.sequence,ack.revision);setDetail(next);minimumSequence.current=next.sequence;minimumRevision.current=next.currentRevision;setBlocked(false);setConfirmedUnread(false);}catch(e){setError(historyRestoreError(e,true));}
   }catch(e){const unknown=uncertain||!(e instanceof HistoryRestoreRejected);setUncertain(unknown);if(!unknown){pending.current=null;setBlocked(true);}setError(historyRestoreError(unknown?new Error('UNKNOWN_RESULT'):e));}finally{operation.current=false;setBusy('');}
  }
  let body:ReturnType<typeof parseReaderBody>|null=null;
  try{body=parseReaderBody(version.body);}catch{body=null;}
- const reason=detail.lifecycle==='archived'?'请先从归档恢复资料，再恢复历史版本。':detail.lifecycle==='trashed'?'请先从回收站恢复资料，再恢复历史版本。':detail.status==='in_review'?'请先结束当前审核，再恢复历史版本。':version.revision>=detail.currentRevision?'当前工作版本不能作为历史恢复来源。':'当前账号、资料状态或来源文件不允许恢复，请重新读取后核对。';
+ const reason=detail.lifecycle==='archived'?'请先从归档恢复资料，再恢复历史版本。':detail.lifecycle==='trashed'?'请先从回收站恢复资料，再恢复历史版本。':detail.status==='in_review'?'请先结束当前审核，再恢复历史版本。':version.revision===detail.currentRevision?'当前工作版本不能作为历史恢复来源。':'当前账号、资料状态或来源文件不允许恢复，请重新读取后核对。';
  return <section className="review-decision" aria-label="历史版本详情">
   <nav className="review-decision-links" aria-label="历史版本导航">{!locked&&<><a href={`/admin/history?article=${id}`}>返回完整历史记录</a><a href="/admin">返回内容工作台</a>{detail.lifecycle==='active'&&<a href={`/admin/editor?article=${id}`}>编辑当前文章</a>}{detail.lifecycle==='archived'&&<a href={`/admin/availability?article=${id}`}>管理归档资料</a>}{detail.lifecycle==='trashed'&&<a href="/admin/trash">查看回收站</a>}</>}<button type="button" disabled={locked} onClick={()=>void reload()}>{busy==='read'?'正在读取…':'重新读取版本状态'}</button></nav>
   {notice&&<p role="status">{notice}</p>}{confirmedUnread&&<p className="review-control-warning">恢复已经确认。下方工作状态仍是上次读取结果，请重新读取后核对。</p>}

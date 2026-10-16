@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {historyActionLabel} from '../src/history/model.ts';
-const snapshot={documentId:'history-local',sequence:9,currentRevision:3,publishedRevision:2,lifecycle:'active',status:'draft',version:{revision:1,title:'历史标题',authorId:'author',authorName:'原作者',editorId:'editor',editorName:'原编辑',createdAt:'2026-09-01T00:00:00Z',body:'# 历史正文',audience:'staff',tags:['流程'],cover:null,blocks:[]},categories:[{id:'category',name:'客服'}],assets:[],canRestore:true};
+const snapshot={documentId:'history-local',sequence:9,currentRevision:3,highestRevision:3,publishedRevision:2,lifecycle:'active',status:'draft',version:{revision:1,title:'历史标题',authorId:'author',authorName:'原作者',editorId:'editor',editorName:'原编辑',createdAt:'2026-09-01T00:00:00Z',body:'# 历史正文',audience:'staff',tags:['流程'],cover:null,blocks:[]},categories:[{id:'category',name:'客服'}],assets:[],canRestore:true};
 test('direct publication history uses one explicit Super Admin label in both languages',()=>{
  assert.equal(historyActionLabel('direct_publish','zh-CN'),'Super Admin 直接发布');
  assert.equal(historyActionLabel('direct_publish','en'),'Published directly by Super Admin');
@@ -25,5 +25,17 @@ test('selected history refresh validates freshness source identity all metadata 
  const m=await import('../src/history/client.ts'),old=globalThis.fetch;try{let cache:RequestCache|undefined;globalThis.fetch=async(_,i)=>{cache=i?.cache;return Response.json(snapshot);};assert.deepEqual(await m.readHistoryVersion('history-local',1,9,3),snapshot);assert.equal(cache,'no-store');
  for(const patch of [{sequence:8},{currentRevision:2},{publishedRevision:4},{documentId:'other'},{lifecycle:'purged'},{status:'in_review'},{lifecycle:'archived'},{version:{...snapshot.version,revision:2}},{version:{...snapshot.version,body:42}},{version:{...snapshot.version,blocks:[{}]}},{categories:[{}]},{assets:[{}]},{assets:[{id:'a',filename:'x',mime:'image/png',size:'2',status:'quarantined'}]}]){globalThis.fetch=async()=>Response.json({...snapshot,...patch});await assert.rejects(m.readHistoryVersion('history-local',1,9,3),/READ_FAILED/);}
  globalThis.fetch=async()=>Response.json({...snapshot,status:'in_review',canRestore:false});assert.equal((await m.readHistoryVersion('history-local',1,9,3)).canRestore,false);
+ }finally{globalThis.fetch=old;}
+});
+test('a discarded revision newer than the current formal pointer remains a valid restore source',async()=>{
+ const m=await import('../src/history/client.ts'),old=globalThis.fetch;
+ const detached={...snapshot,currentRevision:1,highestRevision:2,publishedRevision:1,version:{...snapshot.version,revision:2},canRestore:true};
+ try{
+  globalThis.fetch=async()=>Response.json(detached);
+  assert.deepEqual(await m.readHistoryVersion('history-local',2,9,1),detached);
+  for(const highestRevision of [0,1,3.5,2147483648]){
+   globalThis.fetch=async()=>Response.json({...detached,highestRevision});
+   await assert.rejects(m.readHistoryVersion('history-local',2,9,1),/READ_FAILED/);
+  }
  }finally{globalThis.fetch=old;}
 });

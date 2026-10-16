@@ -17,6 +17,19 @@ test('thumbnail loads stay bounded when a page has many images',async({page})=>{
  await expect.poll(()=>finished).toBeGreaterThanOrEqual(3);
  expect(maximum).toBeLessThanOrEqual(3);
 });
+test('offscreen thumbnails wait until they approach the viewport',async({page})=>{
+ const many=Array.from({length:30},(_,i)=>({...items[i%items.length],id:`bbbbbbbb-bbbb-4bbb-8bbb-${String(i).padStart(12,'0')}`,documentTitle:`延后加载 ${i+1}`}));
+ const seen=new Set<string>();
+ await page.route('**/api/admin/assets/**',route=>{seen.add(route.request().url().split('/').pop()!);return route.fulfill({path:'tests/fixtures/article-cover.png',contentType:'image/png'});});
+ await mount(page,{...data,items:many,total:many.length,counts:{...data.counts,all:many.length,image:many.length}});
+ await expect.poll(()=>seen.size).toBeGreaterThan(0);
+ await page.waitForTimeout(600);
+ expect(seen.size).toBeLessThan(many.length);
+ const last=many.at(-1)!;
+ await expect(page.getByRole('img',{name:`图片预览将在接近画面时加载：${last.documentTitle} · ${last.filename}`})).not.toHaveAttribute('aria-busy','true');
+ await page.getByRole('link',{name:`查看文件 ${last.documentTitle} · ${last.filename}`,exact:true}).scrollIntoViewIfNeeded();
+ await expect.poll(()=>seen.has(last.id)).toBe(true);
+});
 test('a failed thumbnail can retry without opening the detail page or reloading the library',async({page})=>{
  let calls=0;
  await page.route('**/api/admin/assets/**',r=>++calls===1?r.fulfill({status:502,json:{error:'FILE_UNAVAILABLE'}}):r.fulfill({path:'tests/fixtures/article-cover.png',contentType:'image/png'}));

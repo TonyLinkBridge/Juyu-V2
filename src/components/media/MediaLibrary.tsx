@@ -1,6 +1,6 @@
 'use client';
 /* eslint-disable @next/next/no-img-element -- Authenticated private asset delivery; no public image optimizer. */
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {LoaderSkeleton} from '../ui/loaders-skeleton';
 import {previewQueue} from '../../media/preview-queue';
 import {UploadSimple,SquaresFour,ListBullets,X,FileText,FilePdf,FilmStrip,MusicNotes,ImageSquare,DownloadSimple,ArrowUpRight,MagnifyingGlass} from '@phosphor-icons/react';
@@ -12,9 +12,15 @@ import {MediaUpload} from './MediaUpload';
 const categoryNames:Record<FileCategory,string>={all:'全部',image:'图片',video:'视频',audio:'音频',file:'文件'};
 const assetHref=(id:string)=>`/api/admin/assets/${encodeURIComponent(id)}`;
 function FilePreview({asset,large=false,href}:{asset:LibraryAsset;large?:boolean;href?:string}){
- const [failed,setFailed]=useState(false),[image,setImage]=useState<string|null>(null),[attempt,setAttempt]=useState(0),type=fileCategory(asset.mime);
+ const [failed,setFailed]=useState(false),[image,setImage]=useState<string|null>(null),[attempt,setAttempt]=useState(0),[visible,setVisible]=useState(false),root=useRef<HTMLDivElement>(null),type=fileCategory(asset.mime);
  useEffect(()=>{
-  if(type!=='image')return;
+  if(large)return;
+  const node=root.current;if(!node||typeof IntersectionObserver==='undefined'){const timer=window.setTimeout(()=>setVisible(true),0);return()=>window.clearTimeout(timer);}
+  const observer=new IntersectionObserver(entries=>{if(entries.some(entry=>entry.isIntersecting)){setVisible(true);observer.disconnect();}},{rootMargin:'240px 0px'});
+  observer.observe(node);return()=>observer.disconnect();
+ },[asset.id,large]);
+ useEffect(()=>{
+  if(type!=='image'||!(large||visible))return;
   const controller=new AbortController();let active=true,objectUrl:string|undefined;
   void previewQueue.run(controller.signal,async()=>{
    const response=await fetch(assetHref(asset.id),{credentials:'same-origin',cache:'no-store',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(20000)])});
@@ -24,16 +30,20 @@ function FilePreview({asset,large=false,href}:{asset:LibraryAsset;large?:boolean
    if(!active)return;objectUrl=URL.createObjectURL(blob);setImage(objectUrl);
   }).catch(()=>{if(active&&!controller.signal.aborted)setFailed(true);});
   return()=>{active=false;controller.abort();if(objectUrl)URL.revokeObjectURL(objectUrl);};
- },[asset.id,type,attempt]);
+ },[asset.id,type,attempt,large,visible]);
+ let preview;
  if(type==='image'&&!failed){
-  if(!image)return <div className="media-preview-loading" role="img" aria-label={`正在加载图片预览：${asset.documentTitle} · ${asset.filename}`} aria-busy="true"><LoaderSkeleton height="100%" borderRadius={0}/></div>;
+  if(!large&&!visible)preview=<div className="media-preview-deferred" role="img" aria-label={`图片预览将在接近画面时加载：${asset.documentTitle} · ${asset.filename}`}/>;
+  else if(!image)preview=<div className="media-preview-loading" role="img" aria-label={`正在加载图片预览：${asset.documentTitle} · ${asset.filename}`} aria-busy="true"><LoaderSkeleton height="100%" borderRadius={0}/></div>;
+  else {
   const img=<img src={image} alt={large?asset.filename:''} onError={()=>setFailed(true)}/>;
-  return href?<a className="media-preview-image-link" href={href} aria-label={`打开文件详情：${asset.documentTitle} · ${asset.filename}`}>{img}</a>:img;
+  preview=href?<a className="media-preview-image-link" href={href} aria-label={`打开文件详情：${asset.documentTitle} · ${asset.filename}`}>{img}</a>:img;
+  }
  }
- if(type==='video'&&large&&!failed)return <video key={attempt} controls preload="metadata" src={assetHref(asset.id)} aria-label={asset.filename} onError={()=>setFailed(true)}/>;
- if(type==='audio'&&large&&!failed)return <audio key={attempt} controls preload="metadata" src={assetHref(asset.id)} aria-label={asset.filename} onError={()=>setFailed(true)}/>;
- const Icon=failed?ImageSquare:type==='video'?FilmStrip:type==='audio'?MusicNotes:asset.mime==='application/pdf'?FilePdf:FileText;
- return <div className="media-file-icon"><Icon size={large?56:32}/><span>{failed?'预览暂时无法读取':asset.mime==='application/pdf'?'PDF':type==='video'?'视频':type==='audio'?'音频':asset.filename.split('.').at(-1)?.toUpperCase()}</span>{failed&&<button className="media-preview-retry" type="button" aria-label={`重新加载预览：${asset.documentTitle} · ${asset.filename}`} onClick={()=>{setFailed(false);setImage(null);setAttempt(x=>x+1);}}>重试</button>}</div>;
+ if(preview===undefined&&type==='video'&&large&&!failed)preview=<video key={attempt} controls preload="metadata" src={assetHref(asset.id)} aria-label={asset.filename} onError={()=>setFailed(true)}/>;
+ if(preview===undefined&&type==='audio'&&large&&!failed)preview=<audio key={attempt} controls preload="metadata" src={assetHref(asset.id)} aria-label={asset.filename} onError={()=>setFailed(true)}/>;
+ if(preview===undefined){const Icon=failed?ImageSquare:type==='video'?FilmStrip:type==='audio'?MusicNotes:asset.mime==='application/pdf'?FilePdf:FileText;preview=<div className="media-file-icon"><Icon size={large?56:32}/><span>{failed?'预览暂时无法读取':asset.mime==='application/pdf'?'PDF':type==='video'?'视频':type==='audio'?'音频':asset.filename.split('.').at(-1)?.toUpperCase()}</span>{failed&&<button className="media-preview-retry" type="button" aria-label={`重新加载预览：${asset.documentTitle} · ${asset.filename}`} onClick={()=>{setFailed(false);setImage(null);setAttempt(x=>x+1);}}>重试</button>}</div>;}
+ return <div className="media-preview-viewport" ref={root}>{preview}</div>;
 }
 export function MediaLibrary({data,state='ready'}:{data?:MediaLibraryData;state?:'ready'|'unavailable'|'invalid'}){
  const [uploading,setUploading]=useState(false);

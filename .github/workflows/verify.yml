@@ -24,8 +24,8 @@ jobs:
       - run: npm run test:critical
       - name: Verify reader navigation feedback
         run: npm run test:reader-navigation
-      - name: Verify developer and legacy publication database contracts
-        run: node --experimental-strip-types --test --test-concurrency=1 tests/database/developers.test.ts tests/database/slugs.test.ts tests/database/draft-discard.test.ts tests/database/authorization.test.ts
+      - name: Verify all database contracts
+        run: npm run test:db
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

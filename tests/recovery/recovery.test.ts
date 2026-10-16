@@ -121,7 +121,8 @@ test('paired database, migrations and private media recover into isolated empty 
     const home = await support.home();
     assert.deepEqual(home.latest.map(d=>d.id),['article']);
     assert.equal(home.latest[0].title,'article');
-    assert.deepEqual((await ops.home()).latest.map(d=>d.id).sort(),['article','ops']);
+    assert.deepEqual((await ops.home()).latest.map(d=>d.id),['article'],'the knowledge homepage stays limited to knowledge articles');
+    assert.deepEqual((await ops.ops()).items.map(d=>d.id),['ops'],'the restored OPS document remains available in its own collection');
     await assert.rejects(new AuthorizationService(db,async()=>null).home(),/FORBIDDEN/);
   } finally {await runtime.end();await issuer.end();}
   const emptyFiles = await storageFixture(); t.after(() => emptyFiles.close());

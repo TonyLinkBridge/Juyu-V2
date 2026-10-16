@@ -5,9 +5,9 @@ import type {HistoryEvent,HistoryPage,HistoryVersion,DeletedHistoryPage} from '.
 let bundle:Awaited<ReturnType<typeof historyBrowserBundle>>;
 test.beforeEach(async({page})=>{await fixtureAssets(page,'history');});
 test.beforeAll(async()=>{bundle=await historyBrowserBundle();});
-const endpoint='**/api/admin/history/history-local/versions/1';
+const endpoint='**/api/admin/history/history-local/versions/*';
 const ack={documentId:'history-local',sequence:10,revision:4,sourceRevision:1,status:'draft',publishedRevision:2};
-const refreshed={...fixture,sequence:10,currentRevision:4};
+const refreshed={...fixture,sequence:10,currentRevision:4,highestRevision:4};
 async function mount(page:Page,data:HistoryVersion|HistoryPage|DeletedHistoryPage=fixture,timeline:boolean|'deleted'=false){
  await page.route('**/__history_fixture',r=>r.fulfill({contentType:'text/html',body:`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${bundle.css}</style></head><body data-timeline="${timeline==='deleted'?'2':timeline?'1':'0'}"><header><a href="/sign-in" aria-label="JUYU Help Centre 首页"><span>JUYU Help Centre</span></a><p>历史管理 · 本地测试样例（非真实资料）</p></header><main style="max-width:960px;margin:auto;padding:20px"><script id="data" type="application/json">${JSON.stringify(data).replace(/</g,'\\u003c')}</script><div id="root"></div></main><script>${bundle.script.replace(/<\/script/gi,'<\\/script')}</script></body></html>`}));
  await page.route(`**/api/admin/history/history-local/versions/1/assets/${historyAssetId}`,r=>r.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lV0AAAAASUVORK5CYII=','base64')}));
@@ -43,6 +43,15 @@ test('purged receipts display metadata and audit only with no preview or recover
 });
 test('restore confirmation creates a new draft and preserves the existing formal publication',async({page},info)=>{
  const writes:unknown[]=[];await page.route(endpoint,r=>{if(r.request().method()==='GET')return r.fulfill({json:refreshed});writes.push(r.request().postDataJSON());return r.fulfill({json:ack});});await mount(page);await page.getByRole('button',{name:'恢复此版本为新草稿',exact:true}).click();await expect(page.getByText('当前正式内容（工作修订 2） 保持不变。',{exact:true})).toBeVisible();await expect(page.getByText('新草稿必须重新提交独立二审，再由管理员发布。',{exact:true})).toBeVisible();await page.getByRole('button',{name:'取消恢复'}).click();expect(writes).toHaveLength(0);await confirm(page);await expect(page.getByRole('status')).toContainText('新草稿版本 4');await expect(page.getByRole('status')).toContainText('正式内容（工作修订 2） 保持不变');await expect(page.getByText('当前工作版本：4',{exact:true})).toBeVisible();expect(writes).toEqual([{expectedSequence:9,sourceRevision:1}]);await page.screenshot({path:`output/verification/history-restored-${info.project.name}.png`,fullPage:true});
+});
+test('discarded revision newer than the formal pointer can create the next historical draft',async({page})=>{
+ const detached:HistoryVersion={...fixture,sequence:11,currentRevision:1,highestRevision:2,publishedRevision:1,version:{...fixture.version,revision:2,title:'已放弃的修订'},canRestore:true};
+ const restored={...detached,sequence:12,currentRevision:3,highestRevision:3,version:detached.version,canRestore:true};
+ const writes:unknown[]=[];
+ await page.route(endpoint,route=>{if(route.request().method()==='GET')return route.fulfill({json:restored});writes.push(route.request().postDataJSON());return route.fulfill({json:{documentId:'history-local',sequence:12,revision:3,sourceRevision:2,status:'draft',publishedRevision:1}});});
+ await mount(page,detached);await confirm(page);
+ await expect(page.getByRole('status')).toContainText('新草稿版本 3');
+ expect(writes).toEqual([{expectedSequence:11,sourceRevision:2}]);
 });
 test('in-review current source and archived or trashed documents cannot restore',async({page})=>{
  for(const data of [{...fixture,status:'in_review' as const,canRestore:false},{...fixture,currentRevision:1,publishedRevision:null,canRestore:false},{...fixture,lifecycle:'archived' as const,canRestore:false},{...fixture,lifecycle:'trashed' as const,canRestore:false}]){await mount(page,data);await expect(page.getByRole('button',{name:'恢复此版本为新草稿',exact:true})).toHaveCount(0);await expect(page.getByRole('region',{name:'历史版本详情'})).toContainText(data.status==='in_review'?'请先结束当前审核':data.lifecycle==='archived'?'请先从归档恢复资料':data.lifecycle==='trashed'?'请先从回收站恢复资料':'当前工作版本不能作为历史恢复来源');}

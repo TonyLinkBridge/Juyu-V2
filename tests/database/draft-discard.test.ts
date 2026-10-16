@@ -50,12 +50,32 @@ for(const mode of ['standard','super_admin'] as const)test(`${mode}: discard res
  }finally{await h.close();}
 });
 
+for(const mode of ['standard','super_admin'] as const)test(`${mode}: a discarded revision can be restored as a new draft without changing the formal version`,async()=>{
+ const h=await discardDatabase();try{
+  const {published,draft}=await h.workingDraft(mode),id=draft.id;
+  const discardedRevision=draft.workflow.revisionId;
+  const discardedBody=(await h.service(h.author).historyVersion(id,discardedRevision)).version.body;
+  const readerBefore=await h.service(h.staff).article(id);
+  const discard=await h.service(h.author).discardDraft(id,{expectedSequence:draft.sequence});
+  const detail=await h.service(h.author).historyVersion(id,discardedRevision);
+  assert.equal(detail.currentRevision,published.publishedRevisionId);
+  assert.equal(detail.highestRevision,discardedRevision);
+  assert.equal(detail.canRestore,true);
+  const restored=await h.service(h.author).restoreVersion(id,{expectedSequence:discard.sequence,sourceRevision:discardedRevision});
+  assert.equal(restored.revision,discardedRevision+1);
+  assert.equal(restored.publishedRevision,published.publishedRevisionId);
+  assert.equal((await h.service(h.author).historyVersion(id,restored.revision)).version.body,discardedBody);
+  assert.deepEqual(await h.service(h.staff).article(id),readerBefore,'the employee-facing formal version and route stay unchanged');
+  assert.deepEqual(await h.service(h.author).restoreVersion(id,{expectedSequence:discard.sequence,sourceRevision:discardedRevision}),restored,'exact retry remains idempotent');
+ }finally{await h.close();}
+});
+
 test('upgrade fixes existing direct-publication drafts without modifying data and migration replay is safe',async()=>{
  const h=await discardDatabase(true);try{
  const {draft}=await h.workingDraft('super_admin');
  const before=await h.repo.getForManagement(draft.id,h.author);
  await assert.rejects(h.service(h.author).discardDraft(draft.id,{expectedSequence:draft.sequence}),/INVALID_STATE/);
- assert.deepEqual(await migrate(h.fixture.pool),['0058_discard_direct_publication']);
+ assert.deepEqual(await migrate(h.fixture.pool),['0058_discard_direct_publication','0059_restore_discarded_revision']);
  assert.deepEqual(await h.repo.getForManagement(draft.id,h.author),before,'installing the function never discards a draft');
  assert.deepEqual(await migrate(h.fixture.pool),[]);
  assert.equal((await h.service(h.author).discardDraft(draft.id,{expectedSequence:draft.sequence})).status,'published');
