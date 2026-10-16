@@ -1,3 +1,4 @@
+import {isBlankParagraph} from '../fumadocs/paragraphs.ts';
 import {inlineText,isFileBlock,privateAssetId,type EditorBlock,type EditorInline} from './document.ts';
 import {displayColor} from './inline.ts';
 import {annotationText} from './annotation.ts';
@@ -20,7 +21,8 @@ export function printEditor(nodes:EditorBlock[],media:(b:MediaBlock,children?:st
    if(b.type==='codeBlock'){html+=`<section class="pdf-code"><p>${e(b.props.language??'text')}</p><pre><code>${e(inlineText(b.content))}</code></pre></section>${render(b.children)}`;continue;}
    // Match the reader: completion decorates only the item's label, not nested children.
    const label=marks(b.content,inlineImage),content=b.type==='checkListItem'&&b.props.checked?`<span style="text-decoration:line-through">${label}</span>`:label;
-   const tag=b.type==='heading'?`h${Math.min((b.props.level??1)+1,6)}`:b.type==='quote'?'blockquote':'p';html+=`<${tag}${b.type==='heading'?` id="${b.id}"`:''} style="${css(b.props)}">${b.type==='checkListItem'?(b.props.checked?'☑ ':'☐ '):''}${content}</${tag}>${b.children.length?`<div style="padding-left:6mm">${render(b.children)}</div>`:''}`;
+   const blank=isBlankParagraph(b);
+   const tag=b.type==='heading'?`h${Math.min((b.props.level??1)+1,6)}`:b.type==='quote'?'blockquote':'p';html+=`<${tag}${blank?' data-reader-empty-paragraph=""':''}${b.type==='heading'?` id="${b.id}"`:''} style="${css(b.props)}">${b.type==='checkListItem'?(b.props.checked?'☑ ':'☐ '):''}${blank?'<br>':content}</${tag}>${b.children.length?`<div style="padding-left:6mm">${render(b.children)}</div>`:''}`;
   }return html;
  };return render(nodes);
 }

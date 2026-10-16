@@ -1,14 +1,13 @@
 import type {EditorBlock} from '../editor/document';
 
-export function isEmptyPublishedParagraph(block:EditorBlock):boolean{
+/** A stored blank paragraph is an authored line, including inside nested content. */
+export function isBlankParagraph(block:EditorBlock):boolean{
  return block.type==='paragraph'
-  &&block.children.length===0
-  &&block.content.every(item=>item.type==='text'&&!item.text.trim());
+  &&block.content.every(item=>item.type==='text'&&!item.text.trim()&&!/[\r\n]/.test(item.text));
 }
 
-export function withoutEmptyPublishedParagraphs(nodes:EditorBlock[]):EditorBlock[]{
- return nodes.flatMap(block=>{
-  if(isEmptyPublishedParagraph(block))return [];
-  return [{...block,children:withoutEmptyPublishedParagraphs(block.children)} as EditorBlock];
- });
+/** Used only to distinguish readable content from empty callout/accordion placeholders. */
+export function isEmptyPublishedParagraph(block:EditorBlock):boolean{
+ return block.type==='paragraph'&&block.children.length===0
+  &&block.content.every(item=>item.type==='text'&&!item.text.trim());
 }

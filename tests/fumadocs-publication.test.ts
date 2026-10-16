@@ -5,7 +5,6 @@ import {encodeEditorBody} from '../src/editor/document.ts';
 import {canonicalFumadocsPublicationPath,formalFumadocsPublicationPath,fumadocsMarkdownPath,fumadocsPdfPath,fumadocsPublication,fumadocsPublicationLanguages,fumadocsPublicationTree} from '../src/fumadocs/publication.ts';
 import {fumadocsSearchResults} from '../src/fumadocs/search.ts';
 import {fumadocsIconComponents} from '../src/fumadocs/icons.ts';
-import {withoutEmptyPublishedParagraphs} from '../src/fumadocs/paragraphs.ts';
 
 const body=encodeEditorBody([
  {id:'intro',type:'heading',props:{textAlignment:'left',textColor:'default',backgroundColor:'default',level:1},content:[{type:'text',text:'真实文章标题',styles:{}}],children:[]},
@@ -23,7 +22,7 @@ test('published BlockNote body becomes the Fumadocs document and table of conten
  ]);
 });
 
-test('draft and formal readers drop empty paragraphs without dropping nested content',()=>{
+test('publication data preserves authored empty paragraphs and nested content',()=>{
  const blocks=[
   {id:'empty-top',type:'paragraph' as const,props:{textAlignment:'left' as const,textColor:'default' as const,backgroundColor:'default' as const},content:[],children:[]},
   {id:'parent',type:'paragraph' as const,props:{textAlignment:'left' as const,textColor:'default' as const,backgroundColor:'default' as const},content:[{type:'text' as const,text:'保留正文',styles:{}}],children:[
@@ -31,9 +30,9 @@ test('draft and formal readers drop empty paragraphs without dropping nested con
    {id:'nested',type:'paragraph' as const,props:{textAlignment:'left' as const,textColor:'default' as const,backgroundColor:'default' as const},content:[{type:'text' as const,text:'保留子段落',styles:{}}],children:[]},
   ]},
  ];
- const result=withoutEmptyPublishedParagraphs(blocks);
- assert.deepEqual(result.map(block=>block.id),['parent']);
- assert.deepEqual(result[0]?.children.map(block=>block.id),['nested']);
+ const result=fumadocsPublication({body:encodeEditorBody(blocks)}).blocks;
+ assert.deepEqual(result.map(block=>block.id),['empty-top','parent']);
+ assert.deepEqual(result[1]?.children.map(block=>block.id),['empty-nested','nested']);
  assert.equal(blocks[1]?.children.length,2);
 });
 

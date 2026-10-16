@@ -68,7 +68,7 @@ const blocks:EditorBlock[]=[
  ]},
  {id:'email-quote',type:'quote',props:textProps,content:text('引用内容保持作者设置，不自动斜体。'),children:[]},
  {id:'email-tabs',type:'juyu',props:{payload:JSON.stringify({id:'email-tabs',type:'tabs',tabs:[
-  {id:'self-service',title:'自行处理',body:encodeTabBody([{id:'self-service-body',type:'paragraph',props:textProps,content:[{type:'text',text:'先打开账户设置，再查看',styles:{bold:true}},{type:'link',href:'https://example.com/account',content:text('账户操作说明')}],children:[]}]),iconKey:'book'},
+  {id:'self-service',title:'自行处理',body:encodeTabBody([{id:'self-service-body',type:'paragraph',props:textProps,content:[{type:'text',text:'先打开账户设置，再查看',styles:{bold:true}},{type:'link',href:'https://example.com/account',content:text('账户操作说明')}],children:[]},{id:'tab-quote',type:'quote',props:textProps,content:text('标签页内的引用'),children:[]},{id:'tab-blank',type:'paragraph',props:textProps,content:[],children:[]},{id:'tab-after-blank',type:'paragraph',props:textProps,content:text('标签页空行之后'),children:[]}]),iconKey:'book'},
   {id:'staff-support',title:'专员协助',body:'无法登录时，请联系专员核对身份。',iconKey:'users'},
  ]})},children:[]},
  {id:'email-accordion',type:'juyu',props:{payload:JSON.stringify({id:'email-accordion',type:'accordion',items:[
@@ -129,6 +129,13 @@ const blocks:EditorBlock[]=[
  {id:'email-before-result',type:'paragraph',props:textProps,content:text('这是下一个章节标题前的最后一段。'),children:[]},
  {id:'email-result',type:'heading',props:{...textProps,level:1},content:text('提交后会发生什么'),children:[]},
  {id:'email-result-body',type:'paragraph',props:textProps,content:text('专员审核后会通过工单回复结果。请不要重复提交相同申请。'),children:[]},
+ {id:'quote-blank-reference',type:'quote',props:textProps,content:[...text('温馨提示：',{bold:true,textColor:'pink'}),...text('保留这段引用和  两个空格。')],children:[]},
+ {id:'quote-blank-one',type:'paragraph',props:textProps,content:[],children:[]},
+ {id:'quote-blank-two',type:'paragraph',props:textProps,content:text('   '),children:[]},
+ {id:'quote-blank-four',type:'numberedListItem',props:{...textProps,start:4},content:text('空行之后的第四条'),children:[]},
+ {id:'quote-soft-lines',type:'paragraph',props:textProps,content:text('第一行\n第二行'),children:[]},
+ {id:'quote-soft-follow',type:'paragraph',props:textProps,content:text('普通段落间距对照'),children:[]},
+ {id:'quote-red-background',type:'quote',props:{...textProps,backgroundColor:'red'},content:text('保留红底引用',{bold:true}),children:[]},
 ];
 
 const toc=[

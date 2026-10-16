@@ -8,7 +8,7 @@ import {Hint} from '../RichBlocks/Hint';
 import {MediaBlocks} from '../Media/MediaBlocks';
 import {ImageGallery,type GalleryImage} from '../Media/ImageGallery';
 import {tableCellBorderStyle,tableCellVerticalAlignStyle} from '../../../editor/table';
-import {isEmptyPublishedParagraph} from '../../../fumadocs/paragraphs';
+import {isBlankParagraph,isEmptyPublishedParagraph} from '../../../fumadocs/paragraphs';
 /* eslint-disable @next/next/no-img-element -- private assets require session-aware delivery. */
 export function StructuredDocument({blocks,documentId,revision,admin=false,locale='zh-CN'}:{blocks:EditorBlock[];documentId?:string;revision?:number;admin?:boolean;locale?:'zh-CN'|'en'}){
  const render=(nodes:EditorBlock[]):ReactNode[]=>{
@@ -46,7 +46,8 @@ export function StructuredDocument({blocks,documentId,revision,admin=false,local
    if(b.type==='codeBlock'){result.push(<Fragment key={b.id}><CodeBlock block={{id:b.id,type:'code',language:b.props.language??'text',code:inlineText(b.content)}}/>{children}</Fragment>);continue;}
    const Tag=b.type==='heading'?({1:'h2',2:'h3',3:'h4',4:'h5',5:'h6',6:'h6'} as const)[b.props.level??1]:b.type==='quote'?'blockquote':'p';
    const content=<StructuredInline content={b.content} documentId={documentId} revision={revision} admin={admin} locale={locale}/>;
-   const heading=<Tag data-native-level={b.type==='heading'?b.props.level??1:undefined} id={b.type==='heading'?b.id:undefined} tabIndex={b.type==='heading'?-1:undefined} className={b.type==='heading'?'heading font-heading block gitbook-heading':undefined} style={style(b.props)}>{content}{b.type==='heading'&&<a href={`#${b.id}`} className="heading-hash" aria-label={locale==='en'?`Jump to ${inlineText(b.content)}`:`定位到：${inlineText(b.content)}`}>#</a>}</Tag>;
+   const blank=isBlankParagraph(b);
+   const heading=<Tag data-reader-empty-paragraph={blank?'':undefined} data-native-level={b.type==='heading'?b.props.level??1:undefined} id={b.type==='heading'?b.id:undefined} tabIndex={b.type==='heading'?-1:undefined} className={b.type==='heading'?'heading font-heading block gitbook-heading':undefined} style={style(b.props)}>{blank?<br/>:content}{b.type==='heading'&&<a href={`#${b.id}`} className="heading-hash" aria-label={locale==='en'?`Jump to ${inlineText(b.content)}`:`定位到：${inlineText(b.content)}`}>#</a>}</Tag>;
    if(b.type==='toggleListItem'||(b.type==='heading'&&b.props.isToggleable))result.push(<details key={b.id} className="native-toggle"><summary>{b.type==='heading'?heading:content}</summary>{children}</details>);
    else if(b.type==='checkListItem')result.push(<div key={b.id} className="native-check" style={style(b.props)}><input type="checkbox" checked={b.props.checked} disabled aria-label={inlineText(b.content)}/><div><span className={b.props.checked?"native-completed":undefined}>{content}</span>{children}</div></div>);
    else result.push(<Fragment key={b.id}>{heading}{b.children.length>0&&<div className="native-children">{children}</div>}</Fragment>);

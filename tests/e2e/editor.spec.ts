@@ -2,6 +2,7 @@ import {readFile} from 'node:fs/promises';
 import {test,expect,type Page} from '@playwright/test';
 import {editorBrowserBundle,editorFixture} from '../helpers/editor-browser';
 import type {EditorData} from '../../src/editor/contract';
+import {encodeTabBody} from '../../src/media/tab-body';
 import {decodeEditorBody,encodeEditorBody,editorMedia} from '../../src/editor/document';
 let bundle:Awaited<ReturnType<typeof editorBrowserBundle>>;
 test.beforeAll(async()=>{bundle=await editorBrowserBundle();});
@@ -329,7 +330,7 @@ test('open draft preview reflects typing before autosave reaches the server',asy
  await expect(preview).toContainText('实时预览 · 尚未保存',{timeout:500});
  expect(writes).toBe(0);
 });
-test('draft preview uses the formal Fumadocs paragraph rhythm and ignores empty spacing blocks',async({page})=>{
+test('draft preview preserves authored blank paragraphs with one line of visible space',async({page})=>{
  const props={textAlignment:'left' as const,textColor:'default' as const,backgroundColor:'default' as const};
  const text=(id:string,value:string)=>({id,type:'paragraph' as const,props,content:value?[{type:'text' as const,text:value,styles:{}}]:[],children:[]});
  const saved={...structuredClone(editorFixture),body:encodeEditorBody([text('preview-first','第一段'),text('preview-empty',''),text('preview-second','第二段')])};
@@ -338,7 +339,9 @@ test('draft preview uses the formal Fumadocs paragraph rhythm and ignores empty 
  const reader=page.locator('.editor-preview [data-fumadocs-draft-reader]');
  await expect(reader).toBeVisible();
  const paragraphs=reader.locator('.gitbook-document.native-document>p');
- await expect(paragraphs).toHaveCount(2);
+ await expect(paragraphs).toHaveCount(3);
+ await expect(paragraphs.nth(1)).toHaveAttribute('data-reader-empty-paragraph','');
+ await expect(paragraphs.nth(1)).toHaveCSS('min-height','28px');
  await expect(reader.getByText('第一段',{exact:true})).toBeVisible();
  await expect(reader.getByText('第二段',{exact:true})).toBeVisible();
  await expect(paragraphs.first()).toHaveCSS('margin-bottom','20px');
@@ -865,4 +868,77 @@ test('clipboard fallback selects the full draft inside the modal settings dialog
  await expect(page.getByRole('button',{name:'已复制',exact:true})).toHaveAttribute('data-copied','true');
  const copied=await page.evaluate(()=>(window as Window&{copiedDraft?:string}).copiedDraft);expect(JSON.parse(copied!)).toMatchObject({title:editorFixture.title,documentId:editorFixture.documentId});
  await expect(page.getByRole('dialog',{name:'文章设置',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'已复制',exact:true})).toBeFocused();
+});
+
+test('quotes and added blank lines match between editing and draft preview without changing content',async({page})=>{
+ const props={textAlignment:'left',textColor:'default',backgroundColor:'default'};
+ let saved={...structuredClone(editorFixture),body:encodeEditorBody([
+  {id:'quote-parity',type:'quote',props,content:[{type:'text',text:'温馨提示：',styles:{bold:true,textColor:'pink'}},{type:'text',text:'保留这段引用和  两个空格。',styles:{}}],children:[]},
+  {id:'quote-empty-one',type:'paragraph',props,content:[],children:[]},
+  {id:'quote-empty-two',type:'paragraph',props,content:[],children:[]},
+  {id:'quote-list-four',type:'numberedListItem',props:{...props,start:4},content:[{type:'text',text:'原本的第四条',styles:{bold:true}}],children:[]},
+ ])};
+ await page.route('**/api/admin/editor/*',route=>{const value=route.request().postDataJSON();saved={...saved,...value,sequence:saved.sequence+1};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ const preview=page.locator('.editor-preview'),editingQuote=page.locator('.editor-canvas blockquote'),readingQuote=preview.locator('blockquote');
+ await expect(preview.locator('[data-reader-empty-paragraph]')).toHaveCount(2);
+ const style=(element:HTMLElement|SVGElement)=>{const s=getComputedStyle(element);return {color:s.color,border:s.borderInlineStart,padding:s.paddingInlineStart,lineHeight:s.lineHeight,fontStyle:s.fontStyle,fontWeight:s.fontWeight};};
+ expect(await readingQuote.evaluate(style)).toEqual(await editingQuote.evaluate(style));
+ await expect(readingQuote).toHaveText('温馨提示：保留这段引用和  两个空格。');
+ await expect(preview.locator('ol')).toHaveAttribute('start','4');
+ const blanks=preview.locator('[data-reader-empty-paragraph]');
+ for(const blank of await blanks.all())await expect(blank).toHaveCSS('min-height','28px');
+ const gap=async()=>{const q=await readingQuote.boundingBox(),n=await preview.getByText('原本的第四条',{exact:true}).boundingBox();return n!.y-q!.y-q!.height;};
+ const originalGap=await gap();
+ await page.getByRole('button',{name:'关闭草稿预览',exact:true}).click();
+ await page.locator('.editor-canvas [data-id="quote-empty-one"] .bn-inline-content').click({position:{x:8,y:14}});
+ await expect(page.locator('.editor-canvas .bn-editor[contenteditable="true"]')).toBeFocused();
+ await expect(page.locator('.editor-canvas [data-id="quote-empty-one"] .bn-block-content')).toHaveAttribute('data-is-empty-and-focused','true');
+ await page.locator('.editor-canvas .bn-editor[contenteditable="true"]').press('Enter');
+ await expect(page.locator('.editor-canvas .bn-block-content[data-content-type="paragraph"]')).toHaveCount(3);
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ await expect(preview.locator('[data-reader-empty-paragraph]')).toHaveCount(3);
+ expect(Math.round(await gap()-originalGap)).toBe(28);
+ await expect.poll(()=>decodeEditorBody(saved.body)?.filter(block=>block.type==='paragraph').length,{timeout:8000}).toBe(3);
+ const body=decodeEditorBody(saved.body)!;expect(body.find(block=>block.id==='quote-parity')).toEqual(decodeEditorBody(encodeEditorBody([{id:'quote-parity',type:'quote',props,content:[{type:'text',text:'温馨提示：',styles:{bold:true,textColor:'pink'}},{type:'text',text:'保留这段引用和  两个空格。',styles:{}}],children:[]}]))![0]);
+ expect(body.find(block=>block.id==='quote-list-four')?.props).toMatchObject({start:4});
+});
+
+test('paragraph blank-line styling does not collapse nonempty soft breaks and updates when typing',async({page})=>{
+ const props={textAlignment:'left',textColor:'default',backgroundColor:'default'};
+ const article={...structuredClone(editorFixture),body:encodeEditorBody([
+  {id:'soft-lines',type:'paragraph',props,content:[{type:'text',text:'第一行\n第二行',styles:{}}],children:[]},
+  {id:'space-line',type:'paragraph',props,content:[{type:'text',text:'   ',styles:{}}],children:[]},
+ ])};
+ await mount(page,()=>article);
+ await expect(page.locator('[data-id="soft-lines"] [data-reader-empty-paragraph]')).toHaveCount(0);
+ const blank=page.locator('[data-id="space-line"] .bn-block-content');
+ await expect(blank).toHaveAttribute('data-reader-empty-paragraph','');
+ await expect(blank).toHaveCSS('margin-bottom','0px');
+ await page.locator('[data-id="space-line"] .bn-inline-content').click();
+ await page.locator('.editor-canvas .bn-editor[contenteditable="true"]').press('End');
+ await page.keyboard.insertText('变成正文');
+ await expect(blank).not.toHaveAttribute('data-reader-empty-paragraph','');
+ await expect(blank).toContainText('变成正文');
+});
+
+test('red-background quote preserves authored emphasis and matching readable text in preview',async({page})=>{
+ const article={...structuredClone(editorFixture),body:encodeEditorBody([{id:'red-quote',type:'quote',props:{textAlignment:'left',textColor:'default',backgroundColor:'red'},content:[{type:'text',text:'保留红底引用',styles:{bold:true}}],children:[]}])};
+ await mount(page,()=>article);await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ const edit=page.locator('.editor-canvas blockquote'),preview=page.locator('.editor-preview blockquote');
+ await expect(edit).toHaveCSS('color','rgb(255, 255, 255)');await expect(preview).toHaveCSS('color','rgb(255, 255, 255)');
+ await expect(preview.locator('strong')).toHaveText('保留红底引用');
+});
+
+test('embedded tab editing and preview preserve the same quote and blank line',async({page})=>{
+ const props={textAlignment:'left',textColor:'default',backgroundColor:'default'};
+ const body=encodeTabBody([{id:'nested-quote',type:'quote',props,content:[{type:'text',text:'嵌套引用',styles:{bold:true}}],children:[]},{id:'nested-empty',type:'paragraph',props,content:[],children:[]},{id:'nested-next',type:'paragraph',props,content:[{type:'text',text:'空行之后',styles:{}}],children:[]}]);
+ const article={...structuredClone(editorFixture),body:encodeEditorBody([{id:'nested-tab',type:'juyu',props:{payload:JSON.stringify({id:'nested-tab',type:'tabs',tabs:[{id:'nested-one',title:'说明',body}]})},children:[]}])};
+ await mount(page,()=>article);await page.getByRole('button',{name:'编辑排版',exact:true}).click();
+ const blank=page.locator('.rich-tab-body-editor [data-id="nested-empty"] .bn-block-content');
+ await expect(blank).toHaveAttribute('data-reader-empty-paragraph','');await expect(blank).toHaveCSS('min-height','28px');
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ const preview=page.locator('.editor-preview');await expect(preview.locator('[data-reader-empty-paragraph]')).toHaveCount(1);
+ await expect(preview.locator('blockquote')).toHaveText('嵌套引用');
+ await expect(preview.locator('blockquote')).toHaveCSS('line-height','28px');
 });

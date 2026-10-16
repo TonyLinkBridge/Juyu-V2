@@ -13,6 +13,7 @@ import {normalizeBlocks,type ManagedAsset,type MediaBlock} from '../../media/mod
 import {MediaFields} from './MediaFields';
 import {MediaBlocks} from '../gitbook/Media/MediaBlocks';
 import {borderTableSpec} from '../../editor/blocknote-table';
+import {paragraphLineSpec} from '../../editor/paragraph-lines';
 export const EditorContext=createContext<{documentId:string;assets:ManagedAsset[];frozen:boolean;locale:'zh-CN'|'en';activeHintId:string|null;selectHint:(id:string)=>void}>({documentId:'',assets:[],frozen:false,locale:'zh-CN',activeHintId:null,selectHint:()=>{}});
 const juyuInline=createReactInlineContentSpec({type:'juyuInline',propSchema:{kind:{default:'icon',values:['icon','math','image'] as const},value:{default:''},label:{default:''}},content:'none'}, {
  render:({inlineContent})=>{
@@ -65,7 +66,7 @@ export function createEditorSchema(nodes:EditorBlock[]=[]){
  const supportedLanguages:Record<string,{name:string}>={text:{name:'纯文本'},javascript:{name:'JavaScript'},typescript:{name:'TypeScript'},json:{name:'JSON'},html:{name:'HTML'},css:{name:'CSS'},python:{name:'Python'},sql:{name:'SQL'},bash:{name:'Shell'},yaml:{name:'YAML'},markdown:{name:'Markdown'}};
  const visit=(nodes:EditorBlock[])=>{for(const node of nodes){if(node.type==='codeBlock'&&node.props.language&&!supportedLanguages[node.props.language])supportedLanguages[node.props.language]={name:node.props.language};visit(node.children);}};visit(nodes);
  return BlockNoteSchema.create({
- blockSpecs:{...defaultBlockSpecs,table:borderTableSpec,codeBlock:createCodeBlockSpec({supportedLanguages}),juyu:juyu()},
+ blockSpecs:{...defaultBlockSpecs,paragraph:paragraphLineSpec,table:borderTableSpec,codeBlock:createCodeBlockSpec({supportedLanguages}),juyu:juyu()},
  inlineContentSpecs:{...defaultInlineContentSpecs,juyuInline},
  styleSpecs:{...defaultStyleSpecs,textColor:nativeTextColor,backgroundColor:nativeBackgroundColor},
 });

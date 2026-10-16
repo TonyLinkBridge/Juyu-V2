@@ -295,7 +295,7 @@ test('OPS list retains its protected collection behavior inside the official Fum
  const librarySwitcher=opsSidebar.getByRole('button',{name:mobile?/OPS Internal.*运营流程与升级处理/:/^OPS Internal$/}).first();
  await expect(librarySwitcher).toBeVisible();
  await librarySwitcher.click();
- await expect(page.getByRole('link',{name:/知识文章.*团队正式知识/})).toHaveAttribute('href','/help-centre/articles/fumadocs-preview');
+ await expect(page.getByRole('link',{name:/知识文章.*团队正式知识/})).toHaveAttribute('href','/help-centre/library');
  await expect(page.getByRole('link',{name:/OPS Internal.*运营流程与升级处理/})).toHaveAttribute('href','/help-centre/ops');
  await expect(page.getByRole('link',{name:/Reference 速查.*业务规则速查/})).toHaveAttribute('href','/help-centre/reference');
  await expect(page.getByRole('link',{name:/Q&A 问答.*已审核标准答案/})).toHaveAttribute('href','/help-centre/qa');
@@ -546,11 +546,12 @@ test('the plain article fixture uses Fumadocs without inventing an on-page outli
  const nextParagraph=page.getByText('资料应让员工快速找到处理步骤，而不是在整块屏幕上横向追踪文字。登录后，请先核对账户资料，并按照已审核发布的流程处理。',{exact:true});
  await expect(firstParagraph).toBeVisible();
  await expect(nextParagraph).toBeVisible();
- await expect(page.locator('[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type="paragraph"]')).toHaveCount(3);
+ await expect(page.locator('[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type="paragraph"]')).toHaveCount(6);
  const paragraphGap=await Promise.all([firstParagraph.boundingBox(),nextParagraph.boundingBox()]);
  expect(paragraphGap[0]).not.toBeNull();
  expect(paragraphGap[1]).not.toBeNull();
- expect(paragraphGap[1]!.y-(paragraphGap[0]!.y+paragraphGap[0]!.height)).toBeLessThanOrEqual(21);
+ // Three authored blank paragraphs remain between the two real paragraphs.
+ expect(paragraphGap[1]!.y-(paragraphGap[0]!.y+paragraphGap[0]!.height)).toBeGreaterThanOrEqual(84);
  const styledPrompt=page.getByText('这段红色加粗提示保持编辑时的格式。',{exact:true});
  const readerColors=await styledPrompt.evaluate(element=>({
   text:getComputedStyle(element).color,
@@ -973,4 +974,38 @@ test('formal article route keeps the employee gate and Fumadocs search rejects a
  expect(response.headers()['cache-control']).toBe('private, no-store');
  await page.goto('/help-centre/articles/fumadocs-preview');
  await expect(page).toHaveURL(/\/sign-in(?:\?|$)/);
+});
+
+for(const theme of ['light','dark'])test(`published quotes preserve authored blank lines and emphasis in ${theme} theme`,async({page})=>{
+ await page.addInitScript(value=>localStorage.setItem('theme',value),theme);
+ await page.goto('/design-preview/fumadocs-reader');
+ await expect(page.locator('[data-reader-ready="true"]')).toBeVisible();
+ const quote=page.locator('[data-id="quote-blank-reference"] blockquote');
+ await expect(quote).toHaveText('温馨提示：保留这段引用和  两个空格。');
+ await expect(quote).toHaveCSS('white-space','pre-wrap');
+ await expect(quote).toHaveCSS('border-inline-start-width','4px');
+ await expect(quote).toHaveCSS('padding-inline-start','16px');
+ await expect(quote).toHaveCSS('line-height','28px');
+ for(const id of ['quote-blank-one','quote-blank-two']){
+  const line=page.locator(`[data-id="${id}"] .bn-block-content`);
+  await expect(line).toBeAttached();await expect(line).toHaveCSS('min-height','28px');
+  const rect=await line.boundingBox();expect(rect?.height).toBe(28);
+ }
+ const fourth=page.locator('[data-id="quote-blank-four"] .bn-block-content');
+ await expect(fourth).toHaveAttribute('data-index','4');
+ const [a,b]=await Promise.all([quote.boundingBox(),fourth.boundingBox()]);expect(b!.y-a!.y-a!.height).toBeGreaterThanOrEqual(56);
+ const colours=await quote.evaluate(el=>({body:getComputedStyle(el).color,emphasis:getComputedStyle(el.querySelector('[data-style-type="textColor"]')!).color}));
+ expect(colours.emphasis).not.toBe(colours.body);
+ const soft=page.locator('[data-id="quote-soft-lines"] .bn-block-content');
+ await expect(soft).not.toHaveAttribute('data-reader-empty-paragraph','');await expect(soft).toHaveCSS('margin-bottom','20px');
+ await expect(page.locator('[data-id="quote-red-background"] blockquote')).toHaveCSS('color','rgb(255, 255, 255)');
+ await expect(page.locator('[data-id="quote-red-background"] .bn-block-content')).toHaveCSS('background-color','rgb(174, 40, 50)');
+});
+
+test('nested published tab HTML keeps the explicit blank marker after hydration',async({page})=>{
+ await page.goto('/design-preview/fumadocs-reader');
+ const blank=page.locator('[data-fumadocs-blocknote-static] [data-id="tab-blank"] .bn-block-content');
+ await expect(blank).toHaveAttribute('data-reader-empty-paragraph','');await expect(blank).toHaveCSS('min-height','28px');await expect(blank).toHaveCSS('margin-bottom','0px');
+ await expect(page.getByText('标签页内的引用',{exact:true})).toHaveCSS('line-height','28px');
+ await expect(page.getByText('标签页空行之后',{exact:true})).toBeVisible();
 });

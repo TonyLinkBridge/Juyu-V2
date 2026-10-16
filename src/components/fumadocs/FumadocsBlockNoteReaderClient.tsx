@@ -27,6 +27,7 @@ import {inlineText,screenInlineStyle} from '../../editor/inline';
 import {inlineEmbed} from '../../editor/inline-embed';
 import {annotationText} from '../../editor/annotation';
 import {borderTableSpec} from '../../editor/blocknote-table';
+import {exportedParagraphLines,paragraphLineSpec} from '../../editor/paragraph-lines';
 import {tableCellBorderStyle,tableCellVerticalAlignStyle} from '../../editor/table';
 import {nativeBackgroundColor,nativeTextColor} from '../editor/colors';
 import {readerIconKey,type ReaderIconKey} from '../../reader/icon-keys';
@@ -604,7 +605,6 @@ function toFumadocsInline(content:EditorInline[]){
 
 function publishedBlocks(nodes:EditorBlock[],locale:ReaderLocale):unknown[]{
  return nodes.flatMap(block=>{
-  if(isEmptyPublishedParagraph(block))return [];
  if(block.type==='juyu'){
    if(isReusableContent(block.props.payload,block.id))return publishedBlocks(block.children,locale);
    const hint=readHint(block.props.payload);
@@ -651,7 +651,7 @@ function createReaderSchema(nodes:EditorBlock[]=[]){
  const visit=(items:EditorBlock[])=>{for(const item of items){if(item.type==='codeBlock'&&item.props.language&&!supportedLanguages[item.props.language])supportedLanguages[item.props.language]={name:item.props.language};visit(item.children);}};
  visit(nodes);
  return BlockNoteSchema.create({
-  blockSpecs:{...defaultBlockSpecs,heading:fumadocsHeading(),table:borderTableSpec,codeBlock:createCodeBlockSpec({supportedLanguages}),mathBlock:createReactMathBlockSpec(),diagram:createReactDiagramBlockSpec(),juyu:juyuBlock()},
+  blockSpecs:{...defaultBlockSpecs,paragraph:paragraphLineSpec,heading:fumadocsHeading(),table:borderTableSpec,codeBlock:createCodeBlockSpec({supportedLanguages}),mathBlock:createReactMathBlockSpec(),diagram:createReactDiagramBlockSpec(),juyu:juyuBlock()},
   inlineContentSpecs:{...defaultInlineContentSpecs,juyuInline,fumadocsLink,fumadocsAnnotation},
   styleSpecs:{...defaultStyleSpecs,textColor:nativeTextColor,backgroundColor:nativeBackgroundColor},
  });
@@ -696,9 +696,9 @@ function PublishedBlockNoteStatic({blocks,locale}:{blocks:EditorBlock[];locale:R
  const [html,setHtml]=useState('');
  useEffect(()=>{
   let active=true;
-  queueMicrotask(()=>{if(active)setHtml(editor.blocksToFullHTML());});
+  queueMicrotask(()=>{if(active)setHtml(exportedParagraphLines(editor.blocksToFullHTML(),blocks));});
   return ()=>{active=false;};
- },[editor]);
+ },[editor,blocks]);
  return <BlockNoteView editor={editor} editable={false} renderEditor={false} theme={resolvedTheme==='dark'?'dark':'light'} data-fumadocs-blocknote-static=""><div dangerouslySetInnerHTML={{__html:html}}/></BlockNoteView>;
 }
 

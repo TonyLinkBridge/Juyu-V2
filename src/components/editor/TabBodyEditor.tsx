@@ -9,9 +9,10 @@ import {decodeTabBody,encodeTabBody} from '../../media/tab-body';
 import {safeLink} from '../../editor/inline';
 import type {ManagedAsset} from '../../media/model';
 import {EditorSlashMenu} from './EditorSlashMenu';
+import {paragraphLineSpec} from '../../editor/paragraph-lines';
 
 const schema=BlockNoteSchema.create({
- blockSpecs:{paragraph:defaultBlockSpecs.paragraph,heading:defaultBlockSpecs.heading,bulletListItem:defaultBlockSpecs.bulletListItem,numberedListItem:defaultBlockSpecs.numberedListItem,checkListItem:defaultBlockSpecs.checkListItem,toggleListItem:defaultBlockSpecs.toggleListItem,quote:defaultBlockSpecs.quote,codeBlock:defaultBlockSpecs.codeBlock,table:defaultBlockSpecs.table,divider:defaultBlockSpecs.divider,image:defaultBlockSpecs.image},
+ blockSpecs:{paragraph:paragraphLineSpec,heading:defaultBlockSpecs.heading,bulletListItem:defaultBlockSpecs.bulletListItem,numberedListItem:defaultBlockSpecs.numberedListItem,checkListItem:defaultBlockSpecs.checkListItem,toggleListItem:defaultBlockSpecs.toggleListItem,quote:defaultBlockSpecs.quote,codeBlock:defaultBlockSpecs.codeBlock,table:defaultBlockSpecs.table,divider:defaultBlockSpecs.divider,image:defaultBlockSpecs.image},
  inlineContentSpecs:defaultInlineContentSpecs,
  styleSpecs:{...defaultStyleSpecs,textColor:nativeTextColor,backgroundColor:nativeBackgroundColor},
 });

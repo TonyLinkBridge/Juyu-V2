@@ -90,12 +90,7 @@
 [data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='divider'] { margin-block:3rem; }
 [data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='divider'] hr { margin:0;border-color:var(--tw-prose-hr); }
 [data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='quote'] { margin-block:1.6rem; }
-[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='quote'] blockquote {
- border-inline-start:4px solid var(--tw-prose-quote-borders);
- color:var(--tw-prose-quotes);
- font-style:normal;
- font-weight:400;
-}
+
 [data-fumadocs-blocknote-reader] .bn-block-content:is([data-content-type='bulletListItem'],[data-content-type='numberedListItem'],[data-content-type='checkListItem']) { margin-block:.5rem; }
 .fumadocs-search-results {
  --ink:var(--color-fd-foreground);
@@ -325,3 +320,43 @@
 /* Pending feedback overlays the real link without moving the sidebar or page. */
 .juyu-fumadocs-navigation-link{position:relative}
 .juyu-fumadocs-navigation-link>.juyu-nav-pending{position:absolute;inset-inline-end:6px;top:calc(50% - 6px);margin:0;pointer-events:none}
+
+
+/* One quote presentation for editable blocks, draft/review copies and publication.
+   Keep authored inline colours/marks; only the unstyled quote body gets a default. */
+.editor-canvas .bn-block-content[data-content-type='quote'],
+.rich-tab-body-editor .bn-block-content[data-content-type='quote'] { padding-block:0;margin-block:1.6rem; }
+.editor-canvas .bn-block-content[data-content-type='quote']>blockquote,
+.rich-tab-body-editor .bn-block-content[data-content-type='quote']>blockquote,
+.gitbook-document.native-document blockquote,
+[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='quote']>blockquote,
+.fumadocs-blocknote-server blockquote {
+ margin:0;
+ border-inline-start:4px solid var(--color-fd-border,var(--line));
+ padding-inline-start:16px;
+ color:var(--color-fd-foreground,var(--ink));
+ font-size:1rem;
+ line-height:1.75rem;
+ font-style:normal;
+ font-weight:400;
+ white-space:pre-wrap;
+}
+.gitbook-document.native-document blockquote,
+.fumadocs-blocknote-server blockquote { margin-block:1.6rem; }
+/* Empty paragraphs need a real line box. Never use whitespace as a reason to
+   discard a stored block; one explicit empty paragraph occupies one 28px line. */
+:is(.editor-canvas,.rich-tab-body-editor,[data-fumadocs-blocknote-reader]) .bn-block-content[data-content-type='paragraph'][data-reader-empty-paragraph],
+.gitbook-document.native-document p[data-reader-empty-paragraph],
+.fumadocs-blocknote-server p[data-reader-empty-paragraph] {
+ margin-block:0;
+ padding-block:0;
+ min-height:1.75rem;
+ line-height:1.75rem;
+}
+:is(.editor-canvas,.rich-tab-body-editor,[data-fumadocs-blocknote-reader]) .bn-block-content[data-content-type='paragraph'][data-reader-empty-paragraph]>.bn-inline-content { flex:1;min-width:0;min-height:1.75rem;line-height:inherit; }
+
+:is(.editor-canvas,.rich-tab-body-editor,[data-fumadocs-blocknote-reader]) .bn-block-content[data-content-type='quote'][data-text-color]:not([data-text-color='default'])>blockquote,
+:is(.editor-canvas,.rich-tab-body-editor,[data-fumadocs-blocknote-reader]) .bn-block-content[data-content-type='quote'][data-background-color='red']>blockquote { color:inherit; }
+
+/* Match the existing JUYU strong-red quote palette in all reading copies. */
+[data-fumadocs-blocknote-reader] .bn-block-content[data-content-type='quote'][data-background-color='red'] { background-color:#ae2832!important;color:#fff!important; }
