@@ -7,7 +7,7 @@ async function requestEnrollment():Promise<Outcome>{
  try{
   const response=await fetch('/api/auth/enrollment',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}),result=await response.json();
   if(!response.ok)return {state:result.error==='FORBIDDEN'?'denied':'error'};
-  if(result.status==='ready'&&['admin','support','ops'].includes(result.role))return {state:'ready',role:result.role};
+  if(result.status==='ready'&&['admin','support','ops','super_admin'].includes(result.role))return {state:'ready',role:result.role};
   return {state:result.status==='pending'||result.status==='waiting'?result.status:'error'};
  }catch{return {state:'error'};}
 }

@@ -17,3 +17,14 @@
 服务器批准配置未设置时，例外不生效。仍需要在正确 Vercel Production 环境保存仅含 `userId` / `email` 的 `JUYU_APPROVED_EMAIL_ACCOUNT`，部署对应提交，再由账号本人通过 Clerk 邮箱登录完成验收。不得将本地测试、构建通过或配置保存等同于真实账号已能登录。
 
 撤销方式：删除该环境变量并重新部署。账号 ID/邮箱不匹配、未验证邮箱或 Clerk 锁定/禁止的变更在后续验证中生效；成员停用、角色及资料范围仍由原权限链路核验。
+
+
+## 正式接入与后续开通界面修复
+
+- 用户确认仅为指定账号添加 Production 配置，并要求将主登录邮箱换为新的公司邮箱。真实账号与邮箱仍只保存在 Clerk/Vercel，不写入本文件。
+- Vercel `JUYU_APPROVED_EMAIL_ACCOUNT` 已作为仅 Production 的 Secret 保存；未展开、复制或更改其他密钥。
+- `1236ad2` 已部署为 Production Ready，正式域名 `/api/health` 与 `/api/readiness` 均返回该提交；readiness 为 ready，只证明其声明的公开签名密钥与数据库检查。
+- 浏览器回读同一 Clerk 用户的新主邮箱为 Verified；角色仍为 super_admin、没有关联 Slack。真实已登录会话的 `/api/auth/enrollment` 返回 ready / super_admin；知识库主页与后台文章管理均正常加载，账号菜单确认新邮箱与超级管理员身份。未代理本人输入密码，未发布或修改正文资料。
+- 发现现有开通界面只接受 admin/support/ops，遗漏 super_admin，因此即使开通接口成功，页面仍显示通用失败，手动刷新后才进入主页。新增桌面/移动端复现测试，修改前两个 super_admin 用例均因没有自动刷新失败。
+- 修复仅补上合法 super_admin 角色；四种合法角色均自动刷新，非法角色、等待、拒绝行为维持原规则。16 项开通界面测试通过，并将该测试文件纳入 `test:critical`。
+- 最终版本重新执行 `npm run verify:build`，603 项单元测试、类型检查、lint 与正式构建、构建后资源检查通过；只剩原有 lint warning。后续补丁部署与 GitHub Verify 状态须独立读取，不能从本地验证推断。

@@ -5,10 +5,10 @@ test.beforeAll(async()=>{bundle=await enrollmentBrowserBundle();});
 test.beforeEach(async({page})=>{
  await page.route('**/__enrollment_fixture',route=>route.fulfill({contentType:'text/html',body:`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${bundle.css}</style></head><body><main class="access-main"><p>本地界面测试 · 非真实开通</p><section class="access-card"><h1>开通资料库访问</h1><div id="panel"></div></section></main></body></html>`}));
 });
-test('automatic enrollment posts no chosen identity and refreshes after verified success',async({page})=>{
+for(const role of ['support','ops','admin','super_admin'])test(`automatic enrollment posts no chosen identity and refreshes after verified ${role} success`,async({page})=>{
  let writes=0,loads=0;
  page.on('request',request=>{if(request.url().endsWith('/__enrollment_fixture'))loads++;});
- await page.route('**/api/auth/enrollment',route=>{writes++;expect(route.request().method()).toBe('POST');expect(route.request().postDataJSON()).toEqual({});return route.fulfill({json:{status:'ready',role:'admin',initialAdmin:true}});});
+ await page.route('**/api/auth/enrollment',route=>{writes++;expect(route.request().method()).toBe('POST');expect(route.request().postDataJSON()).toEqual({});return route.fulfill({json:{status:'ready',role,initialAdmin:role==='admin'}});});
  await page.goto('/__enrollment_fixture');await page.addScriptTag({content:bundle.script});
  await expect.poll(()=>loads).toBe(2);expect(writes).toBe(1);
 });
@@ -28,4 +28,14 @@ test('waiting and denied enrollment never imply administrator access',async({pag
  await expect(page.getByRole('status')).toContainText('另一位同事');state='denied';
  await page.getByRole('button',{name:'重新核对开通结果'}).click();await expect(page.getByRole('status')).toContainText('未通过开通检查');
  await expect(page.getByRole('button',{name:'重新核对开通结果'})).toHaveCount(0);await expect(page.getByText('访问已开通')).toHaveCount(0);
+});
+
+for(const role of ['SuperAdmin',null])test(`unknown ready role ${role} cannot imply successful enrollment`,async({page})=>{
+ let loads=0;
+ page.on('request',request=>{if(request.url().endsWith('/__enrollment_fixture'))loads++;});
+ await page.route('**/api/auth/enrollment',route=>route.fulfill({json:{status:'ready',role,initialAdmin:false}}));
+ await page.goto('/__enrollment_fixture');await page.addScriptTag({content:bundle.script});
+ await expect(page.getByRole('status')).toContainText('暂时无法完成开通');
+ await expect(page.getByRole('button',{name:'重新核对开通结果'})).toBeVisible();
+ expect(loads).toBe(1);
 });
