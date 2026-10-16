@@ -123,9 +123,7 @@ test('database integrity rejects forged direct publication by an ordinary Admin'
  const id='forged-direct-publication',doc=await owner.create({id,kind:'article',title:'伪造测试',body:'不可发布',audience:'staff'},a),client=await fixture.pool.connect();
  try{
   await client.query('BEGIN');
-  await client.query("INSERT INTO juyu.audit_log(document_id,sequence,action,actor_id,revision_id,at,reviewer_id) VALUES($1,1,'direct_publish','a',1,now(),'a')",[id]);
-  await client.query("UPDATE juyu.documents SET sequence=1,workflow_state='published',approval_mode='super_admin',published_revision_id=1,submitted_by='a',reviewer_id='a',approved_by='a' WHERE id=$1",[id]);
-  await assert.rejects(client.query('COMMIT'),/missing super admin publication evidence/);
+  await assert.rejects(client.query("INSERT INTO juyu.audit_log(document_id,sequence,action,actor_id,revision_id,at,reviewer_id) VALUES($1,1,'direct_publish','a',1,now(),'a')",[id]),/missing super admin publication evidence/);
  }finally{await client.query('ROLLBACK').catch(()=>{});client.release();}
  assert.equal(doc.workflow.status,'draft');
 });
