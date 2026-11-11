@@ -942,3 +942,29 @@ test('embedded tab editing and preview preserve the same quote and blank line',a
  await expect(preview.locator('blockquote')).toHaveText('嵌套引用');
  await expect(preview.locator('blockquote')).toHaveCSS('line-height','28px');
 });
+
+for(const kind of ['article','ops','reference','qa'] as const)test(`returned ${kind} shows feedback before settings, retains it after save and hides it after resubmission`,async({page})=>{
+ const feedback={revision:3,reason:'补充操作步骤\n<script>仅为审核文字</script>',reviewerName:'审核测试员',decidedAt:'2026-11-10T11:30:00.000Z'};
+ let saved:EditorData={...structuredClone(editorFixture),kind,audience:kind==='ops'?'ops':'staff',status:'changes_requested',returnFeedback:feedback};
+ await page.route('**/api/admin/editor/*',route=>{saved={...saved,...route.request().postDataJSON(),sequence:saved.sequence+1,status:'draft'};return route.fulfill({json:saved});});
+ await mount(page,()=>saved);
+ const notice=page.getByRole('region',{name:'退回修改意见'});
+ await expect(notice).toBeVisible();await expect(notice).toContainText(feedback.reason);
+ await expect(notice).toContainText('审核测试员');await expect(notice).toContainText('工作修订 3');
+ await expect(notice.getByRole('link',{name:'查看审核详情'})).toHaveAttribute('href','/admin/review?article=editor-local');
+ expect(await notice.locator('.editor-return-reason').evaluate(el=>getComputedStyle(el).whiteSpace)).toBe('pre-wrap');
+ expect(await notice.locator('script').count()).toBe(0);
+ await page.getByRole('textbox',{name:kind==='qa'?'问题':'文章标题',exact:true}).fill('修订后的测试标题');
+ await expect.poll(()=>saved.status,{timeout:8000}).toBe('draft');
+ await expect(notice).toContainText('上一轮');await page.reload();await expect(notice).toContainText(feedback.reason);
+ await page.route('**/api/admin/review/editor-local',route=>{
+  if(route.request().method()==='GET')return route.fulfill({json:{documentId:saved.documentId,sequence:saved.sequence,revision:4,status:'draft',lifecycle:'active',reviewers:[{id:'reviewer-b',name:'另一位测试审核人'}],nextCursor:null}});
+  const input=route.request().postDataJSON();saved={...saved,sequence:saved.sequence+1,status:'in_review',returnFeedback:null};
+  return route.fulfill({json:{documentId:saved.documentId,sequence:saved.sequence,revision:4,reviewerId:input.reviewerId,status:'in_review'}});
+ });
+ await page.getByRole('button',{name:'提交二审',exact:true}).click();
+ await page.getByRole('combobox',{name:'二审管理员',exact:true}).selectOption('reviewer-b');
+ await page.getByRole('button',{name:'确认提交二审',exact:true}).click();
+ await expect(notice).toHaveCount(0);
+ await page.reload();await expect(page.locator('.bn-editor')).toBeVisible();await expect(notice).toHaveCount(0);
+});

@@ -46,3 +46,7 @@ test('local editor validation identifies the field before a request is sent',asy
  assert.match(validationError('INVALID_PRESENTATION'),/标签|封面/);
  assert.match(validationError('PRIVATE_EDITOR_FILE_REQUIRED'),/上传/);
 });
+
+test('draft saves cannot forge read-only reviewer feedback',()=>{
+ assert.throws(()=>editorInput({...draft,returnFeedback:{revision:1,reason:'伪造意见',reviewerName:'伪造审核人',decidedAt:'2026-11-10T00:00:00.000Z'}}),/INVALID_INPUT/);
+});

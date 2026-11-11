@@ -680,3 +680,12 @@ input:not(.juyu-fumadocs *), select:not(.juyu-fumadocs *) { color: inherit; }
 .login-recovery-exit button { min-height: 46px; }
 .login-recovery-help { margin-top: 20px; font-size: 13px; color: var(--muted); }
 .login-recovery-help summary { cursor: pointer; }
+
+/* Saved reviewer feedback belongs to the protected editing surface. */
+.editor-return-notice{border:1px solid var(--line);border-inline-start:3px solid var(--brand);border-radius:10px;background:var(--panel);padding:16px 20px;margin-block:0 20px;color:var(--ink);min-width:0}
+.editor-return-notice h2{font-size:16px;line-height:1.5;margin:0 0 8px;font-weight:650}
+.editor-return-notice p{font-size:14px;line-height:1.7;margin:8px 0;overflow-wrap:anywhere}
+.editor-return-notice .editor-return-meta{font-size:12px;color:var(--muted)}
+.editor-return-notice .editor-return-reason{white-space:pre-wrap;color:var(--ink)}
+.editor-return-notice a,.task-return-link{font-size:14px;color:var(--brand);text-decoration:underline;text-underline-offset:3px}
+@media(max-width:600px){.editor-return-notice{padding:14px}}

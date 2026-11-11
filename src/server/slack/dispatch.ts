@@ -12,14 +12,14 @@ const labels:Record<NotificationEvent,string>={
 function slackText(value:string){return value.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');}
 export function slackMessage(row:OutboxRow,config:SlackConfig){
  const name=row.title??'受限资料';
- const path=row.event==='published'||row.event==='updated'?contentPath(row.kind,row.document_id,row.locale):`/admin/editor?article=${encodeURIComponent(row.document_id)}`;
+ const path=row.event==='published'||row.event==='updated'?contentPath(row.kind,row.document_id,row.locale):`/admin/${row.event==='changes_requested'?'review':'editor'}?article=${encodeURIComponent(row.document_id)}`;
  const url=new URL(path,config.origin).toString();
  const lines=[`*${labels[row.event]}*`,`资料：${slackText(name)}`,`类型：${{article:'知识文章',ops:'OPS Internal',reference:'Reference 速查',qa:'Q&A 问答'}[row.kind]}`,`操作人：${slackText(row.actor_name)}`];
  if(row.event==='submitted'&&row.reviewer_name)lines.push(`二审人：${slackText(row.reviewer_name)}`);
  const text=lines.join('\n');
  return {channel:config.channel,text,blocks:[
   {type:'section',text:{type:'mrkdwn',text}},
-  {type:'actions',elements:[{type:'button',text:{type:'plain_text',text:row.event==='published'||row.event==='updated'?'打开正式资料':'打开文章'},url}]},
+  {type:'actions',elements:[{type:'button',text:{type:'plain_text',text:row.event==='published'||row.event==='updated'?'打开正式资料':row.event==='changes_requested'?'查看退回原因':'打开文章'},url}]},
  ]};
 }
 

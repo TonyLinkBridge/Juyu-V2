@@ -145,7 +145,18 @@ async function editorSnapshot(client:PoolClient,doc:Document):Promise<EditorData
   (await client.query<{documentId:string;status:string;publishedRevision:number|null}>('SELECT id AS "documentId",workflow_state AS status,published_revision_id AS "publishedRevision" FROM juyu.documents WHERE id=$1',[language.translationOf])).rows[0]:
   (await client.query<{documentId:string;status:string;publishedRevision:number|null}>('SELECT id AS "documentId",workflow_state AS status,published_revision_id AS "publishedRevision" FROM juyu.documents WHERE translation_of=$1 AND locale=\'en\'',[doc.id])).rows[0];
  const canDirectPublish=doc.lifecycle==='active'&&['draft','changes_requested'].includes(doc.workflow.status)&&Boolean((await client.query<{ok:boolean}>('SELECT juyu.is_super_admin() AND juyu.actor_id()=$1 AS ok',[revision.editorId])).rows[0]?.ok);
- return {locale:language.locale,translationOf:language.translationOf,translation:sibling??null,publicationNumber:(await client.query('SELECT juyu.publication_number($1) AS n',[doc.id])).rows[0]?.n??null,canDirectPublish,categoryIds:revision.categoryIds??[],categoryOptions:await readCategoryDefinitions(client),customFields:revision.customFields??[],fieldDefinitions:await readFieldDefinitions(client),...(revision.qa?{qa:revision.qa}:{}),...(revision.iconKey?{iconKey:revision.iconKey}:{}),documentId:doc.id,title:revision.title,description:revision.description??'',releaseNote:revision.releaseNote??'',body:revision.body,sequence:doc.sequence,status:doc.workflow.status,lifecycle:doc.lifecycle,blocks:revision.blocks??[],cover:revision.cover??null,tags:revision.tags??[],assets,kind:doc.kind,audience:revision.audience,publishedRevision:doc.publishedRevisionId};
+ // Only the latest review can supply revision feedback. A new submission or a
+ // completed publication must never inherit an older rejection as current advice.
+ const lastReview=doc.lifecycle==='active'&&['draft','changes_requested'].includes(doc.workflow.status)
+  ?(await client.query<{revision:number;status:string;reason:string|null;reviewerName:string;decidedAt:Date|null}>(`SELECT r.revision_id AS revision,r.status,r.reason,m.display_name AS "reviewerName",r.decided_at AS "decidedAt"
+   FROM juyu.reviews r JOIN juyu.members m ON m.clerk_user_id=r.reviewer_id
+   WHERE r.document_id=$1 AND NOT EXISTS (
+    SELECT 1 FROM juyu.audit_log e WHERE e.document_id=r.document_id AND e.sequence>r.submitted_sequence
+     AND e.action IN ('publish','direct_publish','discard_draft','trash','restore','archive','unpublish','unarchive','restore_version')
+   ) ORDER BY r.submitted_sequence DESC LIMIT 1`,[doc.id])).rows[0]:undefined;
+ const returnFeedback=lastReview?.status==='rejected'&&lastReview.reason&&lastReview.decidedAt
+  ?{revision:lastReview.revision,reason:lastReview.reason,reviewerName:lastReview.reviewerName,decidedAt:lastReview.decidedAt.toISOString()}:null;
+ return {returnFeedback,locale:language.locale,translationOf:language.translationOf,translation:sibling??null,publicationNumber:(await client.query('SELECT juyu.publication_number($1) AS n',[doc.id])).rows[0]?.n??null,canDirectPublish,categoryIds:revision.categoryIds??[],categoryOptions:await readCategoryDefinitions(client),customFields:revision.customFields??[],fieldDefinitions:await readFieldDefinitions(client),...(revision.qa?{qa:revision.qa}:{}),...(revision.iconKey?{iconKey:revision.iconKey}:{}),documentId:doc.id,title:revision.title,description:revision.description??'',releaseNote:revision.releaseNote??'',body:revision.body,sequence:doc.sequence,status:doc.workflow.status,lifecycle:doc.lifecycle,blocks:revision.blocks??[],cover:revision.cover??null,tags:revision.tags??[],assets,kind:doc.kind,audience:revision.audience,publishedRevision:doc.publishedRevisionId};
 }
 /** Server-only persistence boundary. Viewer must come from trusted server authentication,
  * never request JSON. All production transactions go through ScopedDatabase.

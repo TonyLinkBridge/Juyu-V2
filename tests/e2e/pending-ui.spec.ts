@@ -24,3 +24,12 @@ test('module navigation resets draft search and clearing filters keeps the Q&A m
 test('failed QA workspace keeps module and retry query',async({page})=>{
  await mount(page,{query:workspaceQuery({kind:'qa',q:'邮箱'}),retryHref:'/admin?kind=qa&q=邮箱',error:'服务暂不可用'});await expect(page.getByRole('heading',{name:'Q&A 管理'})).toBeVisible();await expect(page.getByRole('link',{name:'重新读取内容'})).toHaveAttribute('href','/admin?kind=qa&q=邮箱');await expect(page.getByRole('status')).not.toContainText('共 0');
 });
+
+for(const kind of ['article','ops','reference','qa'] as const)test(`returned ${kind} has a direct reason link in list and board`,async({page})=>{
+ const task={id:'returned-local',title:'待修改测试',kind,status:'changes_requested',sequence:2,revision:1,publishedRevision:null,updatedAt:'2026-11-10T11:30:00.000Z',author:'测试作者',editor:'测试作者',submitter:'测试作者',reviewer:'测试审核人'};
+ const workspace={...data(kind),items:[task],total:1,counts:{draft:0,in_review:0,changes_requested:1,approved:0,queued:0,published:0}};
+ await mount(page,{data:workspace});
+ await expect(page.getByRole('link',{name:'查看退回原因',exact:true})).toHaveAttribute('href','/admin/review?article=returned-local');
+ await page.evaluate(props=>(window as unknown as {updatePendingWorkspace:(props:unknown)=>void}).updatePendingWorkspace(props),{data:{...workspace,query:{...workspace.query,view:'board'}}});
+ await expect(page.getByRole('link',{name:'查看退回原因',exact:true})).toHaveAttribute('href','/admin/review?article=returned-local');
+});

@@ -25,3 +25,13 @@ test('Slack message only links to the application and escapes untrusted title te
  assert.equal(actions.elements[0]?.url,'https://juyu-helpcentre.vercel.app/admin/editor?article=doc-1');
  assert.doesNotMatch(JSON.stringify(message),/not-shared/);
 });
+
+test('return notifications open protected review details for every kind without posting the private reason',()=>{
+ for(const kind of ['article','ops','reference','qa'] as const){
+  const message=slackMessage({document_id:'doc /?一',sequence:3,event:'changes_requested',kind,locale:'zh-CN',title:'测试资料',actor_name:'审核人',reviewer_name:null,attempts:1},{token:'not-shared',channel:'C0BQ4M16EDB',origin:'https://example.test'});
+  const actions=message.blocks[1];assert.ok(actions&&'elements' in actions&&actions.elements);
+  assert.equal(actions.elements[0]?.url,'https://example.test/admin/review?article=doc%20%2F%3F%E4%B8%80');
+  assert.equal(actions.elements[0]?.text.text,'查看退回原因');
+  assert.doesNotMatch(JSON.stringify(message),/not-shared/);
+ }
+});

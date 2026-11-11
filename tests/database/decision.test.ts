@@ -82,3 +82,44 @@ test('changed assignment and a newer submission invalidate old decision requests
 test('the longest accepted reason persists precisely while invalid text fails before mutation',async()=>{
  const d=await pending();await assert.rejects(service().decideReview(d.id,{expectedSequence:1,action:'reject',reason:'text\0text'}),/INVALID_INPUT/);const reason='理'.repeat(2000);assert.equal((await service().decideReview(d.id,{expectedSequence:1,action:'reject',reason})).reason,reason);assert.equal((await service(a).reviewDetail(d.id)).review?.reason,reason);
 });
+
+test('authors read saved return feedback in every editor kind, retaining it only until the next review',async()=>{
+ for(const kind of ['article','ops','reference','qa'] as const){
+  const d=await repo.create({id:randomUUID(),kind,title:'退回测试',body:'原始内容',audience:kind==='ops'?'ops':'staff'},a);
+  await service(a).submitReview(d.id,{expectedSequence:0,reviewerId:'b'});
+  const reason='补充第一步\n保留 <script> 为普通文字';
+  await service().decideReview(d.id,{expectedSequence:1,action:'reject',reason});
+  const before=await repo.getForManagement(d.id,a);
+  const returned=await service(a).editor(d.id);
+  assert.equal(returned.returnFeedback?.reason,reason);
+  assert.equal(returned.returnFeedback?.reviewerName,'B');
+  assert.equal(returned.returnFeedback?.revision,1);
+  assert.ok(returned.returnFeedback?.decidedAt);
+  assert.deepEqual(await repo.getForManagement(d.id,a),before,'reading feedback must not mutate content or history');
+  await assert.rejects(service(staff).editor(d.id),/FORBIDDEN/);
+  await assert.rejects(service(null).editor(d.id),/FORBIDDEN/);
+  await repo.execute(d.id,{type:'edit',title:'已修改',body:'修改后内容',audience:kind==='ops'?'ops':'staff'},a,{expectedSequence:2});
+  assert.deepEqual((await service(a).editor(d.id)).returnFeedback,returned.returnFeedback);
+  await service(a).submitReview(d.id,{expectedSequence:3,reviewerId:'c'});
+  assert.equal((await service(a).editor(d.id)).returnFeedback,null,'new review must not show a previous reason as current');
+  assert.equal((await fixture.pool.query('SELECT reason FROM juyu.reviews WHERE document_id=$1 AND status=\'rejected\'',[d.id])).rows[0].reason,reason);
+ }
+});
+
+test('return feedback reads preserve the formal publication in every kind and honor author revocation',async()=>{
+ for(const kind of ['article','ops','reference','qa'] as const){
+  const audience=kind==='ops'?'ops' as const:'staff' as const;
+  let d=await repo.create({id:randomUUID(),kind,title:'正式测试资料',body:'正式内容',audience},a);
+  for(const type of ['submit','approve','queue','publish'] as const)d=await repo.execute(d.id,{type},type==='approve'?b:a,{expectedSequence:d.sequence,reviewer:b});
+  const formal=await service(a).article(d.id);
+  d=await repo.execute(d.id,{type:'edit',title:'真实草稿的测试替身',body:'尚未发布的修改',audience},a,{expectedSequence:d.sequence});
+  await service(a).submitReview(d.id,{expectedSequence:d.sequence,reviewerId:'b'});
+  await service().decideReview(d.id,{expectedSequence:d.sequence+1,action:'reject',reason:'补充步骤'});
+  const document=await repo.getForManagement(d.id,a);
+  assert.equal((await service(a).editor(d.id)).returnFeedback?.reason,'补充步骤');
+  assert.deepEqual(await service(a).article(d.id),formal);
+  assert.deepEqual(await repo.getForManagement(d.id,a),document);
+  await fixture.pool.query("UPDATE juyu.members SET disabled_at=now() WHERE clerk_user_id='a'");
+  try{await assert.rejects(service(a).editor(d.id),/INACTIVE_MEMBER/);}finally{await fixture.pool.query("UPDATE juyu.members SET disabled_at=null WHERE clerk_user_id='a'");}
+ }
+});
