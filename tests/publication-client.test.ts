@@ -26,3 +26,13 @@ test('publication errors distinguish an expired login or permission from article
  assert.match(mod.publicationError(new mod.PublicationRejected('FORBIDDEN'),false,'zh-CN'),/登录|权限/);
  assert.match(mod.publicationError(new mod.PublicationRejected('FORBIDDEN'),false,'en'),/sign in|permission/i);
 });
+
+test('approved immediate publication validates the two committed steps and exact formal pointer',async()=>{
+ const mod=await import('../src/review/publication-client.ts'),{publicationInput}=await import('../src/review/publication.ts');
+ const input={expectedSequence:5,action:'publish_now' as const};assert.deepEqual(publicationInput(input),input);
+ assert.throws(()=>publicationInput({expectedSequence:2147483646,action:'publish_now'}),/INVALID_INPUT/);
+ const original=globalThis.fetch,ack={documentId:'release-local',sequence:7,revision:3,action:'publish_now',status:'published',publishedRevision:3,approvedBy:'admin-b'};
+ try{globalThis.fetch=async()=>Response.json(ack);assert.deepEqual(await mod.sendPublication('release-local',input,3,'admin-b',2),ack);
+  for(const patch of [{sequence:6},{status:'queued'},{publishedRevision:2},{approvedBy:'other'},{action:'publish'}]){globalThis.fetch=async()=>Response.json({...ack,...patch});await assert.rejects(mod.sendPublication('release-local',input,3,'admin-b',2),/INVALID_ACK/);}
+ }finally{globalThis.fetch=original;}
+});

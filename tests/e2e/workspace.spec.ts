@@ -71,3 +71,22 @@ test('content toolbar applies real status and removes only that condition',async
  await expect(page).toHaveURL(/status=all/);expect(new URL(page.url()).searchParams.get('scope')).toBe('submitted');
  await expect(page.getByLabel('搜索标题')).toHaveValue('资料');
 });
+
+
+test('approved and queued rows offer immediate publication and keep status text on one line',async({page},info)=>{
+ const {workspaceRows}=await import('../helpers/workspace-browser');
+ const rows=['article','ops','reference','qa'].flatMap((kind,i)=>['approved','queued'].map((status,j)=>({...workspaceRows[0],id:`release-${i}-${j}`,kind:kind as 'article'|'ops'|'reference'|'qa',status:status as 'approved'|'queued',title:'首次操作预定时，如果预定错误了怎么办？需要完整说明的测试标题',submitter:'tracy.long.test.account@example.test',reviewer:'haley.long.test.account@example.test',publishedRevision:null})));
+ if(info.project.name==='desktop')await page.setViewportSize({width:1000,height:900});
+ await page.route(url=>url.pathname==='/admin',async route=>route.fulfill({contentType:'text/html',body:await workspaceHTML(route.request().url(),{rows})}));
+ await page.goto('/admin?view=list');
+ const table=page.locator('.tasks-all-list');
+ const lines=await table.locator('td[data-label="状态"] .task-state').evaluateAll(elements=>elements.map(element=>{const range=document.createRange();range.selectNodeContents(element);return new Set(Array.from(range.getClientRects()).filter(rect=>rect.width>0).map(rect=>Math.round(rect.y))).size;}));
+ expect(lines).toEqual(Array(8).fill(1));
+ if(info.project.name==='desktop')expect(await table.locator('tbody td:first-child').first().evaluate(element=>element.getBoundingClientRect().width)).toBeGreaterThanOrEqual(220);
+ await expect(table.getByRole('link',{name:'立即发布',exact:true})).toHaveCount(8);
+ await expect(table.getByRole('link',{name:'立即发布',exact:true}).first()).toHaveAttribute('href','/admin/review/publish?article=release-0-0&intent=publish_now');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:`output/verification/immediate-workspace-${info.project.name}.png`,fullPage:true});
+ if(info.project.name==='desktop'){await page.getByRole('link',{name:'看板',exact:true}).click();await expect(page.locator('.tasks-desktop-board').getByRole('link',{name:'立即发布',exact:true})).toHaveCount(8);}
+
+});

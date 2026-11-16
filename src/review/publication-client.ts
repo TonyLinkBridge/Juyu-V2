@@ -21,7 +21,7 @@ export async function readPublication(documentId:string,sequence:number):Promise
 export async function sendPublication(documentId:string,input:PublicationInput,revision:number,approvedBy:string|null,previousPublication:number|null):Promise<PublicationAck>{
  const response=await fetch(`/api/admin/review/${encodeURIComponent(documentId)}/publication`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input),signal:AbortSignal.timeout(20000)});const value:unknown=await response.json();
  if(!response.ok){if(response.status>=400&&response.status<500&&record(value)&&typeof value.error==='string')throw new PublicationRejected(value.error);throw new Error('UNKNOWN_RESULT');}
- if(!record(value)||value.documentId!==documentId||value.sequence!==input.expectedSequence+1||value.revision!==revision||value.action!==input.action||value.status!==(input.action==='queue'?'queued':'published')||value.publishedRevision!==(input.action==='queue'?previousPublication:revision)
+ if(!record(value)||value.documentId!==documentId||value.sequence!==input.expectedSequence+(input.action==='publish_now'?2:1)||value.revision!==revision||value.action!==input.action||value.status!==(input.action==='queue'?'queued':'published')||value.publishedRevision!==(input.action==='queue'?previousPublication:revision)
   ||(input.action==='direct_publish'?!id(value.approvedBy):value.approvedBy!==approvedBy))throw new Error('INVALID_ACK');
  return value as unknown as PublicationAck;
 }

@@ -127,3 +127,55 @@ test('publication history is capped at last 20 events with truthful continuation
 test('restored documents require a fresh review and historical action replay conflicts',async()=>{
  for(const queued of [false,true]){const d=await approved();if(queued)await service().changePublication(d.id,{expectedSequence:2,action:'queue'});const sequence=queued?3:2;await service(a).lifecycle(d.id,{expectedSequence:sequence,action:'trash'});await service(a).lifecycle(d.id,{expectedSequence:sequence+1,action:'restore'});const detail=await service().publicationDetail(d.id);assert.equal(detail.approval,null);assert.equal(detail.canQueue,false);assert.equal(detail.canPublish,false);assert.equal(detail.article.status,'draft');if(queued)await assert.rejects(service().changePublication(d.id,{expectedSequence:2,action:'queue'}),/CONFLICT/);await assert.rejects(service().changePublication(d.id,{expectedSequence:sequence+2,action:queued?'publish':'queue'}),/INVALID_STATE/);await service(a).submitReview(d.id,{expectedSequence:sequence+2,reviewerId:'b'});await service(b).decideReview(d.id,{expectedSequence:sequence+3,action:'approve'});await publish(d.id,sequence+4);}
 });
+
+
+test('existing approved and queued publications support one confirmation for every content kind',async()=>{
+ for(const kind of ['article','ops','reference','qa'] as const){
+  for(const state of ['approved','queued'] as const){
+   const d=await repo.create({id:randomUUID(),kind,title:'存量发布测试',body:'保留原送审正文',audience:kind==='ops'?'ops':'staff'},a);
+   await service(a).submitReview(d.id,{expectedSequence:0,reviewerId:'b'});await service(b).decideReview(d.id,{expectedSequence:1,action:'approve'});
+   if(state==='queued')await service().changePublication(d.id,{expectedSequence:2,action:'queue'});
+   const input={expectedSequence:state==='approved'?2:3,action:state==='approved'?'publish_now':'publish'};
+   const before=await repo.getForManagement(d.id,a);assert.ok(before);
+   const ack=await service().changePublication(d.id,input);assert.equal(ack.status,'published');assert.equal(ack.sequence,4);assert.equal(ack.publishedRevision,1);assert.equal(ack.approvedBy,'b');
+   const after=await repo.getForManagement(d.id,a);assert.ok(after);assert.deepEqual(after.revisions,before.revisions);assert.equal(after.workflow.approvalMode,'standard');
+   assert.deepEqual(after.audit.map(e=>e.action),['create','submit','approve','queue','publish']);
+   assert.deepEqual(await service().changePublication(d.id,input),ack);assert.deepEqual(await repo.getForManagement(d.id,a),after);
+  }
+ }
+});
+
+test('immediate publication keeps existing permission approval and media guards',async()=>{
+ const d=await approved();
+ for(const v of [null,staff,{...manager,companyVerified:false}])await assert.rejects(service(v).changePublication(d.id,{expectedSequence:2,action:'publish_now'}),/FORBIDDEN/);
+ const before=await repo.getForManagement(d.id,a);await asset(d.id,'image/png','pending');
+ await assert.rejects(service().changePublication(d.id,{expectedSequence:2,action:'publish_now'}),/UPLOAD_IN_PROGRESS/);assert.deepEqual(await repo.getForManagement(d.id,a),before);
+ const fresh=await repo.create({id:randomUUID(),kind:'article',title:'未审核测试',body:'不得上线',audience:'staff'},a);
+ await assert.rejects(service().changePublication(fresh.id,{expectedSequence:0,action:'publish_now'}),/INVALID_STATE/);
+});
+
+test('immediate publication rolls back its queue and audit if final publication fails',async()=>{
+ const d=await approved(),before=await repo.getForManagement(d.id,a);
+ const outbox=(await fixture.pool.query('SELECT * FROM juyu.slack_outbox WHERE document_id=$1 ORDER BY sequence',[d.id])).rows;
+ await fixture.pool.query(`CREATE FUNCTION juyu.test_refuse_immediate_publication() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.id='${d.id}' AND NEW.workflow_state='published' THEN RAISE EXCEPTION 'TEST_IMMEDIATE_FAILURE'; END IF; RETURN NEW; END $$; CREATE TRIGGER test_refuse_immediate_publication BEFORE UPDATE ON juyu.documents FOR EACH ROW EXECUTE FUNCTION juyu.test_refuse_immediate_publication()`);
+ try{await assert.rejects(service().changePublication(d.id,{expectedSequence:2,action:'publish_now'}),/TEST_IMMEDIATE_FAILURE/);}finally{await fixture.pool.query('DROP TRIGGER test_refuse_immediate_publication ON juyu.documents; DROP FUNCTION juyu.test_refuse_immediate_publication()');}
+ assert.deepEqual(await repo.getForManagement(d.id,a),before);assert.deepEqual((await fixture.pool.query('SELECT * FROM juyu.slack_outbox WHERE document_id=$1 ORDER BY sequence',[d.id])).rows,outbox);
+});
+
+test('concurrent immediate retries publish once and stale or changed requests fail closed',async()=>{
+ const d=await approved(),input={expectedSequence:2,action:'publish_now'};
+ const [first,second]=await Promise.all([service().changePublication(d.id,input),service().changePublication(d.id,input)]);assert.deepEqual(first,second);
+ const before=await repo.getForManagement(d.id,a);await assert.rejects(service().changePublication(d.id,{expectedSequence:3,action:'publish_now'}),/CONFLICT|INVALID_STATE/);assert.deepEqual(await repo.getForManagement(d.id,a),before);
+ assert.equal((await fixture.pool.query("SELECT count(*)::int AS n FROM juyu.audit_log WHERE document_id=$1 AND action='publish'",[d.id])).rows[0].n,1);
+});
+
+test('immediate replacement preserves the original formal content on failure and retains its version on success',async()=>{
+ const first=await approved();await publish(first.id,2);const original=await service(staff).article(first.id);
+ const edited=await repo.execute(first.id,{type:'edit',title:'修订后的测试资料',body:'新的正式内容',audience:'staff'},a,{expectedSequence:4});
+ await service(a).submitReview(first.id,{expectedSequence:edited.sequence,reviewerId:'b'});await service(b).decideReview(first.id,{expectedSequence:edited.sequence+1,action:'approve'});
+ const pendingAsset=await asset(first.id,'image/png','pending');await assert.rejects(service().changePublication(first.id,{expectedSequence:edited.sequence+2,action:'publish_now'}),/UPLOAD_IN_PROGRESS/);
+ assert.deepEqual(await service(staff).article(first.id),original);
+ await fixture.pool.query("UPDATE juyu.assets SET status='ready' WHERE id=$1",[pendingAsset]);
+ await service().changePublication(first.id,{expectedSequence:edited.sequence+2,action:'publish_now'});
+ const saved=await repo.getForManagement(first.id,a);assert.ok(saved);assert.equal(saved.revisions.find(revision=>revision.id===1)?.body,'正式内容');assert.equal(saved.publishedRevisionId,2);assert.equal((await service(staff).article(first.id))?.body,'新的正式内容');
+});

@@ -6,7 +6,7 @@ export function TaskCard({task}:{task:WorkspaceItem}){
   <div className="task-card-top"><span className="task-kind">{kinds[task.kind]}</span><span>工作修订 {task.revision}</span></div>
   <h3><a href={`/admin/editor?article=${encodeURIComponent(task.id)}`}>{task.title}</a></h3>
   <p className="task-publication">{publicationLabel(task)}</p>
-  <TaskCategories task={task}/>
+  <TaskCategories task={task}/>{(task.status==='approved'||task.status==='queued')&&<a className="task-publish-link" href={`/admin/review/publish?article=${encodeURIComponent(task.id)}&intent=publish_now`}>立即发布</a>}
   {task.status==='changes_requested'&&<a className="task-return-link" href={`/admin/review?article=${encodeURIComponent(task.id)}`}>查看退回原因</a>}
   <dl><div><dt>编辑人</dt><dd>{task.editor}</dd></div><div><dt>提交人</dt><dd>{task.submitter??'尚未提交'}</dd></div><div><dt>二审人</dt><dd>{task.reviewer??'尚未指定'}</dd></div></dl>
   <footer><time dateTime={task.updatedAt}>{new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Kuala_Lumpur',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(task.updatedAt))}</time><span>更新 · 马来西亚时间</span></footer>

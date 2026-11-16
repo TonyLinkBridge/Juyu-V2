@@ -80,9 +80,24 @@ export async function changeSavedPublication(c:PoolClient,id:string,value:unknow
  const ack:PublicationAck={documentId:id,sequence:d.sequence,revision:w.revisionId,action:input.action,status,publishedRevision:d.publishedRevisionId,approvedBy:w.approvedBy!};
  // A retry acknowledges the already committed event, even if an asset changed
  // later. It never republishes, updates the timestamp, or adds another audit row.
+ if(input.action==='publish_now'&&d.sequence===input.expectedSequence+2&&w.status==='published'&&valid){
+  const events=d.audit.filter(event=>event.sequence>input.expectedSequence);
+  if(events.length===2&&events.every((event,index)=>event.sequence===input.expectedSequence+index+1&&event.action===['queue','publish'][index]&&event.actorId===actor.id&&event.revisionId===w.revisionId&&event.reason===null)){
+   const published=await changeSavedPublication(c,id,{expectedSequence:input.expectedSequence+1,action:'publish'},actor);
+   return {...ack,sequence:published.sequence,publishedRevision:published.publishedRevision};
+  }
+ }
  if(d.sequence===input.expectedSequence+1&&last?.sequence===d.sequence&&last.action===input.action&&last.actorId===actor.id
   &&last.revisionId===w.revisionId&&w.status===status&&(input.action==='direct_publish'?directCommitted:valid))return ack;
  if(d.sequence!==input.expectedSequence)throw new Error('CONFLICT');
+ if(input.action==='publish_now'){
+  if(w.status!=='approved')throw new Error('INVALID_STATE');
+  if(!valid)throw new Error('INVALID_APPROVAL');
+  // The caller's existing transaction commits both stages, or neither of them.
+  const queued=await changeSavedPublication(c,id,{expectedSequence:input.expectedSequence,action:'queue'},actor);
+  const published=await changeSavedPublication(c,id,{expectedSequence:queued.sequence,action:'publish'},actor);
+  return {...ack,sequence:published.sequence,publishedRevision:published.publishedRevision};
+ }
  if(input.action==='direct_publish'){
   if(!['draft','changes_requested'].includes(w.status))throw new Error('INVALID_STATE');
   const revision=d.revisions.find(item=>item.id===w.revisionId)!;
