@@ -123,3 +123,69 @@ test('return feedback reads preserve the formal publication in every kind and ho
   try{await assert.rejects(service(a).editor(d.id),/INACTIVE_MEMBER/);}finally{await fixture.pool.query("UPDATE juyu.members SET disabled_at=null WHERE clerk_user_id='a'");}
  }
 });
+
+
+test('assigned reviewer atomically approves and publishes every content kind with complete standard history',async()=>{
+ for(const kind of ['article','ops','reference','qa'] as const){
+  const d=await repo.create({id:randomUUID(),kind,title:'组合发布测试',body:'测试正式正文',audience:kind==='ops'?'ops':'staff',...(kind==='qa'?{qa:{category:'组合发布分类',position:0}}:{})},a);
+  await service(a).submitReview(d.id,{expectedSequence:0,reviewerId:'b'});
+  const ack=await service().decideReview(d.id,{expectedSequence:1,action:'approve_publish'});
+  assert.deepEqual(ack,{documentId:d.id,sequence:4,revision:1,status:'published',action:'approve_publish',reason:null,reviewerId:'b',publishedRevision:1});
+  const saved=await repo.getForManagement(d.id,a);assert.ok(saved);assert.equal(saved.workflow.status,'published');assert.equal(saved.workflow.approvalMode,'standard');assert.equal(saved.publishedRevisionId,1);assert.equal(saved.revisions.length,1);
+  assert.deepEqual(saved.audit.slice(-3).map(e=>[e.action,e.actorId,e.sequence]),[['approve','b',2],['queue','b',3],['publish','b',4]]);
+  assert.equal((await service().reviewDetail(d.id)).review?.status,'approved');
+  assert.equal((await service(a).publicationDetail(d.id)).approval?.reviewerId,'b');
+  assert.equal((await service(a).article(d.id)).body,'测试正式正文');
+  if(kind==='ops')assert.equal(await service(staff).article(d.id),null);
+  else assert.equal((await service(staff).article(d.id)).body,'测试正式正文');
+  if(kind==='qa')assert.ok((await service(staff).qa()).categories?.includes('组合发布分类'));
+ }
+});
+
+test('approve and publish never grants authors, other reviewers or ordinary staff publication access',async()=>{
+ const d=await pending();const before=await repo.getForManagement(d.id,a);
+ for(const actor of [a,c,staff,null,{...b,companyVerified:false}])await assert.rejects(service(actor).decideReview(d.id,{expectedSequence:1,action:'approve_publish'}),/NOT_REVIEWER|FORBIDDEN/);
+ assert.deepEqual(await repo.getForManagement(d.id,a),before);
+ await fixture.pool.query("UPDATE juyu.members SET disabled_at=now() WHERE clerk_user_id='b'");
+ try{await assert.rejects(service().decideReview(d.id,{expectedSequence:1,action:'approve_publish'}),/FORBIDDEN/);}finally{await fixture.pool.query("UPDATE juyu.members SET disabled_at=null WHERE clerk_user_id='b'");}
+});
+
+test('concurrent approve-publish retries acknowledge the same publication without extra audit or notifications',async()=>{
+ const d=await pending(),input={expectedSequence:1,action:'approve_publish'};
+ const [first,second]=await Promise.all([service().decideReview(d.id,input),service().decideReview(d.id,input)]);assert.deepEqual(first,second);
+ const saved=await repo.getForManagement(d.id,a);assert.ok(saved);
+ const notifications=await fixture.pool.query('SELECT * FROM juyu.slack_outbox WHERE document_id=$1 ORDER BY sequence',[d.id]);
+ assert.deepEqual(await service().decideReview(d.id,input),first);assert.deepEqual(await repo.getForManagement(d.id,a),saved);
+ assert.deepEqual((await fixture.pool.query('SELECT * FROM juyu.slack_outbox WHERE document_id=$1 ORDER BY sequence',[d.id])).rows,notifications.rows);
+ assert.deepEqual(saved.audit.map(e=>e.action),['create','submit','approve','queue','publish']);
+ for(const changed of [{expectedSequence:1,action:'approve'},{expectedSequence:1,action:'reject',reason:'changed'},{expectedSequence:2,action:'approve_publish'}])await assert.rejects(service().decideReview(d.id,changed),/CONFLICT|INVALID_STATE/);
+ await assert.rejects(service(c).decideReview(d.id,input),/CONFLICT|NOT_REVIEWER/);
+});
+
+test('pending media rolls back the approval receipt and leaves the original review pending',async()=>{
+ const d=await pending(),before=await repo.getForManagement(d.id,a);
+ await fixture.pool.query("INSERT INTO juyu.assets(id,document_id,uploaded_by,filename,mime_type,byte_size,object_key,status) VALUES($1::uuid,$2,'a','test.png','image/png',4,$1::text,'pending')",[randomUUID(),d.id]);
+ await assert.rejects(service().decideReview(d.id,{expectedSequence:1,action:'approve_publish'}),/UPLOAD_IN_PROGRESS/);
+ assert.deepEqual(await repo.getForManagement(d.id,a),before);
+ const detail=await service().reviewDetail(d.id);assert.equal(detail.review?.status,'in_review');assert.equal(detail.review?.decidedAt,null);
+});
+
+test('failure during final publication rolls back approval, queue, formal pointer and notifications',async()=>{
+ const d=await pending(),before=await repo.getForManagement(d.id,a);
+ const notifications=(await fixture.pool.query('SELECT * FROM juyu.slack_outbox WHERE document_id=$1',[d.id])).rows;
+ await fixture.pool.query(`CREATE FUNCTION juyu.test_refuse_final_publication() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.id='${d.id}' AND NEW.workflow_state='published' THEN RAISE EXCEPTION 'TEST_PUBLICATION_FAILURE'; END IF; RETURN NEW; END $$; CREATE TRIGGER test_refuse_final_publication BEFORE UPDATE ON juyu.documents FOR EACH ROW EXECUTE FUNCTION juyu.test_refuse_final_publication()`);
+ try{await assert.rejects(service().decideReview(d.id,{expectedSequence:1,action:'approve_publish'}),/TEST_PUBLICATION_FAILURE/);}finally{await fixture.pool.query('DROP TRIGGER test_refuse_final_publication ON juyu.documents; DROP FUNCTION juyu.test_refuse_final_publication()');}
+ assert.deepEqual(await repo.getForManagement(d.id,a),before);
+ assert.equal((await service().reviewDetail(d.id)).review?.status,'in_review');
+ assert.deepEqual((await fixture.pool.query('SELECT * FROM juyu.slack_outbox WHERE document_id=$1',[d.id])).rows,notifications);
+});
+
+test('combination publication retains previous formal revisions and rejects stale review snapshots',async()=>{
+ const d=await pending();await service().decideReview(d.id,{expectedSequence:1,action:'approve_publish'});
+ const first=await service(a).article(d.id);
+ const edited=await repo.execute(d.id,{type:'edit',title:'第二版测试',body:'第二版正式正文',audience:'staff'},a,{expectedSequence:4});
+ await service(a).submitReview(d.id,{expectedSequence:edited.sequence,reviewerId:'b'});
+ await assert.rejects(service().decideReview(d.id,{expectedSequence:1,action:'approve_publish'}),/CONFLICT/);assert.deepEqual(await service(a).article(d.id),first);
+ await service().decideReview(d.id,{expectedSequence:edited.sequence+1,action:'approve_publish'});
+ const saved=await repo.getForManagement(d.id,a);assert.ok(saved);assert.equal(saved.revisions.find(r=>r.id===1)?.body,'正式内容');assert.equal(saved.publishedRevisionId,2);assert.equal((await service(a).article(d.id)).body,'第二版正式正文');
+});

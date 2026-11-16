@@ -212,3 +212,18 @@ test('Reference and Q&A show only published entries in the requested language',a
   }
  }
 });
+
+test('English combined approval still requires a quality check and publishes through the standard independent review',async()=>{
+ const source=randomUUID(),english=randomUUID(),repo=new DocumentRepository(db);
+ const writer={id:'writer',role:'admin' as const,companyVerified:true},reviewer={...writer,id:'reviewer'};
+ await document(source);
+ const saved=await repo.saveEditor(english,{expectedSequence:null,locale:'en',translationOf:source,title:'Update your account email',body:encodeEditorBody([{id:'step',type:'paragraph',content:[{type:'text',text:'Contact support to update your account email.',styles:{}}]}]),kind:'article',audience:'staff',tags:[],cover:null},writer);
+ const authorService=new AuthorizationService(db,async()=>writer),reviewerService=new AuthorizationService(db,async()=>reviewer);
+ await authorService.submitReview(english,{expectedSequence:saved.sequence,reviewerId:reviewer.id});
+ await assert.rejects(reviewerService.decideReview(english,{expectedSequence:saved.sequence+1,action:'approve_publish'}),/ENGLISH_REVIEW_REQUIRED/);
+ assert.equal((await reviewerService.reviewDetail(english)).article.status,'in_review');
+ const ack=await reviewerService.decideReview(english,{expectedSequence:saved.sequence+1,action:'approve_publish',englishReviewConfirmed:true});
+ assert.equal(ack.status,'published');assert.equal(ack.publishedRevision,1);
+ assert.equal((await fixture.pool.query('SELECT english_quality_confirmed FROM juyu.reviews WHERE document_id=$1',[english])).rows[0]?.english_quality_confirmed,true);
+ assert.equal((await repo.getForManagement(english,writer))?.workflow.approvalMode,'standard');
+});

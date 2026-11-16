@@ -1,3 +1,4 @@
+import {changeSavedPublication} from './publication.ts';
 import type {PoolClient} from 'pg';
 import type {Document,Viewer} from '../../domain/model.ts';
 import {transition} from '../../domain/workflow.ts';
@@ -38,9 +39,20 @@ export async function decideSavedReview(c:PoolClient,id:string,value:unknown,act
  await requireCurrentAdmin(c,actor);
  const d=await loadDocument(c,id);if(!d)throw new Error('NOT_FOUND');if(d.lifecycle!=='active')throw new Error('INACTIVE_DOCUMENT');
  const receipt=await latestReceipt(c,id),w=d.workflow,last=d.audit.at(-1),reason=input.action==='reject'?input.reason!:null;
- const status=input.action==='approve'?'approved':'changes_requested',receiptStatus=input.action==='approve'?'approved':'rejected';
+ const combined=input.action==='approve_publish',approving=input.action!=='reject';
+ const status=combined?'published':approving?'approved':'changes_requested',receiptStatus=approving?'approved':'rejected';
  const ack:DecisionAck={documentId:id,sequence:d.sequence,revision:w.revisionId,status,action:input.action,reason,reviewerId:actor.id};
- if(d.sequence===input.expectedSequence+1&&w.status===status&&independentReviewer(d,actor)&&matchesReview(d,receipt)
+ // A lost response may only acknowledge this exact three-step review/publication.
+ // Reuse publication's immutable approval validation; never run the stages again.
+ if(combined&&d.sequence===input.expectedSequence+3&&w.status==='published'&&independentReviewer(d,actor)&&matchesReview(d,receipt)){
+  const events=d.audit.filter(event=>event.sequence>input.expectedSequence);
+  if(events.length===3&&events.every((event,index)=>event.sequence===input.expectedSequence+index+1&&event.action===['approve','queue','publish'][index]&&event.actorId===actor.id&&event.reviewerId===actor.id&&event.previousReviewerId===actor.id&&event.revisionId===w.revisionId&&event.reason===null)
+   &&receipt?.status==='approved'&&receipt.decidedBy===actor.id&&receipt.reason===null&&receipt.decidedAt?.toISOString()===events[0].at){
+   const published=await changeSavedPublication(c,id,{expectedSequence:input.expectedSequence+2,action:'publish'},actor);
+   return {...ack,publishedRevision:published.publishedRevision!};
+  }
+ }
+ if(!combined&&d.sequence===input.expectedSequence+1&&w.status===status&&independentReviewer(d,actor)&&matchesReview(d,receipt)
   &&last?.action===input.action&&last.actorId===actor.id&&last.reviewerId===actor.id&&last.revisionId===w.revisionId&&last.reason===reason
   &&receipt?.status===receiptStatus&&receipt.decidedBy===actor.id&&receipt.reason===reason&&receipt.decidedAt?.toISOString()===last.at
   &&(input.action!=='approve'||receipt.locale!=='en'||receipt.englishQualityConfirmed))return ack;
@@ -48,9 +60,16 @@ export async function decideSavedReview(c:PoolClient,id:string,value:unknown,act
  if(w.status!=='in_review')throw new Error('INVALID_STATE');
  if(!independentReviewer(d,actor))throw new Error('NOT_REVIEWER');
  if(!matchesReview(d,receipt)||receipt?.status!=='in_review'||receipt.decidedBy!==null||receipt.decidedAt!==null)throw new Error('CONFLICT');
- if(input.action==='approve'&&receipt.locale==='en'&&!input.englishReviewConfirmed)throw new Error('ENGLISH_REVIEW_REQUIRED');
- const now=new Date().toISOString(),command=input.action==='approve'?{type:'approve' as const}:{type:'reject' as const,reason:reason!};
+ if(approving&&receipt.locale==='en'&&!input.englishReviewConfirmed)throw new Error('ENGLISH_REVIEW_REQUIRED');
+ const now=new Date().toISOString(),command=approving?{type:'approve' as const}:{type:'reject' as const,reason:reason!};
  const next=transition(d,command,actor,{expectedSequence:input.expectedSequence,now});
- await persistDocumentTransition(c,id,d,next,command,actor,now,input.action==='approve'&&receipt.locale==='en'&&input.englishReviewConfirmed===true);
+ await persistDocumentTransition(c,id,d,next,command,actor,now,approving&&receipt.locale==='en'&&input.englishReviewConfirmed===true);
+ if(combined){
+  // ScopedDatabase commits all stages together. Media, receipt or SQL failures
+  // roll back approval, publication, history and notifications as one operation.
+  const queued=await changeSavedPublication(c,id,{expectedSequence:next.sequence,action:'queue'},actor);
+  const published=await changeSavedPublication(c,id,{expectedSequence:queued.sequence,action:'publish'},actor);
+  return {...ack,sequence:published.sequence,publishedRevision:published.publishedRevision!};
+ }
  return {...ack,sequence:next.sequence};
 }

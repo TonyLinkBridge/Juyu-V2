@@ -11,13 +11,13 @@ async function mount(page:Page,initial:ReviewDetail=decisionFixture){
 }
 const ack=(action:'approve'|'reject'='approve',reason:string|null=null)=>({documentId:'decision-local',sequence:5,revision:2,reviewerId:'admin-b',status:action==='approve'?'approved':'changes_requested',action,reason});
 test('approval requires explicit confirmation and keeps the previous formal version',async({page},info)=>{
- const writes:unknown[]=[];await page.route('**/api/admin/review/*/decision',r=>{writes.push(r.request().postDataJSON());return r.fulfill({json:ack()});});await mount(page);await expect(page.getByRole('heading',{name:'需要二审的文章'})).toBeVisible();await expect(page.locator('.gitbook-document')).toContainText('完整正文 <script>alert(1)</script>');await expect(page.locator('[contenteditable=true]')).toHaveCount(0);await expect(page.locator('.gitbook-document script')).toHaveCount(0);await page.getByRole('button',{name:'批准本次版本',exact:true}).click();expect(writes).toHaveLength(0);await page.getByRole('button',{name:'取消决定',exact:true}).click();expect(writes).toHaveLength(0);await page.getByRole('button',{name:'批准本次版本',exact:true}).click();await page.getByRole('button',{name:'确认批准',exact:true}).click();await expect(page.getByRole('status')).toContainText('已经批准');await expect(page.getByRole('region',{name:'二审详情'})).toContainText('不会自动发布');await expect(page.getByRole('region',{name:'二审详情'})).toContainText('工作修订 1');expect(writes).toEqual([{expectedSequence:4,action:'approve'}]);await expect(page.getByRole('button',{name:'批准本次版本',exact:true})).toHaveCount(0);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`output/verification/decision-approved-${info.project.name}.png`,fullPage:true});
+ const writes:unknown[]=[];await page.route('**/api/admin/review/*/decision',r=>{writes.push(r.request().postDataJSON());return r.fulfill({json:ack()});});await mount(page);await expect(page.getByRole('heading',{name:'需要二审的文章'})).toBeVisible();await expect(page.locator('.gitbook-document')).toContainText('完整正文 <script>alert(1)</script>');await expect(page.locator('[contenteditable=true]')).toHaveCount(0);await expect(page.locator('.gitbook-document script')).toHaveCount(0);await page.getByRole('button',{name:'仅批准，稍后发布',exact:true}).click();expect(writes).toHaveLength(0);await page.getByRole('button',{name:'取消决定',exact:true}).click();expect(writes).toHaveLength(0);await page.getByRole('button',{name:'仅批准，稍后发布',exact:true}).click();await page.getByRole('button',{name:'确认批准',exact:true}).click();await expect(page.getByRole('status')).toContainText('已经批准');await expect(page.getByRole('region',{name:'二审详情'})).toContainText('不会自动发布');await expect(page.getByRole('region',{name:'二审详情'})).toContainText('工作修订 1');expect(writes).toEqual([{expectedSequence:4,action:'approve'}]);await expect(page.getByRole('button',{name:'仅批准，稍后发布',exact:true})).toHaveCount(0);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`output/verification/decision-approved-${info.project.name}.png`,fullPage:true});
 });
 test('English approval requires the reviewer to confirm language and business meaning',async({page},info)=>{
  const writes:unknown[]=[];
  await page.route('**/api/admin/review/*/decision',route=>{writes.push(route.request().postDataJSON());return route.fulfill({json:ack()});});
  await mount(page,{...decisionFixture,article:{...decisionFixture.article,locale:'en',translationOf:'11111111-1111-4111-8111-111111111111'}});
- await page.getByRole('button',{name:'Approve version',exact:true}).click();
+ await page.getByRole('button',{name:'Approve only, publish later',exact:true}).click();
  await expect(page.getByRole('button',{name:'Confirm approval',exact:true})).toBeDisabled();
  await page.screenshot({path:`output/verification/english-review-${info.project.name}.png`,fullPage:true});
  await page.getByRole('checkbox',{name:/reviewed the English title/}).check();
@@ -29,16 +29,16 @@ test('rejection requires a reason and preserves the original text until exact ac
  const writes:unknown[]=[];await page.route('**/api/admin/review/*/decision',r=>{writes.push(r.request().postDataJSON());return r.fulfill({json:ack('reject','请补充来源 <b>核对</b>')});});await mount(page);await page.getByRole('button',{name:'退回修改',exact:true}).click();await expect(page.getByRole('button',{name:'确认退回',exact:true})).toBeDisabled();await page.getByLabel('退回原因',{exact:true}).fill('   ');await expect(page.getByRole('button',{name:'确认退回',exact:true})).toBeDisabled();await page.getByLabel('退回原因',{exact:true}).fill('  请补充来源 <b>核对</b>  ');await page.screenshot({path:`output/verification/decision-reason-${info.project.name}.png`,fullPage:true});await page.getByRole('button',{name:'确认退回',exact:true}).click();await expect(page.getByRole('status')).toContainText('需要修改');await expect(page.getByRole('region',{name:'二审详情'})).toContainText('请补充来源 <b>核对</b>');await expect(page.locator('.review-return-reason b')).toHaveCount(0);expect(writes).toEqual([{expectedSequence:4,action:'reject',reason:'请补充来源 <b>核对</b>'}]);await page.getByText('更多操作',{exact:true}).click();await expect(page.getByRole('link',{name:'编辑文章'})).toHaveAttribute('href','/admin/editor?article=decision-local');
 });
 test('other administrators can read but cannot decide and inactive records remain closed',async({page})=>{
- await mount(page,{...decisionFixture,canDecide:false});await expect(page.getByRole('region',{name:'二审详情'})).toContainText('仅指定的二审管理员');await expect(page.getByRole('button',{name:'批准本次版本',exact:true})).toHaveCount(0);await mount(page,{...decisionFixture,article:{...decisionFixture.article,lifecycle:'trashed'},canDecide:true});await expect(page.getByRole('button',{name:'退回修改',exact:true})).toHaveCount(0);await expect(page.getByRole('region',{name:'二审详情'})).toContainText('已停用');
+ await mount(page,{...decisionFixture,canDecide:false});await expect(page.getByRole('region',{name:'二审详情'})).toContainText('仅指定的二审管理员');await expect(page.getByRole('button',{name:'仅批准，稍后发布',exact:true})).toHaveCount(0);await mount(page,{...decisionFixture,article:{...decisionFixture.article,lifecycle:'trashed'},canDecide:true});await expect(page.getByRole('button',{name:'退回修改',exact:true})).toHaveCount(0);await expect(page.getByRole('region',{name:'二审详情'})).toContainText('已停用');
 });
 test('unknown and wrong acknowledgements lock the action and retry the identical decision',async({page})=>{
  const writes:unknown[]=[];await page.route('**/api/admin/review/*/decision',r=>{writes.push(r.request().postDataJSON());return r.fulfill({json:writes.length===1?{...ack('reject','原退回原因'),action:'approve'}:ack('reject','原退回原因')});});await mount(page);await page.getByRole('button',{name:'退回修改',exact:true}).click();await page.getByLabel('退回原因',{exact:true}).fill('原退回原因');await page.getByRole('button',{name:'确认退回',exact:true}).click();await expect(page.getByRole('alert')).toContainText('尚未确认');await expect(page.getByLabel('退回原因',{exact:true})).toHaveValue('原退回原因');await expect(page.getByLabel('退回原因',{exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'取消决定'})).toBeDisabled();await expect(page.getByRole('button',{name:'重新读取二审状态'})).toBeDisabled();await expect(page.getByRole('link',{name:'编辑文章'})).toHaveCount(0);await page.getByRole('button',{name:'重试原决定'}).click();await expect(page.getByRole('status')).toContainText('需要修改');expect(writes).toEqual([{expectedSequence:4,action:'reject',reason:'原退回原因'},{expectedSequence:4,action:'reject',reason:'原退回原因'}]);
 });
 test('CAS rejection preserves input and explicit refresh keeps returned revision reason after edits',async({page})=>{
- await page.route('**/api/admin/review/*/decision',r=>r.request().method()==='POST'?r.fulfill({status:409,json:{error:'CONFLICT'}}):r.fulfill({json:{...decisionFixture,article:{...decisionFixture.article,sequence:6,status:'draft',title:'退回后已修改的内容'},review:{...decisionFixture.review!,status:'rejected',reason:'已记录的退回原因',decidedAt:'2026-09-09T02:00:00Z'},canDecide:false}}));await mount(page);await page.getByRole('button',{name:'退回修改',exact:true}).click();await page.getByLabel('退回原因',{exact:true}).fill('未提交的说明');await page.getByRole('button',{name:'确认退回',exact:true}).click();await expect(page.getByRole('alert')).toContainText('版本已改变');await expect(page.getByLabel('退回原因',{exact:true})).toHaveValue('未提交的说明');await expect(page.getByRole('button',{name:'确认退回',exact:true})).toBeDisabled();await page.getByRole('button',{name:'重新读取二审状态'}).click();await page.getByRole('button',{name:'确认继续',exact:true}).click();await expect(page.getByRole('heading',{name:'退回后已修改的内容'})).toBeVisible();await expect(page.getByRole('region',{name:'二审详情'})).toContainText('版本 2 的退回原因');await expect(page.getByRole('region',{name:'二审详情'})).toContainText('已记录的退回原因');await expect(page.getByRole('button',{name:'批准本次版本',exact:true})).toHaveCount(0);
+ await page.route('**/api/admin/review/*/decision',r=>r.request().method()==='POST'?r.fulfill({status:409,json:{error:'CONFLICT'}}):r.fulfill({json:{...decisionFixture,article:{...decisionFixture.article,sequence:6,status:'draft',title:'退回后已修改的内容'},review:{...decisionFixture.review!,status:'rejected',reason:'已记录的退回原因',decidedAt:'2026-09-09T02:00:00Z'},canDecide:false}}));await mount(page);await page.getByRole('button',{name:'退回修改',exact:true}).click();await page.getByLabel('退回原因',{exact:true}).fill('未提交的说明');await page.getByRole('button',{name:'确认退回',exact:true}).click();await expect(page.getByRole('alert')).toContainText('版本已改变');await expect(page.getByLabel('退回原因',{exact:true})).toHaveValue('未提交的说明');await expect(page.getByRole('button',{name:'确认退回',exact:true})).toBeDisabled();await page.getByRole('button',{name:'重新读取二审状态'}).click();await page.getByRole('button',{name:'确认继续',exact:true}).click();await expect(page.getByRole('heading',{name:'退回后已修改的内容'})).toBeVisible();await expect(page.getByRole('region',{name:'二审详情'})).toContainText('版本 2 的退回原因');await expect(page.getByRole('region',{name:'二审详情'})).toContainText('已记录的退回原因');await expect(page.getByRole('button',{name:'仅批准，稍后发布',exact:true})).toHaveCount(0);
 });
 test('refresh blocks decisions while reading and refuses an older snapshot',async({page})=>{
- let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve;});await page.route('**/api/admin/review/*/decision',async r=>{await held;await r.fulfill({json:{...decisionFixture,article:{...decisionFixture.article,sequence:3}}});});await mount(page);await page.getByRole('button',{name:'重新读取二审状态'}).click();await expect(page.getByRole('button',{name:'批准本次版本',exact:true})).toBeDisabled();release();await expect(page.getByRole('alert')).toContainText('读取');await expect(page.getByRole('button',{name:'批准本次版本',exact:true})).toBeDisabled();
+ let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve;});await page.route('**/api/admin/review/*/decision',async r=>{await held;await r.fulfill({json:{...decisionFixture,article:{...decisionFixture.article,sequence:3}}});});await mount(page);await page.getByRole('button',{name:'重新读取二审状态'}).click();await expect(page.getByRole('button',{name:'仅批准，稍后发布',exact:true})).toBeDisabled();release();await expect(page.getByRole('alert')).toContainText('读取');await expect(page.getByRole('button',{name:'仅批准，稍后发布',exact:true})).toBeDisabled();
 });
 test('real unconfigured decision endpoints and page fail closed for forged roles',async({page,request})=>{
  for(const method of ['get','post'] as const){const r=await request[method]('/api/admin/review/00000000-0000-4000-8000-000000000035/decision',{headers:{'x-role':'admin','x-user-id':'admin-b'},...(method==='post'?{data:{expectedSequence:4,action:'approve'}}:{})});expect(r.status()).toBe(503);expect(r.headers()['cache-control']).toBe('private, no-store');}await page.goto('/admin/review?article=00000000-0000-4000-8000-000000000035');await expect(page.getByRole('button',{name:'确认批准'})).toHaveCount(0);await expect(page.getByRole('button',{name:'确认退回'})).toHaveCount(0);
@@ -49,7 +49,7 @@ test('review includes audience tags private cover and legacy rich blocks',async(
 });
 
 test('an in-flight decision disables refresh and editing until exact acknowledgement',async({page})=>{
- let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve;});let reads=0;await page.route('**/api/admin/review/*/decision',async r=>{if(r.request().method()==='GET'){reads++;return r.fulfill({json:decisionFixture});}await held;return r.fulfill({json:ack()});});await mount(page);await page.getByRole('button',{name:'批准本次版本',exact:true}).click();await page.getByRole('button',{name:'确认批准',exact:true}).click();await expect(page.getByRole('button',{name:'重新读取二审状态'})).toBeDisabled();await expect(page.getByRole('link',{name:'编辑文章'})).toHaveCount(0);await expect(page.getByRole('button',{name:'取消决定'})).toBeDisabled();expect(reads).toBe(0);release();await expect(page.getByRole('status')).toContainText('已经批准');
+ let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve;});let reads=0;await page.route('**/api/admin/review/*/decision',async r=>{if(r.request().method()==='GET'){reads++;return r.fulfill({json:decisionFixture});}await held;return r.fulfill({json:ack()});});await mount(page);await page.getByRole('button',{name:'仅批准，稍后发布',exact:true}).click();await page.getByRole('button',{name:'确认批准',exact:true}).click();await expect(page.getByRole('button',{name:'重新读取二审状态'})).toBeDisabled();await expect(page.getByRole('link',{name:'编辑文章'})).toHaveCount(0);await expect(page.getByRole('button',{name:'取消决定'})).toBeDisabled();expect(reads).toBe(0);release();await expect(page.getByRole('status')).toContainText('已经批准');
 });
 
 test('uncertain transport result remains locked even when its retry is rejected',async({page})=>{
@@ -98,7 +98,7 @@ for(const kind of ['article','ops','reference','qa'] as const){
    const back=page.getByRole('link',{name:'← 返回内容工作台',exact:true});
    const href=kind==='article'?'/admin':`/admin?kind=${kind}&view=list`;
    await expect(back).toHaveAttribute('href',href);
-   await page.getByRole('button',{name:action==='approve'?'批准本次版本':'退回修改',exact:true}).click();
+   await page.getByRole('button',{name:action==='approve'?'仅批准，稍后发布':'退回修改',exact:true}).click();
    if(action==='reject')await page.getByLabel('退回原因',{exact:true}).fill('请补充步骤');
    await page.getByRole('button',{name:action==='approve'?'确认批准':'确认退回',exact:true}).click();
    await expect(page.getByRole('status')).toContainText(action==='approve'?'已经批准':'需要修改');
@@ -109,3 +109,36 @@ for(const kind of ['article','ops','reference','qa'] as const){
   });
  }
 }
+
+for(const kind of ['article','ops','reference','qa'] as const){
+ test(`${kind} assigned reviewer can approve and publish after one explicit confirmation`,async({page},info)=>{
+  const writes:unknown[]=[];
+  await page.route('**/api/admin/review/*/decision',route=>{writes.push(route.request().postDataJSON());return route.fulfill({json:{...ack(),action:'approve_publish',status:'published',sequence:7,publishedRevision:2}});});
+  await mount(page,{...decisionFixture,article:{...decisionFixture.article,kind}});
+  await page.getByRole('button',{name:'批准并发布',exact:true}).click();expect(writes).toHaveLength(0);
+  await page.screenshot({path:`output/verification/review-publish-${kind}-${info.project.name}.png`,fullPage:true});
+  await page.getByRole('button',{name:'确认批准并发布',exact:true}).click();
+  await expect(page.getByRole('status')).toContainText('已批准并发布');
+  expect(writes).toEqual([{expectedSequence:4,action:'approve_publish'}]);
+  await expect(page.getByRole('region',{name:'二审详情'})).toContainText('本次版本已正式发布');
+  await expect(page.getByRole('button',{name:'批准并发布',exact:true})).toHaveCount(0);
+  await expect(page.getByText('本次修订尚未发布；员工仍看到正式版内容和分类。',{exact:true})).toHaveCount(0);
+ });
+}
+test('English combined approval requires language confirmation',async({page})=>{
+ const writes:unknown[]=[];await page.route('**/api/admin/review/*/decision',route=>{writes.push(route.request().postDataJSON());return route.fulfill({json:{...ack(),action:'approve_publish',status:'published',sequence:7,publishedRevision:2}});});
+ await mount(page,{...decisionFixture,article:{...decisionFixture.article,locale:'en'}});
+ await page.getByRole('button',{name:'Approve and publish',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Confirm approval and publication',exact:true})).toBeDisabled();
+ await page.getByRole('checkbox').check();await page.getByRole('button',{name:'Confirm approval and publication',exact:true}).click();
+ await expect(page.getByRole('status')).toContainText('Approved and published');
+ expect(writes).toEqual([{expectedSequence:4,action:'approve_publish',englishReviewConfirmed:true}]);
+});
+test('uncertain combined decision freezes action changes and retries the identical publication',async({page})=>{
+ const writes:unknown[]=[];
+ await page.route('**/api/admin/review/*/decision',route=>{writes.push(route.request().postDataJSON());return writes.length===1?route.abort():route.fulfill({json:{...ack(),action:'approve_publish',status:'published',sequence:7,publishedRevision:2}});});
+ await mount(page);await page.getByRole('button',{name:'批准并发布',exact:true}).click();await page.getByRole('button',{name:'确认批准并发布',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('尚未确认');await expect(page.getByRole('button',{name:'取消决定',exact:true})).toBeDisabled();
+ await page.getByRole('button',{name:'重试原决定',exact:true}).click();await expect(page.getByRole('status')).toContainText('已批准并发布');
+ expect(writes).toEqual([{expectedSequence:4,action:'approve_publish'},{expectedSequence:4,action:'approve_publish'}]);
+});
