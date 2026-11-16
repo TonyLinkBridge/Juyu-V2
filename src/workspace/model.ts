@@ -24,3 +24,14 @@ export function publicationLabel(item:Pick<WorkspaceItem,'revision'|'publishedRe
  const version=item.publicationNumber?` ${item.publicationNumber}`:'';
  return item.publishedRevision===null?'尚未发布':item.status==='published'?(version?`正式版${version}`:'已发布'):`旧正式版${version} 仍可阅读`;
 }
+
+export function contentManagementHref(kind?:ContentKind):string {
+ return kind==='ops'||kind==='reference'||kind==='qa'?`/admin?kind=${kind}&view=list`:'/admin';
+}
+
+/** Explain working Q&A metadata without implying it is already visible to readers. */
+export function qaPublicationNotice(item:Pick<WorkspaceItem,'kind'|'publishedRevision'>&{status:string},locale:'zh-CN'|'en'='zh-CN'):string|null {
+ if(item.kind!=='qa'||!['approved','queued'].includes(item.status))return null;
+ if(item.publishedRevision!==null)return locale==='en'?'This revision is not published. Employees still see the published content and categories.':'本次修订尚未发布；员工仍看到正式版内容和分类。';
+ return locale==='en'?(item.status==='approved'?'Approved, but not published. The category is not yet visible on the employee page.':'Awaiting publication. The category is not yet visible on the employee page.'):(item.status==='approved'?'已批准，尚未发布；分类暂不显示在员工页面。':'等待正式发布；分类暂不显示在员工页面。');
+}

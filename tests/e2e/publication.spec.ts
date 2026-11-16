@@ -42,3 +42,23 @@ test('publication diagnostic endpoint cannot log through forged administrator he
  const crossSite=await request.post(path,{headers:{origin:'https://untrusted.example','x-role':'super_admin'},data});expect(crossSite.status()).toBe(403);expect(crossSite.headers()['cache-control']).toBe('private, no-store');
  const forged=await request.post(path,{headers:{origin:'http://127.0.0.1:3210','x-role':'super_admin','x-user-id':'super-a'},data});expect([403,503]).toContain(forged.status());expect(await forged.json()).not.toHaveProperty('logged');
 });
+
+test('unpublished Q&A explains category visibility without publishing and returns to Q&A management',async({page},info)=>{
+ const writes:string[]=[];
+ await page.route('**/api/admin/review/*/publication',route=>{writes.push(route.request().method());return route.abort();});
+ await mount(page,{...fixture,article:{...fixture.article,kind:'qa',publishedRevision:null,qa:{category:'Whois 隐私保护',position:0}}});
+ await expect(page.getByText('已批准，尚未发布；分类暂不显示在员工页面。',{exact:true})).toBeVisible();
+ const back=page.getByRole('link',{name:'返回内容工作台',exact:true});
+ await expect(back).toHaveAttribute('href','/admin?kind=qa&view=list');
+ await page.screenshot({path:`output/verification/qa-unpublished-${info.project.name}.png`,fullPage:true});
+ expect(writes).toEqual([]);
+ await page.route('**/admin?**',route=>route.fulfill({contentType:'text/html',body:'<h1>Q&A 管理</h1>'}));
+ await back.click();await expect(page).toHaveURL('http://127.0.0.1:3210/admin?kind=qa&view=list');
+});
+test('Q&A pending revision keeps the formal category explanation and published Q&A hides the warning',async({page})=>{
+ await mount(page,{...fixture,article:{...fixture.article,kind:'qa'}});
+ await expect(page.getByText('本次修订尚未发布；员工仍看到正式版内容和分类。',{exact:true})).toBeVisible();
+ await mount(page,{...fixture,article:{...fixture.article,kind:'qa',status:'published'},canQueue:false});
+ await expect(page.getByText('本次修订尚未发布；员工仍看到正式版内容和分类。',{exact:true})).toHaveCount(0);
+ await expect(page.getByText('已批准，尚未发布；分类暂不显示在员工页面。',{exact:true})).toHaveCount(0);
+});

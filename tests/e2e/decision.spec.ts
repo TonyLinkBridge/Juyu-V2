@@ -89,3 +89,23 @@ test('history fallback without Navigation API restores the page before asking an
 test('history fallback preserves forward navigation after cancelling back',async({page})=>{await page.addInitScript(()=>Object.defineProperty(window,'navigation',{value:undefined,configurable:true}));await mount(page);await page.evaluate(()=>{history.pushState({},'',location.pathname+'?step=1');history.pushState({},'',location.pathname+'?step=2');history.back();});await expect(page).toHaveURL(/step=1/);await page.getByRole('button',{name:'退回修改',exact:true}).click();await page.getByLabel('退回原因',{exact:true}).fill('前进也要保留');await page.evaluate(()=>history.forward());await expect(page.getByRole('dialog')).toBeVisible();await expect(page).toHaveURL(/step=1/);await page.getByRole('dialog').getByRole('button',{name:'取消',exact:true}).click();await expect(page.getByLabel('退回原因',{exact:true})).toHaveValue('前进也要保留');await page.evaluate(()=>history.forward());await page.getByRole('dialog').getByRole('button',{name:'确认继续'}).click();await expect(page).toHaveURL(/step=2/);});
 
 test('history fallback does not block a same-page heading link',async({page})=>{await page.addInitScript(()=>Object.defineProperty(window,'navigation',{value:undefined,configurable:true}));await mount(page);await page.getByRole('button',{name:'退回修改',exact:true}).click();await page.getByLabel('退回原因',{exact:true}).fill('跳转段落不丢失');await page.evaluate(()=>{location.hash='notes';});await expect(page).toHaveURL(/#notes$/);await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.getByLabel('退回原因',{exact:true})).toHaveValue('跳转段落不丢失');});
+
+for(const kind of ['article','ops','reference','qa'] as const){
+ for(const action of ['approve','reject'] as const){
+  test(`${kind} review returns to its own management page after ${action}`,async({page})=>{
+   await page.route('**/api/admin/review/*/decision',route=>route.fulfill({json:ack(action,action==='reject'?'请补充步骤':null)}));
+   await mount(page,{...decisionFixture,article:{...decisionFixture.article,kind}});
+   const back=page.getByRole('link',{name:'← 返回内容工作台',exact:true});
+   const href=kind==='article'?'/admin':`/admin?kind=${kind}&view=list`;
+   await expect(back).toHaveAttribute('href',href);
+   await page.getByRole('button',{name:action==='approve'?'批准本次版本':'退回修改',exact:true}).click();
+   if(action==='reject')await page.getByLabel('退回原因',{exact:true}).fill('请补充步骤');
+   await page.getByRole('button',{name:action==='approve'?'确认批准':'确认退回',exact:true}).click();
+   await expect(page.getByRole('status')).toContainText(action==='approve'?'已经批准':'需要修改');
+   await expect(back).toHaveAttribute('href',href);
+   await page.route('**/admin?**',route=>route.fulfill({contentType:'text/html',body:'<h1>对应资料管理页</h1>'}));
+   await back.click();
+   await expect(page).toHaveURL(new URL(href,'http://127.0.0.1:3210').href);
+  });
+ }
+}
