@@ -78,4 +78,3 @@ test('candidate pages have no omissions and only the most recent 20 immutable co
  for(let index=0;index<22;index++)await service().changeReviewControl(d.id,{expectedSequence:index+1,action:'reassign',reviewerId:index%2===0?'c':'b'});const detail=await service().controlReviewDetail(d.id);assert.equal(detail.history.length,20);assert.equal(detail.historyMore,true);assert.equal(detail.history[0].sequence,23);assert.equal(detail.history.at(-1)?.sequence,4);assert.equal((await fixture.pool.query("SELECT count(*)::int AS n FROM juyu.audit_log WHERE document_id=$1 AND action='reassign'",[d.id])).rows[0].n,22);
  await assert.rejects(db.run(manager,c=>c.query("UPDATE juyu.audit_log SET reviewer_id='manager' WHERE document_id=$1",[d.id])),/permission denied/);
 });
-

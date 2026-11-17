@@ -1,11 +1,11 @@
-import type {Document,Status} from '../domain/model.ts';
+import type {Document,Status,ContentKind} from '../domain/model.ts';
 import {reviewId,type Reviewer} from './model.ts';
 export interface ControlHistory {
  sequence:number;revision:number;action:'withdraw'|'reassign';actorId:string;actorName:string;
  previousReviewerId:string|null;previousReviewerName:string|null;reviewerId:string|null;reviewerName:string|null;at:string;
 }
 export interface ControlDetail {
- documentId:string;title:string;sequence:number;revision:number;status:Status;lifecycle:Document['lifecycle'];publishedRevision:number|null;
+ kind?:ContentKind;documentId:string;title:string;sequence:number;revision:number;status:Status;lifecycle:Document['lifecycle'];publishedRevision:number|null;
  submittedBy:string|null;reviewerId:string|null;reviewerName:string|null;reviewerAvailable:boolean;canManageReview:boolean;
  reviewers:Reviewer[];nextCursor:string|null;history:ControlHistory[];historyMore:boolean;
 }

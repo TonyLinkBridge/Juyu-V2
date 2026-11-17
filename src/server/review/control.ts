@@ -33,7 +33,7 @@ export async function readControlDetail(c:PoolClient,id:string,actor:Viewer,afte
  FROM juyu.audit_log a JOIN juyu.members actor ON actor.clerk_user_id=a.actor_id LEFT JOIN juyu.members previous ON previous.clerk_user_id=a.previous_reviewer_id LEFT JOIN juyu.members reviewer ON reviewer.clerk_user_id=a.reviewer_id
  WHERE a.document_id=$1 AND a.action IN ('withdraw','reassign') ORDER BY a.sequence DESC LIMIT 21`,[id])).rows;
  const reviewers=rows.slice(0,30);
- return {documentId:id,title:revision.title,sequence:d.sequence,revision:w.revisionId,status:w.status,lifecycle:d.lifecycle,publishedRevision:d.publishedRevisionId,
+ return {kind:d.kind,documentId:id,title:revision.title,sequence:d.sequence,revision:w.revisionId,status:w.status,lifecycle:d.lifecycle,publishedRevision:d.publishedRevisionId,
   submittedBy:w.submittedBy,reviewerId:w.reviewerId,reviewerName:assigned?.name??null,reviewerAvailable:assigned?.available??false,canManageReview,
   reviewers,nextCursor:rows.length>30?reviewers.at(-1)!.id:null,history:history.slice(0,20).map(h=>({...h,at:h.at.toISOString()})),historyMore:history.length>20};
 }

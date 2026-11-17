@@ -24,7 +24,7 @@ export async function readWorkspace(c:PoolClient,actorId:string,input:QueryInput
  ARRAY(SELECT rc.category_id FROM juyu.revision_categories rc WHERE rc.document_id=d.id AND rc.revision_id=r.revision_id) AS "categoryIds",
  ARRAY(SELECT rc.category_id FROM juyu.revision_categories rc WHERE rc.document_id=d.id AND rc.revision_id=d.published_revision_id) AS "publishedCategoryIds",
  juyu.publication_number(d.id) AS "publicationNumber", r.qa_category AS "qaCategory",r.qa_position AS "qaPosition",r.revision_id AS revision,d.published_revision_id AS "publishedRevision",d.updated_at AS "updatedAt",
- a.display_name AS author,e.display_name AS editor,s.display_name AS submitter,v.display_name AS reviewer,(d.workflow_state='in_review' AND d.reviewer_id=$4) AS "canReview"
+ a.display_name AS author,e.display_name AS editor,s.display_name AS submitter,v.display_name AS reviewer,(d.workflow_state='in_review' AND d.reviewer_id=$4) AS "canReview",(d.workflow_state='in_review' AND d.submitted_by=$4 AND juyu.review_admin_eligible($4)) AS "canWithdrawSubmission"
  ${from} JOIN juyu.members a ON a.clerk_user_id=r.author_id JOIN juyu.members e ON e.clerk_user_id=r.editor_id
  LEFT JOIN juyu.members s ON s.clerk_user_id=d.submitted_by LEFT JOIN juyu.members v ON v.clerk_user_id=d.reviewer_id
  ${where} AND ($5='all' OR d.workflow_state=$5)

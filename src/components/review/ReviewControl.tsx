@@ -1,14 +1,15 @@
 'use client';
 import {useReviewLeaveGuard} from './useReviewLeaveGuard';
 import {requestReviewLeave} from '../../review/leave';
+import {contentManagementHref} from '../../workspace/model';
 import {useRef,useState} from 'react';
 import type {ControlDetail,ControlInput} from '../../review/control';
 import {ControlRejected,controlError,readControl,sendControl} from '../../review/control-client';
 type Pending={input:ControlInput;revision:number;previousReviewerId:string;targetName:string};
 const statuses={draft:'草稿',in_review:'审核中',changes_requested:'需要修改',approved:'已经批准',queued:'等待发布',published:'已发布'};
 const actions:Record<string,string>={submit:'提交二审',withdraw:'撤回审核',reassign:'改派二审',approve:'批准版本',reject:'退回修改'};
-export function ReviewControl({initial}:{initial:ControlDetail}){
- const [detail,setDetail]=useState(initial);const [action,setAction]=useState<ControlInput['action']|null>(null);const [target,setTarget]=useState('');
+export function ReviewControl({initial,initialAction}:{initial:ControlDetail;initialAction?:'withdraw'}){
+ const [detail,setDetail]=useState(initial);const [action,setAction]=useState<ControlInput['action']|null>(initialAction==='withdraw'&&initial.canManageReview&&initial.lifecycle==='active'&&initial.status==='in_review'&&initial.reviewerId?'withdraw':null);const [target,setTarget]=useState('');
  const [busy,setBusy]=useState<'read'|'more'|'write'|''>('');const [uncertain,setUncertain]=useState(false);const [blocked,setBlocked]=useState(false);const [error,setError]=useState('');const [notice,setNotice]=useState('');const [confirmedUnread,setConfirmedUnread]=useState(false);
  const operation=useRef(false);const pending=useRef<Pending|null>(null);const minimumSequence=useRef(initial.sequence);
  const eligible=detail.canManageReview&&detail.lifecycle==='active'&&detail.status==='in_review'&&Boolean(detail.reviewerId);const locked=Boolean(busy)||uncertain;const chosen=detail.reviewers.find(x=>x.id===target);const canConfirm=action==='withdraw'||Boolean(chosen);
@@ -27,7 +28,7 @@ export function ReviewControl({initial}:{initial:ControlDetail}){
   }catch(e){const unknown=uncertain||!(e instanceof ControlRejected);setUncertain(unknown);if(!unknown){pending.current=null;setBlocked(true);}setError(controlError(unknown?new Error('UNKNOWN_RESULT'):e));}finally{operation.current=false;setBusy('');}
  }
  return <section className="review-decision review-control" aria-label="本次审核管理">
-  <nav className="review-decision-links" aria-label="审核管理导航">{!locked&&<><a href={`/admin/review?article=${encodeURIComponent(detail.documentId)}`}>返回二审详情</a><a href={`/admin/editor?article=${encodeURIComponent(detail.documentId)}`}>编辑文章</a><a href="/admin">返回内容工作台</a></>}<button type="button" disabled={locked} onClick={()=>void reload()}>{busy==='read'?'正在读取…':'重新读取审核状态'}</button></nav>
+  <nav className="review-decision-links" aria-label="审核管理导航">{!locked&&<><a href={`/admin/review?article=${encodeURIComponent(detail.documentId)}`}>返回二审详情</a><a href={`/admin/editor?article=${encodeURIComponent(detail.documentId)}`}>编辑文章</a><a href={contentManagementHref(detail.kind)}>返回内容工作台</a></>}<button type="button" disabled={locked} onClick={()=>void reload()}>{busy==='read'?'正在读取…':'重新读取审核状态'}</button></nav>
   <header><p className="review-decision-eyebrow">审核管理 · 版本 {detail.revision}</p><h2>{detail.title}</h2><p>当前状态：{statuses[detail.status]}</p><dl className="review-decision-metadata"><div><dt>{detail.status==='in_review'?'冻结的送审版本':'当前版本'}</dt><dd>版本 {detail.revision}</dd></div><div><dt>当前二审管理员</dt><dd>{detail.reviewerName??'未指定'}</dd></div></dl><p>{detail.publishedRevision===null?'尚未发布。':`已有正式内容（工作修订 ${detail.publishedRevision}） 继续可读。`}撤回或改派不会改变已有正式版。</p>{detail.status==='in_review'&&<p>送审内容保持冻结；改派只更换二审管理员。需要修改内容时，请先撤回。</p>}{detail.status==='in_review'&&!detail.reviewerAvailable&&<p className="review-control-warning">原二审管理员已不可用，当前 Admin 仍可撤回或改派本次审核。</p>}</header>
   <section className="review-decision-controls" aria-label="审核管理操作">{notice&&<p role="status">{notice}</p>}{confirmedUnread&&<p>操作已经确认。本页显示的文章状态和记录仍是上次读取结果，最新资料待重新读取。</p>}
    {!eligible&&<p>{detail.lifecycle!=='active'?'文章已停用，不能管理本次审核。':!detail.canManageReview&&detail.status==='in_review'?'当前账号没有管理本次审核的权限。':'当前没有进行中的审核，不能撤回或改派。'}</p>}
