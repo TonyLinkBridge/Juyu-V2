@@ -21,6 +21,7 @@ import {readOps,readReaderSections,readFirstOpsId} from '../ops/repository.ts';
 import {readHistory,readHistoryVersion,restoreSavedVersion,readHistoryAsset,readDeletedHistory} from '../history/repository.ts';
 import {readAvailabilityDetail,changeSavedAvailability,readArchives} from '../availability/repository.ts';
 import {readPublicationDetail,changeSavedPublication} from '../review/publication.ts';
+import {withdrawSavedReviews} from '../review/bulk-withdraw.ts';
 import {readControlDetail,changeSavedReviewControl} from '../review/control.ts';
 import {readReviewDetail,decideSavedReview} from '../review/decision.ts';
 import {readReviewers,submitSavedReview} from '../review/repository.ts';
@@ -160,6 +161,7 @@ export class AuthorizationService {
   async publicationDetail(id:string){const v=await this.viewer(true);return this.database.run(v,c=>readPublicationDetail(c,id,v),true);}
   async changePublication(id:string,input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>changeSavedPublication(c,id,input,v));}
   async controlReviewDetail(id:string,after=''){const v=await this.viewer(true);return this.database.run(v,c=>readControlDetail(c,id,v,after),true);}
+  async withdrawReviews(input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>withdrawSavedReviews(c,input,v));}
   async changeReviewControl(id:string,input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>changeSavedReviewControl(c,id,input,v));}
   async reviewDetail(id:string){const v=await this.viewer(true);return this.database.run(v,c=>readReviewDetail(c,id,v),true);}
   async decideReview(id:string,input:unknown){const v=await this.viewer(true);return this.database.run(v,c=>decideSavedReview(c,id,input,v));}
