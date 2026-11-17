@@ -5,7 +5,8 @@ import {statuses,workspaceQuery,type QueryInput,type WorkspaceData,type Workspac
 import type {Status} from '../../domain/model.ts';
 /** Must run inside the verified Admin repeatable-read transaction. Counts never come from a page slice. */
 export async function readWorkspace(c:PoolClient,actorId:string,input:QueryInput):Promise<WorkspaceData>{
- if((await c.query('SELECT juyu.is_admin() AS allowed')).rows[0]?.allowed!==true)throw new Error('FORBIDDEN');
+ const access=(await c.query('SELECT juyu.is_admin() AS allowed,juyu.is_super_admin() AND juyu.actor_id()=$1 AND juyu.review_admin_eligible($1) AS "canBulkWithdraw"',[actorId])).rows[0];
+ if(access?.allowed!==true)throw new Error('FORBIDDEN');
  const query=workspaceQuery(input);
  const parameters=[query.q,query.kind,query.scope,actorId];
  const from=`FROM juyu.documents d JOIN juyu.revisions r ON r.document_id=d.id AND r.revision_id=d.workflow_revision_id`;
@@ -34,5 +35,5 @@ export async function readWorkspace(c:PoolClient,actorId:string,input:QueryInput
   ?(await c.query<Pick<CategoryDefinition,'id'|'name'|'parentId'|'position'>>('SELECT id,name,parent_id AS "parentId",position FROM juyu.categories ORDER BY position,id')).rows:[];
  const byId=new Map(definitions.map(category=>[category.id,category]));
  const paths=(ids:string[])=>[...ids].sort((a,b)=>(byId.get(a)?.position??0)-(byId.get(b)?.position??0)||a.localeCompare(b)).map(id=>categoryPath(definitions,id)||'分类不可用');
- return {query:{...query,page},items:result.rows.map(({categoryIds,publishedCategoryIds,...row})=>({...row,categoryPaths:paths(categoryIds),publishedCategoryPaths:paths(publishedCategoryIds),updatedAt:new Date(row.updatedAt).toISOString()})),counts,total,page,pages};
+ return {canBulkWithdraw:access.canBulkWithdraw===true,query:{...query,page},items:result.rows.map(({categoryIds,publishedCategoryIds,...row})=>({...row,categoryPaths:paths(categoryIds),publishedCategoryPaths:paths(publishedCategoryIds),updatedAt:new Date(row.updatedAt).toISOString()})),counts,total,page,pages};
 }

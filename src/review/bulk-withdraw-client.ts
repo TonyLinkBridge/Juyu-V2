@@ -18,6 +18,7 @@ export async function readWithdrawWorkspace(query:WorkspaceQuery,completed:BulkW
  const response=await fetch('/api/admin/workspace'+workspaceHref(query).slice('/admin'.length),{cache:'no-store',signal:AbortSignal.timeout(15000)});const value:unknown=await response.json();
  const integer=(n:unknown,min=0)=>Number.isSafeInteger(n)&&Number(n)>=min;
  if(!response.ok||!record(value)||!record(value.query)||!record(value.counts)||!Array.isArray(value.items)||value.items.length>30||!integer(value.total)||!integer(value.page,1)||!integer(value.pages,1))throw new Error('READ_FAILED');
+ if(value.canBulkWithdraw!==undefined&&typeof value.canBulkWithdraw!=='boolean')throw new Error('READ_FAILED');
  if(!integer(value.query.page,1))throw new Error('READ_FAILED');
  let actual:WorkspaceQuery;try{actual=workspaceQuery({...value.query,page:String(value.query.page)} as Record<string,string>);}catch{throw new Error('READ_FAILED');}
  // workspaceQuery accepts HTTP strings; response fields use typed page numbers.

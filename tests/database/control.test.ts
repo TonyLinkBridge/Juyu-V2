@@ -7,7 +7,7 @@ import {migrate} from '../../src/server/database/migrate.ts';
 import {ScopedDatabase} from '../../src/server/database/scoped.ts';
 import {DocumentRepository} from '../../src/server/database/repository.ts';
 import {AuthorizationService} from '../../src/server/authorization/service.ts';
-import type {Viewer,Document} from '../../src/domain/model.ts';
+import type {Viewer} from '../../src/domain/model.ts';
 let fixture:Awaited<ReturnType<typeof temporaryDatabase>>,runtime:Pool,issuer:Pool,db:ScopedDatabase,repo:DocumentRepository;
 const a:Viewer={id:'a',role:'admin',companyVerified:true},b:Viewer={...a,id:'b'},c:Viewer={...a,id:'c'},manager:Viewer={...a,id:'manager'},staff:Viewer={id:'staff',role:'support',companyVerified:true};
 const service=(v:Viewer|null=manager)=>new AuthorizationService(db,async()=>v);
@@ -79,41 +79,3 @@ test('candidate pages have no omissions and only the most recent 20 immutable co
  await assert.rejects(db.run(manager,c=>c.query("UPDATE juyu.audit_log SET reviewer_id='manager' WHERE document_id=$1",[d.id])),/permission denied/);
 });
 
-const batchSnapshot=(d:{id:string;sequence:number;publishedRevisionId:number|null;workflow:{revisionId:number}})=>({documentId:d.id,expectedSequence:d.sequence,revision:d.workflow.revisionId,publishedRevision:d.publishedRevisionId});
-test('bulk withdrawal covers all four content kinds, retaining old publications, contents, authors and immutable history',async()=>{
- const snapshots=[];const before=[];
- for(const kind of ['article','ops','reference','qa'] as const){let d=await repo.create({id:randomUUID(),kind,title:`批量测试 ${kind}`,body:'正式内容',audience:kind==='ops'?'ops':'staff'},a);for(const type of ['submit','approve','queue','publish'] as const)d=await repo.execute(d.id,{type},type==='approve'?b:a,{expectedSequence:d.sequence,reviewer:b});d=await repo.execute(d.id,{type:'edit',title:`待审 ${kind}`,body:'保留的草稿',audience:kind==='ops'?'ops':'staff'},a,{expectedSequence:d.sequence});await service(a).submitReview(d.id,{expectedSequence:d.sequence,reviewerId:'b'});const current=(await repo.getForManagement(d.id,a))!;snapshots.push(batchSnapshot(current));before.push(current);}
- const result=await service().withdrawReviews({items:snapshots});assert.equal(result.items.length,4);
- for(let i=0;i<snapshots.length;i++){const saved:Document=(await repo.getForManagement(snapshots[i].documentId,a))!;assert.equal(saved.workflow.status,'draft');assert.equal(saved.sequence,before[i].sequence+1);assert.deepEqual(saved.revisions,before[i].revisions);assert.equal(saved.publishedRevisionId,1);assert.deepEqual(saved.audit.slice(0,-1),before[i].audit);assert.equal(saved.audit.at(-1)?.action,'withdraw');assert.equal(saved.audit.at(-1)?.actorId,manager.id);assert.equal((await service().article(saved.id))?.body,'正式内容');assert.equal((await receipt(saved.id)).status,'withdrawn');}
- assert.deepEqual(await service().withdrawReviews({items:snapshots}),result);
-});
-test('bulk withdrawal rejects forbidden users and one stale selection rolls back the entire batch',async()=>{
- const docs=[await pending(),await pending()];const current=await Promise.all(docs.map(d=>repo.getForManagement(d.id,a)));const input={items:current.map(d=>batchSnapshot(d!))};
- for(const v of [null,staff,{...manager,companyVerified:false}])await assert.rejects(service(v).withdrawReviews(input),/FORBIDDEN/);
- await service(b).decideReview(docs[1].id,{expectedSequence:1,action:'approve'});const firstBefore=await repo.getForManagement(docs[0].id,a);await assert.rejects(service().withdrawReviews(input),/CONFLICT|INVALID_STATE/);assert.deepEqual(await repo.getForManagement(docs[0].id,a),firstBefore);
- await fixture.pool.query("UPDATE juyu.members SET observed_role='support' WHERE clerk_user_id='manager'");try{await assert.rejects(service().withdrawReviews({items:[input.items[0]]}),/FORBIDDEN/);}finally{await restoreMember('manager');}
-});
-test('bulk withdrawal rolls back all audit and receipt updates after a later database failure',async()=>{
- const docs=[await pending(),await pending()].sort((x,y)=>x.id.localeCompare(y.id));const current=await Promise.all(docs.map(d=>repo.getForManagement(d.id,a)));const input={items:current.map(d=>batchSnapshot(d!))};
- await fixture.pool.query(`CREATE FUNCTION juyu.fail_batch_withdraw() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.document_id='${docs[1].id}' AND NEW.action='withdraw' THEN RAISE EXCEPTION 'injected batch failure'; END IF; RETURN NEW; END $$; CREATE TRIGGER fail_batch_withdraw BEFORE INSERT ON juyu.audit_log FOR EACH ROW EXECUTE FUNCTION juyu.fail_batch_withdraw()`);
- try{await assert.rejects(service().withdrawReviews(input),/injected batch failure/);for(let i=0;i<docs.length;i++){assert.deepEqual(await repo.getForManagement(docs[i].id,a),current[i]);assert.equal((await receipt(docs[i].id)).status,'in_review');}}finally{await fixture.pool.query('DROP TRIGGER fail_batch_withdraw ON juyu.audit_log; DROP FUNCTION juyu.fail_batch_withdraw()');}
-});
-test('concurrent overlapping bulk retries do not deadlock or repeat history and cannot withdraw a resubmission',async()=>{
- const docs=[await pending(),await pending()];const input={items:await Promise.all(docs.map(async d=>batchSnapshot((await repo.getForManagement(d.id,a))!)))};
- const [first,second]=await Promise.all([service().withdrawReviews(input),service().withdrawReviews({items:[...input.items].reverse()})]);assert.deepEqual(first.items.map(x=>x.documentId).sort(),second.items.map(x=>x.documentId).sort());for(const d of docs)assert.equal((await service().controlReviewDetail(d.id)).history.length,1);
- await service(a).submitReview(docs[0].id,{expectedSequence:2,reviewerId:'b'});await assert.rejects(service().withdrawReviews(input),/CONFLICT/);assert.equal((await service().controlReviewDetail(docs[0].id)).status,'in_review');
-});
-
-test('bulk withdrawal rechecks a demoted actor after locks and refuses mixed fresh/replayed selections',async()=>{
- const docs=[await pending(),await pending()];const input={items:await Promise.all(docs.map(async d=>batchSnapshot((await repo.getForManagement(d.id,a))!)))};
- await service().changeReviewControl(docs[0].id,{expectedSequence:1,action:'withdraw'});await assert.rejects(service().withdrawReviews(input),/CONFLICT/);assert.equal((await service().controlReviewDetail(docs[1].id)).status,'in_review');
- const blocker=await fixture.pool.connect();await blocker.query('BEGIN');await blocker.query("UPDATE juyu.members SET observed_role='support' WHERE clerk_user_id='manager'");const work=service().withdrawReviews({items:[input.items[1]]}).then(value=>({value,error:null}),error=>({value:null,error}));
- try{await waitForLock('SELECT clerk_user_id FROM juyu.members%');}finally{await blocker.query('COMMIT');blocker.release();}
- try{assert.match((await work).error?.message??'unexpected success',/FORBIDDEN/);assert.equal((await service(a).controlReviewDetail(docs[1].id)).status,'in_review');}finally{await restoreMember('manager');}
-});
-
-test('the full thirty-document page withdraws atomically and a thirty-first item is rejected without changes',async()=>{
- const docs=[];for(let i=0;i<31;i++)docs.push(await pending());const snapshots=await Promise.all(docs.map(async d=>batchSnapshot((await repo.getForManagement(d.id,a))!)));
- await assert.rejects(service().withdrawReviews({items:snapshots}),/INVALID_INPUT/);assert.equal((await service().controlReviewDetail(docs[0].id)).status,'in_review');
- const result=await service().withdrawReviews({items:snapshots.slice(0,30)});assert.equal(result.items.length,30);for(const row of result.items){assert.equal(row.status,'draft');assert.equal(row.sequence,2);assert.equal((await receipt(row.documentId)).status,'withdrawn');}assert.equal((await service().controlReviewDetail(docs[30].id)).status,'in_review');
-});

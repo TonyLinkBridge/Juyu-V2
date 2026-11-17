@@ -8,7 +8,7 @@ export const kinds={article:'知识文章',ops:'OPS Internal',reference:'Referen
 export type QueryInput=Record<string,string|string[]|undefined>;
 export interface WorkspaceQuery {q:string;scope:keyof typeof scopes;kind:ContentKind|'all';status:Status|'all';page:number;view:'board'|'list'}
 export interface WorkspaceItem {categoryPaths?:string[];publishedCategoryPaths?:string[];publicationNumber?:number|null;qaCategory?:string;qaPosition?:number;id:string;title:string;kind:ContentKind;status:Status;sequence:number;revision:number;publishedRevision:number|null;updatedAt:string;author:string;editor:string;submitter:string|null;reviewer:string|null;canReview?:boolean}
-export interface WorkspaceData {query:WorkspaceQuery;items:WorkspaceItem[];counts:Record<Status,number>;total:number;page:number;pages:number}
+export interface WorkspaceData {canBulkWithdraw?:boolean;query:WorkspaceQuery;items:WorkspaceItem[];counts:Record<Status,number>;total:number;page:number;pages:number}
 export function workspaceQuery(input:QueryInput={}):WorkspaceQuery {
  const read=(key:string,fallback:string)=>{const v=input[key];if(v===undefined)return fallback;if(typeof v!=='string')throw new Error('INVALID_QUERY');return v;};
  const q=read('q','').trim(),scope=read('scope','all'),kind=read('kind','all'),status=read('status','all'),view=read('view','board'),page=read('page','1');

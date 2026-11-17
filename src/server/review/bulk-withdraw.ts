@@ -3,15 +3,21 @@ import type {Viewer} from '../../domain/model.ts';
 import {bulkWithdrawInput,type BulkWithdrawResult} from '../../review/bulk-withdraw.ts';
 import {loadDocument} from '../database/repository.ts';
 import {changeSavedReviewControl} from './control.ts';
+async function requireBulkSuperAdmin(c:PoolClient,actor:Viewer){
+ if(!(await c.query('SELECT juyu.is_super_admin() AND juyu.actor_id()=$1 AND juyu.review_admin_eligible($1) AS ok',[actor.id])).rows[0]?.ok)throw new Error('FORBIDDEN');
+}
 /** One ScopedDatabase transaction: no item, audit or receipt can commit separately. */
 export async function withdrawSavedReviews(c:PoolClient,value:unknown,actor:Viewer):Promise<BulkWithdrawResult>{
  const {items}=bulkWithdrawInput(value);
  if(!(await c.query('SELECT pg_try_advisory_xact_lock_shared(84620915) AS acquired')).rows[0]?.acquired)throw new Error('MEMBER_BUSY');
- if(!(await c.query('SELECT juyu.is_admin() AND juyu.actor_id()=$1 AND juyu.review_admin_eligible($1) AS ok',[actor.id])).rows[0]?.ok)throw new Error('FORBIDDEN');
+ await requireBulkSuperAdmin(c,actor);
  // All batches acquire editor and row locks in the same order, including reversed retries.
  const ordered=[...items].sort((a,b)=>a.documentId<b.documentId?-1:a.documentId>b.documentId?1:0);
  for(const item of ordered)await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[`editor:${item.documentId}`]);
  for(const item of ordered)if(!(await c.query('SELECT id FROM juyu.documents WHERE id=$1 FOR UPDATE',[item.documentId])).rowCount)throw new Error('NOT_FOUND');
+ // Recheck the higher privilege after waiting for document locks, and hold it for the whole batch.
+ await c.query('SELECT clerk_user_id FROM juyu.members WHERE clerk_user_id=$1 FOR SHARE',[actor.id]);
+ await requireBulkSuperAdmin(c,actor);
  let retries=0;
  for(const item of ordered){
   const d=await loadDocument(c,item.documentId);if(!d)throw new Error('NOT_FOUND');
