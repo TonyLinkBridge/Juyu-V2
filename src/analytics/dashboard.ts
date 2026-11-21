@@ -23,7 +23,7 @@ export interface NegativeFeedback {documentId:string;title:string;kind:ContentKi
 export interface DashboardData {
  days:number;dateRange?:CalendarRange|null;from:string;asOf:string;usage?:UsageData;
  summary:{searches:number;zeroResults:number;clickedSearches:number;searchClicks:number;views:number;feedbackTotal:number;feedbackNegative:number};
- popularSearches:SearchGroup[];zeroResultSearches:SearchGroup[];popularArticles:PopularArticle[];negativeFeedback:NegativeFeedback[];
+ popularSearches:SearchGroup[];zeroResultSearches:SearchGroup[];popularArticles:PopularArticle[];popularArticlesByReaders:PopularArticle[];negativeFeedback:NegativeFeedback[];
 }
 export function rangeDays(value:unknown=undefined):DashboardDays {
  if(value===undefined)return 30;

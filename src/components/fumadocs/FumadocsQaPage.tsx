@@ -24,6 +24,7 @@ interface FumadocsQaPageProps {
  menu?:MenuItem[];
  knowledgeEntry?:string;
  searchEnabled?:boolean;
+ analyticsEnabled?:boolean;
  locale?:'zh-CN'|'en';
  tabsPathname?:string;
 }
@@ -59,11 +60,11 @@ function qaCopy(state:FumadocsQaPageProps['state'],locale:'zh-CN'|'en'){
  };
 }
 
-export function FumadocsQaContent({collection=false,data,initialAnswer,previewAnswers,viewerId,state,menu=[],knowledgeEntry,searchEnabled=true,locale='zh-CN',tabsPathname='/help-centre/qa'}:FumadocsQaContentProps){
+export function FumadocsQaContent({collection=false,data,initialAnswer,previewAnswers,viewerId,state,menu=[],knowledgeEntry,searchEnabled=true,analyticsEnabled=false,locale='zh-CN',tabsPathname='/help-centre/qa'}:FumadocsQaContentProps){
  const copy=qaCopy(state,locale);
  if(collection)return <FumadocsHomeContent menu={menu} account locale={locale}><div className="knowledge-home knowledge-home--editorial knowledge-directory collection-directory qa-directory" data-fumadocs-qa-page="">
  <KnowledgeHomeHero menu={menu} search={state==='ready'&&!!data&&searchEnabled} searchContent={data?<QaSearch data={data} locale={locale}/>:undefined} locale={locale} directory activeHref="/help-centre/qa" title={copy.title} description={copy.description}/>
- <div className="home-content"><QaView searchEnabled={searchEnabled} data={data} state={state} initialAnswer={initialAnswer} previewAnswers={previewAnswers} viewerId={viewerId} locale={locale} withinDocsPage directory showSearch={false}/></div>
+ <div className="home-content"><QaView searchEnabled={searchEnabled} analyticsEnabled={analyticsEnabled} data={data} state={state} initialAnswer={initialAnswer} previewAnswers={previewAnswers} viewerId={viewerId} locale={locale} withinDocsPage directory showSearch={false}/></div>
  </div></FumadocsHomeContent>;
 
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
@@ -76,7 +77,7 @@ export function FumadocsQaContent({collection=false,data,initialAnswer,previewAn
   <DocsPage data-fumadocs-qa-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>
    <DocsTitle>{copy.title}</DocsTitle>
    <DocsDescription>{copy.description}</DocsDescription>
-   <DocsBody><div className="not-prose fumadocs-qa-content"><QaView searchEnabled={searchEnabled} data={data} state={state} initialAnswer={initialAnswer} previewAnswers={previewAnswers} viewerId={viewerId} locale={locale} withinDocsPage/></div></DocsBody>
+   <DocsBody><div className="not-prose fumadocs-qa-content"><QaView searchEnabled={searchEnabled} analyticsEnabled={analyticsEnabled} data={data} state={state} initialAnswer={initialAnswer} previewAnswers={previewAnswers} viewerId={viewerId} locale={locale} withinDocsPage/></div></DocsBody>
   </DocsPage>
  </DocsLayout></FumadocsPublicationI18n>;
 }

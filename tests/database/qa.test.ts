@@ -74,6 +74,7 @@ test('QA collection exposes related topics and filters one published question th
  const other=await repo.create({id:randomUUID(),kind:'qa',title:'其他问题',body:'Answer',audience:'staff',tags:['账户安全'],qa:{category:'账户管理',position:1}},admin);
  await publish(shared);await publish(other);
  const all=await collection();assert.deepEqual(all.topics,['信用额度','签约店铺','账户安全']);assert.equal(all.total,2);
+ assert.deepEqual((await collection(support,1,'账户管理')).topics,['账户安全']);
  const store=await collection(support,1,undefined,'签约店铺');assert.equal(store.total,1);assert.equal(store.items[0].title,'0元签约店铺信用额度');assert.equal(store.topic,'签约店铺');
  const credit=await collection(support,1,undefined,'信用额度');assert.equal(credit.total,1);assert.equal(credit.items[0].id,store.items[0].id);
  assert.equal((await service().qa(1,undefined,'签约店铺','zh-CN')).total,1);

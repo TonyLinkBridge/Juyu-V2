@@ -22,6 +22,7 @@ interface FumadocsReferencePageProps {
  menu?:MenuItem[];
  knowledgeEntry?:string;
  search?:boolean;
+ analyticsEnabled?:boolean;
  locale?:'zh-CN'|'en';
  tabsPathname?:string;
 }
@@ -52,7 +53,7 @@ function referenceCopy(state:FumadocsReferencePageProps['state'],locale:'zh-CN'|
  };
 }
 
-export function FumadocsReferenceContent({collection=false,directory,data,detail,state,detailState='idle',menu=[],knowledgeEntry,search=false,locale='zh-CN',tabsPathname='/help-centre/reference'}:FumadocsReferencePageProps){
+export function FumadocsReferenceContent({collection=false,directory,data,detail,state,detailState='idle',menu=[],knowledgeEntry,search=false,analyticsEnabled=false,locale='zh-CN',tabsPathname='/help-centre/reference'}:FumadocsReferencePageProps){
  if(collection)return <FumadocsHomeContent menu={menu} account locale={locale}><div data-fumadocs-reference-page=""><CollectionDirectory kind="reference" directory={directory} state={state} menu={menu} search={search} locale={locale}>{directory?.canEdit&&<p className="reader-actions"><a className="secondary-link" href="/admin/editor?kind=reference">{locale==='en'?'Create reference article':'新建速查资料'}</a></p>}</CollectionDirectory></div></FumadocsHomeContent>;
  const copy=referenceCopy(state,locale);
  return <FumadocsPublicationI18n locale={locale}><DocsLayout
@@ -65,7 +66,7 @@ export function FumadocsReferenceContent({collection=false,directory,data,detail
   <DocsPage data-fumadocs-reference-page="" toc={[]} breadcrumb={{enabled:false}} tableOfContent={{enabled:false}} tableOfContentPopover={{enabled:false}} footer={{enabled:false}}>
    <DocsTitle>{copy.title}</DocsTitle>
    <DocsDescription>{copy.description}</DocsDescription>
-   <DocsBody><div className="not-prose fumadocs-reference-content"><ReferenceView data={data} detail={detail} state={state==='invalid'?'unavailable':state} detailState={detailState} locale={locale} withinDocsPage/></div></DocsBody>
+   <DocsBody><div className="not-prose fumadocs-reference-content"><ReferenceView analyticsEnabled={analyticsEnabled} data={data} detail={detail} state={state==='invalid'?'unavailable':state} detailState={detailState} locale={locale} withinDocsPage/></div></DocsBody>
   </DocsPage>
  </DocsLayout></FumadocsPublicationI18n>;
 }

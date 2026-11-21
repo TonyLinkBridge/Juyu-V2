@@ -40,6 +40,13 @@ export async function readAnalyticsDashboard(c:PoolClient,days:unknown=30):Promi
  ), usage_articles AS MATERIALIZED (
   SELECT document_id AS "documentId",count(DISTINCT member_id)::integer AS readers,count(visible_ms)::integer AS "measuredViews",round(avg(visible_ms))::integer AS "averageVisibleMs"
   FROM visit_records GROUP BY document_id
+ ), top_views AS MATERIALIZED (
+  SELECT * FROM views ORDER BY views DESC,"documentId" COLLATE "C" LIMIT 10
+ ), top_readers AS MATERIALIZED (
+  SELECT v.*,u.readers FROM views v JOIN usage_articles u USING ("documentId")
+  ORDER BY u.readers DESC,v.views DESC,v."documentId" COLLATE "C" LIMIT 10
+ ), ranked_ids AS (
+  SELECT "documentId" FROM top_views UNION SELECT "documentId" FROM top_readers
  ), trend AS MATERIALIZED (
   SELECT to_char(day,'YYYY-MM-DD') AS date,count(v.id)::integer AS views
   FROM bounds b CROSS JOIN LATERAL generate_series(date_trunc('day',b."from" AT TIME ZONE 'Asia/Kuala_Lumpur'),date_trunc('day',(b."asOf"-CASE WHEN $3::timestamptz IS NULL THEN interval '0' ELSE interval '1 microsecond' END) AT TIME ZONE 'Asia/Kuala_Lumpur'),interval '1 day') day
@@ -51,14 +58,15 @@ export async function readAnalyticsDashboard(c:PoolClient,days:unknown=30):Promi
  ) SELECT jsonb_build_object(
   'days',$1::integer,'dateRange',CASE WHEN $2::timestamptz IS NULL THEN NULL ELSE jsonb_build_object('from',to_char($2::timestamptz AT TIME ZONE 'Asia/Kuala_Lumpur','YYYY-MM-DD'),'to',to_char(($3::timestamptz-interval '1 microsecond') AT TIME ZONE 'Asia/Kuala_Lumpur','YYYY-MM-DD')) END,'from',b."from",'asOf',b."asOf",
   'usage',jsonb_build_object('readers',(SELECT count(DISTINCT member_id) FROM visit_records),'measuredViews',(SELECT count(visible_ms) FROM visit_records),'averageVisibleMs',(SELECT round(avg(visible_ms)) FROM visit_records),
-   'articles',coalesce((SELECT jsonb_agg(to_jsonb(u)) FROM usage_articles u JOIN (SELECT "documentId" FROM views ORDER BY views DESC,"documentId" COLLATE "C" LIMIT 10) top ON top."documentId"=u."documentId"),'[]'::jsonb),
+   'articles',coalesce((SELECT jsonb_agg(to_jsonb(u)) FROM usage_articles u JOIN ranked_ids USING ("documentId")),'[]'::jsonb),
    'trend',coalesce((SELECT jsonb_agg(to_jsonb(t) ORDER BY date) FROM trend t),'[]'::jsonb)),
   'summary',jsonb_build_object('searches',(SELECT count(*) FROM searches),'zeroResults',(SELECT count(*) FROM searches WHERE result_count=0),
    'clickedSearches',(SELECT count(DISTINCT search_id) FROM clicks),'searchClicks',(SELECT count(*) FROM clicks),
    'views',coalesce((SELECT sum(views) FROM views),0),'feedbackTotal',coalesce((SELECT sum(total) FROM feedback),0),'feedbackNegative',coalesce((SELECT sum(negative) FROM feedback),0)),
   'popularSearches',coalesce((SELECT jsonb_agg(to_jsonb(x) ORDER BY x.searches DESC,x.fingerprint COLLATE "C") FROM (SELECT * FROM groups ORDER BY searches DESC,fingerprint COLLATE "C" LIMIT 10) x),'[]'::jsonb),
   'zeroResultSearches',coalesce((SELECT jsonb_agg(to_jsonb(x) ORDER BY x."zeroResults" DESC,x.searches DESC,x.fingerprint COLLATE "C") FROM (SELECT * FROM groups WHERE "zeroResults">0 ORDER BY "zeroResults" DESC,searches DESC,fingerprint COLLATE "C" LIMIT 10) x),'[]'::jsonb),
-  'popularArticles',coalesce((SELECT jsonb_agg(to_jsonb(x) ORDER BY x.views DESC,x."documentId" COLLATE "C") FROM (SELECT * FROM views ORDER BY views DESC,"documentId" COLLATE "C" LIMIT 10) x),'[]'::jsonb),
+  'popularArticles',coalesce((SELECT jsonb_agg(to_jsonb(x) ORDER BY x.views DESC,x."documentId" COLLATE "C") FROM top_views x),'[]'::jsonb),
+  'popularArticlesByReaders',coalesce((SELECT jsonb_agg(to_jsonb(x)-'readers' ORDER BY x.readers DESC,x.views DESC,x."documentId" COLLATE "C") FROM top_readers x),'[]'::jsonb),
   'negativeFeedback',coalesce((SELECT jsonb_agg(to_jsonb(x) ORDER BY x.negative DESC,x.total DESC,x."documentId" COLLATE "C") FROM (SELECT * FROM feedback WHERE negative>0 ORDER BY negative DESC,total DESC,"documentId" COLLATE "C" LIMIT 10) x),'[]'::jsonb)
  ) AS data FROM bounds b`,[selected.days,selected.start,selected.end]);
  // An unavailable query must throw; only a successful aggregate may report zero.

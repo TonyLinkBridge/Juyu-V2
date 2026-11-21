@@ -91,8 +91,9 @@ function TasksWorkspaceContent({data:initialData,error,query,retryHref='/admin'}
  <div className="tasks-heading"><div><h1>{name}</h1><p>{qa?'编辑问题与标准答案，审核后发布。分类与排序在问答设置中修改。':'编辑、审核和发布团队的正式资料。'}</p></div><Link prefetch={false} className="primary-link" href={qa?'/admin/editor?kind=qa':kind==='ops'?'/admin/editor?kind=ops':kind==='reference'?'/admin/editor?kind=reference':'/admin/editor'}>＋ {qa?'新建问答':kind==='ops'?'新建运营资料':kind==='reference'?'新建速查资料':'新建文章'}</Link></div>
  {data&&<nav className="workspace-tabs" aria-label="内容范围">{([['all','全部内容'],['submitted','我提交的'],['review','待我审核'],['returned','退回给我的']] as const).map(([scope,label])=>{
   const current=data.query.scope===scope?'page':undefined;
-  const href=workspaceHref(data.query,{scope,page:1,...(scope==='review'&&data.query.status!=='in_review'?{status:'all'}:{})});
-  return scope==='review'?<a key={scope} aria-current={current} href={href}>{label}</a>:<Link prefetch={false} key={scope} aria-current={current} href={href}>{label}</Link>;
+  const scopeStatus=scope==='review'?'in_review':scope==='returned'?'changes_requested':undefined;
+  const href=workspaceHref(data.query,{scope,page:1,...(scopeStatus&&data.query.status!==scopeStatus?{status:'all'}:{})});
+  return scopeStatus?<a key={scope} aria-current={current} href={href}>{label}</a>:<Link prefetch={false} key={scope} aria-current={current} href={href}>{label}</Link>;
  })}</nav>}
  {!data?<section className="tasks-error" role="status"><h2>内容暂时无法读取</h2><p>{error??'请稍后重试，或检查服务连接。'}</p><Link prefetch={false} href={retryHref}>重新读取内容</Link></section>:<>
  <TasksFilters query={data.query}/>{notice&&<p role="status" aria-label={notice.batch?'批量操作结果':'操作结果'} className="workspace-batch-notice">{notice.text}</p>}{stale&&reading&&<p role="status">正在读取最新列表和数量…</p>}{reloadError&&<div className="workspace-batch-error"><p role="alert">{reloadError}</p><button type="button" disabled={reading} onClick={()=>void reload(stale).catch(()=>{})}>{reading?'正在读取…':'重新读取列表'}</button></div>}<div hidden={stale} aria-busy={reading}><p className="tasks-workflow-note">下列数字按当前工作版状态统计；草稿或审核中的资料如已有正式版，员工仍可阅读旧正式版。</p>

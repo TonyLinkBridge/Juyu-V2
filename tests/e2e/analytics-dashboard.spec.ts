@@ -5,7 +5,7 @@ let bundle:Awaited<ReturnType<typeof dashboardBrowserBundle>>;
 test.beforeAll(async()=>{bundle=await dashboardBrowserBundle();});
 const group={fingerprint:'sha256:'+'a'.repeat(64),searches:4,zeroResults:1,clickedSearches:2};
 const article={documentId:'formal-local',title:'正式资料 <script>仅文字</script>',kind:'article' as const,revision:3};
-const data:DashboardData={days:30,from:'2026-08-10T01:00:00.000Z',asOf:'2026-09-09T01:00:00.000Z',summary:{searches:4,zeroResults:1,clickedSearches:2,searchClicks:7,views:9,feedbackTotal:4,feedbackNegative:1},popularSearches:[group],zeroResultSearches:[group],popularArticles:[{...article,views:9}],negativeFeedback:[{...article,total:4,negative:1}]};
+const data:DashboardData={days:30,from:'2026-08-10T01:00:00.000Z',asOf:'2026-09-09T01:00:00.000Z',summary:{searches:4,zeroResults:1,clickedSearches:2,searchClicks:7,views:9,feedbackTotal:4,feedbackNegative:1},popularSearches:[group],zeroResultSearches:[group],popularArticles:[{...article,views:9}],popularArticlesByReaders:[{...article,views:9}],negativeFeedback:[{...article,total:4,negative:1}]};
 async function mount(page:Page,props:unknown={data}){
  await page.route('**/__dashboard_fixture*',r=>r.fulfill({contentType:'text/html',body:`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${bundle.css}</style></head><body><header>使用分析 · 本地测试样例（非真实员工数据）</header><div id="dashboard"></div><script id="data" type="application/json">${JSON.stringify(props).replace(/</g,'\\u003c')}</script><script>${bundle.script.replace(/<\/script/gi,'<\\/script')}</script></body></html>`}));await page.goto('/__dashboard_fixture');
 }
@@ -26,7 +26,7 @@ test('official date picker applies a custom calendar range and refresh preserves
  await mount(page,{data:{...data,days:7,dateRange:{from:'2026-10-02',to:'2026-10-08'}}});await expect(page.getByRole('link',{name:'刷新统计'})).toHaveAttribute('href','/admin/analytics?from=2026-10-02&to=2026-10-08');
 });
 test('dashboard zero data has no fabricated rates and failures suppress supplied stale data',async({page})=>{
- await mount(page,{data:{...data,summary:{searches:0,zeroResults:0,clickedSearches:0,searchClicks:0,views:0,feedbackTotal:0,feedbackNegative:0},popularSearches:[],zeroResultSearches:[],popularArticles:[],negativeFeedback:[]}});
+ await mount(page,{data:{...data,summary:{searches:0,zeroResults:0,clickedSearches:0,searchClicks:0,views:0,feedbackTotal:0,feedbackNegative:0},popularSearches:[],zeroResultSearches:[],popularArticles:[],popularArticlesByReaders:[],negativeFeedback:[]}});
  await expect(page.getByRole('status')).toContainText('暂无可展示的数据');await page.getByRole('tab',{name:'概览',exact:true}).click();await expect(page.locator('.analytics-metrics')).toContainText('—');await expect(page.locator('.analytics-metrics')).not.toContainText('0%');
  for(const state of ['unavailable','denied','invalid']){await page.unrouteAll();await mount(page,{state,data});await expect(page.getByRole('alert')).toBeVisible();await expect(page.locator('.analytics-metrics')).toHaveCount(0);await expect(page.getByRole('link',{name:article.title})).toHaveCount(0);await expect(page.getByRole('status').filter({hasText:/\S/})).toHaveCount(0);}
 });
@@ -60,4 +60,21 @@ test('official calendar stages changes until apply and custom employee detail ke
  await page.route('**/admin/analytics?from=2026-10-03&to=2026-10-05',r=>r.fulfill({contentType:'text/html',body:'<p>Calendar fixture</p>'}));await dialog.getByRole('button',{name:'应用日期',exact:true}).click();await expect(page).toHaveURL(/from=2026-10-03&to=2026-10-05$/);
  await page.route('**/api/admin/analytics/people?**',r=>{peopleUrl=r.request().url();return r.fulfill({json:{items:[],total:0,page:1,pages:1}});});
  await mount(page,{data:{...data,days:3,dateRange:{from:'2026-10-03',to:'2026-10-05'}}});await page.getByRole('tab',{name:'员工',exact:true}).click();await expect.poll(()=>peopleUrl).toContain('from=2026-10-03&to=2026-10-05');expect(peopleUrl).not.toContain('days=');
+});
+
+test('reader ranking shows an article outside the opens ranking and still opens its employee details',async({page})=>{
+ const wider={documentId:'wider-local',title:'更多人查看的问答',kind:'qa',revision:1,views:3};
+ let peopleUrl:string|undefined;
+ await page.route('**/api/admin/analytics/people?**',r=>{
+  peopleUrl=r.request().url();
+  return r.fulfill({json:{items:[],total:0,page:1,pages:1}});
+ });
+ await mount(page,{data:{...data,popularArticlesByReaders:[wider],usage:{readers:4,measuredViews:3,averageVisibleMs:2000,trend:[],articles:[{documentId:wider.documentId,readers:3,measuredViews:3,averageVisibleMs:2000}]}}});
+ const hot=page.getByRole('region',{name:'热门资料'});
+ await expect(hot.getByRole('button',{name:wider.title})).toHaveCount(0);
+ await page.getByLabel('热门资料排序').selectOption('readers');
+ await expect(hot).toContainText('按打开人数排列的前 10 篇');
+ await hot.getByRole('button',{name:wider.title}).click();
+ await expect(page.getByRole('link',{name:'打开正式资料',exact:true})).toHaveAttribute('href','/help-centre/qa?question=wider-local#qa-wider-local');
+ await expect.poll(()=>peopleUrl).toContain('documentId=wider-local');
 });

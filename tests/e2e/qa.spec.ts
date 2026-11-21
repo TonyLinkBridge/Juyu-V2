@@ -2,8 +2,8 @@ import {test,expect,type Page} from '@playwright/test';
 import {qaBrowserBundle} from '../helpers/qa-browser';
 let bundle:Awaited<ReturnType<typeof qaBrowserBundle>>;
 test.beforeAll(async()=>{bundle=await qaBrowserBundle();});
-async function mount(page:Page,options:{state?:string;empty?:boolean;searchEnabled?:boolean;admin?:boolean}={}){
- const qaView={viewerId:'fixture',searchEnabled:options.searchEnabled??true,state:options.state??'ready',data:{q:'',categories:['账户'],topics:['信用额度','签约店铺'],items:options.empty?[]:[{id:'qa-local',title:'如何核对 <script>账户</script>？',revision:1,tags:['信用额度','签约店铺']},{id:'qa-mfa',title:'MFA 验证器误删了怎么办？',revision:1,tags:['账户安全']}],total:options.empty?0:21,page:1,pages:options.empty?1:2,canEdit:options.admin??false}};
+async function mount(page:Page,options:{state?:string;empty?:boolean;searchEnabled?:boolean;admin?:boolean;analyticsEnabled?:boolean;direct?:boolean}={}){
+ const qaView={viewerId:'fixture',analyticsEnabled:options.analyticsEnabled,initialAnswer:options.direct?{id:'qa-local',title:'如何核对账户？',revision:1,body:'标准答案：请核对账户资料。',blocks:[]}:undefined,searchEnabled:options.searchEnabled??true,state:options.state??'ready',data:{q:'',categories:['账户'],topics:['信用额度','签约店铺'],items:options.empty?[]:[{id:'qa-local',title:'如何核对 <script>账户</script>？',revision:1,tags:['信用额度','签约店铺']},{id:'qa-mfa',title:'MFA 验证器误删了怎么办？',revision:1,tags:['账户安全']}],total:options.empty?0:21,page:1,pages:options.empty?1:2,canEdit:options.admin??false}};
  await page.route('**/__qa_fixture',r=>r.fulfill({contentType:'text/html',body:`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${bundle.css}</style></head><body><div id="presentation"></div><script id="data" type="application/json">${JSON.stringify({qaView}).replaceAll('<','\\u003c')}</script><script>${bundle.script.replaceAll('</script','<\\/script')}</script></body></html>`}));await page.goto('/__qa_fixture');
 }
 test('Q&A shows published question titles safely with real pagination and gated search',async({page})=>{
@@ -49,4 +49,41 @@ for(const format of ['native','legacy'] as const)test(`Q&A ${format} images keep
  const before=page.url();await gallery.getByRole('button',{name:'放大图片：问答截图'}).click();
  const dialog=page.getByRole('dialog',{name:'图片放大查看'});await expect(dialog).toBeVisible();await expect(dialog.getByAltText('问答截图')).toBeVisible();
  await dialog.getByRole('button',{name:'关闭图片'}).click();await expect(dialog).toBeHidden();expect(page.url()).toBe(before);
+});
+
+test('expanded Q&A records one authorized open and stops timing when collapsed',async({page})=>{
+ const events:Record<string,unknown>[]=[];
+ await page.route('**/api/analytics',r=>{
+  const event=r.request().postDataJSON();events.push(event);
+  return r.fulfill({json:{eventId:event.eventId,kind:event.kind}});
+ });
+ await page.route('**/api/qa/qa-local',r=>r.fulfill({json:{id:'qa-local',title:'如何核对账户？',revision:1,body:'标准答案：请核对账户资料。',blocks:[]}}));
+ await mount(page,{analyticsEnabled:true});
+ const toggle=page.getByRole('button',{name:/如何核对/});
+ await expect(toggle).toHaveAttribute('aria-expanded','false');
+ expect(events).toEqual([]);
+ const accepted=page.waitForResponse(r=>r.url().endsWith('/api/analytics')&&r.request().postDataJSON().kind==='view');
+ await toggle.click();
+ await page.getByText('标准答案：请核对账户资料。').scrollIntoViewIfNeeded();
+ await accepted;
+ await expect(toggle).toHaveAttribute('aria-expanded','true');
+ await toggle.click();
+ await expect.poll(()=>events.find(e=>e.kind==='view_time')).toMatchObject({documentId:'qa-local',revision:1,viewId:events[0].eventId});
+ expect(events.filter(e=>e.kind==='view')).toHaveLength(1);
+ await expect(toggle).toHaveAttribute('aria-expanded','false');
+});
+
+test('direct Q&A answer uses the same analytics flag',async({page})=>{
+ const opened:unknown[]=[];
+ await page.route('**/api/analytics',r=>{
+  const event=r.request().postDataJSON();if(event.kind==='view')opened.push(event);
+  return r.fulfill({json:{eventId:event.eventId,kind:event.kind}});
+ });
+ await mount(page,{direct:true,analyticsEnabled:false});
+ await page.getByText('标准答案：请核对账户资料。').scrollIntoViewIfNeeded();
+ expect(opened).toHaveLength(0);
+ await page.unroute('**/__qa_fixture');
+ await mount(page,{direct:true,analyticsEnabled:true});
+ await page.getByText('标准答案：请核对账户资料。').scrollIntoViewIfNeeded();
+ await expect.poll(()=>opened).toEqual([expect.objectContaining({kind:'view',documentId:'qa-local',revision:1})]);
 });

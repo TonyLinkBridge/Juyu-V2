@@ -1,3 +1,4 @@
+import {notifyWorkspaceChange} from '../workspace/freshness.ts';
 import type {AvailabilityAck,AvailabilityDetail,AvailabilityInput} from './model.ts';
 export class AvailabilityRejected extends Error {}
 const record=(x:unknown):x is Record<string,unknown>=>Boolean(x)&&typeof x==='object'&&!Array.isArray(x);
@@ -15,6 +16,7 @@ export async function sendAvailability(id:string,input:AvailabilityInput,revisio
  const r=await fetch(`/api/admin/availability/${encodeURIComponent(id)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input),signal:AbortSignal.timeout(20000)}),v:unknown=await r.json();
  if(!r.ok){if(r.status>=400&&r.status<500&&record(v)&&typeof v.error==='string')throw new AvailabilityRejected(v.error);throw new Error('UNKNOWN_RESULT');}
  if(!record(v)||v.documentId!==id||v.sequence!==input.expectedSequence+1||v.revision!==revision||v.action!==input.action||v.lifecycle!==(input.action==='archive'?'archived':'active')||v.status!=='draft'||v.publishedRevision!==null)throw new Error('INVALID_ACK');
+ notifyWorkspaceChange();
  return v as unknown as AvailabilityAck;
 }
 export function availabilityError(e:unknown,reading=false){

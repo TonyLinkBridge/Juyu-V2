@@ -39,7 +39,7 @@ const item={...article,kind:'article',savedAt:'2026-09-09T01:00:00Z',viewedAt:'2
 const detail={...article,tables:[{id:'one',headers:['注册商','办理规则','说明'],rows:[['本地示例','转出 EPP 核对','请按正式资料核对'],['较长的注册商示例名称','续费操作','需要按当前资料核对']]}]};
 const feedbackSummary={documentId:article.id,title:article.title,revision:2,total:1,helpful:0,unhelpful:1,current:true,latestAt:'2026-09-09T01:00:00Z'};
 const group={fingerprint:'sha256:'+'a'.repeat(64),searches:4,zeroResults:1,clickedSearches:2};
-const dashboard={days:30,from:'2026-08-10T01:00:00Z',asOf:'2026-09-09T01:00:00Z',summary:{searches:4,zeroResults:1,clickedSearches:2,searchClicks:7,views:9,feedbackTotal:4,feedbackNegative:1},popularSearches:[group],zeroResultSearches:[group],popularArticles:[{documentId:article.id,title:article.title,kind:'article',revision:2,views:9}],negativeFeedback:[{documentId:article.id,title:article.title,kind:'article',revision:2,total:4,negative:1}]};
+const dashboard={days:30,from:'2026-08-10T01:00:00Z',asOf:'2026-09-09T01:00:00Z',summary:{searches:4,zeroResults:1,clickedSearches:2,searchClicks:7,views:9,feedbackTotal:4,feedbackNegative:1},popularSearches:[group],zeroResultSearches:[group],popularArticlesByReaders:[],popularArticles:[{documentId:article.id,title:article.title,kind:'article',revision:2,views:9}],negativeFeedback:[{documentId:article.id,title:article.title,kind:'article',revision:2,total:4,negative:1}]};
 export const secondarySurfaces:Surface[]=[
  {name:'search',build:navigationBrowserBundle,root:'presentation',selfMain:true,data:{pages,search:searchTitles(pages,'EPP','1')}},
  {name:'search-empty',build:navigationBrowserBundle,root:'presentation',selfMain:true,data:{pages,search:searchTitles(pages,'不存在的资料','1')}},

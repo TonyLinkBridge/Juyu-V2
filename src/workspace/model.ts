@@ -20,6 +20,19 @@ export function workspaceHref(query:WorkspaceQuery,patch:Partial<WorkspaceQuery>
  for(const [key,value] of Object.entries(q))params.set(key,String(value));
  return `/admin?${params}`;
 }
+export function workspaceItemDestination(task:Pick<WorkspaceItem,'id'|'kind'|'status'|'canReview'>){
+ const article='?article='+encodeURIComponent(task.id);
+ if(task.status==='in_review'){
+  const href='/admin/review'+article;
+  return {href,actionHref:href,label:task.canReview?'处理审核':'查看审核'};
+ }
+ if(task.status==='approved'||task.status==='queued'){
+  const href='/admin/review/publish'+article;
+  return {href,actionHref:href+'&intent=publish_now',label:'立即发布'};
+ }
+ const href='/admin/editor'+article;
+ return {href,actionHref:href,label:task.kind==='qa'?'编辑问答':'编辑文章'};
+}
 export function publicationLabel(item:Pick<WorkspaceItem,'revision'|'publishedRevision'|'status'|'publicationNumber'>){
  const version=item.publicationNumber?` ${item.publicationNumber}`:'';
  return item.publishedRevision===null?'尚未发布':item.status==='published'?(version?`正式版${version}`:'已发布'):`旧正式版${version} 仍可阅读`;

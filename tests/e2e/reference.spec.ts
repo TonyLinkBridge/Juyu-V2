@@ -14,8 +14,8 @@ const richBlock=normalizeEditorBlocks([{id:'rich',type:'table',props:{textColor:
 if(richBlock.type!=='table')throw Error('Invalid rich fixture');
 const richTable=nativeReferenceTable(richBlock);
 
-async function mount(page:Page,options:{admin?:boolean;state?:'ready'|'denied'|'unavailable';detailState?:'ready'|'idle'|'unavailable';noTables?:boolean;empty?:boolean;rich?:boolean}={}){
- const data={state:options.state??'ready',detailState:options.detailState??'ready',data:{items:options.empty?[]:[detail],total:options.empty?0:1,page:1,pages:1,canEdit:options.admin??false},detail:{...detail,tables:options.noTables?[]:options.rich?[richTable]:detail.tables}};
+async function mount(page:Page,options:{admin?:boolean;state?:'ready'|'denied'|'unavailable';detailState?:'ready'|'idle'|'unavailable';noTables?:boolean;empty?:boolean;rich?:boolean;analyticsEnabled?:boolean}={}){
+ const data={analyticsEnabled:options.analyticsEnabled,state:options.state??'ready',detailState:options.detailState??'ready',data:{items:options.empty?[]:[detail],total:options.empty?0:1,page:1,pages:1,canEdit:options.admin??false},detail:{...detail,tables:options.noTables?[]:options.rich?[richTable]:detail.tables}};
  await page.route('**/__reference_fixture',r=>r.fulfill({contentType:'text/html',body:`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${bundle.css}</style></head><body><header>Reference · 本地测试样例（非真实业务资料）</header><main id="main-content" class="editor-main search-main"><div id="reference"></div></main><script id="data" type="application/json">${JSON.stringify(data).replace(/</g,'\\u003c')}</script><script>${bundle.script.replace(/<\/script/gi,'<\\/script')}</script></body></html>`}));await page.goto('/__reference_fixture');await expect(page.getByRole('heading',{name:'速查资料',exact:true})).toBeVisible();
 }
 test('formal tables filter Chinese keywords by column and paginate without editing or leaking markup',async({page},info)=>{
@@ -70,4 +70,23 @@ test('R17 rich formats links and merged cells survive filtering pagination and t
 
 test('R07 compact selection exposes the current table without an extra read action',async({page},info)=>{
  await mount(page,{admin:true});await expect(page.getByRole('navigation',{name:'选择速查资料'}).getByRole('link')).toHaveAttribute('aria-current','page');await expect(page.getByRole('region',{name:'速查表 1',exact:true})).toBeVisible();await expect(page.getByRole('link',{name:'阅读全文'})).toBeHidden();await page.getByText('其他操作',{exact:true}).click();await expect(page.getByRole('link',{name:'编辑此资料'})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`output/verification/R07-reference-${info.project.name}.png`,fullPage:true});
+});
+
+test('only the visible published Reference detail records opens and time',async({page})=>{
+ const events:Record<string,unknown>[]=[];
+ await page.route('**/api/analytics',r=>{
+  const event=r.request().postDataJSON();events.push(event);
+  return r.fulfill({json:{eventId:event.eventId,kind:event.kind}});
+ });
+ await mount(page,{analyticsEnabled:true,detailState:'unavailable'});
+ await expect(page.getByRole('alert')).toContainText('所选速查资料暂时无法读取');
+ expect(events).toEqual([]);
+ await page.unroute('**/__reference_fixture');
+ const accepted=page.waitForResponse(r=>r.url().endsWith('/api/analytics')&&r.request().postDataJSON().kind==='view');
+ await mount(page,{analyticsEnabled:true});
+ await page.getByRole('region',{name:'所选正式资料'}).getByRole('heading',{name:detail.title}).scrollIntoViewIfNeeded();
+ await accepted;
+ await page.evaluate(()=>window.dispatchEvent(new PageTransitionEvent('pagehide')));
+ await expect.poll(()=>events.find(e=>e.kind==='view_time')).toMatchObject({documentId:detail.id,revision:detail.revision,viewId:events[0].eventId});
+ expect(events.filter(e=>e.kind==='view')).toHaveLength(1);
 });

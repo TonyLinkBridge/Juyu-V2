@@ -154,3 +154,19 @@ test('custom calendar range and employee detail agree on inclusive UTC+8 days an
  const range={from:'2024-02-29',to:'2024-02-29'},data=await db.run(admin,c=>readAnalyticsDashboard(c,range),true),people=await service(admin).analyticsPeople({...range,documentId:d.id});
  assert.equal(data.summary.views,2);assert.equal(data.days,1);assert.deepEqual(data.dateRange,range);assert.deepEqual(data.usage?.trend,[{date:'2024-02-29',views:2}]);assert.equal(people.items[0].views,2);assert.equal(people.total,1);
 });
+
+test('most unique readers ranks every eligible article before taking the top ten',async()=>{
+ for(let i=0;i<10;i++){
+  const d=await publish(await draft('Repeated opens '+i));
+  for(let n=0;n<3;n++)await event(d.id);
+ }
+ const wider=await publish(await draft('Wider readership','qa'));
+ await event(wider.id);
+ await fixture.pool.query("INSERT INTO juyu.analytics_events(id,member_id,kind,document_id,revision_id,occurred_at) VALUES($1,'o','view',$2,1,now())",[randomUUID(),wider.id]);
+ const data=await read();
+ assert.equal(data.popularArticles.length,10);
+ assert.ok(!data.popularArticles.some(row=>row.documentId===wider.id));
+ assert.equal(data.popularArticlesByReaders.length,10);
+ assert.equal(data.popularArticlesByReaders[0].documentId,wider.id);
+ assert.equal(data.usage?.articles.find(row=>row.documentId===wider.id)?.readers,2);
+});

@@ -22,7 +22,7 @@ interface Props {
  referenceAliases?:Record<string,string>;
 }
 
-/** Shared formal reader surface. Knowledge, OPS and Q&A render through this exact component. */
+/** Shared formal article reader for knowledge articles, OPS and full-length Reference articles. */
 export function FumadocsPublicationPage({article,features,viewerId,favorite,formal=true,recentKind='article',referencePages=[],referenceAliases}:Props){
  const locale=article.locale==='en'?'en':'zh-CN';
  const document=fumadocsPublication(article);
