@@ -11,7 +11,7 @@ test('current-page selection confirms all four kinds once; cancel has no write a
  await mount(page);await expect(page.getByRole('button',{name:'批量撤回送审',exact:true})).toBeDisabled();await expect(page.getByRole('checkbox')).toHaveCount(5);await select(page);
  await expect(page.getByRole('dialog')).toContainText('4 份');await expect(page.getByRole('dialog')).toContainText('已有正式版继续保留');await page.getByRole('button',{name:'取消',exact:true}).click();expect(posts).toBe(0);
  await page.getByRole('button',{name:'批量撤回送审',exact:true}).click();await page.getByRole('button',{name:'确认撤回 4 份',exact:true}).click();await expect(page.getByRole('status',{name:'批量操作结果'})).toContainText('已撤回 4 份');expect(posts).toBe(1);
- await expect(page.getByRole('alert')).toContainText('列表');await expect(page.getByRole('button',{name:'批量撤回送审',exact:true})).toBeDisabled();await expect(page.locator('td[data-label="状态"]')).toContainText(['草稿','草稿','草稿','草稿','已经发布']);await expect(page.getByText('旧正式版继续可读')).toHaveCount(4);
+ await expect(page.getByRole('alert')).toContainText('列表');await expect(page.getByRole('button',{name:'批量撤回送审',exact:true})).not.toBeVisible();await expect(page.getByRole('table')).not.toBeVisible();await expect(page.getByRole('link',{name:'等待审核 4',exact:true})).not.toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`output/verification/bulk-withdraw-${info.project.name}.png`,fullPage:true});
 });
 test('uncertain result locks the original selection and retries exactly once without changing versions',async({page})=>{
@@ -48,4 +48,23 @@ test('closing a conflict cannot reopen and resubmit the same stale selection wit
 
 test('ordinary administrators see no batch toolbar or row checkboxes',async({page})=>{
  await mount(page,false);await expect(page.getByRole('table')).toBeVisible();await expect(page.getByRole('button',{name:'批量撤回送审',exact:true})).toHaveCount(0);await expect(page.getByRole('checkbox')).toHaveCount(0);await expect(page.getByRole('link',{name:'查看审核',exact:true})).toHaveCount(4);
+});
+
+test('a failed post-withdrawal read hides the old pending rows and totals until retry succeeds',async({page})=>{
+ await page.route(url=>url.pathname==='/admin',async r=>r.fulfill({contentType:'text/html',body:await workspaceHTML(r.request().url(),{rows,canBulkWithdraw:true})}));
+ await page.route('**/api/admin/review/bulk-withdraw',r=>r.fulfill({json:ack}));
+ let recovered=false;
+ await page.route('**/api/admin/workspace?*',r=>recovered?r.fulfill({json:{canBulkWithdraw:true,query:{q:'',scope:'all',kind:'all',status:'in_review',view:'list',page:1},items:[],counts:{draft:4,in_review:0,changes_requested:0,approved:0,queued:0,published:0},total:0,pages:1,page:1}}):r.fulfill({status:503,json:{error:'UNAVAILABLE'}}));
+ await page.goto('/admin?status=in_review&view=list');
+ await select(page);
+ await page.getByRole('button',{name:'确认撤回 4 份',exact:true}).click();
+ await expect(page.getByRole('status',{name:'批量操作结果'})).toContainText('已撤回 4 份');
+ await expect(page.getByRole('alert')).toContainText('列表');
+ await expect(page.getByRole('table')).not.toBeVisible({timeout:2000});
+ await expect(page.getByRole('link',{name:'等待审核 4'})).not.toBeVisible();
+ recovered=true;
+ await page.getByRole('button',{name:'重新读取列表',exact:true}).click();
+ await expect(page.getByRole('link',{name:'等待审核 0',exact:true})).toBeVisible();
+ await expect(page.getByRole('link',{name:'草稿 4',exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'没有符合条件的内容'})).toBeVisible();
 });

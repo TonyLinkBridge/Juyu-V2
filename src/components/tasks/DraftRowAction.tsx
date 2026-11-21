@@ -4,12 +4,12 @@ import {useRouter} from 'next/navigation';
 import {lifecycleError,lifecycleRequest} from '../../lifecycle/client';
 import {discardDraftRequest,draftActionError} from '../../drafts/client';
 
-export function DraftRowAction({id,title,sequence,publishedRevision,onCompleted}:{id:string;title:string;sequence:number;publishedRevision:number|null;onCompleted:(action:'trash'|'discard',sequence:number)=>void}){
+export function DraftRowAction({id,title,sequence,publishedRevision,onCompleted}:{id:string;title:string;sequence:number;publishedRevision:number|null;onCompleted?:(action:'trash'|'discard')=>Promise<void>}){
  const dialog=useRef<HTMLDialogElement>(null);const router=useRouter();
  const [busy,setBusy]=useState(false),[error,setError]=useState('');
  const action=publishedRevision===null?'trash':'discard';
  const label=action==='trash'?'删除草稿':'放弃本次修订';
- async function confirm(){if(busy)return;setBusy(true);setError('');try{const result=action==='trash'?await lifecycleRequest(id,{action:'trash',expectedSequence:sequence}):await discardDraftRequest(id,{expectedSequence:sequence});dialog.current?.close();onCompleted(action,result.sequence);router.refresh();}catch(e){setError(action==='trash'?lifecycleError(e):draftActionError(e));}finally{setBusy(false);}}
+ async function confirm(){if(busy)return;setBusy(true);setError('');try{if(action==='trash')await lifecycleRequest(id,{action:'trash',expectedSequence:sequence});else await discardDraftRequest(id,{expectedSequence:sequence});dialog.current?.close();if(onCompleted)await onCompleted(action);else router.refresh();}catch(e){setError(action==='trash'?lifecycleError(e):draftActionError(e));}finally{setBusy(false);}}
  return <>
   <button type="button" className="task-draft-trigger" disabled={busy} onClick={()=>{setError('');dialog.current?.showModal();}}>{label}</button>
   <dialog ref={dialog} className="juyu-confirm task-draft-dialog" aria-labelledby={`draft-action-${id}`} onCancel={event=>{if(busy)event.preventDefault();}}>

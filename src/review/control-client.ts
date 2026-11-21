@@ -1,3 +1,4 @@
+import {notifyWorkspaceChange} from '../workspace/freshness.ts';
 import type {ControlDetail,ControlInput,ControlAck} from './control';
 export class ControlRejected extends Error {}
 const record=(value:unknown):value is Record<string,unknown>=>Boolean(value)&&typeof value==='object'&&!Array.isArray(value);
@@ -16,6 +17,7 @@ export async function sendControl(documentId:string,input:ControlInput,revision:
  const response=await fetch(`/api/admin/review/${encodeURIComponent(documentId)}/control`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input),signal:AbortSignal.timeout(20000)});const value:unknown=await response.json();
  if(!response.ok){if(response.status>=400&&response.status<500&&record(value)&&typeof value.error==='string')throw new ControlRejected(value.error);throw new Error('UNKNOWN_RESULT');}
  if(!record(value)||(value.kind!==undefined&&!['article','ops','reference','qa'].includes(String(value.kind)))||value.documentId!==documentId||value.sequence!==input.expectedSequence+1||value.revision!==revision||value.action!==input.action||value.status!==(input.action==='withdraw'?'draft':'in_review')||value.previousReviewerId!==previousReviewerId||value.reviewerId!==(input.action==='withdraw'?null:input.reviewerId))throw new Error('INVALID_ACK');
+ notifyWorkspaceChange();
  return value as unknown as ControlAck;
 }
 export function controlError(error:unknown,reading=false){const code=error instanceof Error?error.message:'';

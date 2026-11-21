@@ -1,3 +1,4 @@
+import {notifyWorkspaceChange} from '../workspace/freshness.ts';
 import type {PublicationDetail,PublicationInput,PublicationAck} from './publication.ts';
 import {recoverySnapshot} from '../editor/recovery.ts';
 export class PublicationRejected extends Error {}
@@ -23,6 +24,7 @@ export async function sendPublication(documentId:string,input:PublicationInput,r
  if(!response.ok){if(response.status>=400&&response.status<500&&record(value)&&typeof value.error==='string')throw new PublicationRejected(value.error);throw new Error('UNKNOWN_RESULT');}
  if(!record(value)||value.documentId!==documentId||value.sequence!==input.expectedSequence+(input.action==='publish_now'?2:1)||value.revision!==revision||value.action!==input.action||value.status!==(input.action==='queue'?'queued':'published')||value.publishedRevision!==(input.action==='queue'?previousPublication:revision)
   ||(input.action==='direct_publish'?!id(value.approvedBy):value.approvedBy!==approvedBy))throw new Error('INVALID_ACK');
+ notifyWorkspaceChange();
  return value as unknown as PublicationAck;
 }
 export function publicationError(error:unknown,reading=false,locale:'zh-CN'|'en'='zh-CN'):string {

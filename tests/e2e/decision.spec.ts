@@ -1,3 +1,4 @@
+import {workspaceHTML,workspaceRows} from '../helpers/workspace-browser';
 import {fixtureAssets} from '../helpers/fixture-assets';
 import {test,expect,type Page} from '@playwright/test';
 import {decisionBrowserBundle,decisionFixture} from '../helpers/decision-browser';
@@ -141,4 +142,27 @@ test('uncertain combined decision freezes action changes and retries the identic
  await expect(page.getByRole('alert')).toContainText('尚未确认');await expect(page.getByRole('button',{name:'取消决定',exact:true})).toBeDisabled();
  await page.getByRole('button',{name:'重试原决定',exact:true}).click();await expect(page.getByRole('status')).toContainText('已批准并发布');
  expect(writes).toEqual([{expectedSequence:4,action:'approve_publish'},{expectedSequence:4,action:'approve_publish'}]);
+});
+
+for(const action of ['reject','approve','approve_publish'] as const)test(`confirmed ${action} refreshes the assigned queue in another tab`,async({page,context})=>{
+ const queue=await context.newPage();
+ const row={...workspaceRows[0],id:'decision-local',title:'待审同步测试',status:'in_review' as const,sequence:4,canReview:true};
+ const query={q:'',scope:'review',kind:'all',status:'all',view:'list',page:1};
+ const reason='补充步骤';
+ let committed=false;
+ await queue.route(url=>url.pathname==='/admin',async r=>r.fulfill({contentType:'text/html',body:await workspaceHTML(r.request().url(),{rows:[row]})}));
+ await queue.route('**/api/admin/workspace?*',r=>r.fulfill({json:{query,items:committed?[]:[row],counts:{draft:0,in_review:committed?0:1,changes_requested:0,approved:0,queued:0,published:0},total:committed?0:1,page:1,pages:1}}));
+ await queue.goto('/admin?scope=review&view=list');
+ await expect(queue.getByRole('link',{name:'等待审核 1',exact:true})).toBeVisible();
+ await page.route('**/api/admin/review/*/decision',r=>{
+  committed=true;
+  return r.fulfill({json:action==='approve_publish'?{...ack(),action,status:'published',sequence:7,publishedRevision:2}:ack(action,action==='reject'?reason:null)});
+ });
+ await mount(page);
+ await page.getByRole('button',{name:{reject:'退回修改',approve:'仅批准，稍后发布',approve_publish:'批准并发布'}[action],exact:true}).click();
+ if(action==='reject')await page.getByLabel('退回原因',{exact:true}).fill(reason);
+ await page.getByRole('button',{name:{reject:'确认退回',approve:'确认批准',approve_publish:'确认批准并发布'}[action],exact:true}).click();
+ await expect(queue.getByRole('link',{name:'等待审核 0',exact:true})).toBeVisible();
+ await expect(queue.getByRole('heading',{name:'没有符合条件的内容'})).toBeVisible();
+ await queue.close();
 });

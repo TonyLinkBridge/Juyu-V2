@@ -20,9 +20,13 @@ for(const view of ['list','board'] as const)test(`workspace ${view} shows catego
  await page.screenshot({path:`output/verification/workspace-categories-${view}-${info.project.name}.png`,fullPage:false});
  await page.evaluate(()=>document.documentElement.classList.add('dark'));expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
-test('discarding a revision immediately replaces draft category text with formal category text',async({page})=>{
+test('discarding a revision reloads the live row, its category and its status counts together',async({page})=>{
  await page.route('**/api/admin/drafts/article/discard',r=>r.fulfill({json:{documentId:'article',sequence:3,revision:1,publishedRevision:1,status:'published'}}));
+ const published={...items[0],status:'published',sequence:3,revision:1,categoryPaths:items[0].publishedCategoryPaths};
+ await page.route('**/api/admin/workspace?*',r=>r.fulfill({json:{query:workspaceQuery({view:'list'}),items:[published,...items.slice(1)],counts:{draft:3,in_review:0,changes_requested:0,approved:0,queued:0,published:1},total:4,page:1,pages:1}}));
  await mount(page,'list');const article=page.locator('tr').filter({has:page.getByRole('link',{name:'分类核对 article',exact:true})});
  await article.getByRole('button',{name:'放弃本次修订',exact:true}).click();await page.getByRole('button',{name:'确认放弃修订',exact:true}).click();
  await expect(article.getByText('分类：正式目录 / 账户安全',{exact:true})).toBeVisible();await expect(article.getByText('分类：草稿目录 / MFA',{exact:true})).toHaveCount(0);
+ await expect(page.getByRole('link',{name:'草稿 3',exact:true})).toBeVisible();
+ await expect(page.getByRole('link',{name:'已经发布 1',exact:true})).toBeVisible();
 });

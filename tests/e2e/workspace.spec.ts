@@ -90,3 +90,26 @@ test('approved and queued rows offer immediate publication and keep status text 
  if(info.project.name==='desktop'){await page.getByRole('link',{name:'看板',exact:true}).click();await expect(page.locator('.tasks-desktop-board').getByRole('link',{name:'立即发布',exact:true})).toHaveCount(8);}
 
 });
+
+test('entering the assigned review list drops an incompatible status filter',async({page})=>{
+ await fixture(page);
+ await page.goto('/admin?kind=qa&status=published&view=list');
+ await page.getByRole('navigation',{name:'内容范围'}).getByRole('link',{name:'待我审核',exact:true}).click();
+ const params=new URL(page.url()).searchParams;
+ expect(params.get('scope')).toBe('review');
+ expect(params.get('status')).toBe('all');
+ expect(params.get('kind')).toBe('qa');
+});
+
+test('restoring a cached review page rechecks its rows and totals',async({page})=>{
+ const {workspaceRows}=await import('../helpers/workspace-browser');
+ const row={...workspaceRows[0],id:'restore-fixture',status:'in_review' as const,canReview:true};
+ const query={q:'',scope:'review',kind:'all',status:'all',view:'list',page:1};
+ await page.route(url=>url.pathname==='/admin',async r=>r.fulfill({contentType:'text/html',body:await workspaceHTML(r.request().url(),{rows:[row]})}));
+ await page.route('**/api/admin/workspace?*',r=>r.fulfill({json:{query,items:[],counts:{draft:0,in_review:0,changes_requested:0,approved:0,queued:0,published:0},total:0,page:1,pages:1}}));
+ await page.goto('/admin?scope=review&view=list');
+ await expect(page.getByRole('link',{name:'等待审核 1',exact:true})).toBeVisible();
+ await page.evaluate(()=>window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));
+ await expect(page.getByRole('link',{name:'等待审核 0',exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'没有符合条件的内容'})).toBeVisible();
+});

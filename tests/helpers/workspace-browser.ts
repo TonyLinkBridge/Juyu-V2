@@ -9,7 +9,7 @@ export async function workspaceHTML(url:string,{empty=false,failed=false,rows=wo
  const u=new URL(url),input=Object.fromEntries(u.searchParams);const query=workspaceQuery(input);
  // Isolated UI data only. Real query semantics/authorization are exercised against PostgreSQL separately.
  let items=empty?[]:rows.filter(r=>r.title.includes(query.q)&&(query.kind==='all'||r.kind===query.kind));
- if(query.scope==='review')items=[];else if(query.scope==='returned')items=items.filter(r=>r.status==='changes_requested');else if(query.scope==='submitted')items=items.filter(r=>r.submitter==='管理员 A');
+ if(query.scope==='review')items=items.filter(r=>r.status==='in_review'&&r.canReview===true);else if(query.scope==='returned')items=items.filter(r=>r.status==='changes_requested');else if(query.scope==='submitted')items=items.filter(r=>r.submitter==='管理员 A');
  const counts=Object.fromEntries(statuses.map(s=>[s.id,items.filter(r=>r.status===s.id).length])) as WorkspaceData['counts'];
  if(query.status!=='all')items=items.filter(r=>r.status===query.status);
  const total=items.length,pages=Math.max(1,Math.ceil(total/30)),page=Math.min(pages,query.page);

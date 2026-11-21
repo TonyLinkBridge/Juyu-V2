@@ -14,8 +14,9 @@ export function bulkWithdrawError(error:unknown){
  return error instanceof BulkWithdrawRejected?error.message==='CONFLICT'||error.message==='INVALID_STATE'?'所选资料的版本或审核状态已改变，整批未执行。请重新读取列表，再勾选核对。':error.message==='FORBIDDEN'?'当前账号没有撤回权限，整批未执行。请核对账号权限。':'整批未执行。请重新读取列表，核对后再操作。':'本次批量操作结果尚未确认。原批次已保留，请重试原批次核对，避免重复处理。';
 }
 
-export async function readWithdrawWorkspace(query:WorkspaceQuery,completed:BulkWithdrawResult['items']=[]):Promise<WorkspaceData>{
- const response=await fetch('/api/admin/workspace'+workspaceHref(query).slice('/admin'.length),{cache:'no-store',signal:AbortSignal.timeout(15000)});const value:unknown=await response.json();
+export async function readWithdrawWorkspace(query:WorkspaceQuery,completed:BulkWithdrawResult['items']=[],cancel?:AbortSignal):Promise<WorkspaceData>{
+ const timeout=AbortSignal.timeout(15000);
+ const response=await fetch('/api/admin/workspace'+workspaceHref(query).slice('/admin'.length),{cache:'no-store',signal:cancel?AbortSignal.any([cancel,timeout]):timeout});const value:unknown=await response.json();
  const integer=(n:unknown,min=0)=>Number.isSafeInteger(n)&&Number(n)>=min;
  if(!response.ok||!record(value)||!record(value.query)||!record(value.counts)||!Array.isArray(value.items)||value.items.length>30||!integer(value.total)||!integer(value.page,1)||!integer(value.pages,1))throw new Error('READ_FAILED');
  if(value.canBulkWithdraw!==undefined&&typeof value.canBulkWithdraw!=='boolean')throw new Error('READ_FAILED');

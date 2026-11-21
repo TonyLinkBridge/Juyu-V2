@@ -1,3 +1,4 @@
+import {workspaceHTML,workspaceRows} from '../helpers/workspace-browser';
 import {test,expect,type Page} from '@playwright/test';
 import {controlBrowserBundle,controlFixture as fixture} from '../helpers/control-browser';
 import type {ControlDetail} from '../../src/review/control';
@@ -27,4 +28,27 @@ test('R18 refresh keeps reassignment selection until discard is confirmed',async
  await expect(page.getByLabel('新的二审管理员',{exact:true})).toHaveValue('admin-c');
  await page.getByRole('button',{name:'重新读取审核状态'}).click();await page.getByRole('button',{name:'确认继续',exact:true}).click();
  await expect(page.getByRole('button',{name:'改派二审管理员',exact:true})).toBeVisible();
+});
+
+for(const action of ['withdraw','reassign'] as const)test(`confirmed ${action} refreshes the previous reviewer's list and count`,async({page,context})=>{
+ const queue=await context.newPage();
+ const row={...workspaceRows[0],id:fixture.documentId,title:'待审同步测试',status:'in_review' as const,sequence:4,canReview:true};
+ const query={q:'',scope:'review',kind:'all',status:'all',view:'list',page:1};
+ let committed=false;
+ await queue.route(url=>url.pathname==='/admin',async r=>r.fulfill({contentType:'text/html',body:await workspaceHTML(r.request().url(),{rows:[row]})}));
+ await queue.route('**/api/admin/workspace?*',r=>r.fulfill({json:{query,items:committed?[]:[row],counts:{draft:0,in_review:committed?0:1,changes_requested:0,approved:0,queued:0,published:0},total:committed?0:1,page:1,pages:1}}));
+ await queue.goto('/admin?scope=review&view=list');
+ await expect(queue.getByRole('link',{name:'等待审核 1',exact:true})).toBeVisible();
+ await page.route('**/api/admin/review/*/control',r=>{
+  if(r.request().method()==='GET')return r.fulfill({json:changed(action)});
+  committed=true;
+  return r.fulfill({json:ack(action)});
+ });
+ await mount(page);
+ await page.getByRole('button',{name:action==='withdraw'?'撤回本次审核':'改派二审管理员',exact:true}).click();
+ if(action==='reassign')await page.getByLabel('新的二审管理员',{exact:true}).selectOption('admin-c');
+ await page.getByRole('button',{name:action==='withdraw'?'确认撤回':'确认改派',exact:true}).click();
+ await expect(queue.getByRole('link',{name:'等待审核 0',exact:true})).toBeVisible();
+ await expect(queue.getByRole('heading',{name:'没有符合条件的内容'})).toBeVisible();
+ await queue.close();
 });

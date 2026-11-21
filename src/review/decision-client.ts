@@ -1,3 +1,4 @@
+import {notifyWorkspaceChange} from '../workspace/freshness.ts';
 import type {ReviewDetail,DecisionInput,DecisionAck} from './decision';
 import {recoverySnapshot} from '../editor/recovery';
 export class DecisionRejected extends Error {}
@@ -14,6 +15,7 @@ export async function sendDecision(id:string,input:DecisionInput,revision:number
  const response=await fetch(`/api/admin/review/${encodeURIComponent(id)}/decision`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input),signal:AbortSignal.timeout(20000)});const value=await response.json();
  if(!response.ok){if(response.status>=400&&response.status<500)throw new DecisionRejected(value.error??'REJECTED');throw new Error('UNKNOWN_RESULT');}
  if(value.documentId!==id||value.sequence!==input.expectedSequence+(input.action==='approve_publish'?3:1)||value.revision!==revision||value.reviewerId!==reviewerId||value.action!==input.action||value.status!==(input.action==='approve_publish'?'published':input.action==='approve'?'approved':'changes_requested')||value.reason!==(input.action==='reject'?input.reason:null)||(input.action==='approve_publish'&&value.publishedRevision!==revision))throw new Error('INVALID_ACK');
+ notifyWorkspaceChange();
  return value;
 }
 export function decisionError(error:unknown,reading=false){const code=error instanceof Error?error.message:'';
