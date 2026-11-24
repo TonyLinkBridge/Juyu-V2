@@ -106,7 +106,7 @@ test('compact workspace exposes one preview action and three complete settings g
  await expect(rail.getByRole('button',{name:'预览',exact:true})).toHaveCount(0);
  await expect(page.getByRole('button',{name:'预览草稿',exact:true})).toHaveCount(1);
  await expect(page.locator('.editor-outline-guidance')).toHaveCount(0);
- await expect(page.locator('.editor-save-status').getByText(/草稿 · 自动保存/)).toBeVisible();
+ await expect(page.locator('.editor-toolbar-status').getByRole('status')).toHaveText(/草稿 · 自动保存/);
  await page.getByRole('button',{name:'文章设置',exact:true}).click();
  const dialog=page.getByRole('dialog',{name:'文章设置',exact:true});
  await expect(dialog.getByRole('button',{name:/^内容与访问/})).toBeVisible();
