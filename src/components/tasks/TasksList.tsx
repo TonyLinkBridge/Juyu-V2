@@ -47,7 +47,7 @@ export function TasksList({data,onWithdrawn,onDraftChanged,onReload}:{data:Works
  // Decorative local artwork only; never a substitute for saved article/category metadata.
  const cover=/店铺/.test(task.title)?'shop':/所有人|拥有人/.test(task.title)?'ownership':/授权/.test(task.title)?'authorization':/密码|找回/.test(task.title)?'recovery':/绑定/.test(task.title)?'binding':task.kind==='ops'?'ownership':task.kind==='reference'?'authorization':task.kind==='qa'?'binding':'security';
  return <article className="workspace-catalog-card" key={task.id}>
-  <div className="workspace-catalog-cover"><Link prefetch={false} href={href} aria-label={`打开：${task.title}`}><img src={`/illustrations/content-catalog/${cover}.webp`} width="800" height="320" alt="" loading="lazy" decoding="async"/></Link>
+  <div className="workspace-catalog-cover"><Link prefetch={false} href={href} aria-label={`打开：${task.title}`}><img className="workspace-cover-light" src={`/illustrations/content-catalog/${cover}.webp`} width="800" height="320" alt="" loading="lazy" decoding="async"/><img className="workspace-cover-dark" src={`/illustrations/content-catalog/${cover}-dark.webp`} width="800" height="320" alt="" loading="lazy" decoding="async"/></Link>
    {canBulkWithdraw&&task.status==='in_review'&&<label className="workspace-catalog-select"><input type="checkbox" aria-label={`选择资料：${task.title}`} disabled={locked||blocked} checked={selected.some(row=>row.id===task.id)} onChange={event=>choose(task,event.target.checked)}/></label>}
   </div>
   <div className="workspace-catalog-body"><div className="workspace-catalog-kind">{kinds[task.kind]} · 工作修订 {task.revision}</div><h2><Link prefetch={false} href={href}>{task.title}</Link></h2><TaskCategories task={task}/>

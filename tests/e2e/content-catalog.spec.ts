@@ -4,6 +4,27 @@ import type {WorkspaceItem} from '../../src/workspace/model';
 
 const rows:WorkspaceItem[]=(['article','ops','reference','qa'] as const).flatMap((kind,index)=>['in_review','changes_requested','approved','queued','draft','published'].map((status,i)=>({...workspaceRows[0],id:`catalog-${kind}-${i}`,kind,status:status as WorkspaceItem['status'],title:`${kind} ${status} 很长的测试标题用于核对完整内容不会被截掉`,editor:'编辑账号.long@example.test',submitter:'submitter.long@example.test',reviewer:'reviewer.long@example.test',sequence:9,revision:3,publishedRevision:i===4?2:null,publicationNumber:i===4?1:null,canReview:index===0,canWithdrawSubmission:true,categoryPaths:['主要分类 / 一级分类 / 子分类','另一个分类','第三分类'],qaCategory:'Whois 隐私保护',qaPosition:5})));
 
+test('all catalog types follow both themes with dark artwork and readable status colors',async({page},info)=>{
+ await page.route(url=>url.pathname==='/admin',async route=>route.fulfill({contentType:'text/html',body:await workspaceHTML(route.request().url(),{rows})}));
+ await page.goto('/admin?view=cards');
+ const covers=page.locator('.workspace-catalog-cover img:visible');
+ const destinations=await page.locator('.workspace-catalog-card h2 a').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')));
+ await expect(covers).toHaveCount(24);await expect(covers.first()).not.toHaveAttribute('src',/-dark\.webp$/);
+ await page.evaluate(()=>document.documentElement.classList.add('dark'));
+ await expect(covers.first()).toHaveAttribute('src',/-dark\.webp$/);
+ await expect(covers).toHaveCount(24);
+ const checks=await page.locator('.task-status-filters a').evaluateAll(nodes=>nodes.map(node=>{
+  const lum=(rgb:string)=>{const c=rgb.match(/[\d.]+/g)!.slice(0,3).map(Number).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
+  const s=getComputedStyle(node),bg=lum(s.backgroundColor),fg=lum(s.color);return {bg,contrast:(Math.max(bg,fg)+.05)/(Math.min(bg,fg)+.05)};
+ }));
+ expect(Math.max(...checks.map(x=>x.bg))).toBeLessThan(.15);expect(Math.min(...checks.map(x=>x.contrast))).toBeGreaterThanOrEqual(4.5);
+ expect(await page.locator('.workspace-catalog-card h2 a').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')))).toEqual(destinations);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:`output/verification/catalog-dark-fixed-${info.project.name}.png`,fullPage:false});
+ await page.evaluate(()=>document.documentElement.classList.remove('dark'));
+ await expect(covers.first()).not.toHaveAttribute('src',/-dark\.webp$/);
+});
+
 test('catalog preserves all four kinds, exact workflow destinations, categories and role-gated batch actions',async({page})=>{
  await page.route(url=>url.pathname==='/admin',async route=>route.fulfill({contentType:'text/html',body:await workspaceHTML(route.request().url(),{rows,canBulkWithdraw:true})}));
  await page.goto('/admin?kind=all&view=cards');

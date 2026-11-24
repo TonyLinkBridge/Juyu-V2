@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-24",
+  "method": "Built-in image generation edits of the six corresponding original catalog illustrations; downsampled to 800x320 WebP for delivery.",
+  "scope": "Dark palette only; preserve each original subject, composition and light asset.",
+  "prompt": "EDIT TARGET: the attached existing JUYU catalog illustration. Create its dark-theme counterpart ONLY. Preserve exactly the original subject, individual symbols, number of objects, drawing style, composition, proportions, relative positions, stroke weights, margins, and wide 800:320 aspect ratio. This is a color adaptation, not a redesign. Replace the pale full-canvas background with a flat dark charcoal #25252e, and the pale pink background hills with subtly lighter dark muted rose/charcoal #34303a. Replace white object surfaces with dark slate #34343f, black outlines with soft light gray #c6c6cf so the shapes remain legible; retain recognizable JUYU muted red accents, red shield/awning/key badge/arrow where present. White lock/key glyphs remain light. Preserve all original shapes and marks exactly. No new objects, no gradients or glows, no new typography, no cropping, no decorative additions, no watermark. Opaque dark background. Match the reference framing and content faithfully.",
+  "assets": [
+    {
+      "light": "public/illustrations/content-catalog/security.webp",
+      "dark": "public/illustrations/content-catalog/security-dark.webp"
+    },
+    {
+      "light": "public/illustrations/content-catalog/shop.webp",
+      "dark": "public/illustrations/content-catalog/shop-dark.webp"
+    },
+    {
+      "light": "public/illustrations/content-catalog/ownership.webp",
+      "dark": "public/illustrations/content-catalog/ownership-dark.webp"
+    },
+    {
+      "light": "public/illustrations/content-catalog/authorization.webp",
+      "dark": "public/illustrations/content-catalog/authorization-dark.webp"
+    },
+    {
+      "light": "public/illustrations/content-catalog/recovery.webp",
+      "dark": "public/illustrations/content-catalog/recovery-dark.webp"
+    },
+    {
+      "light": "public/illustrations/content-catalog/binding.webp",
+      "dark": "public/illustrations/content-catalog/binding-dark.webp"
+    }
+  ]
+}

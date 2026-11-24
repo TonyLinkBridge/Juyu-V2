@@ -34,9 +34,19 @@
 .workspace-catalog{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .workspace-catalog-card{min-width:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
 .workspace-catalog-card:hover{border-color:var(--brand)}
-.workspace-catalog-cover{height:112px;position:relative;background:#fcf7f5;border-radius:9px 9px 0 0;overflow:hidden;flex:none}
+.workspace-catalog-cover{height:112px;position:relative;background:var(--catalog-cover-background,#fcf7f5);border-radius:9px 9px 0 0;overflow:hidden;flex:none}
 .workspace-catalog-cover>a{display:block;width:100%;height:100%}
 .workspace-catalog-cover img{width:100%;height:100%;object-fit:contain}
+.workspace-catalog-cover .workspace-cover-dark{display:none}
+.dark .workspace-catalog-cover{--catalog-cover-background:#25252e}
+.dark .workspace-catalog-cover .workspace-cover-light{display:none}
+.dark .workspace-catalog-cover .workspace-cover-dark{display:block}
+/* Same workflow states and light colors; dark surfaces avoid bright badge islands. */
+.dark .tasks-catalog-workspace .state-in_review{background:#2b2b45;color:#c7ccff}
+.dark .tasks-catalog-workspace .state-changes_requested{background:#3b2f20;color:#f4c989}
+.dark .tasks-catalog-workspace .state-approved{background:#20372c;color:#a6dfbc}
+.dark .tasks-catalog-workspace .state-queued{background:#342741;color:#d6b6ff}
+.dark .tasks-catalog-workspace .state-published{background:#20363a;color:#9cdbdd}
 .workspace-catalog-select{position:absolute;top:10px;left:10px;background:var(--panel);padding:5px;display:flex;border-radius:4px}
 .workspace-catalog-select input{width:17px;height:17px;accent-color:var(--brand);margin:0}
 .workspace-catalog-body{display:flex;flex-direction:column;flex:1;min-width:0;padding:15px}
