@@ -161,3 +161,36 @@ No unresolved P0/P1/P2 visual findings. Full assistive-technology certification 
 - The directory browser suite now prepares the actual development article route in a bounded beforeAll hook and requires HTTP 200. The clicked destination and the original 5-second visible-heading assertion remain unchanged; no navigation failures are ignored and no retries were added.
 - Empty-cache verification passed all 22 desktop/mobile navigation cases. The final production build, typecheck/lint and 595 unit tests passed again. This is a test-setup correction only; production content, routes, permissions and navigation behavior are unchanged.
 - The preceding menu fix remains in main and its 350 critical UI cases passed on GitHub. A new complete remote Verify run is required for this test-only follow-up.
+
+
+# Content catalog release QA — 2026-11-24
+
+User-approved direction: option 5, brand content catalog. Production integration preserves existing functions and server authorization; isolated mock route and mock forms are excluded from this release.
+
+## Source and normalized captures
+
+- Reference: `/Users/tony/.codex/generated_images/01a07e8f-7d3d-7913-ae5a-b945e4845a98/exec-cc3ce3d1-0900-4591-9bc3-f83c30d276c0.png`.
+- Reference normalized to 1440 × 1024: `/tmp/juyu-catalog-qa/source-normalized.jpg`.
+- Actual source component, light theme, six fixtures, cards, all scope: `/tmp/juyu-catalog-qa/release-final-desktop.jpg`.
+- Same 1440 × 1024 comparison: `/tmp/juyu-catalog-qa/release-comparison.jpg`, reference left and implementation right.
+- Phone capture: `/tmp/juyu-catalog-qa/release-final-mobile.jpg`, 390px viewport.
+- Fixture renders real TasksWorkspace/TasksList and styles; excludes auth/header/sidebar because this harness deliberately has no real credentials. Production frame is checked separately after deployment.
+
+## Visual decisions and fixes
+
+- Retain original scope links, six workflow totals, list/board switching, batch selection, publication metadata, submitter/reviewer, draft operations and pagination. These make cards taller than the concept image; the user explicitly prioritizes function preservation.
+- Do not fabricate summaries or create an unsupported server-side category filter. Show original category paths and Q&A category/sort/visibility explanations.
+- Fixed oversized filter form caused by existing `!important` padding; compact row now retains search/type/apply/menu.
+- Fixed mobile hidden type selection and misleading board switch: cards/list are available; existing explicit board links retain their established phone-list fallback.
+- Normal four-kind sidebar links now select cards; existing explicit list/board URLs remain supported. Review queue and return links preserve their existing list destinations.
+- Six local decorative WebP covers retain the selected red/blush art direction, totaling under 50KB. Covers never replace saved article metadata or private media.
+
+## Browser checks
+
+In-app browser, real source component with isolated fixtures, no production mutations: title/status filtering and chip removal; list-to-card switch; current-page bulk confirmation and cancel; publication/review links; visible type selector at 390px; no horizontal page overflow (scrollWidth 390 at width 390). No browser error/warning logs returned.
+
+## Limits
+
+This visual QA does not assert exact pixel parity with the concept: real metadata and preserved operations take precedence. It does not exercise writes to production. Live production data/auth checks and complete automated results are recorded separately in the release verification note.
+
+final result: passed

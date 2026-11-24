@@ -70,7 +70,7 @@ test('R05 mobile header expands search and keeps the official theme outside the 
 test('R08 Reference has one active admin navigation entry on desktop and mobile',async({page},info)=>{
  await page.route('**/reader-frame-fixture*',r=>r.fulfill({contentType:'text/html',body:'<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="app"></div></body></html>'}));
  await page.goto('/reader-frame-fixture?adminFixture=1&kind=reference&view=list');await page.addStyleTag({content:bundle.css});await page.addScriptTag({content:bundle.script});if(info.project.name==='mobile')await page.locator('.admin-mobile-nav>summary').click();
- const nav=page.locator('nav[aria-label="后台导航"]:visible');await expect(nav.locator('[aria-current=page]')).toHaveCount(1);await expect(nav.getByRole('link',{name:'Reference 管理',exact:true})).toHaveAttribute('aria-current','page');await expect(nav.getByRole('link',{name:'Reference 管理',exact:true})).toHaveAttribute('href','/admin?kind=reference&view=list');
+ const nav=page.locator('nav[aria-label="后台导航"]:visible');await expect(nav.locator('[aria-current=page]')).toHaveCount(1);await expect(nav.getByRole('link',{name:'Reference 管理',exact:true})).toHaveAttribute('aria-current','page');await expect(nav.getByRole('link',{name:'Reference 管理',exact:true})).toHaveAttribute('href','/admin?kind=reference&view=cards');
 });
 
 

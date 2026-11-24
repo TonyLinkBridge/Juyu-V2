@@ -1,7 +1,8 @@
 'use client';
+/* eslint-disable @next/next/no-img-element -- Small local decorative covers, no private media proxy. */
 import Link from 'next/link';
 import {useId,useRef,useState} from 'react';
-import {statuses,kinds,workspaceItemDestination,type WorkspaceData} from '../../workspace/model';
+import {statuses,kinds,publicationLabel,workspaceItemDestination,type WorkspaceData} from '../../workspace/model';
 import {sendBulkWithdraw,BulkWithdrawRejected,bulkWithdrawError} from '../../review/bulk-withdraw-client';
 import type {BulkWithdrawInput,BulkWithdrawResult} from '../../review/bulk-withdraw';
 import {useReviewLeaveGuard} from '../review/useReviewLeaveGuard';
@@ -28,6 +29,7 @@ export function TasksList({data,onWithdrawn,onDraftChanged,onReload}:{data:Works
   finally{operation.current=false;setBusy(false);}
  }
  async function refresh(){if(operation.current||uncertain)return;operation.current=true;setBusy(true);try{await onReload?.();setChosen([]);setConfirmRows([]);pending.current=null;setBlocked(false);dialog.current?.close();}catch{setError('列表读取失败，操作已暂停。请稍后重试。');}finally{operation.current=false;setBusy(false);}}
+ function rowActions(task:WorkspaceItem){const {actionHref,label}=workspaceItemDestination(task);return <div className="task-row-actions"><Link prefetch={false} className={task.status==='in_review'?'task-review-action':'secondary-link'} href={actionHref}>{label}</Link>{task.status==='in_review'&&task.canWithdrawSubmission===true&&<Link prefetch={false} className="secondary-link" href={`/admin/review/manage?article=${encodeURIComponent(task.id)}&intent=withdraw`}>撤回送审</Link>}{task.status==='changes_requested'&&<Link prefetch={false} className="secondary-link" href={`/admin/review?article=${encodeURIComponent(task.id)}`}>查看退回原因</Link>}{task.status==='draft'&&<DraftRowAction id={task.id} title={task.title} sequence={task.sequence} publishedRevision={task.publishedRevision} onCompleted={onDraftChanged}/>}</div>;}
  return <>
  {canBulkWithdraw&&<>
  <div className="workspace-batch-toolbar" role="group" aria-label="当前页批量撤回">
@@ -40,8 +42,24 @@ export function TasksList({data,onWithdrawn,onDraftChanged,onReload}:{data:Works
   {error&&<p role="alert" className="task-draft-error">{error}</p>}
   <div className="juyu-confirm-actions"><button type="button" disabled={locked} onClick={close}>取消</button>{blocked&&!uncertain?<button type="button" disabled={busy} onClick={()=>void refresh()}>重新读取列表</button>:null}<button type="button" className="editor-delete-trigger" disabled={busy||blocked&&!uncertain||confirmRows.length===0} onClick={()=>void confirm()}>{busy?'正在撤回…':uncertain?'重试原批次':`确认撤回 ${confirmRows.length} 份`}</button></div>
  </dialog></>}
+ {data.query.view==='cards'?<section className="workspace-catalog" aria-label="资料卡片">{items.map(task=>{
+ const {href}=workspaceItemDestination(task);
+ // Decorative local artwork only; never a substitute for saved article/category metadata.
+ const cover=/店铺/.test(task.title)?'shop':/所有人|拥有人/.test(task.title)?'ownership':/授权/.test(task.title)?'authorization':/密码|找回/.test(task.title)?'recovery':/绑定/.test(task.title)?'binding':task.kind==='ops'?'ownership':task.kind==='reference'?'authorization':task.kind==='qa'?'binding':'security';
+ return <article className="workspace-catalog-card" key={task.id}>
+  <div className="workspace-catalog-cover"><Link prefetch={false} href={href} aria-label={`打开：${task.title}`}><img src={`/illustrations/content-catalog/${cover}.webp`} width="800" height="320" alt="" loading="lazy" decoding="async"/></Link>
+   {canBulkWithdraw&&task.status==='in_review'&&<label className="workspace-catalog-select"><input type="checkbox" aria-label={`选择资料：${task.title}`} disabled={locked||blocked} checked={selected.some(row=>row.id===task.id)} onChange={event=>choose(task,event.target.checked)}/></label>}
+  </div>
+  <div className="workspace-catalog-body"><div className="workspace-catalog-kind">{kinds[task.kind]} · 工作修订 {task.revision}</div><h2><Link prefetch={false} href={href}>{task.title}</Link></h2><TaskCategories task={task}/>
+   <div className="workspace-catalog-state"><span className={`task-state state-${task.status}`}>{statuses.find(state=>state.id===task.status)!.name}</span><span>{publicationLabel(task)}</span></div>
+   <dl className="workspace-catalog-people"><div><dt>编辑人</dt><dd>{task.editor}</dd></div><div><dt>提交人</dt><dd>{task.submitter??'尚未提交'}</dd></div><div><dt>二审人</dt><dd>{task.reviewer??'尚未指定'}</dd></div></dl>
+   <time dateTime={task.updatedAt}>{new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Kuala_Lumpur',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(task.updatedAt))} · 马来西亚时间</time>
+   <footer>{rowActions(task)}</footer>
+  </div>
+ </article>;
+ })}</section>:
  <div className="workspace-table-wrap"><table className="workspace-table"><caption className="sr-only">内容列表</caption><thead><tr><th>标题</th><th>状态</th><th>提交人</th><th>二审人</th><th>更新时间</th><th>操作</th></tr></thead><tbody>{items.map(task=>{
- const {href,actionHref,label}=workspaceItemDestination(task);
- return <tr key={task.id}><td data-label="标题">{canBulkWithdraw&&task.status==='in_review'&&<label className="workspace-select-row"><input type="checkbox" aria-label={`选择资料：${task.title}`} disabled={locked||blocked} checked={selected.some(row=>row.id===task.id)} onChange={event=>choose(task,event.target.checked)}/>选择</label>}<Link prefetch={false} href={href}><strong>{task.title}</strong></Link><small>{kinds[task.kind]} · 工作修订 {task.revision}</small><TaskCategories task={task}/></td><td data-label="状态"><span className={`task-state state-${task.status}`}>{statuses.find(s=>s.id===task.status)!.name}</span>{task.publishedRevision!==null&&task.status!=='published'&&<small>旧正式版继续可读</small>}</td><td data-label="提交人">{task.submitter??'尚未提交'}</td><td data-label="二审人">{task.reviewer??'尚未指定'}</td><td data-label="更新时间"><time dateTime={task.updatedAt}>{new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Kuala_Lumpur',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(task.updatedAt))}</time></td><td data-label="操作"><div className="task-row-actions"><Link prefetch={false} className={task.status==='in_review'?'task-review-action':'secondary-link'} href={actionHref}>{label}</Link>{task.status==='in_review'&&task.canWithdrawSubmission===true&&<Link prefetch={false} className="secondary-link" href={`/admin/review/manage?article=${encodeURIComponent(task.id)}&intent=withdraw`}>撤回送审</Link>}{task.status==='changes_requested'&&<Link prefetch={false} className="secondary-link" href={`/admin/review?article=${encodeURIComponent(task.id)}`}>查看退回原因</Link>}{task.status==='draft'&&<DraftRowAction id={task.id} title={task.title} sequence={task.sequence} publishedRevision={task.publishedRevision} onCompleted={onDraftChanged}/>}</div></td></tr>;
- })}</tbody></table></div></>;
+ const {href}=workspaceItemDestination(task);
+ return <tr key={task.id}><td data-label="标题">{canBulkWithdraw&&task.status==='in_review'&&<label className="workspace-select-row"><input type="checkbox" aria-label={`选择资料：${task.title}`} disabled={locked||blocked} checked={selected.some(row=>row.id===task.id)} onChange={event=>choose(task,event.target.checked)}/>选择</label>}<Link prefetch={false} href={href}><strong>{task.title}</strong></Link><small>{kinds[task.kind]} · 工作修订 {task.revision}</small><TaskCategories task={task}/></td><td data-label="状态"><span className={`task-state state-${task.status}`}>{statuses.find(s=>s.id===task.status)!.name}</span>{task.publishedRevision!==null&&task.status!=='published'&&<small>旧正式版继续可读</small>}</td><td data-label="提交人">{task.submitter??'尚未提交'}</td><td data-label="二审人">{task.reviewer??'尚未指定'}</td><td data-label="更新时间"><time dateTime={task.updatedAt}>{new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Kuala_Lumpur',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(task.updatedAt))}</time></td><td data-label="操作">{rowActions(task)}</td></tr>;
+ })}</tbody></table></div>}</>;
 }

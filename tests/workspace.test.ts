@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {workspaceQuery,workspaceHref,publicationLabel} from '../src/workspace/model.ts';
 import {workspaceResponse} from '../src/server/workspace/http.ts';
+test('catalog view round-trips through filters and pagination without changing scope or content type',()=>{
+ const query=workspaceQuery({kind:'qa',scope:'review',view:'cards',q:'中文 & 问答',page:'2'});
+ const url=new URL(workspaceHref(query,{status:'in_review',page:1}),'https://local.test');
+ assert.equal(url.searchParams.get('view'),'cards');
+ assert.equal(url.searchParams.get('scope'),'review');
+ assert.equal(url.searchParams.get('kind'),'qa');
+ assert.equal(url.searchParams.get('q'),'中文 & 问答');
+ assert.equal(url.searchParams.get('page'),'1');
+ assert.equal(workspaceQuery({view:'list'}).view,'list');
+ assert.equal(workspaceQuery({view:'board'}).view,'board');
+});
 test('workspace query rejects ambiguous filters and treats title as literal text',()=>{
  assert.equal(workspaceQuery({q:'  中文 %_  '}).q,'中文 %_');
  for(const query of [{q:['a','b']},{scope:'toString'},{status:'unknown'},{kind:'constructor'},{page:'1e3'},{page:'0'},{page:'-1'},{q:'x'.repeat(121)},{view:'grid'}])assert.throws(()=>workspaceQuery(query),/INVALID_QUERY/);

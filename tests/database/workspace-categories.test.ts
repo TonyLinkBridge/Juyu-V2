@@ -27,6 +27,9 @@ test('workspace supplies full directory paths for article OPS and Reference with
  const docs=await Promise.all(['article','ops','reference'].map(kind=>draft(kind as ContentKind,[childId,otherId])));await draft('article');
  const data=await new AuthorizationService(db,async()=>admin).workspace({q:'分类核对'});
  assert.equal(data.total,4);assert.equal(data.items.length,4);
+ const cards=await new AuthorizationService(db,async()=>admin).workspace({q:'分类核对',view:'cards'});
+ assert.equal(cards.query.view,'cards');assert.equal(cards.canBulkWithdraw,false);
+ assert.deepEqual(cards.items,data.items);assert.deepEqual(cards.counts,data.counts);
  for(const doc of docs){const item=data.items.find(x=>x.id===doc.id)!;assert.deepEqual(item.categoryPaths,['账户管理 / 账户安全','会员']);assert.deepEqual(item.publishedCategoryPaths,[]);}
  assert.deepEqual(data.items.find(x=>!docs.some(d=>d.id===x.id))!.categoryPaths,[]);
  await fixture.pool.query("UPDATE juyu.categories SET name='账号安全',enabled=false WHERE id=$1",[childId]);

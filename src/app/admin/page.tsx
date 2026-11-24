@@ -18,11 +18,11 @@ export default async function AdminWorkspace({searchParams}:{searchParams:Promis
   const access = await currentAdminAccess();
   if (access.status !== 'admin') redirect(adminDestination(access));
   const params=await searchParams;let data:WorkspaceData|undefined,error:string|undefined;
-  const input={...params,kind:params.kind??(params.scope==='review'?'all':'article'),view:params.view??'list'};
+  const input={...params,kind:params.kind??(params.scope==='review'?'all':'article'),view:params.view??'cards'};
   let query:WorkspaceQuery|undefined;try{query=workspaceQuery(input);}catch{}
   const retryParams=new URLSearchParams();for(const [key,value] of Object.entries(input)){if(typeof value==='string')retryParams.set(key,value);else if(Array.isArray(value))for(const item of value)retryParams.append(key,item);}
   const retryHref='/admin?'+retryParams;
-  try{data=await (await applicationAuthorization()).workspace({...params,kind:params.kind??(params.scope==='review'?'all':'article'),view:params.view??'list'});}catch(e){error=e instanceof Error&&e.message==='INVALID_QUERY'?'筛选条件无效，请重新读取内容后设置。':'请稍后重试，或检查服务连接。';}
+  try{data=await (await applicationAuthorization()).workspace({...params,kind:params.kind??(params.scope==='review'?'all':'article'),view:params.view??'cards'});}catch(e){error=e instanceof Error&&e.message==='INVALID_QUERY'?'筛选条件无效，请重新读取内容后设置。':'请稍后重试，或检查服务连接。';}
   return <EntryShell><NewAnnouncements/><TasksWorkspace query={query} retryHref={retryHref} data={data} error={error} account={<EmployeeSignOut audience="admin"/>}/></EntryShell>;
  });
 }

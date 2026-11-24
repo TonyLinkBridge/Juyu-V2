@@ -18,7 +18,7 @@ export async function arcBrowserBundle(name:string,entry:string){
  const {webpack}=require('next/dist/compiled/webpack/webpack');
  await new Promise<void>((done,reject)=>{const compiler=webpack({mode:'development',devtool:false,entry:resolve(dir,'entry.js'),output:{path:dir,filename:'bundle.js'},resolve:{extensions:['.tsx','.ts','.js','.json'],modules:[resolve('node_modules')],alias:{'next/navigation':navigation,'next/form':form,'next/link':link}},module:{rules:[cssRule,{test:/\.tsx?$/,exclude:/node_modules/,use:resolve('tests/helpers/fixture-typescript-loader.mjs')},{test:/\.js$/,resolve:{fullySpecified:false}}]}});compiler.run((error:Error|null,stats:{hasErrors():boolean;toString():string})=>compiler.close(()=>error||stats.hasErrors()?reject(error??new Error(stats.toString())):done()));});
  const built=await Promise.all((await readdir('.next/static/chunks')).filter(n=>n.endsWith('.css')).map(n=>readFile(`.next/static/chunks/${n}`,'utf8')));
- return {script:await readFile(resolve(dir,'bundle.js'),'utf8'),css:built.join('\n')+await readFile('src/app/globals.css','utf8')+await readFile('src/app/admin/admin-data.css','utf8')+await readFile('src/app/loading.css','utf8')};
+ return {script:await readFile(resolve(dir,'bundle.js'),'utf8'),css:built.join('\n')+await readFile('src/app/globals.css','utf8')+await readFile('src/app/admin/admin-data.css','utf8')+await readFile('src/app/loading.css','utf8')+await readFile('src/components/tasks/content-catalog.css','utf8')};
 }
 export async function prepareArcSources(dir:string){
  const ts=(await import('typescript')).default;
