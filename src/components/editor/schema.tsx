@@ -4,7 +4,7 @@ import {nativeTextColor,nativeBackgroundColor} from './colors';
 import type {EditorBlock} from '../../editor/document';
 import {createContext,useContext} from 'react';
 import {BlockNoteSchema,defaultBlockSpecs,defaultInlineContentSpecs,defaultStyleSpecs,createCodeBlockSpec} from '@blocknote/core';
-import {createReactBlockSpec,createReactInlineContentSpec} from '@blocknote/react';
+import {createReactBlockSpec,createReactInlineContentSpec,ReactImageBlock,ReactVideoBlock,ReactAudioBlock,ReactFileBlock} from '@blocknote/react';
 import {fromCanvasBlocks} from '../../editor/inline-canvas';
 import {readerIconKey} from '../../reader/icon-keys';
 import {ReaderIcon} from '../../reader/icons';
@@ -66,7 +66,8 @@ export function createEditorSchema(nodes:EditorBlock[]=[]){
  const supportedLanguages:Record<string,{name:string}>={text:{name:'纯文本'},javascript:{name:'JavaScript'},typescript:{name:'TypeScript'},json:{name:'JSON'},html:{name:'HTML'},css:{name:'CSS'},python:{name:'Python'},sql:{name:'SQL'},bash:{name:'Shell'},yaml:{name:'YAML'},markdown:{name:'Markdown'}};
  const visit=(nodes:EditorBlock[])=>{for(const node of nodes){if(node.type==='codeBlock'&&node.props.language&&!supportedLanguages[node.props.language])supportedLanguages[node.props.language]={name:node.props.language};visit(node.children);}};visit(nodes);
  return BlockNoteSchema.create({
- blockSpecs:{...defaultBlockSpecs,paragraph:paragraphLineSpec,table:borderTableSpec,codeBlock:createCodeBlockSpec({supportedLanguages}),juyu:juyu()},
+ // React file wrappers listen for both upload start and end, including failures.
+ blockSpecs:{...defaultBlockSpecs,image:ReactImageBlock(),video:ReactVideoBlock(),audio:ReactAudioBlock(),file:ReactFileBlock(),paragraph:paragraphLineSpec,table:borderTableSpec,codeBlock:createCodeBlockSpec({supportedLanguages}),juyu:juyu()},
  inlineContentSpecs:{...defaultInlineContentSpecs,juyuInline},
  styleSpecs:{...defaultStyleSpecs,textColor:nativeTextColor,backgroundColor:nativeBackgroundColor},
 });

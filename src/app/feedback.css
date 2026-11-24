@@ -124,3 +124,15 @@
 @media(max-width:760px){.editor-outline-guidance{margin-inline:24px}}
 
 .editor-settings-actions>button[data-slot=copy-button]{display:flex;justify-content:flex-start;gap:8px}
+
+.editor-upload-recovery{margin:16px 0;padding:14px 16px;border:1px solid var(--brand);border-radius:8px;background:var(--panel);font-size:13px}
+.editor-upload-recovery>strong{color:var(--brand)}
+.editor-upload-recovery ul{list-style:none;padding:0;margin:10px 0}
+.editor-upload-recovery li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.editor-upload-recovery li>div:first-child{min-width:0;overflow-wrap:anywhere}
+.editor-upload-recovery p{margin:5px 0;color:var(--muted);line-height:1.6}
+.editor-upload-recovery-actions{display:flex;gap:8px;flex:none}
+.editor-upload-recovery-actions button{min-height:36px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink);padding:6px 10px;cursor:pointer}
+.editor-upload-recovery-actions button:disabled{opacity:.5;cursor:not-allowed}
+.editor-paste-hint{margin:0 54px 14px;color:var(--muted);font-size:12px;line-height:1.6}
+@media(max-width:640px){.editor-upload-recovery li{align-items:flex-start;flex-direction:column}.editor-paste-hint{margin-inline:48px 24px}}

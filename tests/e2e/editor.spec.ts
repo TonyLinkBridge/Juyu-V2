@@ -800,7 +800,7 @@ test('an open publication confirmation explains uploading even when the draft is
  await mount(page,()=>article);await page.getByRole('button',{name:'批准并发布',exact:true}).click();await settings(page,'封面与附件');await page.getByRole('button',{name:'关闭文章设置',exact:true}).click();
  // Start the real upload from the settings input, then return to the open confirmation.
  await settings(page,'封面与附件');await page.getByLabel('上传文件',{exact:true}).setInputFiles({name:'sample.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9jjCcAAAAASUVORK5CYII=','base64')});await closeSettings(page);
- const dialog=page.getByRole('dialog',{name:'批准并发布'});await expect(page.locator('.save-state')).toContainText('所有修改已保存');await expect(dialog.getByRole('button',{name:'确认发布',exact:true})).toBeDisabled();await expect(dialog.getByRole('status')).toContainText('上传');release();await expect(dialog.getByRole('button',{name:'确认发布',exact:true})).toBeEnabled();
+ const dialog=page.getByRole('dialog',{name:'批准并发布'});await expect(page.locator('.save-state')).toContainText('文件正在上传');await expect(dialog.getByRole('button',{name:'确认发布',exact:true})).toBeDisabled();await expect(dialog.getByRole('status')).toContainText('上传');release();await expect(dialog.getByRole('button',{name:'确认发布',exact:true})).toBeEnabled();
 });
 
 // Already-open tools must obey the same publication lock as the writing surface.
