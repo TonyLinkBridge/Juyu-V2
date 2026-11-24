@@ -1,11 +1,24 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {Pool,type PoolConfig} from 'pg';
+import {Client,Pool,type PoolClient,type PoolConfig} from 'pg';
 import {loadComponent} from './helpers/render-component.ts';
 
 test('both application pools keep the request alive until idle connections can close',async t=>{
  const pools:Pool[]=[];
- class ObservedPool extends Pool {constructor(options:PoolConfig){super(options);pools.push(this);}}
+ // Exercise the helper's real connect/release tracking without a database socket.
+ // Promise and callback acquisition are both used by pg consumers.
+ type ConnectCallback=Parameters<Pool['connect']>[0];
+ class ObservedPool extends Pool {
+  constructor(options:PoolConfig){super(options);pools.push(this);}
+  override connect():Promise<PoolClient>;
+  override connect(callback:ConnectCallback):void;
+  override connect(callback?:ConnectCallback):Promise<PoolClient>|void {
+   const client=new Client() as PoolClient;
+   client.release=()=>{this.emit('release',undefined,client);};
+   if(callback){callback(undefined,client,client.release);return;}
+   return Promise.resolve(client);
+  }
+ }
  const pending:Promise<unknown>[]=[];
  const context=Symbol.for('@vercel/request-context');
  const globals=globalThis as typeof globalThis&{[key:symbol]:unknown};
@@ -19,7 +32,10 @@ test('both application pools keep the request alive until idle connections can c
   const open=app.applicationDatabase as ()=>unknown;
   assert.equal(open(),open(),'a repeated request reuses its pools');
   assert.equal(pools.length,2);
-  for(const pool of pools)pool.emit('release',null,{});
+  const clients=await Promise.all(pools.map((pool,index)=>index===0?pool.connect():new Promise<PoolClient>((resolve,reject)=>pool.connect((error,client)=>{if(error)reject(error);else if(client)resolve(client);else reject(new Error('Fixture client missing'));}))));
+  // A delayed release must retain the request captured when borrowing the client.
+  globals[context]={get:()=>undefined};
+  for(const client of clients)client.release();
   assert.equal(pending.length,2,'both runtime and issuer release must register background cleanup');
   t.mock.timers.tick(20000);await Promise.all(pending);
  }finally{
