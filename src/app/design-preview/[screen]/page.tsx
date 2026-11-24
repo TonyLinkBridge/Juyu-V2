@@ -1,6 +1,7 @@
 import '../../forms-settings.css';
 import '../../admin/fumadocs-theme.css';
 import '../../admin/admin-data.css';
+import '../../../components/tasks/content-catalog.css';
 import {AdminPageSkeleton,MediaPageSkeleton,AnalyticsPageSkeleton,EditorPageSkeleton} from '../../../components/loading/LoadingSkeletons';
 import {ReaderContentSkeleton} from '../../../components/loading/ReaderRouteLoading';
 import {FumadocsDocsLayout} from '../../../components/fumadocs/FumadocsDocsLayout';

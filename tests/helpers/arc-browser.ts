@@ -9,7 +9,7 @@ export async function arcBrowserBundle(name:string,entry:string){
  await writeFile(resolve(dir,'package.json'),'{"type":"module"}');
  const cssRule=await prepareUserMenuFixture(dir);
  await writeFile(resolve(dir,'entry.js'),entry);
- const navigation=resolve(dir,'navigation.cjs');await writeFile(navigation,`exports.useRouter=()=>({push:path=>window.location.assign(path),prefetch:()=>{},refresh:()=>{}});`);
+ const navigation=resolve(dir,'navigation.cjs');await writeFile(navigation,`exports.useRouter=()=>({push:path=>window.__workspaceNavigate?window.__workspaceNavigate(path):window.location.assign(path),prefetch:()=>{},refresh:()=>{}});`);
  // Isolated browser fixtures have no Next router. Mock only framework navigation,
  // retaining native GET submission and real production components.
  const form=resolve(dir,'form.cjs'),link=resolve(dir,'link.cjs');

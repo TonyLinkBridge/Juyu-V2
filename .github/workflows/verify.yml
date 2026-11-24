@@ -22,7 +22,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run verify:build
       - run: npm run test:critical
-      - name: Verify reader navigation feedback
+      - name: Verify reader and workspace navigation feedback
         run: npm run test:reader-navigation
       - name: Verify all database contracts
         run: npm run test:db

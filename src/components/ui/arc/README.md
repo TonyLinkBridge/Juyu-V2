@@ -1,12 +1,13 @@
 # UIArc components in JUYU
 
-Official registry TSX and CSS Modules, retrieved 2026-10-08. Registry URLs and SHA-256 receipts are in [sources.json](sources.json); copyright and MIT notice are retained in [LICENSE](LICENSE). No extra dependency was installed.
+Official registry TSX and CSS Modules, retrieved 2026-10-08. Registry URLs and SHA-256 receipts are in [sources.json](sources.json); copyright and MIT notice are retained in [LICENSE](LICENSE). The Select addition (2026-11-24) uses pinned `@radix-ui/react-select@2.4.1`; installation scripts were disabled and the production audit matched the baseline without new advisories.
 
 | Component | Production integration | Local adaptations |
 | --- | --- | --- |
 | File Dropzone | Media upload dialog | Chinese labels; explicit-submit staging, disabled controls, external upload status/progress, safe retry callback |
 | Action Button | Media upload and category save | Chinese labels supplied by caller; synchronous duplicate-click guard; success only after acknowledged action; optional live announcement when the host form already has its own status; JUYU action color tokens |
-| Filter Toolbar | Content workspace and media library | Chinese labels; URL-backed filter add/remove/clear |
+| Filter Toolbar | Content workspace and media library | Chinese labels; URL-backed filter add/remove/clear; content workspace opts into a fixed-size compact menu, opening its sole status field directly |
+| Select | Content workspace material type | Ordinary Arc Select, Radix keyboard/form behavior, portal theme scope; 150ms entrance and reduced-motion handling; no rolling blur |
 | Multi-select | Article category assignment | Chinese label defaults; full hierarchy paths and effective-access hints from existing category model; max 20; menu flips upward and scrolls within a short drawer |
 | Sortable Data Table | Media list | Chinese labels; controlled manual server sorting before pagination; current detail-row highlight |
 | Date Range Picker | Analytics | Chinese labels and locale; calendar bounds validated on server and shared with employee detail |

@@ -33,7 +33,7 @@ test('workspace filters by personal scope, kind and status and resets page via k
  await expect(page.locator('.tasks-results [role=status]')).toContainText('共 6 篇 · 第 1 / 1 页');await expect(page.getByRole('link',{name:'退回给我的',exact:true})).toHaveAttribute('aria-current','page');
  await page.reload();await expect(page.getByRole('link',{name:'退回给我的',exact:true})).toHaveAttribute('aria-current','page');
  await page.getByRole('link',{name:'待我审核',exact:true}).click();await expect(page.getByRole('heading',{name:'没有符合条件的内容'})).toBeVisible();
- await page.getByRole('button',{name:'清除全部',exact:true}).click();await page.getByLabel('资料类型').selectOption('ops');await page.getByRole('button',{name:'应用筛选'}).click();await expect(page.locator('.tasks-results [role=status]')).toContainText('共 12 篇');
+ await page.getByRole('button',{name:'清除全部',exact:true}).click();await page.getByRole('combobox',{name:'资料类型'}).click();await page.getByRole('option',{name:'OPS Internal',exact:true}).click();await expect(page.locator('.tasks-results [role=status]')).toContainText('共 12 篇');
  await page.getByRole('navigation',{name:'按状态查看'}).getByRole('link',{name:/^草稿\s*6$/}).click();await expect(page.locator('.tasks-results [role=status]')).toContainText('共 6 篇');
  await page.getByLabel('搜索标题').fill('no-match');await page.getByRole('button',{name:'应用筛选'}).click();await expect(page.getByRole('heading',{name:'没有符合条件的内容'})).toBeVisible();
 });
@@ -63,7 +63,7 @@ test('R08 Reference workspace exposes the matching title and editor type',async(
 
 test('content toolbar applies real status and removes only that condition',async({page})=>{
  await fixture(page);await page.goto('/admin?q=资料&kind=article&scope=submitted&view=list&page=2');
- await page.getByRole('button',{name:'添加筛选',exact:true}).click();await page.getByRole('menuitem',{name:/^内容状态/}).click();await page.getByRole('menuitemradio',{name:'已经发布',exact:true}).click();
+ await page.getByRole('button',{name:'添加筛选',exact:true}).click();await page.getByRole('menuitemradio',{name:'已经发布',exact:true}).click();
  await expect(page).toHaveURL(/status=published/);const params=new URL(page.url()).searchParams;
  expect(Object.fromEntries(params)).toMatchObject({q:'资料',kind:'article',scope:'submitted',view:'list',status:'published',page:'1'});
  await expect(page.locator('.tasks-results [role=status]')).toContainText('共 6 篇');

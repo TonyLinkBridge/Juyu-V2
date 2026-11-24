@@ -68,3 +68,15 @@
 /* In a column the frame must size from its height, not a zero flex basis, or its spring is ignored and a new line of chips snaps. */
 @media (max-width: 520px) { .toolbar { align-items: stretch; flex-direction: column; } .frame { flex: none; } .actions { justify-content: flex-end; } }
 @media (prefers-reduced-motion: reduce) { .chip button, .clear, .surface, .back { transition: none; } .chip button:active, .clear:active { transform: none; } }
+
+/* JUYU compact presentation: fixed geometry and a short composited entrance. */
+.menu[data-presentation="compact"] .trigger { border-color: var(--border); background: var(--surface); }
+.menu[data-presentation="compact"][data-state="open"] .trigger { pointer-events: auto; background: var(--surface-muted); }
+.menu[data-presentation="compact"] .surface { top: calc(100% + 6px); transition: none; }
+.menu[data-presentation="compact"][data-y="up"] .surface { top: auto; bottom: calc(100% + 6px); }
+.menu[data-presentation="compact"][data-state="closed"] .surface { visibility: hidden; pointer-events: none; }
+.menu[data-presentation="compact"][data-state="open"] .surface { animation: compact-in 150ms ease-out both; }
+.menu[data-presentation="compact"] .trigger:disabled { opacity: .55; cursor: wait; }
+.menu[data-presentation="compact"] .list { max-height: min(20rem,55vh,var(--filter-menu-list-height,55vh)); }
+@keyframes compact-in { from { opacity: 0; transform: translateY(3px); } }
+@media (prefers-reduced-motion: reduce) { .menu[data-presentation="compact"][data-state="open"] .surface { animation: none; } }

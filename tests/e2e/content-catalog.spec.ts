@@ -38,7 +38,7 @@ test('catalog filters use server navigation, preserve cards, and ordinary admins
  await expect(page.getByRole('region',{name:'资料卡片'}).locator('article')).toHaveCount(1);
  expect(new URL(page.url()).searchParams.get('view')).toBe('cards');
  await page.getByRole('button',{name:'添加筛选',exact:true}).click();
- await page.getByRole('menuitem',{name:/^内容状态/}).click();
+
  await page.getByRole('menuitemradio',{name:'已经发布',exact:true}).click();
  await expect(page.getByRole('heading',{name:'没有符合条件的内容'})).toBeVisible();
  expect(new URL(page.url()).searchParams.get('view')).toBe('cards');

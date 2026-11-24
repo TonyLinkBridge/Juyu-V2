@@ -11,7 +11,7 @@ async function open(page:import('@playwright/test').Page,query='kind=article&sco
 }
 test('official filter menu changes real status and preserves workspace context',async({page})=>{
  await open(page);await page.getByRole('button',{name:'添加筛选',exact:true}).click();
- await page.getByRole('menuitem',{name:/^内容状态/}).click();
+
  await page.getByRole('menuitemradio',{name:'已经发布',exact:true}).click();
  await expect(page).toHaveURL(/status=published/);
  const params=new URL(page.url()).searchParams;
@@ -43,5 +43,5 @@ test('failed clipboard and legacy fallback show an honest error without losing i
 });
 
 test('changing material type applies the real kind and keeps the search context',async({page})=>{
- await open(page);await page.getByLabel('资料类型').selectOption('ops');await expect(page).toHaveURL(/kind=ops/);const params=new URL(page.url()).searchParams;expect(params.get('scope')).toBe('submitted');expect(params.get('q')).toBe('域名');expect(params.get('page')).toBe('1');
+ await open(page);await page.getByRole('combobox',{name:'资料类型'}).click();await page.getByRole('option',{name:'OPS Internal',exact:true}).click();await expect(page).toHaveURL(/kind=ops/);const params=new URL(page.url()).searchParams;expect(params.get('scope')).toBe('submitted');expect(params.get('q')).toBe('域名');expect(params.get('page')).toBe('1');
 });

@@ -31,6 +31,12 @@
       "component": "date-range-picker",
       "source": "https://uiarc.dev/r/date-range-picker.json",
       "sha256": "96e983e9e5bafade5601392e9569a7a6c56be0904a784bb36db15c306b279ed8"
+    },
+    {
+      "component": "select",
+      "source": "https://uiarc.dev/r/select.json",
+      "retrieved": "2026-11-24",
+      "sha256": "7bcfa2f43efbb0a27e708dd819472f7ca5430c343e01843d5389a64f2645b5b1"
     }
   ]
 }

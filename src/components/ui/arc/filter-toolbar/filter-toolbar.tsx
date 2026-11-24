@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import type { FocusEvent, KeyboardEvent, MouseEvent, ReactNode, RefObject } from "react";
+import type { CSSProperties, FocusEvent, KeyboardEvent, MouseEvent, ReactNode, RefObject } from "react";
 import { Check, ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import { AnimatePresence, animate, motion, useIsPresent, useMotionValue, useReducedMotion, useTransform, type HTMLMotionProps, type MotionValue, type Variants } from "motion/react";
 import { motionTokens } from "../lib/motion-tokens";
@@ -20,6 +20,9 @@ export interface FilterMenuProps {
   label?: string;
   /** The trigger edge the panel lines up with. It flips or shifts when the viewport, or a clipping ancestor, has no room. */
   align?: "start" | "end";
+  /** Compact menus open at their final size; a sole field opens directly. */
+  presentation?: "morph" | "compact";
+  disabled?: boolean;
 }
 export interface FilterToolbarProps {
   filters: FilterChip[];
@@ -214,15 +217,18 @@ function roomFor(node: HTMLElement) {
 
 /** An Add filter button that grows into its own menu: pick a field, then a value. The shape springs between the
  *  button and the panel, and the panel renders in place, so keep its ancestors free of overflow clipping. */
-export function FilterMenu({ fields, onSelect, active = [], label = "添加筛选", align = "end" }: FilterMenuProps) {
+export function FilterMenu({ fields, onSelect, active = [], label = "添加筛选", align = "end", presentation = "morph", disabled = false }: FilterMenuProps) {
+  const compact = presentation === "compact";
+  const directFieldId = compact && fields.length === 1 ? fields[0].id : null;
   const reduced = useReducedMotion() ?? false;
   const id = useId(), panelId = `${id}panel`, titleId = `${id}title`;
   const root = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null), panel = useRef<HTMLDivElement>(null);
   const phaseRef = useRef<Phase>("closed"), run = useRef(0), focusNext = useRef<FocusRequest | null>(null);
   const [phase, setPhase] = useState<Phase>("closed");
-  const [fieldId, setFieldId] = useState<string | null>(null);
+  const [fieldId, setFieldId] = useState<string | null>(directFieldId);
   const [direction, setDirection] = useState(1);
   const [up, setUp] = useState(false);
+  const [listMaxHeight,setListMaxHeight]=useState<number>();
   // The content scales up from the trigger's center, so it reads as growing out of the button.
   const [origin, setOrigin] = useState("100% 0");
   // The surface is the button's own rounded rectangle. At rest it fills the trigger; while open it springs to the panel.
@@ -242,24 +248,30 @@ export function FilterMenu({ fields, onSelect, active = [], label = "添加筛�
 
   const openMenu = useCallback((focus: FocusRequest) => {
     const button = trigger.current, content = panel.current;
-    if (!button || !content) return;
+    if (!button || !content || disabled) return;
     const rect = button.getBoundingClientRect(), panelWidth = content.offsetWidth + 2, panelHeight = content.offsetHeight + 2;
     const room = roomFor(root.current ?? button), gutter = 16;
     const min = room.left + gutter - rect.left, max = room.right - gutter - rect.left - panelWidth, end = rect.width - panelWidth;
     let x = align === "end" ? (end >= min ? end : 0 <= max ? 0 : end) : (0 <= max ? 0 : end >= min ? end : 0);
     x = Math.round(Math.min(Math.max(x, min), Math.max(min, max)));
-    const below = room.bottom - rect.top, above = rect.bottom - room.top;
+    const below = room.bottom - (compact ? rect.bottom + 6 : rect.top), above = (compact ? rect.top - 6 : rect.bottom) - room.top;
     const nextUp = below < panelHeight + gutter && above > below;
+    // Compact panels sit outside the button. Leave room for the header, padding and border;
+    // if neither side fits the full list, scroll the list within the larger visible side.
+    const list = content.querySelector<HTMLElement>('[role="menu"]');
+    const frameHeight = content.offsetHeight - (list?.offsetHeight ?? 0) + 6;
+    if(compact)setListMaxHeight(Math.max(0,(nextUp?above:below)-gutter-frameHeight));
     if (phaseRef.current === "closed") { width.jump(rect.width); height.jump(rect.height); left.jump(0); }
     target.jump(x); from.jump(rect.width); to.jump(panelWidth);
     phaseRef.current = "open"; run.current += 1; focusNext.current = focus;
-    setPhase("open"); setUp(nextUp); setFieldId(null); setDirection(-1);
+    setPhase("open"); setUp(nextUp); setFieldId(directFieldId); setDirection(-1);
     setOrigin(`${Math.round(rect.width / 2 - x)}px ${nextUp ? "100%" : "0"}`);
+    if(compact){left.jump(x);width.jump(panelWidth);height.jump(panelHeight);return;}
     const transition = reduced ? still : motionTokens.spring.morph;
     animate(left, x, transition);
     animate(width as MotionValue<number>, panelWidth, transition);
     animate(height as MotionValue<number>, panelHeight, transition);
-  }, [align, from, height, left, reduced, target, to, width]);
+  }, [align, compact, directFieldId, disabled, from, height, left, reduced, target, to, width]);
 
   const closeMenu = useCallback((restore: false | "keyboard" | "pointer") => {
     const button = trigger.current;
@@ -269,6 +281,7 @@ export function FilterMenu({ fields, onSelect, active = [], label = "添加筛�
     setPhase("closing");
     // Focus returns to the trigger; its ring shows only when the menu was closed from the keyboard.
     if (restore) button.focus({ preventScroll: true, focusVisible: restore === "keyboard" } as FocusOptions);
+    if(compact){phaseRef.current="closed";setPhase("closed");setFieldId(directFieldId);return;}
     // Closing is quicker than opening: the snappy spring lands the shape back on the button.
     const transition = reduced ? still : motionTokens.spring.snappy;
     animate(left, 0, transition);
@@ -280,7 +293,7 @@ export function FilterMenu({ fields, onSelect, active = [], label = "添加筛�
       width.jump("100%"); height.jump("100%");
       setPhase("closed"); setFieldId(null);
     } });
-  }, [height, left, reduced, width]);
+  }, [compact, directFieldId, height, left, reduced, width]);
 
   // A new step changes the panel height; the surface follows on the smooth spring instead of snapping.
   useLayoutEffect(() => {
@@ -288,11 +301,12 @@ export function FilterMenu({ fields, onSelect, active = [], label = "添加筛�
     if (!content || typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(() => {
       if (phaseRef.current !== "open") return;
+      if(compact){height.jump(content.offsetHeight+2);return;}
       animate(height as MotionValue<number>, content.offsetHeight + 2, reduced ? still : motionTokens.spring.smooth);
     });
     observer.observe(content);
     return () => observer.disconnect();
-  }, [height, reduced]);
+  }, [compact, height, reduced]);
 
   // Focus moves into the panel once it is interactive: an item for keyboard users, the dialog itself for the pointer.
   useLayoutEffect(() => {
@@ -325,10 +339,10 @@ export function FilterMenu({ fields, onSelect, active = [], label = "添加筛�
     if (event.defaultPrevented) return;
     const items = Array.from(panel.current?.querySelectorAll<HTMLElement>("[data-current] [data-row]") ?? []);
     if (event.key === "ArrowDown" || event.key === "ArrowUp") { event.preventDefault(); (event.key === "ArrowDown" ? items[0] : items.at(-1))?.focus({ preventScroll: true }); }
-    if (event.key === "ArrowLeft" && field) { event.preventDefault(); goBack(true); }
+    if (event.key === "ArrowLeft" && field && !directFieldId) { event.preventDefault(); goBack(true); }
   }
   function goBack(keyboard: boolean) {
-    if (!field) return;
+    if (!field || directFieldId) return;
     focusNext.current = keyboard ? { key: field.id } : "panel";
     setDirection(-1); setFieldId(null);
   }
@@ -356,33 +370,33 @@ export function FilterMenu({ fields, onSelect, active = [], label = "添加筛�
     exit: (dir: number) => reduced ? { opacity: 0, transition: still } : { opacity: 0, x: dir * -18, filter: blur(motionTokens.blur.subtle), transition: leave },
   };
 
-  return <div ref={root} className={styles.menu} data-state={phase} data-y={up ? "up" : "down"}
+  return <div ref={root} className={styles.menu} data-presentation={presentation} data-state={phase} data-y={up ? "up" : "down"} style={compact?{'--filter-menu-list-height':listMaxHeight===undefined?undefined:`${listMaxHeight}px`} as CSSProperties:undefined}
     onKeyDown={event => { if (event.key === "Escape" && phaseRef.current === "open") { event.preventDefault(); event.stopPropagation(); closeMenu("keyboard"); } }}
     onBlur={event => { const next = event.relatedTarget as Node | null; if (phaseRef.current === "open" && next && !root.current?.contains(next)) closeMenu(false); }}>
-    <button ref={trigger} type="button" className={styles.trigger} data-filter-trigger="" aria-haspopup="dialog" aria-expanded={open} aria-controls={panelId} tabIndex={open ? -1 : undefined}
-      onClick={event => { if (phaseRef.current !== "open") openMenu(event.detail === 0 ? "first" : "panel"); }}
+    <button ref={trigger} type="button" disabled={disabled} className={styles.trigger} data-filter-trigger="" aria-haspopup="dialog" aria-expanded={open} aria-controls={panelId} tabIndex={open && !compact ? -1 : undefined}
+      onClick={event => { if(compact && open)closeMenu(event.detail===0?"keyboard":"pointer");else if (phaseRef.current !== "open") openMenu(event.detail === 0 ? "first" : "panel"); }}
       onKeyDown={event => { if (event.key === "ArrowDown" || event.key === "ArrowUp") { event.preventDefault(); openMenu(event.key === "ArrowDown" ? "first" : "last"); } }}>
-      <motion.span className={styles.face} style={faceStyle}>
+      <motion.span className={styles.face} style={compact?undefined:faceStyle}>
         <Plus size={15} strokeWidth={1.8} aria-hidden="true" />{label}
       </motion.span>
     </button>
     <motion.div className={styles.surface} style={{ left, width, height }}>
       <motion.div ref={panel} id={panelId} className={styles.panel} role="dialog" aria-labelledby={titleId} tabIndex={-1} inert={!open} style={{ x: panelX }} onKeyDown={onPanelKeyDown}>
-        <motion.div style={contentStyle}>
+        <motion.div style={compact?undefined:contentStyle}>
           <div className={styles.head}>
             <AnimatePresence initial={false}>
-              {field ? <motion.button key="back" type="button" className={styles.back} aria-label="返回筛选项目" onClick={event => goBack(event.detail === 0)}
+              {field && !directFieldId ? <motion.button key="back" type="button" className={styles.back} aria-label="返回筛选项目" onClick={event => goBack(event.detail === 0)}
                 initial={reduced ? { opacity: 0, width: 28, marginRight: 2 } : { opacity: 0, width: 0, marginRight: 0, scale: .6 }} animate={{ opacity: 1, width: 28, marginRight: 2, scale: 1 }}
                 exit={reduced ? { opacity: 0, transition: still } : { opacity: 0, width: 0, marginRight: 0, scale: .6, transition: { ...motionTokens.spring.snappy, opacity: leave } }}
                 transition={reduced ? fade : { ...motionTokens.spring.snappy, opacity: enter }}><ChevronLeft size={16} strokeWidth={1.8} aria-hidden="true" /></motion.button> : null}
             </AnimatePresence>
             <span className={styles.title} id={titleId}>
-              <AnimatePresence mode="popLayout" initial={false}><motion.span key={field?.id ?? "fields"} className={styles.titleText} {...textMotion(reduced)}>{field ? field.label : label}</motion.span></AnimatePresence>
+              <AnimatePresence mode="popLayout" initial={false}><motion.span key={field?.id ?? "fields"} className={styles.titleText} {...(compact?{}:textMotion(reduced))}>{field ? field.label : label}</motion.span></AnimatePresence>
             </span>
           </div>
           <div className={styles.stage}>
             <AnimatePresence mode="popLayout" initial={false} custom={direction}>
-              <motion.div key={field?.id ?? "fields"} className={styles.step} custom={direction} variants={step} initial="enter" animate="center" exit="exit">
+              <motion.div key={field?.id ?? "fields"} className={styles.step} custom={direction} variants={compact?undefined:step} initial={compact?false:"enter"} animate="center" exit={compact?undefined:"exit"}>
                 {field
                   ? <MenuList rows={valueRows} labelledBy={titleId} radio onChoose={chooseValue} onBack={goBack} onLeave={() => panel.current?.focus({ preventScroll: true })} />
                   : <MenuList rows={fieldRows} labelledBy={titleId} onChoose={chooseField} onLeave={() => panel.current?.focus({ preventScroll: true })} />}

@@ -67,3 +67,13 @@
 @media(max-width:767px){.tasks-catalog-workspace[data-workspace-view=board] .tasks-mobile-label{display:block}}
 /* Preserve the existing phone list fallback for old board links; offer the two actual phone layouts. */
 @media(max-width:767px){.tasks-catalog-workspace .tasks-view-switch a[href*="view=board"]{display:none}.tasks-catalog-workspace[data-workspace-view=board] .tasks-view-switch a[href*="view=list"]{background:var(--accent-soft);color:var(--brand)}}
+
+.tasks-catalog-workspace .workspace-filter-fields{border:0;padding:0;margin:0;min-width:0}
+.tasks-catalog-workspace .tasks-filters .workspace-kind-select{min-width:150px}
+.tasks-catalog-workspace .workspace-kind-select button[role=combobox]{min-height:42px;font-size:13px;border-radius:7px}
+.tasks-catalog-workspace .workspace-kind-select>div{gap:6px}
+.tasks-catalog-workspace .workspace-filter-fields>.juyu-arc{margin-top:10px}
+.tasks-catalog-workspace .workspace-filter-feedback{min-height:0;margin:0;color:var(--muted);font-size:12px}
+.tasks-catalog-workspace .workspace-filter-feedback:not(:empty){margin-top:8px}
+.tasks-catalog-workspace .workspace-filter-fields:disabled .task-apply{cursor:wait;opacity:.65}
+@media(max-width:767px){.tasks-catalog-workspace .tasks-filters .workspace-kind-select{min-width:0}}
