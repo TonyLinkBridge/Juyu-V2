@@ -29,3 +29,10 @@
 - Visual inspection: two columns at desktop width, two stacked items on mobile, theme-token backgrounds/badges; no horizontal overflow or clipped English guidance. English progress calculation, publication labels and action links are unchanged.
 - Reviewer confirmed the existing English-status priority is retained (an existing English publication remains labeled published while a revision exists). No workflow/status-model changes were made as part of this layout request.
 - Stable local preview images are copied to the task visualization directory as juyu-editor-version-summary-{light,dark,mobile}-20261125.png. No production pages/data were edited or saved.
+
+## Authorized release and CI follow-up
+
+- User authorized pushing with “推”. Commit 2e81669 was pushed to main; Vercel deployed that exact release. An authenticated read-only production check confirmed the new card in both themes, restored the original theme and left the editor clean without saving.
+- Verify run 45434765043 passed build/unit checks and 656 browser cases, skipped one existing case, and failed the mobile native paragraph-drag case. The trace showed the drop at y=787 inside the fixed bottom tool rail after the summary moved the body lower. The original test reproduced this failure three out of three times locally.
+- Center the final paragraph before measuring drag endpoints. Keep the actual pointer drag, persisted order after reload, native deletion, undo and unique-block-identity assertions unchanged. The production implementation is unchanged by this correction.
+- Corrected native-drag case passed six out of six runs: three desktop and three mobile. All runs used local HTTP fixtures and empty production credentials. A fresh full Verify run remains required after pushing this test correction.

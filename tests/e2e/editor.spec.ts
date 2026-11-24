@@ -705,6 +705,8 @@ test('native drag handle changes paragraph order and native menu deletion can be
  let saved={...structuredClone(editorFixture),body:'JUYU_BLOCKNOTE_V1\n'+JSON.stringify(['第一段','第二段','第三段'].map((text,i)=>({id:'drag-'+i,type:'paragraph',content:[{type:'text',text,styles:{}}]})))};
  await page.route('**/api/admin/editor/*',route=>{saved={...saved,...route.request().postDataJSON(),sequence:saved.sequence+1};return route.fulfill({json:saved});});
  await mount(page,()=>saved);const first=page.locator('.bn-editor [data-content-type="paragraph"]').filter({hasText:'第一段'}),last=page.locator('.bn-editor [data-content-type="paragraph"]').filter({hasText:'第三段'});
+ // Keep both drag endpoints clear of the fixed mobile tool rail before measuring them.
+ await last.evaluate(element=>element.scrollIntoView({block:'center'}));
  await first.hover();const handle=page.locator('.bn-side-menu [draggable="true"]');await expect(handle).toBeVisible();const bounds=await last.boundingBox(),origin=await handle.boundingBox();await page.mouse.move(origin!.x+origin!.width/2,origin!.y+origin!.height/2);await page.mouse.down();await page.mouse.move(origin!.x+origin!.width/2+12,origin!.y+origin!.height/2,{steps:3});await page.mouse.move(bounds!.x+80,bounds!.y+bounds!.height+8,{steps:12});await page.mouse.move(bounds!.x+82,bounds!.y+bounds!.height+9,{steps:3});await page.mouse.up();
  await expect.poll(()=>saved.body.indexOf('第一段')>saved.body.indexOf('第二段'),{timeout:8000}).toBe(true);
  await page.reload();await expect(page.locator('.bn-editor [data-content-type="paragraph"]').first()).toContainText('第二段');
