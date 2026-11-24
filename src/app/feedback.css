@@ -136,3 +136,17 @@
 .editor-upload-recovery-actions button:disabled{opacity:.5;cursor:not-allowed}
 .editor-paste-hint{margin:0 54px 14px;color:var(--muted);font-size:12px;line-height:1.6}
 @media(max-width:640px){.editor-upload-recovery li{align-items:flex-start;flex-direction:column}.editor-paste-hint{margin-inline:48px 24px}}
+
+
+/* Keep controls on one baseline; messages have their own row. */
+.editor-toolbar{display:block;padding-block:12px}
+.editor-toolbar-main{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:12px;min-width:0}
+.editor-toolbar-main .editor-save-status{flex:0 0 auto}
+.editor-toolbar-actions{align-items:center;flex-wrap:wrap}
+.editor-toolbar-actions>button,.editor-toolbar .editor-direct-publish>button,.editor-toolbar .review-submission.is-compact>button,.editor-toolbar .editor-input-backup>summary{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;height:38px;min-height:38px;padding:8px 12px;border-radius:7px;font-size:13px;line-height:20px;white-space:nowrap}
+.editor-toolbar .editor-direct-publish{display:flex;align-items:center}
+.editor-toolbar-status{display:flex;justify-content:flex-end;align-items:baseline;flex-wrap:wrap;gap:4px 14px;margin-top:8px;min-width:0;color:var(--muted);font-size:12px;line-height:1.5}
+.editor-toolbar .editor-toolbar-status .save-state{margin:0;max-width:none;font-size:12px;white-space:normal;overflow-wrap:anywhere}
+.editor-toolbar-status>[role=status]{max-width:100%;overflow-wrap:anywhere}
+@media(max-width:1100px){.editor-toolbar-main{flex-wrap:wrap;gap:10px 12px}.editor-toolbar-actions{flex-basis:100%;justify-content:flex-end}.editor-toolbar-main .editor-save-status{flex:0 0 auto}}
+@media(max-width:640px){.editor-toolbar{padding:10px 12px}.editor-toolbar-main{gap:10px}.editor-toolbar-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;overflow:visible}.editor-toolbar-actions>button,.editor-toolbar .editor-direct-publish>button,.editor-toolbar .review-submission.is-compact>button{width:100%;height:100%;min-height:40px;white-space:normal}.editor-toolbar .editor-direct-publish,.editor-toolbar .review-submission.is-compact{align-self:stretch;min-width:0}.editor-toolbar-status{justify-content:flex-start;gap:4px 10px;margin-top:10px;font-size:11px}.editor-toolbar .editor-toolbar-status .save-state{font-size:11px}}
