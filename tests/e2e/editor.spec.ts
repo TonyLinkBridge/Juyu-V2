@@ -16,6 +16,34 @@ const settingGroup:Record<string,string>={
  '阅读范围与资料':'内容与访问','选择文章分类':'内容与访问','自定义字段':'内容与访问',
  '封面与附件':'封面与附件','更新说明':'发布与管理','保存与管理':'发布与管理',
 };
+
+test('custom table cell colors remain visible in editor and preview in both themes without saving',async({page})=>{
+ const body=encodeEditorBody([{id:'colored-table',type:'table',props:{textColor:'default'},content:{type:'tableContent',columnWidths:[180,240],headerRows:0,rows:[{cells:[{type:'tableCell',props:{textColor:'rgb(255, 255, 255)',backgroundColor:'rgb(31, 78, 121)',textAlignment:'left'},content:[{type:'text',text:'状态',styles:{bold:true,textColor:'rgb(255, 255, 255)'}}]},{type:'tableCell',props:{textColor:'#ffffff',backgroundColor:'#1f4e79',textAlignment:'left'},content:[{type:'text',text:'含义',styles:{}}]}]},{cells:[[{type:'text',text:'普通行',styles:{}}],[{type:'text',text:'正常内容',styles:{}}]]}]},children:[]}]);
+ let writes=0;await page.route('**/api/admin/drafts/**',route=>{if(route.request().method()!=='GET')writes++;return route.fulfill({status:500,json:{error:'unexpected write'}});});
+ await mount(page,()=>({...structuredClone(editorFixture),body}));
+ const cells=page.locator('.bn-editor table tr').first().locator('td');
+ await expect(cells.first()).toHaveCSS('background-color','rgb(31, 78, 121)');
+ await expect(cells.nth(1)).toHaveCSS('color','rgb(255, 255, 255)');
+ await expect(cells.nth(1).locator('p')).toHaveCSS('color','rgb(255, 255, 255)');
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ await expect(page.locator('.editor-preview table tr').first().locator('td').first()).toHaveCSS('background-color','rgb(31, 78, 121)');
+ await page.evaluate(()=>document.documentElement.classList.add('dark'));
+ await expect(cells.first()).toHaveCSS('background-color','rgb(31, 78, 121)');
+ await expect(cells.nth(1)).toHaveCSS('color','rgb(255, 255, 255)');
+ await expect(page.locator('.editor-preview table tr').first().locator('td').first()).toHaveCSS('background-color','rgb(31, 78, 121)');
+ expect(writes).toBe(0);
+});
+
+test('inline black overrides white cell text consistently with preview',async({page})=>{
+ const body=encodeEditorBody([{id:'inline-color-table',type:'table',props:{textColor:'default'},content:{type:'tableContent',rows:[{cells:[{type:'tableCell',props:{textColor:'#fff',backgroundColor:'#fff',textAlignment:'left'},content:[{type:'text',text:'明确指定黑色',styles:{textColor:'#000'}}]}]}]},children:[]}]);
+ await mount(page,()=>({...structuredClone(editorFixture),body}));
+ const text=page.locator('.bn-editor td [data-style-type=textColor]');
+ await expect(text).toHaveCSS('color','rgb(0, 0, 0)');
+ await page.getByRole('button',{name:'预览草稿',exact:true}).click();
+ await expect(page.locator('.editor-preview td span').first()).toHaveCSS('color','rgb(0, 0, 0)');
+ await page.evaluate(()=>document.documentElement.classList.add('dark'));
+ await expect(text).toHaveCSS('color','rgb(0, 0, 0)');
+});
 async function settings(page:Page,section='发布与管理'){
  await page.getByRole('button',{name:/^(文章设置|问答设置)$/}).click();
  const dialog=page.getByRole('dialog',{name:/^(文章设置|问答设置)$/});
@@ -941,6 +969,17 @@ test('embedded tab editing and preview preserve the same quote and blank line',a
  const preview=page.locator('.editor-preview');await expect(preview.locator('[data-reader-empty-paragraph]')).toHaveCount(1);
  await expect(preview.locator('blockquote')).toHaveText('嵌套引用');
  await expect(preview.locator('blockquote')).toHaveCSS('line-height','28px');
+});
+
+test('embedded tab table uses saved custom colors without rewriting content',async({page})=>{
+ const body=encodeTabBody([{id:'nested-color-table',type:'table',props:{textColor:'default'},content:{type:'tableContent',rows:[{cells:[{type:'tableCell',props:{textColor:'#ffffff',backgroundColor:'#1f4e79',textAlignment:'left'},content:[{type:'text',text:'分页表头',styles:{}}]}]}]},children:[]}]);
+ const article={...structuredClone(editorFixture),body:encodeEditorBody([{id:'color-tab',type:'juyu',props:{payload:JSON.stringify({id:'color-tab',type:'tabs',tabs:[{id:'color-one',title:'说明',body}]})},children:[]}])};
+ await mount(page,()=>article);await page.getByRole('button',{name:'编辑排版',exact:true}).click();
+ const cell=page.locator('.rich-tab-body-editor td').first();
+ await expect(cell).toHaveCSS('background-color','rgb(31, 78, 121)');await expect(cell).toHaveCSS('color','rgb(255, 255, 255)');
+ await page.evaluate(()=>document.documentElement.classList.add('dark'));
+ await expect(cell).toHaveCSS('background-color','rgb(31, 78, 121)');
+ await expect(page.getByRole('button',{name:'保存草稿',exact:true})).toBeDisabled();
 });
 
 for(const kind of ['article','ops','reference','qa'] as const)test(`returned ${kind} shows feedback before settings, retains it after save and hides it after resubmission`,async({page})=>{

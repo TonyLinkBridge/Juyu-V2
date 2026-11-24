@@ -1,4 +1,4 @@
-import {invalid,record,keys,color,displayColor,normalizeInline,inlineText,type EditorInline} from './inline.ts';
+import {invalid,record,keys,color,displayColor,screenInlineStyle,normalizeInline,inlineText,type EditorInline} from './inline.ts';
 export type Alignment='left'|'center'|'right'|'justify';
 export type TableBorderEdge='top'|'right'|'bottom'|'left';
 export type TableBorderLine={width:1|2|3;color:string};
@@ -10,6 +10,11 @@ export type TableVerticalAlignData=Record<string,Exclude<TableVerticalAlignment,
 export type TableCellAnchor={row:number;column:number;rowIndex:number;cellIndex:number;rowspan:number;colspan:number};
 export type Cell={type:'tableCell';props:{textColor:string;backgroundColor:string;textAlignment:Alignment;colspan?:number;rowspan?:number};content:EditorInline[]};
 export type TableContent={type:'tableContent';columnWidths:(number|undefined)[];headerRows?:number;headerCols?:number;rows:{cells:Cell[]}[]};
+/** Render-only colors: keep saved values intact and reject CSS declarations from pasted attributes. */
+export function tableCellColorStyle(attributes:{textColor?:unknown;backgroundColor?:unknown}){
+ const checked=(value:unknown)=>{try{return value===undefined?undefined:color(value);}catch{return undefined;}};
+ return screenInlineStyle({textColor:checked(attributes.textColor),backgroundColor:checked(attributes.backgroundColor)});
+}
 export function alignment(v:unknown):Alignment{if(v===undefined)return 'left';if(!['left','center','right','justify'].includes(String(v)))return invalid();return v as Alignment;}
 const borderEdges:TableBorderEdge[]=['top','right','bottom','left'];
 export function normalizeTableBorderData(value:unknown):string{
