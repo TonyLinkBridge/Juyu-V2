@@ -150,3 +150,11 @@
 .editor-toolbar-status>[role=status]{max-width:100%;overflow-wrap:anywhere}
 @media(max-width:1100px){.editor-toolbar-main{flex-wrap:wrap;gap:10px 12px}.editor-toolbar-actions{flex-basis:100%;justify-content:flex-end}.editor-toolbar-main .editor-save-status{flex:0 0 auto}}
 @media(max-width:640px){.editor-toolbar{padding:10px 12px}.editor-toolbar-main{gap:10px}.editor-toolbar-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;overflow:visible}.editor-toolbar-actions>button,.editor-toolbar .editor-direct-publish>button,.editor-toolbar .review-submission.is-compact>button{width:100%;height:100%;min-height:40px;white-space:normal}.editor-toolbar .editor-direct-publish,.editor-toolbar .review-submission.is-compact{align-self:stretch;min-width:0}.editor-toolbar-status{justify-content:flex-start;gap:4px 10px;margin-top:10px;font-size:11px}.editor-toolbar .editor-toolbar-status .save-state{font-size:11px}}
+
+/* Keep version facts together without competing with errors or editor actions. */
+.editor-version-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:1px;margin:14px 0 4px;border:1px solid var(--line);border-radius:10px;background:var(--line);overflow:hidden}
+.editor-version-item{display:flex;flex-direction:column;gap:7px;min-width:0;padding:12px 14px;background:var(--panel)}
+.editor-version-heading{display:flex;flex-wrap:wrap;align-items:center;gap:7px 10px;min-width:0}
+.editor-version-label{font-size:12px;line-height:1.5;font-weight:500;color:var(--muted)}
+.editor-version-heading .editor-published-note,.editor-translation-status{max-width:100%;margin:0;padding:3px 8px;border:1px solid var(--line);border-radius:6px;background:var(--hover);color:var(--ink);font-size:12px;font-weight:600;line-height:1.4;overflow-wrap:anywhere}
+.editor-version-item>p{margin:0;color:var(--muted);font-size:12px;line-height:1.65;overflow-wrap:anywhere}

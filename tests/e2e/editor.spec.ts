@@ -550,7 +550,7 @@ test('upload-in-progress rejection keeps editor data available',async({page})=>{
 test('editing a published article saves a new draft while showing that its old formal version remains readable',async({page})=>{
  let saved:EditorData={...structuredClone(editorFixture),status:'published',publicationNumber:1,publishedRevision:2};
  await page.route('**/api/admin/editor/*',r=>{const value=r.request().postDataJSON();expect(value.expectedSequence).toBe(3);saved={...saved,...value,sequence:4,status:'draft',publishedRevision:2};return r.fulfill({json:saved});});
- await mount(page,()=>saved);await expect(page.getByText('修改会保存为新草稿，旧正式版继续可读；新稿需要重新二审和发布。',{exact:true})).toBeVisible();
+ await mount(page,()=>saved);await expect(page.getByText('修改会保存为新草稿，旧正式版继续可读；新版完成审核并发布后生效。',{exact:true})).toBeVisible();
  await page.getByRole('textbox',{name:/^(文章标题|问题)$/}).fill('修改后的正式资料');await expect(page.locator('.save-state')).toContainText('所有修改已保存',{timeout:8000});await expect(page.getByText('旧正式版 1 仍可阅读',{exact:true})).toBeVisible();await settings(page);expect(saved.status).toBe('draft');expect(saved.publishedRevision).toBe(2);await expect(page.getByRole('link',{name:'归档与下线'})).toHaveAttribute('href','/admin/availability?article=editor-local');
 });
 test('new OPS documents default to restricted audience and cannot select ordinary staff',async({page})=>{
