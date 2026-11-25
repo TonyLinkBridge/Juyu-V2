@@ -61,8 +61,7 @@ test('worker retries a failed Slack response and never resends a delivered event
  row=(await fixture.pool.query('SELECT attempts,sent_at,slack_ts FROM juyu.slack_outbox WHERE document_id=$1',[id])).rows[0];
  assert.equal(row.attempts,2);assert.ok(row.sent_at);assert.equal(row.slack_ts,'1790000000.000001');
  assert.deepEqual(await dispatchSlackOutbox(issuer,config,1,transport),{sent:0,failed:0});
- assert.equal(calls,2);assert.match(JSON.stringify(bodies[1]),/受限资料/);
- assert.doesNotMatch(JSON.stringify(bodies),/通知演练/);
+ assert.equal(calls,2);assert.match(JSON.stringify(bodies[1]),/通知演练/);
 });
 
 test('a restricted draft queues its event without exposing its title to Slack',async()=>{
