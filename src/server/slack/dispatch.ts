@@ -11,7 +11,8 @@ const labels:Record<NotificationEvent,string>={
 };
 function slackText(value:string){return value.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');}
 export function slackMessage(row:OutboxRow,config:SlackConfig){
- const name=row.title??'受限资料';
+ // Channel membership does not prove current access, including for queued notices.
+ const name='受限资料';
  const path=row.event==='published'||row.event==='updated'?contentPath(row.kind,row.document_id,row.locale):`/admin/${row.event==='changes_requested'?'review':'editor'}?article=${encodeURIComponent(row.document_id)}`;
  const url=new URL(path,config.origin).toString();
  const lines=[`*${labels[row.event]}*`,`资料：${slackText(name)}`,`类型：${{article:'知识文章',ops:'OPS Internal',reference:'Reference 速查',qa:'Q&A 问答'}[row.kind]}`,`操作人：${slackText(row.actor_name)}`];

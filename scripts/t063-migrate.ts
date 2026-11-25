@@ -18,7 +18,7 @@ try{
  if(process.argv.includes('--apply')){
   const before=(await pool.query("SELECT pg_get_functiondef('juyu.guard_revision_categories()'::regprocedure) AS categories,pg_get_functiondef('juyu.guard_revision_fields()'::regprocedure) AS fields")).rows[0];
   await mkdir('output/verification',{recursive:true});await writeFile('output/verification/t063-before-config-locks.json',JSON.stringify(before),{mode:0o600,flag:'wx'}).catch(e=>{if(e.code!=='EEXIST')throw e;});
-  const applied=await migrate(pool);assert.ok(applied.length===0||(applied.length===1&&applied[0]==='0029_shared_revision_config_locks'));
+  const applied=await migrate(pool,{through:'0029_shared_revision_config_locks'});assert.ok(applied.length===0||(applied.length===1&&applied[0]==='0029_shared_revision_config_locks'));
   const verified=(await pool.query("SELECT pg_get_functiondef('juyu.guard_revision_categories()'::regprocedure) LIKE '%pg_advisory_xact_lock_shared(84620949)%' AS categories, pg_get_functiondef('juyu.guard_revision_fields()'::regprocedure) LIKE '%pg_advisory_xact_lock_shared(84620948)%' AS fields")).rows[0];assert.ok(verified.categories&&verified.fields);
   console.log(JSON.stringify({applied,verified}));
  }
