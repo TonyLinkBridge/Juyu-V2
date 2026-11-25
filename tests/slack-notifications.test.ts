@@ -18,8 +18,10 @@ test('publishing distinguishes a first release from an update',()=>{
  assert.equal(notificationEvent('queue','approved',1), null);
 });
 
-test('Slack message only links to the application and escapes untrusted title text',()=>{
- const message=slackMessage({document_id:'doc-1',sequence:3,event:'submitted',kind:'article',locale:'zh-CN',title:'<script>&',actor_name:'作者',reviewer_name:'审核者',attempts:1},{token:'not-shared',channel:'C0BQ4M16EDB',origin:'https://juyu-helpcentre.vercel.app'});
+test('Slack message hides queued titles, links to the application and escapes actor text',()=>{
+ const message=slackMessage({document_id:'doc-1',sequence:3,event:'submitted',kind:'article',locale:'zh-CN',title:'private-queued-title',actor_name:'<script>&',reviewer_name:'审核者',attempts:1},{token:'not-shared',channel:'C0BQ4M16EDB',origin:'https://juyu-helpcentre.vercel.app'});
+ assert.match(message.text,/资料：受限资料/);
+ assert.doesNotMatch(JSON.stringify(message),/private-queued-title/);
  assert.match(message.text,/&lt;script&gt;&amp;/);
  const actions=message.blocks[1];assert.ok(actions&&'elements' in actions&&actions.elements);
  assert.equal(actions.elements[0]?.url,'https://juyu-helpcentre.vercel.app/admin/editor?article=doc-1');
@@ -33,5 +35,18 @@ test('return notifications open protected review details for every kind without 
   assert.equal(actions.elements[0]?.url,'https://example.test/admin/review?article=doc%20%2F%3F%E4%B8%80');
   assert.equal(actions.elements[0]?.text.text,'查看退回原因');
   assert.doesNotMatch(JSON.stringify(message),/not-shared/);
+ }
+});
+
+
+test('every workflow event hides legacy queued titles in both locales',()=>{
+ for(const event of ['revision_started','submitted','approved','changes_requested','published','updated'] as const){
+  for(const locale of ['zh-CN','en'] as const){
+   for(const title of [null,'restricted-title-from-old-queue']){
+    const message=slackMessage({document_id:'doc-1',sequence:3,event,kind:'article',locale,title,actor_name:'author',reviewer_name:null,attempts:1},{token:'dummy-token',channel:'C0BQ4M16EDB',origin:'https://example.test'});
+    assert.match(message.text,/资料：受限资料/);
+    assert.doesNotMatch(JSON.stringify(message),/restricted-title-from-old-queue|dummy-token/);
+   }
+  }
  }
 });
