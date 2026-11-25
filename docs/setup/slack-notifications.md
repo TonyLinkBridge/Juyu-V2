@@ -14,9 +14,9 @@ in source control or expose them to client-side code.
 The application queues one notice for submission, approval, rejection, initial
 publication, publication of an update, and the first edit of an already
 published document. Ordinary autosaves do not notify. Notices contain a type,
-actor, and application link; they never include article body. Every outgoing
-notice replaces the title with `受限资料`, including previously queued notices.
-The link still requires the reader's normal application permissions.
+title, actor, and application link; they never include article body. Titles
+from restricted audiences or categories are replaced with `受限资料`. The link
+still requires the reader's normal application permissions.
 
 The queue is committed with the article audit entry, then delivery runs after
 the response. Failed Slack sends retry with a bounded backoff, and Vercel's
